@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { 
-  ArrowLeft, ChevronRight, Sun, Moon, Sunrise, Sunset, Check, Bell
+  ArrowLeft, ChevronRight, Sun, Moon, Sunrise, Sunset, SunDim, Check, Bell
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useUserPreferences, useLocalStorage, usePrayerNotificationPrefs } from "@/hooks/useLocalStorage";
 import { usePrayerTimes } from "@/hooks/usePrayerTimes";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { PrayerLocationBadge } from "@/components/PrayerLocationBadge";
@@ -38,10 +39,10 @@ const DashboardPrayers = () => {
   }, []);
   
   const prayers = prayerTimes ? [
-    { name: 'Fajr', nameAr: 'الفجر', time: prayerTimes.fajr, icon: Moon, description: 'Dawn prayer - marks the start of fasting', highlight: true },
-    { name: 'Sunrise', nameAr: 'الشروق', time: prayerTimes.sunrise, icon: Sunrise, description: 'Sun rises - fasting continues' },
+    { name: 'Fajr', nameAr: 'الفجر', time: prayerTimes.fajr, icon: Sunrise, description: 'Dawn prayer - marks the start of fasting', highlight: true },
+    { name: 'Sunrise', nameAr: 'الشروق', time: prayerTimes.sunrise, icon: Sun, description: 'Sun rises - fasting continues' },
     { name: 'Dhuhr', nameAr: 'الظهر', time: prayerTimes.dhuhr, icon: Sun, description: 'Midday prayer' },
-    { name: 'Asr', nameAr: 'العصر', time: prayerTimes.asr, icon: Sun, description: 'Afternoon prayer' },
+    { name: 'Asr', nameAr: 'العصر', time: prayerTimes.asr, icon: SunDim, description: 'Afternoon prayer' },
     { name: 'Maghrib', nameAr: 'المغرب', time: prayerTimes.maghrib, icon: Sunset, description: 'Sunset prayer - time to break fast (Iftar)', highlight: true },
     { name: 'Isha', nameAr: 'العشاء', time: prayerTimes.isha, icon: Moon, description: 'Night prayer' },
   ] : [];
@@ -167,7 +168,25 @@ const DashboardPrayers = () => {
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground">{prayer.description}</p>
+                      {prayer.name === 'Fajr' || prayer.name === 'Maghrib' ? (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p className="text-sm text-muted-foreground cursor-help border-b border-dotted border-muted-foreground/40 w-fit">
+                              {prayer.description}
+                            </p>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="max-w-xs p-3">
+                            <p className="font-semibold text-sm">
+                              {prayer.name === 'Fajr' ? EATING_TIME_TOOLTIPS.fajr.title : EATING_TIME_TOOLTIPS.maghrib.title}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {prayer.name === 'Fajr' ? EATING_TIME_TOOLTIPS.fajr.body : EATING_TIME_TOOLTIPS.maghrib.body}
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">{prayer.description}</p>
+                      )}
                     </div>
                     
                     <div className="text-right flex items-center gap-3 flex-wrap justify-end">
@@ -187,18 +206,26 @@ const DashboardPrayers = () => {
                         </div>
                       )}
                       <span className="text-2xl font-bold">{prayer.time}</span>
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          setTodayPrayer(prayer.name, !todayPrayers[prayer.name]);
-                        }}
-                        className={`p-2 rounded-lg border-2 transition-colors ${
-                          todayPrayers[prayer.name] ? "bg-secondary border-secondary text-secondary-foreground" : "border-border hover:border-secondary"
-                        }`}
-                        title="Mark as prayed"
-                      >
-                        <Check className="w-5 h-5" />
-                      </button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setTodayPrayer(prayer.name, !todayPrayers[prayer.name]);
+                            }}
+                            className={`p-2 rounded-lg border-2 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
+                              todayPrayers[prayer.name] ? "bg-secondary border-secondary text-secondary-foreground" : "border-border hover:border-secondary"
+                            }`}
+                            aria-label={todayPrayers[prayer.name] ? `Mark ${prayer.name} as not prayed` : `Mark ${prayer.name} as prayed`}
+                          >
+                            <Check className="w-5 h-5" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="left">
+                          {todayPrayers[prayer.name] ? "Mark as not prayed" : "Mark as prayed"} • {prayer.nameAr}
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                   </div>
                 </motion.div>

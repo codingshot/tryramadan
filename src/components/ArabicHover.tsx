@@ -25,11 +25,22 @@ export const ArabicHover = ({
   className = "",
 }: ArabicHoverProps) => {
   return (
-    <Tooltip delayDuration={200}>
+    <Tooltip delayDuration={300}>
       <TooltipTrigger asChild>
         <span
-          className={cn("cursor-help border-b border-dotted border-muted-foreground/40 hover:border-secondary/60 transition-colors", className)}
+          role="button"
+          tabIndex={0}
+          className={cn(
+            "cursor-help border-b border-dotted border-muted-foreground/40 hover:border-secondary/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 rounded-sm transition-colors py-0.5",
+            className
+          )}
           title={arabic}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              (e.currentTarget as HTMLElement).click();
+            }
+          }}
         >
           {children}
         </span>

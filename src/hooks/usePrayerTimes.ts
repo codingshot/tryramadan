@@ -96,6 +96,73 @@ export function usePrayerTimes(lat: number | null, lng: number | null) {
   return { prayerTimes, hijriDate, loading, error };
 }
 
+/** Format YYYY-MM-DD to DD-MM-YYYY for Aladhan API */
+function toAladhanDate(isoDate: string): string {
+  const [y, m, d] = isoDate.split('-');
+  return `${d}-${m}-${y}`;
+}
+
+/** Fetch prayer times for a specific date (ISO YYYY-MM-DD). Used for day view / click-through days. */
+export function usePrayerTimesForDate(
+  lat: number | null,
+  lng: number | null,
+  isoDate: string | null
+) {
+  const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
+  const [hijriDate, setHijriDate] = useState<{ day: string; month: string; monthAr: string; year: string } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!lat || !lng || !isoDate) {
+      setPrayerTimes(null);
+      setHijriDate(null);
+      return;
+    }
+
+    const dateStr = toAladhanDate(isoDate);
+
+    const fetchPrayerTimes = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetch(
+          `https://api.aladhan.com/v1/timings/${dateStr}?latitude=${lat}&longitude=${lng}&method=2`
+        );
+        if (!response.ok) throw new Error('Failed to fetch prayer times');
+        const data: AladhanResponse = await response.json();
+        if (data.code === 200) {
+          setPrayerTimes({
+            fajr: data.data.timings.Fajr,
+            sunrise: data.data.timings.Sunrise,
+            dhuhr: data.data.timings.Dhuhr,
+            asr: data.data.timings.Asr,
+            maghrib: data.data.timings.Maghrib,
+            isha: data.data.timings.Isha,
+            imsak: data.data.timings.Imsak,
+            date: data.data.date.readable,
+          });
+          setHijriDate({
+            day: data.data.date.hijri.day,
+            month: data.data.date.hijri.month.en,
+            monthAr: data.data.date.hijri.month.ar,
+            year: data.data.date.hijri.year,
+          });
+        }
+      } catch (err) {
+        console.error('Prayer times for date error:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load prayer times');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPrayerTimes();
+  }, [lat, lng, isoDate]);
+
+  return { prayerTimes, hijriDate, loading, error };
+}
+
 // Check if today is a Sunnah fasting day
 export function getSunnahFastingInfo(): { isSunnahDay: boolean; reason: string; reasonAr: string } | null {
   const today = new Date();

@@ -9,7 +9,8 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import recipesData from "@/data/recipes.json";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useRecipeFavorites } from "@/hooks/useLocalStorage";
+import { useRecipeFavorites, useDayMealPlans } from "@/hooks/useLocalStorage";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -43,8 +44,10 @@ const DashboardMeals = () => {
   const [activeTab, setActiveTab] = useState<MealType>("suhoor");
   const [selectedRecipes, setSelectedRecipes] = useState<number[]>([]);
   const [favorites, setFavorites] = useRecipeFavorites();
+  const [mealPlans, setMealPlans] = useDayMealPlans();
   const [regionFilter, setRegionFilter] = useState<string>("all");
   const [dietaryFilter, setDietaryFilter] = useState<string>("all");
+  const today = new Date().toISOString().split("T")[0];
 
   const baseRecipes = activeTab === "suhoor" ? allSuhoor : allIftar;
   const recipes = useMemo(() => {
@@ -72,6 +75,41 @@ const DashboardMeals = () => {
     .filter(r => selectedRecipes.includes(r.id))
     .flatMap(r => r.ingredients);
   const uniqueGroceries = [...new Set(groceryList)];
+
+  const copyGroceryList = () => {
+    if (uniqueGroceries.length === 0) {
+      toast.info("Select recipes first to build a grocery list.");
+      return;
+    }
+    const text = uniqueGroceries.join("\n");
+    navigator.clipboard.writeText(text).then(
+      () => toast.success("Grocery list copied to clipboard."),
+      () => toast.error("Could not copy to clipboard.")
+    );
+  };
+
+  const addSelectedToTodaySchedule = () => {
+    if (selectedRecipes.length === 0) {
+      toast.info("Select at least one recipe to add to today's schedule.");
+      return;
+    }
+    const keys = selectedRecipes.map((id) => `${activeTab}-${id}`);
+    const newValue = keys.join(",");
+    setMealPlans((prev) => {
+      const current = prev[today] || {};
+      const existing = (activeTab === "suhoor" ? current.suhoor : current.iftar) || "";
+      const merged = existing ? `${existing},${newValue}` : newValue;
+      const deduped = [...new Set(merged.split(","))].filter(Boolean).join(",");
+      return {
+        ...prev,
+        [today]: {
+          ...current,
+          [activeTab]: deduped,
+        },
+      };
+    });
+    toast.success(`Added ${selectedRecipes.length} recipe(s) to today's ${activeTab}.`);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -332,12 +370,21 @@ const DashboardMeals = () => {
               animate={{ opacity: 1, y: 0 }}
               className="p-6 rounded-2xl bg-card border border-border"
             >
-              <div className="flex items-center gap-2 mb-4">
-                <ShoppingCart className="w-5 h-5 text-secondary" />
-                <h3 className="font-display font-bold">
-                  Grocery List • قائمة التسوق
-                </h3>
-                <span className="text-sm text-muted-foreground">({uniqueGroceries.length} items)</span>
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+                <div className="flex items-center gap-2">
+                  <ShoppingCart className="w-5 h-5 text-secondary" />
+                  <h3 className="font-display font-bold">
+                    Grocery List • قائمة التسوق
+                  </h3>
+                  <span className="text-sm text-muted-foreground">({uniqueGroceries.length} items)</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={copyGroceryList}
+                  className="px-4 py-2 rounded-xl bg-secondary text-secondary-foreground text-sm font-medium hover:bg-secondary/90"
+                >
+                  Copy grocery list
+                </button>
               </div>
               
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
@@ -348,6 +395,23 @@ const DashboardMeals = () => {
                   </div>
                 ))}
               </div>
+            </motion.div>
+          )}
+
+          {/* Add selected to today's schedule */}
+          {selectedRecipes.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-6"
+            >
+              <button
+                type="button"
+                onClick={addSelectedToTodaySchedule}
+                className="w-full py-3 px-4 rounded-2xl border-2 border-secondary bg-secondary/10 text-secondary font-medium hover:bg-secondary/20 transition-colors"
+              >
+                Add selected to today's schedule ({activeTab})
+              </button>
             </motion.div>
           )}
         </div>

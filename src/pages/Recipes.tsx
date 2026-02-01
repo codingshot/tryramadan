@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Coffee, Utensils, Globe, Clock, ChevronRight } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -136,9 +136,19 @@ function RecipeCard({
   recipe: Recipe;
   index: number;
 }) {
+  const navigate = useNavigate();
   const country = recipe.countryId
     ? countries.find((c) => c.id === recipe.countryId)
     : null;
+  const recipePath = `/recipe/${mealType}/${recipe.id}`;
+
+  const handleCardClick = () => navigate(recipePath);
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      navigate(recipePath);
+    }
+  };
 
   return (
     <motion.article
@@ -146,9 +156,12 @@ function RecipeCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.05 * index }}
     >
-      <Link
-        to={`/recipe/${mealType}/${recipe.id}`}
-        className="block p-6 rounded-2xl bg-card border border-border hover:border-secondary/50 transition-all group"
+      <div
+        role="link"
+        tabIndex={0}
+        onClick={handleCardClick}
+        onKeyDown={handleKeyDown}
+        className="block p-6 rounded-2xl bg-card border border-border hover:border-secondary/50 transition-all group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
         aria-label={`View recipe: ${recipe.name} (${mealType})`}
       >
         <div className="flex items-start justify-between gap-4">
@@ -174,7 +187,7 @@ function RecipeCard({
                 <Link
                   to={`/culture/${recipe.countryId}`}
                   onClick={(e) => e.stopPropagation()}
-                  className="flex items-center gap-1 text-secondary hover:underline"
+                  className="flex items-center gap-1 text-secondary hover:underline inline-flex"
                 >
                   {country.flag} {country.name}
                 </Link>
@@ -183,7 +196,7 @@ function RecipeCard({
           </div>
           <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-secondary shrink-0" aria-hidden />
         </div>
-      </Link>
+      </div>
     </motion.article>
   );
 }

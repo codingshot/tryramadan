@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Coffee, Utensils, ChevronRight, Globe, MapPin } from "lucide-react";
+import { ArrowLeft, Coffee, Utensils, ChevronRight, Globe, MapPin, Users, Building2 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { PageSEO } from "@/components/PageSEO";
@@ -91,6 +91,39 @@ export default function CultureCountry() {
               <h2 id="foods-heading" className="font-display font-bold text-lg mb-3">Traditional foods</h2>
               <p className="text-muted-foreground">{country.foods.join(", ")}</p>
             </section>
+
+            {(country.muslimPopulation || country.muslimPopulationNote) && (
+              <section className="mb-8 p-5 rounded-2xl bg-card border border-border" aria-labelledby="population-heading">
+                <h2 id="population-heading" className="font-display font-bold text-lg mb-3 flex items-center gap-2">
+                  <Users className="w-5 h-5 text-secondary" aria-hidden />
+                  Muslim population & context
+                </h2>
+                {country.muslimPopulation && (
+                  <p className="font-medium text-secondary">{country.muslimPopulation}</p>
+                )}
+                {country.muslimPopulationNote && (
+                  <p className="text-sm text-muted-foreground mt-1">{country.muslimPopulationNote}</p>
+                )}
+              </section>
+            )}
+
+            {country.majorMosques && country.majorMosques.length > 0 && (
+              <section className="mb-8" aria-labelledby="mosques-heading">
+                <h2 id="mosques-heading" className="font-display font-bold text-lg mb-4 flex items-center gap-2">
+                  <Building2 className="w-5 h-5 text-secondary" aria-hidden />
+                  Major mosques
+                </h2>
+                <ul className="space-y-3">
+                  {country.majorMosques.map((mosque, i) => (
+                    <li key={i} className="p-4 rounded-xl bg-card border border-border">
+                      <span className="font-medium">{mosque.name}</span>
+                      {mosque.city && <span className="text-sm text-muted-foreground ml-2">· {mosque.city}</span>}
+                      {mosque.note && <p className="text-sm text-muted-foreground mt-1">{mosque.note}</p>}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
 
             {country.cities && country.cities.length > 0 && (
               <section className="mb-8" aria-labelledby="cities-heading">

@@ -3,14 +3,16 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Trophy, ChevronRight } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { useFastingProgress } from "@/hooks/useLocalStorage";
+import { useFastingProgress, useLocalStorage } from "@/hooks/useLocalStorage";
 import { ArabicHover } from "@/components/ArabicHover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function DashboardAchievements() {
   const [progress] = useFastingProgress();
+  const [learnRead] = useLocalStorage<string[]>("tryramadan-learn-read", []);
   const completedDays = progress.completedDays.length;
   const totalDays = 30;
+  const eagerLearnerUnlocked = learnRead.length >= 10;
 
   const calculateStreak = () => {
     const today = new Date();
@@ -35,6 +37,7 @@ export default function DashboardAchievements() {
     { id: "streak-5", name: "Consistent", desc: "5-day streak", icon: "🔥", unlocked: currentStreak >= 5 },
     { id: "streak-10", name: "Dedicated", desc: "10-day streak", icon: "💪", unlocked: currentStreak >= 10 },
     { id: "full-month", name: "Ramadan Champion", desc: "Complete all 30 days", icon: "🏆", unlocked: completedDays >= 30 },
+    { id: "learner", name: "Eager Learner", desc: "Read 10 educational articles", icon: "📚", unlocked: eagerLearnerUnlocked },
   ];
 
   const unlocked = badges.filter((b) => b.unlocked);

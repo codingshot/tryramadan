@@ -22,7 +22,24 @@ export default function DashboardHealth() {
   const today = new Date().toISOString().split("T")[0];
   const [wellnessLog, setWellnessLog] = useWellnessLog();
   const [symptomLog, setSymptomLog] = useSymptomLog();
-  const { energyEntries } = useTodayData();
+  const { energyEntries, hydrationGlasses } = useTodayData();
+
+  // Recent wellness: last 5 entries across all days, sorted by timestamp
+  const recentWellness = (() => {
+    const list: { date: string; timeOfDay: string; mood: number; note?: string; timestamp: string }[] = [];
+    Object.entries(wellnessLog).forEach(([date, entries]) => {
+      entries.forEach((e) =>
+        list.push({
+          date,
+          timeOfDay: e.timeOfDay,
+          mood: e.mood,
+          note: e.note,
+          timestamp: e.timestamp,
+        })
+      );
+    });
+    return list.sort((a, b) => (b.timestamp > a.timestamp ? 1 : -1)).slice(0, 5);
+  })();
 
   const [wellnessTime, setWellnessTime] = useState<"morning" | "evening">("morning");
   const [wellnessMood, setWellnessMood] = useState<1 | 2 | 3 | 4 | 5>(3);
@@ -191,12 +208,38 @@ export default function DashboardHealth() {
             )}
           </motion.div>
 
+          {/* Hydration summary + quick link */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.12 }}
+            className="mb-6"
+          >
+            <Link
+              to="/dashboard/today"
+              className="block p-6 rounded-2xl bg-card border border-border hover:border-secondary/50 transition-all"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center">
+                  <Droplets className="w-6 h-6 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold">Hydration today</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {hydrationGlasses} / 8+ glasses · Track on Today's Fast
+                  </p>
+                </div>
+                <span className="text-sm font-medium text-secondary">Update →</span>
+              </div>
+            </Link>
+          </motion.div>
+
           {/* Energy trends today */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className="grid gap-4 mb-8"
+            className="grid gap-4 mb-6"
           >
             <Link
               to="/dashboard/today"
@@ -215,16 +258,33 @@ export default function DashboardHealth() {
               </div>
               <TrendingUp className="w-5 h-5 text-muted-foreground" />
             </Link>
-            <div className="p-6 rounded-2xl bg-card border border-border flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center">
-                <Droplets className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-bold">Hydration</h3>
-                <p className="text-sm text-muted-foreground">Aim for 8+ glasses between iftar and suhoor. Track on Today's Fast.</p>
-              </div>
-            </div>
           </motion.div>
+
+          {/* Recent wellness */}
+          {recentWellness.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.18 }}
+              className="p-6 rounded-2xl bg-card border border-border mb-8"
+            >
+              <h3 className="font-display font-bold mb-3 flex items-center gap-2">
+                <Heart className="w-5 h-5 text-secondary" />
+                Recent wellness
+              </h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                {recentWellness.map((e, i) => (
+                  <li key={i} className="flex items-center justify-between py-1">
+                    <span>
+                      {e.date} · {e.timeOfDay} — mood {e.mood}
+                      {e.note && `: ${e.note}`}
+                    </span>
+                    <span className="text-xs">{new Date(e.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          )}
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}

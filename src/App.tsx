@@ -72,7 +72,7 @@ function ThemeSync() {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeSync />
-    <TooltipProvider>
+    <TooltipProvider delayDuration={300} skipDelayDuration={100}>
       <Toaster />
       <Sonner />
       <BrowserRouter>

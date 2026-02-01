@@ -1,5 +1,6 @@
+import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
 import { FeaturesSection } from "@/components/FeaturesSection";
@@ -16,6 +17,18 @@ import { ArabicTerm } from "@/components/ArabicTerm";
 
 const Index = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Scroll to hash when landing on home with a hash (e.g. from footer "Features" link)
+  useEffect(() => {
+    if (location.pathname !== "/" || !location.hash) return;
+    const id = location.hash.slice(1);
+    const el = id ? document.getElementById(id) : null;
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [location.pathname, location.hash]);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />

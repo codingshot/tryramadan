@@ -11,6 +11,7 @@ import { DailyHadith } from "@/components/DailyHadith";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import dailyFactsData from "@/data/daily-facts.json";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const QUIZ_QUESTIONS = [
   { q: "In which month of the Islamic calendar does Ramadan fall?", options: ["Seventh", "Eighth", "Ninth", "Tenth"], correct: 2 },
@@ -237,7 +238,7 @@ const DashboardLearn = () => {
                     className="block p-5 rounded-2xl bg-card border border-border hover:border-secondary/50 hover:shadow-lg transition-all group relative"
                   >
                     {readLinks.includes(path.link) && (
-                      <span className="absolute top-3 right-3 text-secondary" title="Read">
+                      <span className="absolute top-3 right-3 text-secondary" title="Read • مقروء" aria-hidden>
                         <CheckCircle className="w-5 h-5" />
                       </span>
                     )}
@@ -252,14 +253,21 @@ const DashboardLearn = () => {
                             <span className="text-sm text-secondary font-arabic">{path.titleAr}</span>
                           </div>
                           <div className="flex items-center gap-1">
-                            <button
-                              type="button"
-                              onClick={(e) => markAsRead(e, path.link)}
-                              className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-secondary transition-colors"
-                              title="Mark as read"
-                            >
-                              <CheckCircle className={`w-4 h-4 ${readLinks.includes(path.link) ? "text-secondary" : ""}`} />
-                            </button>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button
+                                  type="button"
+                                  onClick={(e) => markAsRead(e, path.link)}
+                                  className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-secondary transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                                  aria-label={readLinks.includes(path.link) ? "Mark as unread" : "Mark as read"}
+                                >
+                                  <CheckCircle className={`w-4 h-4 ${readLinks.includes(path.link) ? "text-secondary" : ""}`} />
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {readLinks.includes(path.link) ? "Mark as unread" : "Mark as read"} • {path.titleAr}
+                              </TooltipContent>
+                            </Tooltip>
                             <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-secondary group-hover:translate-x-1 transition-all" />
                           </div>
                         </div>

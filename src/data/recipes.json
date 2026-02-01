@@ -60,6 +60,72 @@
       "significance": "Dates and oats align with the Sunnah of breaking fast with dates while providing sustained energy.",
       "dietary": ["vegetarian", "vegan-option"],
       "countryId": "western-communities"
+    },
+    {
+      "id": 6,
+      "name": "Lebanese Man'oushe with Labneh",
+      "region": "Levant",
+      "description": "Flatbread with za'atar or cheese, served with labneh and olives",
+      "ingredients": ["Dough", "Za'atar", "Olive oil", "Labneh", "Olives", "Tomatoes"],
+      "prepTime": "25 min",
+      "benefits": "Filling and hydrating; olive oil and labneh provide sustained energy",
+      "tips": "Man'oushe is a classic Lebanese suhoor; pair with jallab or water",
+      "countryId": "lebanon"
+    },
+    {
+      "id": 7,
+      "name": "Jordanian Labneh & Za'atar",
+      "region": "Levant",
+      "description": "Thick strained yogurt with za'atar, olive oil, and warm bread",
+      "ingredients": ["Labneh", "Za'atar", "Olive oil", "Pita or shrak bread", "Olives"],
+      "prepTime": "10 min",
+      "benefits": "Protein-rich and easy to digest; olive oil for lasting energy",
+      "tips": "Traditional Jordanian suhoor; add dates for quick energy",
+      "countryId": "jordan"
+    },
+    {
+      "id": 8,
+      "name": "Nigerian Kunu & Masa",
+      "region": "West Africa",
+      "description": "Millet-based drink (kunu) with rice pancakes (masa)",
+      "ingredients": ["Millet", "Rice flour", "Yeast", "Sugar", "Ginger"],
+      "prepTime": "40 min",
+      "benefits": "Hydrating and filling; masa is light and easy before dawn",
+      "tips": "Kunu is a traditional Hausa suhoor drink; often served cold",
+      "countryId": "nigeria"
+    },
+    {
+      "id": 9,
+      "name": "Bangladeshi Panta Bhat",
+      "region": "South Asia",
+      "description": "Fermented rice soaked in water, served with chili and salt",
+      "ingredients": ["Rice", "Water", "Green chili", "Salt", "Onion"],
+      "prepTime": "5 min (rice prepared day before)",
+      "benefits": "Cooling and hydrating; traditional Bengali suhoor",
+      "tips": "Often eaten with fried fish or bhorta (mashed vegetables)",
+      "countryId": "bangladesh"
+    },
+    {
+      "id": 10,
+      "name": "Kenyan Mandazi & Chai",
+      "region": "East Africa",
+      "description": "Sweet fried dough (mandazi) with spiced chai tea",
+      "ingredients": ["Flour", "Sugar", "Cardamom", "Tea leaves", "Milk", "Ginger"],
+      "prepTime": "30 min",
+      "benefits": "Quick energy from carbs; chai helps with warmth and alertness",
+      "tips": "Common Swahili coast suhoor; pair with dates or fruit",
+      "countryId": "kenya"
+    },
+    {
+      "id": 11,
+      "name": "Bosnian Burek",
+      "region": "Balkans",
+      "description": "Flaky pastry filled with meat, cheese, or spinach",
+      "ingredients": ["Phyllo dough", "Ground meat or cheese", "Onions", "Eggs", "Yogurt"],
+      "prepTime": "50 min",
+      "benefits": "Filling and protein-rich; traditional Balkan pre-dawn meal",
+      "tips": "Often eaten with yogurt; popular in Sarajevo for suhoor",
+      "countryId": "bosnia"
     }
   ],
   "iftar": [
@@ -121,6 +187,84 @@
       "benefits": "Complete meal with proteins and carbohydrates for recovery",
       "tips": "Serve with raita and fresh salad for balance",
       "countryId": "saudi-arabia"
+    },
+    {
+      "id": 6,
+      "name": "Lebanese Fattoush & Jallab",
+      "region": "Levant",
+      "description": "Toasted bread salad with sumac and refreshing jallab (date and grape drink)",
+      "ingredients": ["Pita bread", "Cucumber", "Tomato", "Sumac", "Pomegranate molasses", "Dates", "Rose water"],
+      "prepTime": "20 min",
+      "benefits": "Hydrating salad and sweet drink; jallab is a Ramadan staple in Lebanon",
+      "tips": "Jallab is often served with ice and pine nuts; break fast with dates first",
+      "countryId": "lebanon"
+    },
+    {
+      "id": 7,
+      "name": "Jordanian Mansaf",
+      "region": "Levant",
+      "description": "Lamb cooked in jameed (dried yogurt) sauce over rice, served on large platters",
+      "ingredients": ["Lamb", "Jameed", "Rice", "Bread", "Pine nuts", "Spices"],
+      "prepTime": "120 min",
+      "benefits": "Jordan's national dish; protein and carbs for recovery after fasting",
+      "tips": "Eaten communally at Ramadan gatherings; symbolizes hospitality",
+      "significance": "Mansaf is central to Jordanian identity and is often served at special Ramadan and Eid gatherings.",
+      "countryId": "jordan"
+    },
+    {
+      "id": 8,
+      "name": "Indonesian Kolak",
+      "region": "Southeast Asia",
+      "description": "Sweet coconut milk dessert with banana, sweet potato, and palm sugar",
+      "ingredients": ["Banana", "Sweet potato", "Palm sugar", "Coconut milk", "Pandan leaf"],
+      "prepTime": "25 min",
+      "benefits": "Quick energy and hydration; popular takjil (iftar snack) in Indonesia",
+      "tips": "Kolak is one of the most common iftar sweets during Ramadan in Indonesia",
+      "countryId": "indonesia"
+    },
+    {
+      "id": 9,
+      "name": "Nigerian Jollof Rice",
+      "region": "West Africa",
+      "description": "One-pot spiced tomato rice with chicken or fish",
+      "ingredients": ["Rice", "Tomatoes", "Onions", "Chicken or fish", "Spices", "Bell pepper"],
+      "prepTime": "60 min",
+      "benefits": "Complete meal; festive dish at Nigerian Ramadan iftars",
+      "tips": "Jollof is a centerpiece at West African iftar gatherings",
+      "countryId": "nigeria"
+    },
+    {
+      "id": 10,
+      "name": "Bangladeshi Piaju & Halim",
+      "region": "South Asia",
+      "description": "Lentil fritters (piaju) and slow-cooked meat and lentil stew (halim)",
+      "ingredients": ["Lentils", "Onions", "Spices", "Beef or mutton", "Wheat", "Ginger"],
+      "prepTime": "90 min",
+      "benefits": "Protein-rich and warming; halim is a Ramadan staple in Dhaka",
+      "tips": "Piaju is a popular street iftar snack; halim is often sold in Chawk Bazaar",
+      "countryId": "bangladesh"
+    },
+    {
+      "id": 11,
+      "name": "Bosnian Begova Čorba",
+      "region": "Balkans",
+      "description": "Chicken and vegetable soup with okra and sour cream",
+      "ingredients": ["Chicken", "Okra", "Carrots", "Celery", "Sour cream", "Egg", "Vermicelli"],
+      "prepTime": "60 min",
+      "benefits": "Warming and rehydrating; traditional Bosnian iftar starter",
+      "tips": "Served with bread; often the first dish at Sarajevo iftar tables",
+      "countryId": "bosnia"
+    },
+    {
+      "id": 12,
+      "name": "Kenyan Pilau",
+      "region": "East Africa",
+      "description": "Spiced rice with meat, often served at communal iftars",
+      "ingredients": ["Rice", "Beef or chicken", "Pilau masala", "Onions", "Garlic", "Coconut milk"],
+      "prepTime": "55 min",
+      "benefits": "Filling and aromatic; reflects Swahili and South Asian influences",
+      "tips": "Common at Nairobi and Mombasa iftars; serve with kachumbari (tomato salad)",
+      "countryId": "kenya"
     }
   ]
 }

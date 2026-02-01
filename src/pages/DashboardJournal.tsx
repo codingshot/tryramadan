@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, BookOpen, PenLine, ChevronRight } from "lucide-react";
+import { ArrowLeft, BookOpen, PenLine, ChevronDown, ChevronUp } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArabicHover } from "@/components/ArabicHover";
@@ -20,6 +20,8 @@ const PROMPTS = [
   "One thing you're grateful for today.",
   "A small act of kindness you gave or received.",
   "What would you tell someone new to fasting?",
+  "How did today's fast change your perspective?",
+  "What intention will you carry into tomorrow?",
 ];
 
 function getDailyPrompt(): string {
@@ -51,7 +53,11 @@ export default function DashboardJournal() {
     setTodayGratitude("");
   };
 
-  const displayEntries = entries.slice(0, 7);
+  const [expandedDate, setExpandedDate] = useState<string | null>(null);
+  const INITIAL_SHOW = 7;
+  const [showCount, setShowCount] = useState(INITIAL_SHOW);
+  const displayEntries = entries.slice(0, showCount);
+  const hasMore = entries.length > showCount;
 
   return (
     <div className="min-h-screen bg-background">
@@ -131,19 +137,44 @@ export default function DashboardJournal() {
               <p className="text-sm text-muted-foreground">No entries yet. Start with today's prompt above.</p>
             ) : (
               <ul className="space-y-3">
-                {displayEntries.map((entry) => (
-                  <li
-                    key={entry.date}
-                    className="p-4 rounded-xl bg-card border border-border"
-                  >
-                    <span className="text-xs text-muted-foreground">{entry.date}</span>
-                    <p className="text-sm mt-1 line-clamp-2">{entry.content}</p>
-                    {entry.gratitude && (
-                      <p className="text-xs text-secondary mt-2">Grateful: {entry.gratitude}</p>
-                    )}
-                  </li>
-                ))}
+                {displayEntries.map((entry) => {
+                  const isExpanded = expandedDate === entry.date;
+                  return (
+                    <li
+                      key={entry.date}
+                      className="p-4 rounded-xl bg-card border border-border"
+                    >
+                      <span className="text-xs text-muted-foreground">{entry.date}</span>
+                      <p className={`text-sm mt-1 ${isExpanded ? "" : "line-clamp-2"}`}>
+                        {entry.content}
+                      </p>
+                      {entry.gratitude && (
+                        <p className="text-xs text-secondary mt-2">Grateful: {entry.gratitude}</p>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setExpandedDate(isExpanded ? null : entry.date)}
+                        className="mt-2 flex items-center gap-1 text-xs font-medium text-secondary hover:underline"
+                      >
+                        {isExpanded ? (
+                          <>Show less <ChevronUp className="w-3 h-3" /></>
+                        ) : (
+                          <>View full <ChevronDown className="w-3 h-3" /></>
+                        )}
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
+            )}
+            {hasMore && (
+              <button
+                type="button"
+                onClick={() => setShowCount((c) => c + 14)}
+                className="mt-4 text-sm font-medium text-secondary hover:underline"
+              >
+                Show more entries
+              </button>
             )}
           </motion.div>
         </div>

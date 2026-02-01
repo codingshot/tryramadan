@@ -30,13 +30,18 @@ export const Footer = () => {
             <h4 className="font-display font-bold mb-4">Quick Links</h4>
             <ul className="space-y-2">
               <li>
-                <a href="/#features" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
+                <Link to="/#features" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
                   Features
-                </a>
+                </Link>
               </li>
               <li>
                 <Link to="/programs" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
                   Fasting Programs
+                </Link>
+              </li>
+              <li>
+                <Link to="/recipes" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
+                  Recipes
                 </Link>
               </li>
               <li>
@@ -45,9 +50,9 @@ export const Footer = () => {
                 </Link>
               </li>
               <li>
-                <a href="/#health" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
+                <Link to="/#health" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
                   Health Benefits
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -107,9 +112,9 @@ export const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="/#about" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
+                <Link to="/#about" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
                   About Us
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

@@ -27,6 +27,28 @@
       padding-right: 2rem;
     }
   }
+  /* Prevent horizontal overflow on small screens */
+  html, body {
+    overflow-x: hidden;
+  }
+}
+
+/* Touch targets: minimum 44px for accessibility (WCAG) */
+@layer utilities {
+  .min-touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .min-touch-target-inline {
+    min-height: 44px;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+  }
 }
 
 @layer base {

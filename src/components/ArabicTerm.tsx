@@ -10,9 +10,19 @@ interface ArabicTermProps {
 
 export const ArabicTerm = ({ term, arabic, transliteration, definition, children }: ArabicTermProps) => {
   return (
-    <Tooltip delayDuration={200}>
+    <Tooltip delayDuration={300}>
       <TooltipTrigger asChild>
-        <span className="term-tooltip cursor-help">
+        <span
+          role="button"
+          tabIndex={0}
+          className="term-tooltip cursor-help focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 rounded-sm py-0.5"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              (e.currentTarget as HTMLElement).click();
+            }
+          }}
+        >
           {children || term}
         </span>
       </TooltipTrigger>

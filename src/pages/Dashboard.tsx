@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import { 
-  Moon, Sun, Clock, Calendar, MapPin, Settings, 
-  TrendingUp, Check, Bell, ChevronRight, Flame,
-  Utensils, Coffee, Droplets, BookOpen, Target,
+  Moon, Sun, Sunrise, Sunset, SunDim, Clock, Calendar, MapPin, Settings, 
+  TrendingUp, Check, Bell, ChevronRight, Flame, ChevronLeft,
+  Utensils, Coffee, Droplets, BookOpen, Target, PenLine,
   AlertTriangle, Trophy
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
@@ -24,10 +24,16 @@ import {
   uncompleteFastingToday,
   getTodayFastingLog,
   isFastingToday,
+  setDayCompleted,
+  useDayMealPlans,
+  useDayNutrition,
+  useDailyGoals,
+  useLocalStorage,
 } from "@/hooks/useLocalStorage";
-import { usePrayerTimes, getSunnahFastingInfo, checkAyyamAlBeed } from "@/hooks/usePrayerTimes";
+import { usePrayerTimes, usePrayerTimesForDate, getSunnahFastingInfo, checkAyyamAlBeed } from "@/hooks/usePrayerTimes";
 import { useAutoLocation } from "@/hooks/useLocation";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
 import { Footer } from "@/components/Footer";
 
 const Dashboard = () => {
@@ -36,6 +42,9 @@ const Dashboard = () => {
   const [progress, setProgress] = useFastingProgress();
   const [isFasting, setIsFasting] = useState(true);
   const [ayyamAlBeed, setAyyamAlBeed] = useState<{ isAyyamAlBeed: boolean; hijriDay: number } | null>(null);
+  const [locationEditorOpen, setLocationEditorOpen] = useState(false);
+  const todayStr = new Date().toISOString().split("T")[0];
+  const [selectedDate, setSelectedDate] = useState(todayStr);
   
   // Auto-detect location if not set
   const { location: autoLocation, loading: locationLoading } = useAutoLocation();
@@ -44,13 +53,43 @@ const Dashboard = () => {
   const locationCoords = preferences.locationCoords || 
     (autoLocation ? { lat: autoLocation.lat, lng: autoLocation.lng } : null);
   
-  // Get prayer times
+  // Get prayer times (today)
   const { prayerTimes, hijriDate, loading: timesLoading } = usePrayerTimes(
     locationCoords?.lat || null,
     locationCoords?.lng || null
   );
+  // Prayer times for selected day (for day view)
+  const { prayerTimes: selectedDayPrayerTimes } = usePrayerTimesForDate(
+    locationCoords?.lat || null,
+    locationCoords?.lng || null,
+    selectedDate
+  );
+  
+  const [mealPlans, setMealPlans] = useDayMealPlans();
+  const [dayNutrition, setDayNutrition] = useDayNutrition();
+  const [dailyGoals] = useDailyGoals();
+  const [journalEntries] = useLocalStorage<{ date: string; prompt?: string; content: string; gratitude?: string }[]>("tryramadan-journal", []);
   
   const sunnahInfo = getSunnahFastingInfo();
+  
+  const selectedDayMeals = mealPlans[selectedDate];
+  const selectedDayNutr = dayNutrition[selectedDate];
+  const selectedDayJournal = journalEntries.find((e) => e.date === selectedDate);
+  const selectedDayComplete = progress.completedDays.includes(selectedDate);
+  const selectedDateObj = new Date(selectedDate + "T12:00:00");
+  const isSelectedToday = selectedDate === todayStr;
+  
+  const goPrevDay = () => {
+    const d = new Date(selectedDate + "T12:00:00");
+    d.setDate(d.getDate() - 1);
+    setSelectedDate(d.toISOString().split("T")[0]);
+  };
+  const goNextDay = () => {
+    const d = new Date(selectedDate + "T12:00:00");
+    d.setDate(d.getDate() + 1);
+    setSelectedDate(d.toISOString().split("T")[0]);
+  };
+  const goToToday = () => setSelectedDate(todayStr);
   
   // Update location in preferences if auto-detected
   useEffect(() => {
@@ -185,12 +224,55 @@ const Dashboard = () => {
             {/* PWA install prompt (when installable and not dismissed) */}
             <PWAInstallBanner />
 
-            {/* Location display with edit option */}
-            <div className="flex items-center gap-2">
-              <LocationDisplay showTimezone />
+            {/* Location display with edit option — click anywhere to update */}
+            <div className="flex flex-wrap items-center gap-2">
+              <LocationDisplay
+                showTimezone
+                open={locationEditorOpen}
+                onOpenChange={setLocationEditorOpen}
+              />
               {(locationLoading || timesLoading) && (
                 <span className="text-xs text-muted-foreground animate-pulse">updating...</span>
               )}
+            </div>
+
+            {/* Day selector — click through days */}
+            <div className="flex flex-wrap items-center justify-between gap-2 mt-4 p-3 rounded-xl bg-muted/50 border border-border">
+              <button
+                type="button"
+                onClick={goPrevDay}
+                className="p-2 rounded-lg hover:bg-muted transition-colors"
+                aria-label="Previous day"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <div className="flex items-center gap-2">
+                <span className="font-display font-semibold">
+                  {selectedDateObj.toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
+                </span>
+                {isSelectedToday && (
+                  <span className="px-2 py-0.5 rounded-full bg-secondary/20 text-secondary text-xs font-medium">Today</span>
+                )}
+              </div>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={goNextDay}
+                  className="p-2 rounded-lg hover:bg-muted transition-colors"
+                  aria-label="Next day"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+                {!isSelectedToday && (
+                  <button
+                    type="button"
+                    onClick={goToToday}
+                    className="px-3 py-1.5 rounded-lg bg-primary/20 text-primary text-sm font-medium hover:bg-primary/30"
+                  >
+                    Go to today
+                  </button>
+                )}
+              </div>
             </div>
           </motion.div>
           
@@ -216,9 +298,25 @@ const Dashboard = () => {
             </div>
             {prayerTimes && (
               <div className="text-sm text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 items-center">
-                <span>Suhoor: {prayerTimes.imsak}</span>
-                <span>Iftar: {prayerTimes.maghrib}</span>
-                <PrayerLocationBadge />
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-help border-b border-dotted border-muted-foreground/40">Suhoor: {prayerTimes.imsak}</span>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs p-3">
+                    <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.suhoor.title}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.suhoor.body}</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="cursor-help border-b border-dotted border-muted-foreground/40">Iftar: {prayerTimes.maghrib}</span>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs p-3">
+                    <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.iftar.title}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.iftar.body}</p>
+                  </TooltipContent>
+                </Tooltip>
+                <PrayerLocationBadge onClickToUpdate={() => setLocationEditorOpen(true)} />
               </div>
             )}
           </motion.div>
@@ -235,22 +333,54 @@ const Dashboard = () => {
                 to="/dashboard/schedule"
                 className="block p-4 rounded-2xl bg-card border border-border grid grid-cols-2 sm:grid-cols-4 gap-3 hover:border-secondary/50 transition-colors"
               >
-                <div>
-                  <span className="text-xs text-muted-foreground block">Suhoor ends</span>
-                  <span className="font-bold text-secondary">{prayerTimes.fajr}</span>
-                </div>
-                <div>
-                  <span className="text-xs text-muted-foreground block">Iftar</span>
-                  <span className="font-bold text-secondary">{prayerTimes.maghrib}</span>
-                </div>
-                <div>
-                  <span className="text-xs text-muted-foreground block">Fajr</span>
-                  <span className="font-medium">{prayerTimes.fajr}</span>
-                </div>
-                <div>
-                  <span className="text-xs text-muted-foreground block">Maghrib</span>
-                  <span className="font-medium">{prayerTimes.maghrib}</span>
-                </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="cursor-help">
+                      <span className="text-xs text-muted-foreground block">Suhoor ends</span>
+                      <span className="font-bold text-secondary">{prayerTimes.fajr}</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs p-3">
+                    <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.suhoorEnds.title}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.suhoorEnds.body}</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="cursor-help">
+                      <span className="text-xs text-muted-foreground block">Iftar</span>
+                      <span className="font-bold text-secondary">{prayerTimes.maghrib}</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs p-3">
+                    <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.iftar.title}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.iftar.body}</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="cursor-help">
+                      <span className="text-xs text-muted-foreground block">Fajr</span>
+                      <span className="font-medium">{prayerTimes.fajr}</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs p-3">
+                    <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.fajr.title}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.fajr.body}</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="cursor-help">
+                      <span className="text-xs text-muted-foreground block">Maghrib</span>
+                      <span className="font-medium">{prayerTimes.maghrib}</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs p-3">
+                    <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.maghrib.title}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.maghrib.body}</p>
+                  </TooltipContent>
+                </Tooltip>
               </Link>
             </motion.div>
           )}
@@ -320,10 +450,15 @@ const Dashboard = () => {
                   </div>
                 </button>
               </TooltipTrigger>
-              <TooltipContent>
+              <TooltipContent className="max-w-xs p-3">
                 {todayComplete 
                   ? "Today's fast is marked complete! Click to undo." 
-                  : "Mark today's fast as complete when you break your fast at Iftar."}
+                  : (
+                    <>
+                      <p className="font-semibold text-sm">Mark today's fast complete</p>
+                      <p className="text-xs text-muted-foreground mt-1">Do this after you break your fast at Iftar (Maghrib). {EATING_TIME_TOOLTIPS.iftar.body}</p>
+                    </>
+                  )}
               </TooltipContent>
             </Tooltip>
             
@@ -380,6 +515,191 @@ const Dashboard = () => {
                 Voluntary fasting days (Mon/Thu/White Days) completed
               </TooltipContent>
             </Tooltip>
+
+            {/* Day view: meal plan, calories, prayer times, journal for selected day */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.18 }}
+              className="mb-8 p-6 rounded-2xl bg-card border border-border"
+            >
+              <h3 className="font-display font-bold mb-4 flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-secondary" />
+                {isSelectedToday ? "Today's plan" : "Day plan"} · {selectedDateObj.toLocaleDateString("en", { month: "short", day: "numeric" })}
+              </h3>
+
+              {/* Prayer times for this day */}
+              {selectedDayPrayerTimes && (
+                <div className="grid grid-cols-2 gap-3 mb-4 p-3 rounded-xl bg-muted/50">
+                  <div>
+                    <span className="text-xs text-muted-foreground block">Suhoor ends (Fajr)</span>
+                    <span className="font-bold text-secondary">{selectedDayPrayerTimes.fajr}</span>
+                  </div>
+                  <div>
+                    <span className="text-xs text-muted-foreground block">Iftar (Maghrib)</span>
+                    <span className="font-bold text-secondary">{selectedDayPrayerTimes.maghrib}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Meal plan for day */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground block mb-1">Suhoor</label>
+                  <input
+                    type="text"
+                    value={selectedDayMeals?.suhoor ?? ""}
+                    onChange={(e) =>
+                      setMealPlans((prev) => ({
+                        ...prev,
+                        [selectedDate]: { ...(prev[selectedDate] || {}), suhoor: e.target.value.trim() || undefined },
+                      }))
+                    }
+                    placeholder="e.g. Oats & dates"
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground block mb-1">Iftar</label>
+                  <input
+                    type="text"
+                    value={selectedDayMeals?.iftar ?? ""}
+                    onChange={(e) =>
+                      setMealPlans((prev) => ({
+                        ...prev,
+                        [selectedDate]: { ...(prev[selectedDate] || {}), iftar: e.target.value.trim() || undefined },
+                      }))
+                    }
+                    placeholder="e.g. Harira & dates"
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+                  />
+                </div>
+              </div>
+
+              {/* Calorie / nutrition for day */}
+              <div className="mb-4">
+                <span className="text-xs font-medium text-muted-foreground block mb-2">Calories & macros (optional)</span>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <div>
+                    <input
+                      type="number"
+                      min={0}
+                      placeholder="Cal"
+                      value={selectedDayNutr?.calories ?? ""}
+                      onChange={(e) =>
+                        setDayNutrition((prev) => ({
+                          ...prev,
+                          [selectedDate]: {
+                            ...(prev[selectedDate] || {}),
+                            calories: e.target.value ? Number(e.target.value) : undefined,
+                          },
+                        }))
+                      }
+                      className="w-full px-2 py-1.5 rounded-lg border border-border bg-background text-sm"
+                    />
+                    <span className="text-[10px] text-muted-foreground">/ {dailyGoals.calories} goal</span>
+                  </div>
+                  <div>
+                    <input
+                      type="number"
+                      min={0}
+                      placeholder="P"
+                      value={selectedDayNutr?.protein ?? ""}
+                      onChange={(e) =>
+                        setDayNutrition((prev) => ({
+                          ...prev,
+                          [selectedDate]: {
+                            ...(prev[selectedDate] || {}),
+                            protein: e.target.value ? Number(e.target.value) : undefined,
+                          },
+                        }))
+                      }
+                      className="w-full px-2 py-1.5 rounded-lg border border-border bg-background text-sm"
+                    />
+                    <span className="text-[10px] text-muted-foreground">/ {dailyGoals.protein}g</span>
+                  </div>
+                  <div>
+                    <input
+                      type="number"
+                      min={0}
+                      placeholder="C"
+                      value={selectedDayNutr?.carbs ?? ""}
+                      onChange={(e) =>
+                        setDayNutrition((prev) => ({
+                          ...prev,
+                          [selectedDate]: {
+                            ...(prev[selectedDate] || {}),
+                            carbs: e.target.value ? Number(e.target.value) : undefined,
+                          },
+                        }))
+                      }
+                      className="w-full px-2 py-1.5 rounded-lg border border-border bg-background text-sm"
+                    />
+                    <span className="text-[10px] text-muted-foreground">/ {dailyGoals.carbs}g</span>
+                  </div>
+                  <div>
+                    <input
+                      type="number"
+                      min={0}
+                      placeholder="F"
+                      value={selectedDayNutr?.fat ?? ""}
+                      onChange={(e) =>
+                        setDayNutrition((prev) => ({
+                          ...prev,
+                          [selectedDate]: {
+                            ...(prev[selectedDate] || {}),
+                            fat: e.target.value ? Number(e.target.value) : undefined,
+                          },
+                        }))
+                      }
+                      className="w-full px-2 py-1.5 rounded-lg border border-border bg-background text-sm"
+                    />
+                    <span className="text-[10px] text-muted-foreground">/ {dailyGoals.fat}g</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Journal for day */}
+              <div className="mb-4">
+                <span className="text-xs font-medium text-muted-foreground block mb-1">Journal</span>
+                {selectedDayJournal ? (
+                  <Link
+                    to="/dashboard/journal"
+                    className="block p-3 rounded-xl bg-muted/50 border border-border hover:border-secondary/50 text-sm"
+                  >
+                    <span className="line-clamp-2 text-foreground">{selectedDayJournal.content}</span>
+                    {selectedDayJournal.gratitude && (
+                      <span className="text-xs text-secondary mt-1 block">Grateful: {selectedDayJournal.gratitude}</span>
+                    )}
+                    <span className="text-xs text-muted-foreground mt-1">Edit in Journal →</span>
+                  </Link>
+                ) : (
+                  <Link
+                    to="/dashboard/journal"
+                    className="block p-3 rounded-xl border border-dashed border-border hover:border-secondary/50 text-sm text-muted-foreground hover:text-foreground"
+                  >
+                    <PenLine className="w-4 h-4 inline mr-2" />
+                    No entry for this day — Add in Journal
+                  </Link>
+                )}
+              </div>
+
+              {/* Mark day complete */}
+              <div className="flex items-center justify-between pt-3 border-t border-border">
+                <span className="text-sm text-muted-foreground">
+                  {selectedDayComplete ? "Marked as fast completed" : "Mark this day as fast completed"}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setDayCompleted(progress, setProgress, selectedDate, !selectedDayComplete)}
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                    selectedDayComplete ? "bg-secondary/20 text-secondary border border-secondary/40" : "bg-muted hover:bg-muted/80"
+                  }`}
+                >
+                  {selectedDayComplete ? "Completed ✓" : "Mark done"}
+                </button>
+              </div>
+            </motion.div>
 
             {/* Progress Ring — Ramadan completion */}
             <div className="p-4 rounded-2xl bg-card border border-border flex flex-col items-center">
@@ -513,17 +833,19 @@ const Dashboard = () => {
                   <Clock className="w-5 h-5 text-secondary" />
                   Today's Prayer Times • أوقات الصلاة
                 </Link>
-                <PrayerLocationBadge />
+                <PrayerLocationBadge onClickToUpdate={() => setLocationEditorOpen(true)} />
               </div>
               <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
                 {[
-                  { name: 'Fajr', nameAr: 'الفجر', time: prayerTimes.fajr, highlight: true },
-                  { name: 'Sunrise', nameAr: 'الشروق', time: prayerTimes.sunrise },
-                  { name: 'Dhuhr', nameAr: 'الظهر', time: prayerTimes.dhuhr },
-                  { name: 'Asr', nameAr: 'العصر', time: prayerTimes.asr },
-                  { name: 'Maghrib', nameAr: 'المغرب', time: prayerTimes.maghrib, highlight: true },
-                  { name: 'Isha', nameAr: 'العشاء', time: prayerTimes.isha },
-                ].map((prayer) => (
+                  { name: 'Fajr', nameAr: 'الفجر', time: prayerTimes.fajr, highlight: true, Icon: Sunrise },
+                  { name: 'Sunrise', nameAr: 'الشروق', time: prayerTimes.sunrise, Icon: Sun },
+                  { name: 'Dhuhr', nameAr: 'الظهر', time: prayerTimes.dhuhr, Icon: Sun },
+                  { name: 'Asr', nameAr: 'العصر', time: prayerTimes.asr, Icon: SunDim },
+                  { name: 'Maghrib', nameAr: 'المغرب', time: prayerTimes.maghrib, highlight: true, Icon: Sunset },
+                  { name: 'Isha', nameAr: 'العشاء', time: prayerTimes.isha, Icon: Moon },
+                ].map((prayer) => {
+                  const PrayerIcon = prayer.Icon;
+                  return (
                   <Tooltip key={prayer.name}>
                     <TooltipTrigger asChild>
                       <div className={`p-3 rounded-xl text-center ${
@@ -531,18 +853,32 @@ const Dashboard = () => {
                           ? 'bg-secondary/20 border border-secondary/30' 
                           : 'bg-card border border-border'
                       }`}>
+                        <PrayerIcon className={`w-5 h-5 mx-auto mb-1 block ${prayer.highlight ? 'text-secondary' : 'text-muted-foreground'}`} aria-hidden />
                         <span className="text-xs text-muted-foreground block">{prayer.name}</span>
                         <span className="text-lg font-bold block">{prayer.time}</span>
                         <span className="text-xs font-arabic text-secondary">{prayer.nameAr}</span>
                       </div>
                     </TooltipTrigger>
-                    <TooltipContent>
-                      {prayer.name === 'Fajr' && 'Start of fasting - last chance for Suhoor'}
-                      {prayer.name === 'Maghrib' && 'Time to break your fast (Iftar)'}
-                      {!['Fajr', 'Maghrib'].includes(prayer.name) && `${prayer.name} prayer time`}
+                    <TooltipContent className="max-w-xs p-3">
+                      {prayer.name === 'Fajr' && (
+                        <>
+                          <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.fajr.title}</p>
+                          <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.fajr.body}</p>
+                        </>
+                      )}
+                      {prayer.name === 'Maghrib' && (
+                        <>
+                          <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.maghrib.title}</p>
+                          <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.maghrib.body}</p>
+                        </>
+                      )}
+                      {!['Fajr', 'Maghrib'].includes(prayer.name) && (
+                        <p className="text-sm">{prayer.name} prayer time • {prayer.nameAr}</p>
+                      )}
                     </TooltipContent>
                   </Tooltip>
-                ))}
+                  );
+                })}
               </div>
             </motion.div>
           )}

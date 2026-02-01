@@ -7,12 +7,16 @@ import {
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { useFastingProgress, getTodayFastingLog, isFastingToday } from "@/hooks/useLocalStorage";
+import { useFastingProgress, getTodayFastingLog, isFastingToday, useLocalStorage } from "@/hooks/useLocalStorage";
+import type { EnergyEntry } from "@/hooks/useLocalStorage";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 
+type TodayStore = Record<string, { energyEntries?: EnergyEntry[] }>;
+
 const DashboardProgress = () => {
   const [progress] = useFastingProgress();
+  const [todayStore] = useLocalStorage<TodayStore>("tryramadan-today", {});
 
   const exportCsv = useCallback(() => {
     const totalDays = 30;
@@ -51,6 +55,20 @@ const DashboardProgress = () => {
   const todayLog = getTodayFastingLog(progress);
   const recentLog = (progress.fastingLog || []).slice(-14).reverse();
 
+  // Energy over time: last 7 days from tryramadan-today
+  const energyOverTime = (() => {
+    const dates = Object.keys(todayStore).sort().reverse().slice(0, 7);
+    return dates.map((date) => {
+      const entries = todayStore[date]?.energyEntries || [];
+      const lastLevel = entries.length > 0 ? entries[entries.length - 1].level : null;
+      const avgLevel =
+        entries.length > 0
+          ? Math.round(entries.reduce((s, e) => s + e.level, 0) / entries.length)
+          : null;
+      return { date, lastLevel, avgLevel, count: entries.length };
+    });
+  })();
+
   // Calculate stats
   const totalDays = 30;
   const completedDays = progress.completedDays.length;
@@ -79,6 +97,10 @@ const DashboardProgress = () => {
   
   const currentStreak = calculateStreak();
   
+  // Learn-read count for Eager Learner badge
+  const [learnRead] = useLocalStorage<string[]>("tryramadan-learn-read", []);
+  const eagerLearnerUnlocked = learnRead.length >= 10;
+
   // Achievement badges
   const badges = [
     { id: 'first-fast', name: 'First Fast', description: 'Complete your first fast', icon: '🌙', unlocked: completedDays >= 1 },
@@ -88,7 +110,7 @@ const DashboardProgress = () => {
     { id: 'streak-10', name: 'Dedicated', description: '10-day fasting streak', icon: '💪', unlocked: currentStreak >= 10 },
     { id: 'full-month', name: 'Ramadan Champion', description: 'Complete all 30 days', icon: '🏆', unlocked: completedDays >= 30 },
     { id: 'early-bird', name: 'Early Bird', description: 'Never missed Suhoor', icon: '🌅', unlocked: false },
-    { id: 'learner', name: 'Eager Learner', description: 'Read 10 educational articles', icon: '📚', unlocked: false },
+    { id: 'learner', name: 'Eager Learner', description: 'Read 10 educational articles', icon: '📚', unlocked: eagerLearnerUnlocked },
   ];
   
   const unlockedBadges = badges.filter(b => b.unlocked);
@@ -175,6 +197,44 @@ const DashboardProgress = () => {
               </motion.div>
             </div>
           </motion.div>
+
+          {/* Energy over time */}
+          {energyOverTime.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.22 }}
+              className="p-6 rounded-2xl bg-card border border-border mb-8"
+            >
+              <h3 className="font-display font-bold mb-3 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-secondary" />
+                Energy over time
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Last recorded energy (1–5) per day from Today's Fast check-ins.
+              </p>
+              <ul className="space-y-2 text-sm">
+                {energyOverTime.map(({ date, lastLevel, avgLevel, count }) => (
+                  <li
+                    key={date}
+                    className="flex items-center justify-between py-2 border-b border-border last:border-0"
+                  >
+                    <span className="font-medium">{date}</span>
+                    <span className="text-muted-foreground">
+                      {lastLevel != null ? (
+                        <>Last: {lastLevel}/5</>
+                      ) : (
+                        "—"
+                      )}
+                      {count > 1 && avgLevel != null && (
+                        <span className="ml-2">· Avg: {avgLevel}/5</span>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          )}
 
           {/* Fasting tracker status + log */}
           <motion.div

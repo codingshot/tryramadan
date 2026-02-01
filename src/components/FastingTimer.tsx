@@ -5,6 +5,8 @@ import { usePrayerTimes, getSunnahFastingInfo } from "@/hooks/usePrayerTimes";
 import { useUserPreferences } from "@/hooks/useLocalStorage";
 import { useAutoLocation } from "@/hooks/useLocation";
 import { Link } from "react-router-dom";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
 import { SunnahFastingBadge } from "./SunnahFastingBadge";
 
 interface FastingTimerProps {
@@ -220,25 +222,50 @@ export const FastingTimer = ({
           <Clock className="w-4 h-4" />
           <span className="text-sm">
             Until{" "}
-            <span className="text-secondary font-semibold">
-              {isFasting ? "Iftar • إفطار" : "Suhoor • سحور"}
-            </span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-secondary font-semibold cursor-help border-b border-dotted border-primary-foreground/30">
+                  {isFasting ? "Iftar • إفطار" : "Suhoor • سحور"}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="max-w-xs bg-card border-border p-3">
+                <p className="font-semibold text-sm">{isFasting ? EATING_TIME_TOOLTIPS.iftar.title : EATING_TIME_TOOLTIPS.suhoor.title}</p>
+                <p className="text-xs text-muted-foreground mt-1">{isFasting ? EATING_TIME_TOOLTIPS.iftar.body : EATING_TIME_TOOLTIPS.suhoor.body}</p>
+              </TooltipContent>
+            </Tooltip>
             {" "}at {isFasting ? iftarTime : suhoorTime}
           </span>
         </div>
 
         {/* Prayer times info */}
         <div className="mt-6 pt-4 border-t border-primary-foreground/10 grid grid-cols-2 gap-4 text-sm">
-          <div className="text-center p-3 rounded-lg bg-primary-foreground/5">
-            <span className="text-primary-foreground/50 block text-xs mb-1">Suhoor Ends • نهاية السحور</span>
-            <span className="text-secondary font-bold text-lg">{suhoorTime}</span>
-            <span className="block text-xs text-primary-foreground/40 mt-1">Eat Cutoff • موعد التوقف</span>
-          </div>
-          <div className="text-center p-3 rounded-lg bg-primary-foreground/5">
-            <span className="text-primary-foreground/50 block text-xs mb-1">Iftar Time • وقت الإفطار</span>
-            <span className="text-secondary font-bold text-lg">{iftarTime}</span>
-            <span className="block text-xs text-primary-foreground/40 mt-1">Break Fast • الفطور</span>
-          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="text-center p-3 rounded-lg bg-primary-foreground/5 cursor-help border border-transparent hover:border-primary-foreground/20 transition-colors">
+                <span className="text-primary-foreground/50 block text-xs mb-1">Suhoor Ends • نهاية السحور</span>
+                <span className="text-secondary font-bold text-lg">{suhoorTime}</span>
+                <span className="block text-xs text-primary-foreground/40 mt-1">Eat Cutoff • موعد التوقف</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-xs bg-card border-border p-3">
+              <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.suhoorEnds.title}</p>
+              <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.suhoorEnds.body}</p>
+            </TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="text-center p-3 rounded-lg bg-primary-foreground/5 cursor-help border border-transparent hover:border-primary-foreground/20 transition-colors">
+                <span className="text-primary-foreground/50 block text-xs mb-1">Iftar Time • وقت الإفطار</span>
+                <span className="text-secondary font-bold text-lg">{iftarTime}</span>
+                <span className="block text-xs text-primary-foreground/40 mt-1">Break Fast • الفطور</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-xs bg-card border-border p-3">
+              <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.iftarTime.title}</p>
+              <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.iftarTime.body}</p>
+              <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.breakFast.body}</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
 
         {/* Location / API status */}

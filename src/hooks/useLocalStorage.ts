@@ -214,6 +214,21 @@ export function uncompleteFastingToday(
   console.log(`${LOG_PREFIX} Undo completed. ${today} set back to in progress.`);
 }
 
+/** Set a specific day (ISO YYYY-MM-DD) as completed or not. Use for day view / click-through days. */
+export function setDayCompleted(
+  progress: FastingProgress,
+  setProgress: (value: FastingProgress | ((prev: FastingProgress) => FastingProgress)) => void,
+  dateStr: string,
+  completed: boolean
+): void {
+  const has = progress.completedDays.includes(dateStr);
+  if (completed && !has) {
+    setProgress({ ...progress, completedDays: [...progress.completedDays, dateStr].sort() });
+  } else if (!completed && has) {
+    setProgress({ ...progress, completedDays: progress.completedDays.filter((d) => d !== dateStr) });
+  }
+}
+
 // Notification settings
 export interface NotificationSettings {
   suhoorEnabled: boolean;

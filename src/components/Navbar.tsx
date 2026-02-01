@@ -30,7 +30,7 @@ export const Navbar = () => {
   const navLinks = [
     { name: "Features", nameAr: "المميزات", href: "#features", to: "/#features" },
     { name: "Programs", nameAr: "البرامج", href: "#programs", to: "/programs" },
-    { name: "Recipes", nameAr: "وصفات", href: "#recipes", to: "/recipes" },
+    { name: "Recipes", nameAr: "وصفات", href: "", to: "/recipes" },
     { name: "Culture", nameAr: "الثقافة", href: "#culture", to: "/culture" },
     { name: "Health", nameAr: "الصحة", href: "#health", to: "/#health" },
     { name: "About", nameAr: "عنا", href: "#about", to: "/#about" },

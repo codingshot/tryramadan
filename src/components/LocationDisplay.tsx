@@ -8,12 +8,19 @@ import { useUserPreferences } from "@/hooks/useLocalStorage";
 interface LocationDisplayProps {
   compact?: boolean;
   showTimezone?: boolean;
+  /** Controlled open state: when provided, clicking the display uses this instead of internal state */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export const LocationDisplay = ({ compact = false, showTimezone = false }: LocationDisplayProps) => {
+export const LocationDisplay = ({ compact = false, showTimezone = false, open: controlledOpen, onOpenChange }: LocationDisplayProps) => {
   const [preferences, setPreferences] = useUserPreferences();
-  const [isEditing, setIsEditing] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const isControlled = controlledOpen !== undefined && onOpenChange !== undefined;
+  const isEditing = isControlled ? controlledOpen : internalOpen;
+  const setIsEditing = isControlled ? onOpenChange! : setInternalOpen;
   
   const handleLocationSelect = (location: LocationResult) => {
     setPreferences({

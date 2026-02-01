@@ -32,6 +32,12 @@ export interface CityPractice {
   notes: string;
 }
 
+export interface MajorMosque {
+  name: string;
+  city?: string;
+  note?: string;
+}
+
 export interface Country {
   id: string;
   name: string;
@@ -42,11 +48,31 @@ export interface Country {
   foods: string[];
   specialNote: string;
   cities?: CityPractice[];
+  /** Muslim population (e.g. "~95%", "242 million (87%)") */
+  muslimPopulation?: string;
+  /** Short note on Muslim community (e.g. "World's largest Muslim-majority country") */
+  muslimPopulationNote?: string;
+  majorMosques?: MajorMosque[];
 }
 
 const recipes = recipesData as { suhoor: Recipe[]; iftar: Recipe[] };
 const culture = culturalData as {
-  regions: { id: string; name: string; countries: { id: string; name: string; flag: string; traditions: Country["traditions"]; foods: string[]; specialNote: string; cities?: CityPractice[] }[] }[];
+  regions: {
+    id: string;
+    name: string;
+    countries: {
+      id: string;
+      name: string;
+      flag: string;
+      traditions: Country["traditions"];
+      foods: string[];
+      specialNote: string;
+      cities?: CityPractice[];
+      muslimPopulation?: string;
+      muslimPopulationNote?: string;
+      majorMosques?: MajorMosque[];
+    }[];
+  }[];
 };
 
 /** All countries flattened with regionId and regionName for lookup and SEO */
@@ -62,6 +88,9 @@ export function getAllCountries(): Country[] {
       foods: c.foods,
       specialNote: c.specialNote,
       cities: c.cities,
+      muslimPopulation: c.muslimPopulation,
+      muslimPopulationNote: c.muslimPopulationNote,
+      majorMosques: c.majorMosques,
     }))
   );
 }

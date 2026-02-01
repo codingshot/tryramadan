@@ -18,6 +18,7 @@ import {
 } from "@/hooks/useLocalStorage";
 import { usePrayerTimes } from "@/hooks/usePrayerTimes";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
 import { PrayerLocationBadge } from "@/components/PrayerLocationBadge";
 
 const HYDRATION_GOAL = 8;
@@ -164,14 +165,30 @@ const DashboardToday = () => {
               transition={{ delay: 0.12 }}
               className="mb-6 grid grid-cols-2 gap-4"
             >
-              <div className="p-4 rounded-2xl bg-card border border-border text-center">
-                <span className="text-xs text-muted-foreground block">Until Suhoor ends (Fajr)</span>
-                <span className="text-xl font-bold text-secondary">{String(countdownSuhoorEnd.h).padStart(2, '0')}:{String(countdownSuhoorEnd.m).padStart(2, '0')}</span>
-              </div>
-              <div className="p-4 rounded-2xl bg-card border border-border text-center">
-                <span className="text-xs text-muted-foreground block">Until Iftar</span>
-                <span className="text-xl font-bold text-secondary">{String(countdownIftar.h).padStart(2, '0')}:{String(countdownIftar.m).padStart(2, '0')}</span>
-              </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="p-4 rounded-2xl bg-card border border-border text-center cursor-help">
+                    <span className="text-xs text-muted-foreground block">Until Suhoor ends (Fajr)</span>
+                    <span className="text-xl font-bold text-secondary">{String(countdownSuhoorEnd.h).padStart(2, '0')}:{String(countdownSuhoorEnd.m).padStart(2, '0')}</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-xs p-3">
+                  <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.suhoorEnds.title}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.suhoorEnds.body}</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="p-4 rounded-2xl bg-card border border-border text-center cursor-help">
+                    <span className="text-xs text-muted-foreground block">Until Iftar</span>
+                    <span className="text-xl font-bold text-secondary">{String(countdownIftar.h).padStart(2, '0')}:{String(countdownIftar.m).padStart(2, '0')}</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-xs p-3">
+                  <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.untilIftar.title}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.untilIftar.body}</p>
+                </TooltipContent>
+              </Tooltip>
             </motion.div>
           )}
 
