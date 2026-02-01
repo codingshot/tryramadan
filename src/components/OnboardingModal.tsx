@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, ArrowLeft, Check, Moon, BookOpen, Heart, Bell, Loader2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, Check, Moon, BookOpen, Heart, Bell, Loader2, MapPin } from "lucide-react";
 import { LocationSearch } from "./LocationSearch";
-import { LocationResult } from "@/hooks/useLocation";
+import { LocationResult, getLocationFromIP } from "@/hooks/useLocation";
 import { useUserPreferences, defaultPreferences } from "@/hooks/useLocalStorage";
 import { useNotifications } from "@/hooks/useNotifications";
 
@@ -33,7 +33,21 @@ export const OnboardingModal = ({ isOpen, onClose, onComplete }: OnboardingModal
   const [preferences, setPreferences] = useUserPreferences();
   const { permission, supported, requestPermission, sendTestNotification } = useNotifications();
   const [notifLoading, setNotifLoading] = useState(false);
+  const [locationLoading, setLocationLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Auto-detect location when reaching location step
+  useEffect(() => {
+    if (step === 'location' && !selectedLocation) {
+      setLocationLoading(true);
+      getLocationFromIP().then((location) => {
+        if (location) {
+          setSelectedLocation(location);
+        }
+        setLocationLoading(false);
+      });
+    }
+  }, [step, selectedLocation]);
 
   const handleComplete = () => {
     const data: OnboardingData = {
@@ -59,11 +73,8 @@ export const OnboardingModal = ({ isOpen, onClose, onComplete }: OnboardingModal
     onComplete(data);
     onClose();
     
-    // Scroll to timer section
-    const timerSection = document.getElementById('programs');
-    if (timerSection) {
-      timerSection.scrollIntoView({ behavior: 'smooth' });
-    }
+    // Navigate to dashboard
+    navigate('/dashboard');
   };
 
   const handleLocationSelect = (location: LocationResult) => {
@@ -327,16 +338,29 @@ export const OnboardingModal = ({ isOpen, onClose, onComplete }: OnboardingModal
                     Your Location • موقعك
                     <span className="text-muted-foreground font-normal ml-2">(for accurate prayer times)</span>
                   </label>
+                  
+                  {/* Auto-detected location card */}
+                  {locationLoading ? (
+                    <div className="flex items-center gap-3 p-4 rounded-xl bg-muted/50 border border-border mb-3">
+                      <Loader2 className="w-5 h-5 animate-spin text-secondary" />
+                      <span className="text-muted-foreground">Detecting your location...</span>
+                    </div>
+                  ) : selectedLocation ? (
+                    <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/10 border border-secondary/30 mb-3">
+                      <MapPin className="w-5 h-5 text-secondary flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground">{selectedLocation.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">{selectedLocation.country}</p>
+                      </div>
+                      <Check className="w-5 h-5 text-secondary flex-shrink-0" />
+                    </div>
+                  ) : null}
+                  
                   <LocationSearch
                     value={selectedLocation?.name || ''}
                     onSelect={handleLocationSelect}
-                    placeholder="Search city or click 📍 to detect"
+                    placeholder="Search for a different city..."
                   />
-                  {selectedLocation && (
-                    <p className="text-xs text-secondary mt-2">
-                      📍 {selectedLocation.displayName}
-                    </p>
-                  )}
                 </div>
 
                 <button 

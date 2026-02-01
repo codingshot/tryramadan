@@ -169,13 +169,15 @@ export const LocationSearch = ({ value, onSelect, placeholder = "Search city..."
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute z-50 w-full mt-2 bg-card border border-border rounded-xl shadow-elevated overflow-hidden"
+            className="absolute z-[100] w-full mt-2 bg-card border border-border rounded-xl shadow-2xl overflow-hidden"
+            style={{ backgroundColor: 'hsl(var(--card))' }}
           >
             {results.map((location, index) => (
               <button
                 key={`${location.lat}-${location.lng}-${index}`}
                 onClick={() => handleSelect(location)}
-                className="w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors border-b border-border last:border-b-0 flex items-start gap-3"
+                className="w-full px-4 py-3 text-left hover:bg-muted transition-colors border-b border-border last:border-b-0 flex items-start gap-3"
+                style={{ backgroundColor: 'hsl(var(--card))' }}
               >
                 <MapPin className="w-4 h-4 text-secondary mt-0.5 flex-shrink-0" />
                 <div className="flex-1 min-w-0">

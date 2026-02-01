@@ -74,14 +74,15 @@ src/
 │   ├── ramadan-info.json
 │   └── recipes.json
 ├── hooks/           # Custom React hooks
-│   ├── useLocalStorage.ts   # Persistent user preferences
+│   ├── useLocalStorage.ts   # Persistent user preferences & progress
 │   ├── useLocation.ts       # Geolocation & search
 │   ├── useNotifications.ts  # Push notification management
 │   ├── usePrayerTimes.ts    # Aladhan API integration
 │   └── use-mobile.tsx
 ├── lib/             # Utility functions
 ├── pages/           # Route pages
-│   ├── Index.tsx
+│   ├── Dashboard.tsx    # Main fasting dashboard with timer & tracking
+│   ├── Index.tsx        # Landing page
 │   └── NotFound.tsx
 └── index.css        # Design system & Tailwind config
 ```
