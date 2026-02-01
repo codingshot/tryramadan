@@ -1,0 +1,224 @@
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { 
+  ArrowLeft, TrendingUp, Flame, Calendar, Check, Trophy, 
+  BookOpen, ChevronRight
+} from "lucide-react";
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
+import { useFastingProgress } from "@/hooks/useLocalStorage";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
+const DashboardProgress = () => {
+  const [progress] = useFastingProgress();
+  
+  // Calculate stats
+  const totalDays = 30;
+  const completedDays = progress.completedDays.length;
+  const completionRate = Math.round((completedDays / totalDays) * 100);
+  
+  // Calculate streak
+  const calculateStreak = () => {
+    const today = new Date();
+    const sortedDays = [...progress.completedDays].sort().reverse();
+    
+    let streak = 0;
+    let currentDate = new Date();
+    
+    for (const day of sortedDays) {
+      const dayStr = currentDate.toISOString().split('T')[0];
+      if (day === dayStr) {
+        streak++;
+        currentDate.setDate(currentDate.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+    
+    return streak;
+  };
+  
+  const currentStreak = calculateStreak();
+  
+  // Achievement badges
+  const badges = [
+    { id: 'first-fast', name: 'First Fast', description: 'Complete your first fast', icon: '🌙', unlocked: completedDays >= 1 },
+    { id: 'week-one', name: 'Week One', description: 'Complete 7 days of fasting', icon: '⭐', unlocked: completedDays >= 7 },
+    { id: 'halfway', name: 'Halfway There', description: 'Complete 15 days of fasting', icon: '🏅', unlocked: completedDays >= 15 },
+    { id: 'streak-5', name: 'Consistent', description: '5-day fasting streak', icon: '🔥', unlocked: currentStreak >= 5 },
+    { id: 'streak-10', name: 'Dedicated', description: '10-day fasting streak', icon: '💪', unlocked: currentStreak >= 10 },
+    { id: 'full-month', name: 'Ramadan Champion', description: 'Complete all 30 days', icon: '🏆', unlocked: completedDays >= 30 },
+    { id: 'early-bird', name: 'Early Bird', description: 'Never missed Suhoor', icon: '🌅', unlocked: false },
+    { id: 'learner', name: 'Eager Learner', description: 'Read 10 educational articles', icon: '📚', unlocked: false },
+  ];
+  
+  const unlockedBadges = badges.filter(b => b.unlocked);
+  const lockedBadges = badges.filter(b => !b.unlocked);
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      
+      <main className="pt-20 pb-16">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <Link 
+            to="/dashboard" 
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Dashboard
+          </Link>
+          
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <h1 className="text-2xl md:text-3xl font-display font-bold">
+              Your Progress
+              <span className="block font-arabic text-lg text-secondary mt-1">تقدمك</span>
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Track your fasting journey and celebrate your achievements
+            </p>
+          </motion.div>
+          
+          {/* Stats overview */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+          >
+            <div className="p-4 rounded-2xl bg-secondary/10 border border-secondary/20 text-center">
+              <Calendar className="w-6 h-6 text-secondary mx-auto mb-2" />
+              <span className="text-3xl font-bold text-secondary">{completedDays}</span>
+              <span className="block text-sm text-muted-foreground">Days Completed</span>
+            </div>
+            <div className="p-4 rounded-2xl bg-card border border-border text-center">
+              <Flame className="w-6 h-6 text-orange-500 mx-auto mb-2" />
+              <span className="text-3xl font-bold">{currentStreak}</span>
+              <span className="block text-sm text-muted-foreground">Current Streak</span>
+            </div>
+            <div className="p-4 rounded-2xl bg-card border border-border text-center">
+              <TrendingUp className="w-6 h-6 text-green-500 mx-auto mb-2" />
+              <span className="text-3xl font-bold">{completionRate}%</span>
+              <span className="block text-sm text-muted-foreground">Completion Rate</span>
+            </div>
+            <div className="p-4 rounded-2xl bg-card border border-border text-center">
+              <Trophy className="w-6 h-6 text-amber-500 mx-auto mb-2" />
+              <span className="text-3xl font-bold">{unlockedBadges.length}</span>
+              <span className="block text-sm text-muted-foreground">Badges Earned</span>
+            </div>
+          </motion.div>
+          
+          {/* Progress bar */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="p-6 rounded-2xl bg-card border border-border mb-8"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <span className="font-medium">Ramadan Progress • تقدم رمضان</span>
+              <span className="text-secondary font-bold">{completedDays} / {totalDays} days</span>
+            </div>
+            <div className="h-6 bg-muted rounded-full overflow-hidden">
+              <motion.div 
+                className="h-full bg-gradient-gold rounded-full flex items-center justify-end pr-2"
+                initial={{ width: 0 }}
+                animate={{ width: `${completionRate}%` }}
+                transition={{ duration: 1, ease: "easeOut" }}
+              >
+                {completionRate > 10 && (
+                  <span className="text-xs font-bold text-foreground">{completionRate}%</span>
+                )}
+              </motion.div>
+            </div>
+          </motion.div>
+          
+          {/* Badges */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="space-y-6"
+          >
+            {/* Unlocked badges */}
+            {unlockedBadges.length > 0 && (
+              <div>
+                <h3 className="font-display font-bold mb-4 flex items-center gap-2">
+                  <Trophy className="w-5 h-5 text-secondary" />
+                  Earned Badges • الشارات المكتسبة
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {unlockedBadges.map((badge, index) => (
+                    <motion.div
+                      key={badge.id}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.4 + index * 0.1 }}
+                      className="p-4 rounded-2xl bg-gradient-to-br from-secondary/20 to-secondary/5 border border-secondary/30 text-center"
+                    >
+                      <span className="text-4xl block mb-2">{badge.icon}</span>
+                      <span className="font-bold text-sm block">{badge.name}</span>
+                      <span className="text-xs text-muted-foreground">{badge.description}</span>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            {/* Locked badges */}
+            <div>
+              <h3 className="font-display font-bold mb-4 flex items-center gap-2">
+                <span className="opacity-50">🔒</span>
+                Upcoming Badges • الشارات القادمة
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {lockedBadges.map((badge) => (
+                  <Tooltip key={badge.id}>
+                    <TooltipTrigger asChild>
+                      <div className="p-4 rounded-2xl bg-muted/50 border border-border text-center opacity-60">
+                        <span className="text-4xl block mb-2 grayscale">{badge.icon}</span>
+                        <span className="font-bold text-sm block">{badge.name}</span>
+                        <span className="text-xs text-muted-foreground">Locked</span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>{badge.description}</TooltipContent>
+                  </Tooltip>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+          
+          {/* View full calendar */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="mt-8"
+          >
+            <Link 
+              to="/dashboard/schedule"
+              className="flex items-center justify-between p-4 rounded-2xl bg-card border border-border hover:border-secondary/50 transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <Calendar className="w-6 h-6 text-secondary" />
+                <div>
+                  <span className="font-medium">View Full Calendar</span>
+                  <p className="text-sm text-muted-foreground">See your complete fasting schedule</p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            </Link>
+          </motion.div>
+        </div>
+      </main>
+      
+      <Footer />
+    </div>
+  );
+};
+
+export default DashboardProgress;
