@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Heart, Mail, ExternalLink } from "lucide-react";
+import { Heart, ExternalLink, Hammer } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 export const Footer = () => {
@@ -23,15 +23,6 @@ export const Footer = () => {
               A culturally immersive wellness app that introduces non-Muslims to the practice 
               of Ramadan fasting through a progressive, educational, and respectful approach.
             </p>
-            <div className="flex items-center gap-4">
-              <a 
-                href="mailto:hello@tryramadan.app" 
-                className="flex items-center gap-2 text-sm text-secondary hover:text-secondary/80 transition-colors"
-              >
-                <Mail className="w-4 h-4" />
-                hello@tryramadan.app
-              </a>
-            </div>
           </div>
 
           {/* Quick Links */}
@@ -86,13 +77,8 @@ export const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="#" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
-                  Privacy Policy
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
-                  Terms of Service
+                <a href="#about" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
+                  About Us
                 </a>
               </li>
             </ul>
@@ -107,9 +93,15 @@ export const Footer = () => {
             <p className="text-sm text-primary-foreground/60">
               © {currentYear} TryRamadan.app. All rights reserved.
             </p>
-            <p className="text-sm text-primary-foreground/60 flex items-center gap-1">
-              Made with <Heart className="w-4 h-4 text-secondary fill-secondary" /> for interfaith understanding
-            </p>
+            <a 
+              href="https://ummah.build" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-sm text-primary-foreground/60 flex items-center gap-1 hover:text-secondary transition-colors"
+            >
+              Built with <Heart className="w-4 h-4 text-secondary fill-secondary" /> by{" "}
+              <span className="text-secondary font-semibold">ummah.build</span>
+            </a>
           </div>
         </div>
       </div>

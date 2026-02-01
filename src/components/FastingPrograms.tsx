@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Clock, Check, Target } from "lucide-react";
+import { Clock, Check, Target, Star } from "lucide-react";
 import fastingData from "@/data/fasting-programs.json";
 
 interface FastingProgramsProps {
@@ -7,7 +7,7 @@ interface FastingProgramsProps {
   selectedProgram?: string;
 }
 
-export const FastingPrograms = ({ onSelectProgram, selectedProgram = "beginner" }: FastingProgramsProps) => {
+export const FastingPrograms = ({ onSelectProgram, selectedProgram = "traditional" }: FastingProgramsProps) => {
   const programs = fastingData.programs;
 
   return (
@@ -26,8 +26,19 @@ export const FastingPrograms = ({ onSelectProgram, selectedProgram = "beginner" 
                 ? "ring-2 ring-secondary shadow-gold" 
                 : "hover:shadow-elevated"
               }
+              ${program.recommended ? "border-2 border-secondary/50" : ""}
             `}
           >
+            {/* Recommended badge */}
+            {program.recommended && (
+              <div className="absolute top-0 left-0 right-0 bg-gradient-gold py-1 px-3 text-center">
+                <span className="text-xs font-bold text-foreground flex items-center justify-center gap-1">
+                  <Star className="w-3 h-3 fill-current" />
+                  Recommended • موصى به
+                </span>
+              </div>
+            )}
+
             {/* Selected indicator */}
             {selectedProgram === program.id && (
               <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-gradient-gold flex items-center justify-center">
@@ -35,37 +46,42 @@ export const FastingPrograms = ({ onSelectProgram, selectedProgram = "beginner" 
               </div>
             )}
 
-            {/* Duration badge */}
-            <div className="flex items-center gap-2 mb-3">
-              <Clock className="w-4 h-4 text-secondary" />
-              <span className="text-sm font-semibold text-secondary">{program.duration}</span>
-            </div>
+            <div className={program.recommended ? "pt-6" : ""}>
+              {/* Duration badge */}
+              <div className="flex items-center gap-2 mb-3">
+                <Clock className="w-4 h-4 text-secondary" />
+                <span className="text-sm font-semibold text-secondary">{program.duration}</span>
+              </div>
 
-            <h3 className="font-display text-xl font-bold mb-2">{program.name}</h3>
-            <p className="text-sm text-muted-foreground mb-4">{program.description}</p>
-
-            {/* Weekly schedule preview */}
-            <div className="space-y-2 mb-4">
-              {program.weeklySchedule.slice(0, 2).map((week, weekIndex) => (
-                <div key={weekIndex} className="flex items-center gap-2 text-xs">
-                  <Target className="w-3 h-3 text-muted-foreground" />
-                  <span className="text-muted-foreground">
-                    Week {week.week}: {typeof week.hours === 'number' ? `${week.hours}h` : week.hours}
-                  </span>
-                </div>
-              ))}
-              {program.weeklySchedule.length > 2 && (
-                <span className="text-xs text-muted-foreground">
-                  +{program.weeklySchedule.length - 2} more weeks
-                </span>
+              <h3 className="font-display text-xl font-bold mb-1">{program.name}</h3>
+              {program.nameAr && (
+                <p className="font-arabic text-secondary text-sm mb-2">{program.nameAr}</p>
               )}
-            </div>
+              <p className="text-sm text-muted-foreground mb-4">{program.description}</p>
 
-            {/* Tips preview */}
-            <div className="pt-3 border-t border-border">
-              <p className="text-xs text-muted-foreground italic">
-                💡 {program.tips[0]}
-              </p>
+              {/* Weekly schedule preview */}
+              <div className="space-y-2 mb-4">
+                {program.weeklySchedule.slice(0, 2).map((week, weekIndex) => (
+                  <div key={weekIndex} className="flex items-center gap-2 text-xs">
+                    <Target className="w-3 h-3 text-muted-foreground" />
+                    <span className="text-muted-foreground">
+                      Week {week.week}: {typeof week.hours === 'number' ? `${week.hours}h` : week.hours}
+                    </span>
+                  </div>
+                ))}
+                {program.weeklySchedule.length > 2 && (
+                  <span className="text-xs text-muted-foreground">
+                    +{program.weeklySchedule.length - 2} more weeks
+                  </span>
+                )}
+              </div>
+
+              {/* Tips preview */}
+              <div className="pt-3 border-t border-border">
+                <p className="text-xs text-muted-foreground italic">
+                  💡 {program.tips[0]}
+                </p>
+              </div>
             </div>
           </motion.div>
         ))}
