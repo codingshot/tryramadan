@@ -13,6 +13,10 @@ import DashboardLearn from "./pages/DashboardLearn";
 import DashboardProgress from "./pages/DashboardProgress";
 import LearnGlossary from "./pages/LearnGlossary";
 import LearnHadith from "./pages/LearnHadith";
+import HealthSafety from "./pages/HealthSafety";
+import FAQ from "./pages/FAQ";
+import Emergency from "./pages/Emergency";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +38,10 @@ const App = () => (
           <Route path="/dashboard/progress" element={<DashboardProgress />} />
           <Route path="/learn/glossary" element={<LearnGlossary />} />
           <Route path="/learn/hadith" element={<LearnHadith />} />
+          <Route path="/health-safety" element={<HealthSafety />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/emergency" element={<Emergency />} />
+          <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
