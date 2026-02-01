@@ -1,0 +1,106 @@
+{
+  "suhoor": [
+    {
+      "id": 1,
+      "name": "Middle Eastern Power Bowl",
+      "region": "Middle East",
+      "description": "Ful medames with eggs, tahini, fresh vegetables, and warm pita",
+      "ingredients": ["Fava beans", "Eggs", "Tahini", "Olive oil", "Tomatoes", "Cucumber", "Pita bread"],
+      "prepTime": "20 min",
+      "benefits": "High protein and fiber for sustained energy throughout the fast",
+      "tips": "Add a drizzle of olive oil for healthy fats"
+    },
+    {
+      "id": 2,
+      "name": "South Asian Paratha Breakfast",
+      "region": "South Asia",
+      "description": "Whole wheat paratha with egg curry and lassi",
+      "ingredients": ["Whole wheat flour", "Eggs", "Onions", "Spices", "Yogurt"],
+      "prepTime": "30 min",
+      "benefits": "Complex carbohydrates and protein keep you full longer",
+      "tips": "Yogurt-based lassi helps with hydration"
+    },
+    {
+      "id": 3,
+      "name": "Turkish Sahur Spread",
+      "region": "Turkey",
+      "description": "Cheese, olives, eggs, fresh bread, and Turkish tea",
+      "ingredients": ["Feta cheese", "Olives", "Eggs", "Fresh bread", "Tomatoes", "Honey"],
+      "prepTime": "15 min",
+      "benefits": "Balanced meal with proteins, healthy fats, and carbohydrates",
+      "tips": "Limit caffeine intake; opt for herbal tea if possible"
+    },
+    {
+      "id": 4,
+      "name": "Indonesian Bubur Ayam",
+      "region": "Southeast Asia",
+      "description": "Savory chicken rice porridge with toppings",
+      "ingredients": ["Rice", "Chicken", "Ginger", "Fried shallots", "Soy sauce", "Eggs"],
+      "prepTime": "45 min",
+      "benefits": "Easily digestible, warming, and hydrating",
+      "tips": "Prepare the night before for easy morning reheating"
+    },
+    {
+      "id": 5,
+      "name": "Overnight Oats with Dates",
+      "region": "Modern/Western",
+      "description": "Steel-cut oats soaked overnight with dates, nuts, and honey",
+      "ingredients": ["Oats", "Dates", "Almonds", "Milk", "Honey", "Cinnamon"],
+      "prepTime": "5 min (prep night before)",
+      "benefits": "Slow-release energy, easy to digest, no morning cooking needed",
+      "tips": "Add chia seeds for extra fiber and omega-3s"
+    }
+  ],
+  "iftar": [
+    {
+      "id": 1,
+      "name": "Traditional Date & Water Start",
+      "region": "Universal",
+      "description": "The Prophetic way to break fast - dates and water first",
+      "ingredients": ["Medjool dates", "Water", "Milk (optional)"],
+      "prepTime": "0 min",
+      "benefits": "Natural sugars provide quick energy; dates are easily digestible",
+      "tips": "Eat 1-3 dates and drink water, then pray Maghrib before the main meal"
+    },
+    {
+      "id": 2,
+      "name": "Moroccan Harira Soup",
+      "region": "Morocco",
+      "description": "Hearty tomato-based soup with lentils, chickpeas, and fresh herbs",
+      "ingredients": ["Tomatoes", "Lentils", "Chickpeas", "Celery", "Cilantro", "Ginger"],
+      "prepTime": "45 min",
+      "benefits": "Rehydrating, protein-rich, and gentle on the stomach after fasting",
+      "tips": "Serve with chebakia (honey cookies) for a traditional experience"
+    },
+    {
+      "id": 3,
+      "name": "Pakistani Fruit Chaat",
+      "region": "South Asia",
+      "description": "Refreshing mixed fruit salad with chaat masala and lime",
+      "ingredients": ["Seasonal fruits", "Chaat masala", "Lime juice", "Mint"],
+      "prepTime": "15 min",
+      "benefits": "Hydrating fruits with electrolytes and vitamins",
+      "tips": "Use a variety of colorful fruits for maximum nutrition"
+    },
+    {
+      "id": 4,
+      "name": "Egyptian Konafa",
+      "region": "Egypt",
+      "description": "Sweet cheese pastry with crispy kadaif and sugar syrup",
+      "ingredients": ["Kadaif pastry", "Akkawi cheese", "Butter", "Sugar syrup", "Rose water"],
+      "prepTime": "40 min",
+      "benefits": "Traditional celebration dessert (enjoy in moderation)",
+      "tips": "Balance sweet treats with protein-rich main dishes"
+    },
+    {
+      "id": 5,
+      "name": "Arabian Chicken Mandi",
+      "region": "Gulf States",
+      "description": "Aromatic spiced rice with tender chicken, cooked in traditional style",
+      "ingredients": ["Basmati rice", "Chicken", "Arabian spices", "Dried lime", "Onions"],
+      "prepTime": "90 min",
+      "benefits": "Complete meal with proteins and carbohydrates for recovery",
+      "tips": "Serve with raita and fresh salad for balance"
+    }
+  ]
+}

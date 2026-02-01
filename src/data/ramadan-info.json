@@ -1,0 +1,168 @@
+{
+  "glossary": [
+    {
+      "term": "Ramadan",
+      "arabic": "رمضان",
+      "transliteration": "Ramaḍān",
+      "definition": "The ninth month of the Islamic lunar calendar, during which Muslims observe fasting from dawn to sunset as one of the Five Pillars of Islam.",
+      "category": "core"
+    },
+    {
+      "term": "Suhoor",
+      "arabic": "سحور",
+      "transliteration": "Suḥūr",
+      "definition": "The pre-dawn meal eaten before beginning the daily fast. It's recommended to eat suhoor as close to dawn as possible for maximum energy during fasting hours.",
+      "category": "meals"
+    },
+    {
+      "term": "Iftar",
+      "arabic": "إفطار",
+      "transliteration": "Ifṭār",
+      "definition": "The evening meal that breaks the daily fast at sunset. Traditionally begins with dates and water, following the Prophet's practice.",
+      "category": "meals"
+    },
+    {
+      "term": "Fajr",
+      "arabic": "فجر",
+      "transliteration": "Fajr",
+      "definition": "The dawn prayer and also the time when fasting begins each day. The call to Fajr prayer signals the start of the fasting period.",
+      "category": "prayer"
+    },
+    {
+      "term": "Maghrib",
+      "arabic": "مغرب",
+      "transliteration": "Maghrib",
+      "definition": "The sunset prayer and the time when fasting ends each day. The call to Maghrib prayer signals it's time for iftar.",
+      "category": "prayer"
+    },
+    {
+      "term": "Taraweeh",
+      "arabic": "تراويح",
+      "transliteration": "Tarāwīḥ",
+      "definition": "Special evening prayers performed during Ramadan after the Isha (night) prayer. These prayers involve recitation of the Quran.",
+      "category": "prayer"
+    },
+    {
+      "term": "Zakat",
+      "arabic": "زكاة",
+      "transliteration": "Zakāt",
+      "definition": "Obligatory charitable giving, one of the Five Pillars of Islam. During Ramadan, many Muslims calculate and pay their annual zakat.",
+      "category": "charity"
+    },
+    {
+      "term": "Sadaqah",
+      "arabic": "صدقة",
+      "transliteration": "Ṣadaqah",
+      "definition": "Voluntary charitable giving beyond zakat. The rewards for sadaqah are believed to be multiplied during Ramadan.",
+      "category": "charity"
+    },
+    {
+      "term": "Sawm",
+      "arabic": "صوم",
+      "transliteration": "Ṣawm",
+      "definition": "The Arabic word for fasting. Sawm is one of the Five Pillars of Islam and involves abstaining from food, drink, and other physical needs from dawn to sunset.",
+      "category": "core"
+    },
+    {
+      "term": "Laylat al-Qadr",
+      "arabic": "ليلة القدر",
+      "transliteration": "Laylat al-Qadr",
+      "definition": "The Night of Power or Decree, believed to fall within the last ten nights of Ramadan. It commemorates the night the Quran was first revealed.",
+      "category": "spiritual"
+    },
+    {
+      "term": "Eid al-Fitr",
+      "arabic": "عيد الفطر",
+      "transliteration": "ʿĪd al-Fiṭr",
+      "definition": "The Festival of Breaking Fast, a three-day celebration marking the end of Ramadan. It begins with a special prayer and involves family gatherings, gift-giving, and festive meals.",
+      "category": "celebration"
+    },
+    {
+      "term": "Quran",
+      "arabic": "قرآن",
+      "transliteration": "Qurʾān",
+      "definition": "The holy book of Islam, believed to be the word of God revealed to Prophet Muhammad. Ramadan is the month when its revelation began.",
+      "category": "core"
+    },
+    {
+      "term": "Dua",
+      "arabic": "دعاء",
+      "transliteration": "Duʿāʾ",
+      "definition": "Personal supplication or prayer to God. The moment just before breaking fast is considered an especially blessed time for dua.",
+      "category": "prayer"
+    },
+    {
+      "term": "Niyyah",
+      "arabic": "نية",
+      "transliteration": "Niyyah",
+      "definition": "Intention. Making the intention to fast is an essential part of the fasting practice, typically made before Fajr.",
+      "category": "core"
+    },
+    {
+      "term": "Fitrah",
+      "arabic": "فطرة",
+      "transliteration": "Fiṭrah",
+      "definition": "A charitable donation given before Eid prayer, typically the value of one meal per family member, to ensure everyone can celebrate Eid.",
+      "category": "charity"
+    }
+  ],
+  "fastingRules": [
+    {
+      "title": "What Invalidates the Fast",
+      "rules": [
+        "Eating or drinking intentionally",
+        "Smoking or inhaling substances intentionally",
+        "Intentional vomiting"
+      ]
+    },
+    {
+      "title": "What Does NOT Invalidate the Fast",
+      "rules": [
+        "Eating or drinking by accident (forgetting you're fasting)",
+        "Tasting food without swallowing",
+        "Brushing teeth (being careful not to swallow)",
+        "Taking a shower or swimming",
+        "Receiving injections or blood tests (for medical purposes)"
+      ]
+    },
+    {
+      "title": "Who is Exempt from Fasting",
+      "rules": [
+        "Children who haven't reached puberty",
+        "Elderly who cannot safely fast",
+        "Those who are ill or have medical conditions",
+        "Pregnant or breastfeeding women",
+        "Travelers on long journeys",
+        "Women during menstruation"
+      ],
+      "note": "Those who are temporarily exempt should make up missed fasts later. Those permanently exempt may pay fidya (feeding a poor person for each day missed)."
+    }
+  ],
+  "healthBenefits": [
+    {
+      "title": "Metabolic Health",
+      "description": "Intermittent fasting can improve insulin sensitivity, blood pressure, and reduce oxidative stress markers.",
+      "source": "Cell Metabolism, 2019"
+    },
+    {
+      "title": "Weight Management",
+      "description": "Studies show intermittent fasting can lead to 3-8% body weight reduction over 3-24 weeks.",
+      "source": "Annual Review of Nutrition"
+    },
+    {
+      "title": "Cardiovascular Benefits",
+      "description": "Research shows fasting can improve cardiovascular risk factors including blood pressure and cholesterol levels.",
+      "source": "New England Journal of Medicine, 2019"
+    },
+    {
+      "title": "Cellular Health",
+      "description": "Fasting triggers autophagy (cellular cleaning processes) which may have anti-aging effects.",
+      "source": "Science Journal"
+    },
+    {
+      "title": "Brain Health",
+      "description": "Intermittent fasting may support cognitive function and potentially reduce risk of neurodegenerative diseases.",
+      "source": "Nature Reviews Neuroscience"
+    }
+  ]
+}
