@@ -1,0 +1,283 @@
+{
+  "regions": [
+    {
+      "id": "middle-east",
+      "name": "Middle East & North Africa",
+      "countries": [
+        {
+          "id": "saudi-arabia",
+          "name": "Saudi Arabia & Gulf States",
+          "flag": "🇸🇦",
+          "traditions": [
+            {
+              "name": "Iftar Cannon",
+              "arabicName": "مدفع الإفطار",
+              "transliteration": "Midfa al-Iftar",
+              "description": "Traditional cannon fire signals time to break fast in many cities"
+            },
+            {
+              "name": "Ghabga",
+              "arabicName": "غبقة",
+              "transliteration": "Ghabga",
+              "description": "Late-night social gatherings and feasts after Taraweeh prayers"
+            },
+            {
+              "name": "Ramadan Tents",
+              "arabicName": "خيمة رمضان",
+              "transliteration": "Khaymat Ramadan",
+              "description": "Elaborate outdoor tents set up for communal iftars and charity meals"
+            }
+          ],
+          "foods": ["Dates", "Sambusas", "Harees", "Kabsa", "Luqaimat"],
+          "specialNote": "Night markets (souqs) stay open late into the night during Ramadan"
+        },
+        {
+          "id": "egypt",
+          "name": "Egypt",
+          "flag": "🇪🇬",
+          "traditions": [
+            {
+              "name": "Fanous",
+              "arabicName": "فانوس",
+              "transliteration": "Fanous",
+              "description": "Colorful decorative lanterns hung in homes and streets"
+            },
+            {
+              "name": "Mesaharati",
+              "arabicName": "المسحراتي",
+              "transliteration": "Al-Mesaharati",
+              "description": "Traditional drum beater who wakes people for Suhoor by walking through neighborhoods"
+            },
+            {
+              "name": "Ramadan TV Series",
+              "arabicName": "مسلسلات",
+              "transliteration": "Mosalsalat",
+              "description": "Special television dramas produced exclusively for Ramadan"
+            },
+            {
+              "name": "Charity Tables",
+              "arabicName": "مائدة الرحمن",
+              "transliteration": "Ma'edet al-Rahman",
+              "description": "Free iftar tables set up in streets for the needy"
+            }
+          ],
+          "foods": ["Konafa", "Qatayef", "Ful Medames", "Koshary"],
+          "specialNote": "Egypt is famous for its elaborate Ramadan lanterns that light up streets and homes"
+        },
+        {
+          "id": "morocco",
+          "name": "Morocco",
+          "flag": "🇲🇦",
+          "traditions": [
+            {
+              "name": "Harira Tradition",
+              "arabicName": "حريرة",
+              "transliteration": "Harira",
+              "description": "Breaking fast with harira soup, dates, and chebakia (sesame cookies)"
+            },
+            {
+              "name": "Neffar",
+              "arabicName": "النفار",
+              "transliteration": "Neffar",
+              "description": "Similar to mesaharati, calls people to suhoor with horn or flute"
+            }
+          ],
+          "foods": ["Harira Soup", "Chebakia", "Sellou", "Briouats"],
+          "specialNote": "Hand of Fatima decorations are traditionally displayed during Ramadan"
+        },
+        {
+          "id": "turkey",
+          "name": "Turkey",
+          "flag": "🇹🇷",
+          "traditions": [
+            {
+              "name": "Mahya",
+              "arabicName": "محيا",
+              "transliteration": "Mahya",
+              "description": "Lights strung between minarets forming messages and designs"
+            },
+            {
+              "name": "Drummers",
+              "arabicName": "دافولجو",
+              "transliteration": "Davulcu",
+              "description": "Traditional drummers walk neighborhoods for Suhoor wake-up calls"
+            }
+          ],
+          "foods": ["Pide Bread", "Güllaç", "İmam Bayıldı", "Künefe"],
+          "specialNote": "Special flatbread (Pide) is baked only during Ramadan"
+        }
+      ]
+    },
+    {
+      "id": "south-asia",
+      "name": "South & Southeast Asia",
+      "countries": [
+        {
+          "id": "indonesia",
+          "name": "Indonesia & Malaysia",
+          "flag": "🇮🇩",
+          "traditions": [
+            {
+              "name": "Bedug Drums",
+              "arabicName": "بدوق",
+              "transliteration": "Bedug",
+              "description": "Large drums beaten at mosques to announce iftar and prayer times"
+            },
+            {
+              "name": "Ramadan Markets",
+              "arabicName": "باسار رمضان",
+              "transliteration": "Pasar Ramadan",
+              "description": "Night bazaars selling traditional foods and drinks"
+            },
+            {
+              "name": "Mudik Tradition",
+              "arabicName": "موديك",
+              "transliteration": "Mudik",
+              "description": "Mass exodus to hometowns to spend Ramadan with family"
+            }
+          ],
+          "foods": ["Kolak", "Rendang", "Ketupat", "Bubur Lambuk"],
+          "specialNote": "Takjil - small snacks and drinks given out for free at iftar time"
+        },
+        {
+          "id": "pakistan",
+          "name": "Pakistan & India",
+          "flag": "🇵🇰",
+          "traditions": [
+            {
+              "name": "Rooh Afza",
+              "arabicName": "روح افزا",
+              "transliteration": "Rooh Afza",
+              "description": "Traditional rose syrup drink consumed widely during iftar"
+            },
+            {
+              "name": "Shab-e-Qadr",
+              "arabicName": "شب قدر",
+              "transliteration": "Shab-e-Qadr",
+              "description": "Special night vigils in last ten days with Quran recitation"
+            },
+            {
+              "name": "Chaand Raat",
+              "arabicName": "چاند رات",
+              "transliteration": "Chaand Raat",
+              "description": "Night before Eid with shopping, henna, and celebrations"
+            }
+          ],
+          "foods": ["Biryani", "Haleem", "Fruit Chaat", "Jalebi", "Kheer", "Samosas", "Pakoras"],
+          "specialNote": "Dastarkhwan - large communal cloth spread on floor for iftar gatherings"
+        },
+        {
+          "id": "bangladesh",
+          "name": "Bangladesh",
+          "flag": "🇧🇩",
+          "traditions": [
+            {
+              "name": "Taraweeh at Baitul Mukarram",
+              "arabicName": "تراويح",
+              "transliteration": "Taraweeh",
+              "description": "Massive congregational prayers at national mosque"
+            }
+          ],
+          "foods": ["Jilapi", "Muri", "Halim", "Piaju"],
+          "specialNote": "Historic communal iftar traditions in Chawk Bazaar area of Old Dhaka"
+        }
+      ]
+    },
+    {
+      "id": "africa",
+      "name": "Africa",
+      "countries": [
+        {
+          "id": "nigeria",
+          "name": "Nigeria",
+          "flag": "🇳🇬",
+          "traditions": [
+            {
+              "name": "Bukateria Culture",
+              "arabicName": "",
+              "transliteration": "Bukateria",
+              "description": "Small food stalls that become especially active during Ramadan"
+            },
+            {
+              "name": "Tafsir Programs",
+              "arabicName": "تفسير",
+              "transliteration": "Tafsir",
+              "description": "Popular Quran commentary sessions held in communities"
+            }
+          ],
+          "foods": ["Kosai", "Masa", "Fura da Nono"],
+          "specialNote": "Community gatherings feature traditional bean cakes and rice cakes"
+        },
+        {
+          "id": "senegal",
+          "name": "Senegal & West Africa",
+          "flag": "🇸🇳",
+          "traditions": [
+            {
+              "name": "Ndogou",
+              "arabicName": "",
+              "transliteration": "Ndogou",
+              "description": "The moment of breaking fast, often shared communally from large bowls"
+            }
+          ],
+          "foods": ["Thieboudienne", "Café Touba"],
+          "specialNote": "Korité preparations build up to elaborate Eid celebrations"
+        }
+      ]
+    },
+    {
+      "id": "central-asia",
+      "name": "Central Asia",
+      "countries": [
+        {
+          "id": "uzbekistan",
+          "name": "Uzbekistan & Central Asian Republics",
+          "flag": "🇺🇿",
+          "traditions": [
+            {
+              "name": "Pilaf Traditions",
+              "arabicName": "پلو",
+              "transliteration": "Plov",
+              "description": "Large communal rice dishes prepared for iftar"
+            }
+          ],
+          "foods": ["Plov", "Somsa", "Shashlik"],
+          "specialNote": "Unique post-Soviet Muslim identity expressions during Ramadan"
+        }
+      ]
+    },
+    {
+      "id": "western",
+      "name": "Europe & Americas",
+      "countries": [
+        {
+          "id": "western-communities",
+          "name": "Western Muslim Communities",
+          "flag": "🌍",
+          "traditions": [
+            {
+              "name": "Interfaith Iftars",
+              "arabicName": "",
+              "transliteration": "",
+              "description": "Community dinners inviting non-Muslim neighbors to learn about Ramadan"
+            },
+            {
+              "name": "Convert Support Iftars",
+              "arabicName": "",
+              "transliteration": "",
+              "description": "Special gatherings to support new Muslims through their first Ramadan"
+            },
+            {
+              "name": "Multi-ethnic Fusion Iftars",
+              "arabicName": "",
+              "transliteration": "",
+              "description": "Combining traditions from diverse Muslim immigrant communities"
+            }
+          ],
+          "foods": ["Fusion dishes from various cultures"],
+          "specialNote": "Online communities provide digital connections for isolated Muslims"
+        }
+      ]
+    }
+  ]
+}
