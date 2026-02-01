@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { 
   Moon, Sun, Clock, Calendar, MapPin, Settings, 
   TrendingUp, Check, Bell, ChevronRight, Flame,
-  Utensils, Coffee, Droplets
+  Utensils, Coffee, Droplets, BookOpen, Target
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { FastingTimer } from "@/components/FastingTimer";

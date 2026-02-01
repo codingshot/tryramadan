@@ -1,0 +1,144 @@
+{
+  "glossary": [
+    {
+      "term": "Sawm",
+      "arabic": "صوم",
+      "pronunciation": "sow-m",
+      "definition": "Fasting, specifically the obligatory fast during Ramadan. One of the Five Pillars of Islam.",
+      "category": "Fasting"
+    },
+    {
+      "term": "Suhoor",
+      "arabic": "سحور",
+      "pronunciation": "su-hoor",
+      "definition": "The pre-dawn meal eaten before beginning the daily fast. It's a blessed meal and highly recommended.",
+      "category": "Fasting"
+    },
+    {
+      "term": "Iftar",
+      "arabic": "إفطار",
+      "pronunciation": "if-taar",
+      "definition": "The meal eaten to break the fast at sunset. Traditionally starts with dates and water.",
+      "category": "Fasting"
+    },
+    {
+      "term": "Ramadan",
+      "arabic": "رمضان",
+      "pronunciation": "ra-ma-daan",
+      "definition": "The ninth month of the Islamic lunar calendar. The month of obligatory fasting and spiritual reflection.",
+      "category": "Calendar"
+    },
+    {
+      "term": "Maghrib",
+      "arabic": "المغرب",
+      "pronunciation": "magh-rib",
+      "definition": "The sunset prayer, marking the end of the fasting period each day and time to break the fast.",
+      "category": "Prayer"
+    },
+    {
+      "term": "Fajr",
+      "arabic": "الفجر",
+      "pronunciation": "fa-jr",
+      "definition": "The dawn prayer, marking the beginning of the fasting period for the day.",
+      "category": "Prayer"
+    },
+    {
+      "term": "Taraweeh",
+      "arabic": "تراويح",
+      "pronunciation": "ta-ra-weeh",
+      "definition": "Special nightly prayers performed during Ramadan after Isha prayer. Usually involves reciting the entire Quran.",
+      "category": "Prayer"
+    },
+    {
+      "term": "Laylat al-Qadr",
+      "arabic": "ليلة القدر",
+      "pronunciation": "lay-lat al-qa-dr",
+      "definition": "The Night of Power/Decree. Falls in the last ten nights of Ramadan and is considered better than a thousand months.",
+      "category": "Ramadan"
+    },
+    {
+      "term": "Eid al-Fitr",
+      "arabic": "عيد الفطر",
+      "pronunciation": "eed al-fit-r",
+      "definition": "The Festival of Breaking the Fast, celebrated at the end of Ramadan. A day of joy, prayer, and community.",
+      "category": "Celebration"
+    },
+    {
+      "term": "Zakat",
+      "arabic": "زكاة",
+      "pronunciation": "za-kaat",
+      "definition": "Obligatory charity, one of the Five Pillars. Often given during Ramadan. Typically 2.5% of wealth.",
+      "category": "Charity"
+    },
+    {
+      "term": "Sadaqah",
+      "arabic": "صدقة",
+      "pronunciation": "sa-da-qa",
+      "definition": "Voluntary charity given for the pleasure of Allah. Can be given at any time in any amount.",
+      "category": "Charity"
+    },
+    {
+      "term": "Dua",
+      "arabic": "دعاء",
+      "pronunciation": "doo-aa",
+      "definition": "Supplication or prayer to Allah. A personal conversation with God, made at any time.",
+      "category": "Worship"
+    },
+    {
+      "term": "Quran",
+      "arabic": "القرآن",
+      "pronunciation": "qur-aan",
+      "definition": "The holy book of Islam, believed to be the word of Allah revealed to Prophet Muhammad (peace be upon him).",
+      "category": "Scripture"
+    },
+    {
+      "term": "Hadith",
+      "arabic": "حديث",
+      "pronunciation": "ha-deeth",
+      "definition": "Sayings and actions of Prophet Muhammad (peace be upon him), recorded as guidance for Muslims.",
+      "category": "Scripture"
+    },
+    {
+      "term": "Sunnah",
+      "arabic": "سنة",
+      "pronunciation": "sun-na",
+      "definition": "The practices and traditions of Prophet Muhammad (peace be upon him). Following Sunnah is highly encouraged.",
+      "category": "Practice"
+    },
+    {
+      "term": "Imsak",
+      "arabic": "إمساك",
+      "pronunciation": "im-saak",
+      "definition": "The time to stop eating before Fajr. Usually a few minutes before the Fajr prayer call.",
+      "category": "Fasting"
+    },
+    {
+      "term": "Niyyah",
+      "arabic": "نية",
+      "pronunciation": "nee-ya",
+      "definition": "Intention. The intention to fast must be made before dawn for the fast to be valid.",
+      "category": "Fasting"
+    },
+    {
+      "term": "Ayyam al-Beed",
+      "arabic": "أيام البيض",
+      "pronunciation": "ay-yaam al-beed",
+      "definition": "The White Days - the 13th, 14th, and 15th of each Islamic month. Voluntary fasting on these days is recommended.",
+      "category": "Sunnah"
+    },
+    {
+      "term": "Ihsan",
+      "arabic": "إحسان",
+      "pronunciation": "ih-saan",
+      "definition": "Excellence in worship, doing beautiful deeds. Worshipping Allah as though you see Him.",
+      "category": "Virtue"
+    },
+    {
+      "term": "Taqwa",
+      "arabic": "تقوى",
+      "pronunciation": "taq-wa",
+      "definition": "God-consciousness, piety, being mindful of Allah. Fasting helps develop taqwa.",
+      "category": "Virtue"
+    }
+  ]
+}
