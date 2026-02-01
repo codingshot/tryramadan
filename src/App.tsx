@@ -41,6 +41,7 @@ import Terms from "./pages/Terms";
 import Legal from "./pages/Legal";
 import Privacy from "./pages/Privacy";
 import NotFound from "./pages/NotFound";
+import { AdhanScheduler } from "./components/AdhanScheduler";
 
 const queryClient = new QueryClient();
 
@@ -76,6 +77,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <AdhanScheduler />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route

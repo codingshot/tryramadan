@@ -14,18 +14,40 @@ import { ProgressTracker } from "@/components/ProgressTracker";
 import { CTASection } from "@/components/CTASection";
 import { Footer } from "@/components/Footer";
 import { ArabicTerm } from "@/components/ArabicTerm";
+import { useFastingProgress } from "@/hooks/useLocalStorage";
+import { ChevronRight } from "lucide-react";
+
+const RAMADAN_START = new Date("2025-02-28");
+const RAMADAN_END = new Date("2025-03-29");
+const TOTAL_DAYS = 30;
+
+function getRamadanDayNumber(date: Date): number | null {
+  if (date < RAMADAN_START || date > RAMADAN_END) return null;
+  return Math.floor((date.getTime() - RAMADAN_START.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+}
 
 const Index = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [progress] = useFastingProgress();
+  const today = new Date();
+  const todayRamadanDay = getRamadanDayNumber(today);
+  const currentDay = todayRamadanDay ?? progress.currentDay ?? 1;
+  const completedDayNumbers = progress.completedDays
+    .map((d) => getRamadanDayNumber(new Date(d + "T12:00:00")))
+    .filter((n): n is number => n != null);
+  const hasRealProgress = completedDayNumbers.length > 0 || (todayRamadanDay != null && todayRamadanDay <= TOTAL_DAYS);
 
-  // Scroll to hash when landing on home with a hash (e.g. from footer "Features" link)
+  // Scroll to hash when landing on home with a hash (e.g. navbar/footer "Features" from another page)
   useEffect(() => {
     if (location.pathname !== "/" || !location.hash) return;
-    const id = location.hash.slice(1);
+    const id = location.hash.replace("#", "");
     const el = id ? document.getElementById(id) : null;
     if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      const raf = requestAnimationFrame(() => {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      return () => cancelAnimationFrame(raf);
     }
   }, [location.pathname, location.hash]);
 
@@ -54,11 +76,14 @@ const Index = () => {
             >
               Programs
             </Link>
-            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-              <Link to="/programs" className="hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-secondary rounded">
+            <Link
+              to="/programs"
+              className="block relative z-10 cursor-pointer py-2 -my-2 mb-4 mx-auto max-w-fit rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            >
+              <h2 className="text-3xl md:text-4xl font-display font-bold mb-0 hover:opacity-90 transition-opacity">
                 Choose Your <span className="text-gradient-gold">Fasting Path</span>
-              </Link>
-            </h2>
+              </h2>
+            </Link>
             <p className="text-muted-foreground">
               Whether you're new to fasting or ready for the full experience, 
               we have a program designed for your comfort level.
@@ -69,23 +94,42 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Progress Preview */}
+      {/* Progress Preview – real data when available, CTA to Dashboard */}
       <section className="py-16 bg-muted/30">
         <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="max-w-2xl mx-auto"
+          <Link
+            to={hasRealProgress ? "/dashboard/progress" : "/dashboard"}
+            className="block max-w-2xl mx-auto group"
           >
-            <div className="text-center mb-8">
-              <h3 className="text-2xl font-display font-bold mb-2">Track Your Journey</h3>
-              <p className="text-muted-foreground text-sm">
-                Celebrate each day as you progress through the blessed month
-              </p>
-            </div>
-            <ProgressTracker currentDay={5} totalDays={30} completedDays={[1, 2, 3, 4]} />
-          </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="p-6 md:p-8 rounded-2xl bg-card border border-border hover:border-secondary/50 transition-all shadow-sm hover:shadow-md"
+            >
+              <div className="text-center mb-6">
+                <h3 className="text-2xl font-display font-bold mb-2 group-hover:text-secondary transition-colors">
+                  Track Your Journey
+                </h3>
+                <p className="text-muted-foreground text-sm">
+                  {hasRealProgress
+                    ? "See your progress and log your fasts in the Dashboard"
+                    : "Celebrate each day as you progress through the blessed month"}
+                </p>
+              </div>
+              <ProgressTracker
+                currentDay={hasRealProgress ? currentDay : 5}
+                totalDays={TOTAL_DAYS}
+                completedDays={hasRealProgress ? completedDayNumbers : [1, 2, 3, 4]}
+              />
+              <div className="mt-6 flex items-center justify-center gap-2 text-secondary font-medium text-sm">
+                <span>
+                  {hasRealProgress ? "View your progress" : "Go to Dashboard"}
+                </span>
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+            </motion.div>
+          </Link>
         </div>
       </section>
 

@@ -15,6 +15,9 @@ import {
   Flame,
   CalendarDays,
   X,
+  Clock,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -24,11 +27,72 @@ import {
   useDailyGoals,
   useDayMealPlans,
   useDayNutrition,
+  useDayFoodLog,
+  getDayTotalsFromFoodLog,
+  getFastingLogForDate,
+  hoursBetween,
+  type FoodLogEntry,
 } from "@/hooks/useLocalStorage";
+import { getRecipes, getRecipe, parseNutrient, type MealType } from "@/lib/cultureRecipes";
+import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const allRecipesForPicker = getRecipes();
+
+function FoodLogRow({
+  entry,
+  onPortionsChange,
+  onRemove,
+}: {
+  entry: FoodLogEntry;
+  onPortionsChange: (portions: number) => void;
+  onRemove: () => void;
+}) {
+  const totalCal = Math.round((entry.caloriesPerPortion || 0) * entry.portions);
+  const totalP = entry.proteinPerPortion != null ? Math.round(entry.proteinPerPortion * entry.portions) : null;
+  const totalC = entry.carbsPerPortion != null ? Math.round(entry.carbsPerPortion * entry.portions) : null;
+  const totalF = entry.fatPerPortion != null ? Math.round(entry.fatPerPortion * entry.portions) : null;
+  return (
+    <li className="flex flex-wrap items-center gap-2 text-sm py-1 border-b border-border/50 last:border-0">
+      <span className="font-medium min-w-0 truncate">{entry.name}</span>
+      <span className="text-muted-foreground shrink-0">
+        <input
+          type="number"
+          step="0.5"
+          min="0.1"
+          className="w-12 py-0.5 px-1 rounded border border-border bg-background text-center text-xs"
+          value={entry.portions}
+          onChange={(e) => onPortionsChange(parseFloat(e.target.value) || 1)}
+        />
+        {" "}× {entry.caloriesPerPortion} cal
+      </span>
+      <span className="shrink-0 font-medium">= {totalCal} cal</span>
+      {(totalP != null || totalC != null || totalF != null) && (
+        <span className="text-xs text-muted-foreground">
+          P{totalP ?? "—"} C{totalC ?? "—"} F{totalF ?? "—"}
+        </span>
+      )}
+      {entry.recipeId && (
+        <Link to={`/recipe/${entry.mealType}/${entry.recipeId.split("-")[1]}`} className="text-xs text-secondary hover:underline shrink-0">
+          View recipe
+        </Link>
+      )}
+      <button type="button" onClick={onRemove} className="p-1 rounded hover:bg-destructive/20 text-muted-foreground hover:text-destructive ml-auto" aria-label="Remove">
+        <Trash2 className="w-3.5 h-3.5" />
+      </button>
+    </li>
+  );
+}
 
 const DashboardSchedule = () => {
   const [progress, setProgress] = useFastingProgress();
@@ -39,11 +103,14 @@ const DashboardSchedule = () => {
   const [dailyGoals, setDailyGoals] = useDailyGoals();
   const [mealPlans, setMealPlans] = useDayMealPlans();
   const [nutrition, setNutrition] = useDayNutrition();
+  const [foodLogs, setFoodLogs] = useDayFoodLog();
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [noteInput, setNoteInput] = useState("");
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [showGoalsEditor, setShowGoalsEditor] = useState(false);
+  const [addFoodMeal, setAddFoodMeal] = useState<MealType | null>(null);
+  const [addFoodCustomInputs, setAddFoodCustomInputs] = useState({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "" });
 
   const RAMADAN_START = new Date("2025-02-28");
   const RAMADAN_END = new Date("2025-03-29");
@@ -122,14 +189,109 @@ const DashboardSchedule = () => {
   const firstDay = getFirstDayOfMonth(currentMonth);
   const monthName = currentMonth.toLocaleDateString("en", { month: "long", year: "numeric" });
   const completedCount = progress.completedDays.length;
+  const ramadanDaysInMonth = Array.from({ length: daysInMonth }, (_, i) => {
+    const d = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i + 1);
+    return isRamadanDay(d) ? 1 : 0;
+  }).reduce((a, b) => a + b, 0);
+  const sunnahDaysInMonth = Array.from({ length: daysInMonth }, (_, i) => {
+    const d = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i + 1);
+    return isSunnahDay(d) && !isRamadanDay(d) ? 1 : 0;
+  }).reduce((a, b) => a + b, 0);
+  const totalHoursFasted = (progress.fastingLog ?? []).reduce((sum, e) => sum + (e.hoursFasted ?? (e.startedAt && e.completedAt ? hoursBetween(e.startedAt, e.completedAt) : 0)), 0);
 
   const selectedDayMeals = selectedDate ? mealPlans[selectedDate] : undefined;
   const selectedDayNutrition = selectedDate ? nutrition[selectedDate] : undefined;
+  const selectedDayFoodLog = selectedDate ? foodLogs[selectedDate] : undefined;
+  const selectedDayTotalsFromFood = getDayTotalsFromFoodLog(selectedDayFoodLog);
+  const selectedFastingLog = selectedDate ? getFastingLogForDate(progress, selectedDate) : undefined;
   const selectedDateObj = selectedDate ? new Date(selectedDate + "T12:00:00") : null;
   const selectedIsRamadan = selectedDateObj ? isRamadanDay(selectedDateObj) : false;
   const selectedRamadanDay = selectedDateObj ? getRamadanDayNumber(selectedDateObj) : null;
   const selectedIsSunnah = selectedDateObj ? isSunnahDay(selectedDateObj) : false;
   const selectedCompleted = selectedDate ? progress.completedDays.includes(selectedDate) : false;
+
+  const addFoodFromRecipe = (mealType: MealType, recipeKey: string) => {
+    if (!selectedDate) return;
+    const [type, idStr] = recipeKey.split("-");
+    const meal = type as MealType;
+    const id = parseInt(idStr, 10);
+    const recipe = getRecipe(meal, id);
+    if (!recipe) return;
+    const cal = recipe.nutrition?.calories ?? 0;
+    const protein = parseNutrient(recipe.nutrition?.protein);
+    const carbs = parseNutrient(recipe.nutrition?.carbs);
+    const fat = parseNutrient(recipe.nutrition?.fat);
+    const entry: FoodLogEntry = {
+      id: `${Date.now()}-${recipeKey}`,
+      type: "recipe",
+      mealType,
+      name: recipe.name,
+      portions: 1,
+      caloriesPerPortion: cal,
+      proteinPerPortion: protein,
+      carbsPerPortion: carbs,
+      fatPerPortion: fat,
+      recipeId: recipeKey,
+    };
+    setFoodLogs((prev) => {
+      const day = prev[selectedDate] || { suhoor: [], iftar: [] };
+      const list = meal === "suhoor" ? [...day.suhoor, entry] : [...day.iftar, entry];
+      return {
+        ...prev,
+        [selectedDate]: { ...day, [meal]: list },
+      };
+    });
+    setAddFoodMeal(null);
+  };
+
+  const submitAddFoodCustom = (mealType: MealType) => {
+    if (!selectedDate) return;
+    const name = addFoodCustomInputs.name.trim();
+    const cal = parseInt(addFoodCustomInputs.cal, 10) || 0;
+    const portions = Math.max(0.1, parseFloat(addFoodCustomInputs.portions) || 1);
+    const protein = parseFloat(addFoodCustomInputs.protein) || 0;
+    const carbs = parseFloat(addFoodCustomInputs.carbs) || 0;
+    const fat = parseFloat(addFoodCustomInputs.fat) || 0;
+    if (!name && cal <= 0) return;
+    const entry: FoodLogEntry = {
+      id: `custom-${Date.now()}`,
+      type: "custom",
+      mealType,
+      name: name || "Custom",
+      portions,
+      caloriesPerPortion: cal,
+      proteinPerPortion: protein || undefined,
+      carbsPerPortion: carbs || undefined,
+      fatPerPortion: fat || undefined,
+    };
+    setFoodLogs((prev) => {
+      const day = prev[selectedDate] || { suhoor: [], iftar: [] };
+      const list = mealType === "suhoor" ? [...day.suhoor, entry] : [...day.iftar, entry];
+      return { ...prev, [selectedDate]: { ...day, [mealType]: list } };
+    });
+    setAddFoodCustomInputs({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "" });
+    setAddFoodMeal(null);
+  };
+
+  const removeFoodEntry = (mealType: MealType, id: string) => {
+    if (!selectedDate) return;
+    setFoodLogs((prev) => {
+      const day = prev[selectedDate] || { suhoor: [], iftar: [] };
+      const list = mealType === "suhoor" ? day.suhoor.filter((e) => e.id !== id) : day.iftar.filter((e) => e.id !== id);
+      return { ...prev, [selectedDate]: { ...day, [mealType]: list } };
+    });
+  };
+
+  const updateFoodPortions = (mealType: MealType, id: string, portions: number) => {
+    if (!selectedDate) return;
+    setFoodLogs((prev) => {
+      const day = prev[selectedDate] || { suhoor: [], iftar: [] };
+      const list = (mealType === "suhoor" ? day.suhoor : day.iftar).map((e) =>
+        e.id === id ? { ...e, portions: Math.max(0.1, portions) } : e
+      );
+      return { ...prev, [selectedDate]: { ...day, [mealType]: list } };
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -238,23 +400,43 @@ const DashboardSchedule = () => {
             </AnimatePresence>
           </motion.div>
 
-          {/* Stats */}
+          {/* Stats: Ramadan, Sunnah, completed, hours fasted */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             transition={{ delay: 0.1 }}
-            className="grid grid-cols-3 gap-4 mb-6"
+            className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"
           >
-            <div className="p-4 rounded-2xl bg-secondary/10 border border-secondary/20 text-center">
-              <span className="text-3xl font-bold text-secondary">{completedCount}</span>
-              <span className="block text-sm text-muted-foreground">Days Completed</span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="p-4 rounded-2xl bg-secondary/10 border border-secondary/20 text-center cursor-help">
+                  <span className="text-2xl md:text-3xl font-bold text-secondary">{ramadanDaysInMonth}</span>
+                  <span className="block text-xs text-muted-foreground">Ramadan this month</span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs">
+                <p className="font-medium">Ramadan days</p>
+                <p className="text-xs mt-1">Days of the blessed month in this calendar view. Fast from dawn (Fajr) to sunset (Maghrib).</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20 text-center cursor-help">
+                  <span className="text-2xl md:text-3xl font-bold">{sunnahDaysInMonth}</span>
+                  <span className="block text-xs text-muted-foreground">Sunnah (Mon/Thu)</span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs">
+                <p className="font-medium">Sunnah fasting days</p>
+                <p className="text-xs mt-1">Monday and Thursday are recommended for voluntary fasting outside Ramadan (Prophetic tradition).</p>
+              </TooltipContent>
+            </Tooltip>
+            <div className="p-4 rounded-2xl bg-card border border-border text-center">
+              <span className="text-2xl md:text-3xl font-bold text-secondary">{completedCount}</span>
+              <span className="block text-xs text-muted-foreground">Days completed</span>
             </div>
             <div className="p-4 rounded-2xl bg-card border border-border text-center">
-              <span className="text-3xl font-bold">30</span>
-              <span className="block text-sm text-muted-foreground">Total Days</span>
-            </div>
-            <div className="p-4 rounded-2xl bg-card border border-border text-center">
-              <span className="text-3xl font-bold">{30 - completedCount}</span>
-              <span className="block text-sm text-muted-foreground">Remaining</span>
+              <span className="text-2xl md:text-3xl font-bold">{totalHoursFasted > 0 ? totalHoursFasted.toFixed(1) : "—"}</span>
+              <span className="block text-xs text-muted-foreground">Total hours fasted</span>
             </div>
           </motion.div>
 
@@ -432,6 +614,31 @@ const DashboardSchedule = () => {
                       </div>
                     )}
 
+                    {/* Hours fasted (if logged) */}
+                    {(selectedFastingLog?.hoursFasted != null ||
+                      (selectedFastingLog?.startedAt && selectedFastingLog?.completedAt)) && (
+                      <div className="flex items-center gap-2 p-3 rounded-xl bg-secondary/10 border border-secondary/20">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Clock className="w-4 h-4 text-secondary shrink-0" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs">
+                            <p className="font-medium">{EATING_TIME_TOOLTIPS.suhoorEnds.title}</p>
+                            <p className="text-xs mt-1">{EATING_TIME_TOOLTIPS.suhoorEnds.body}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                        <span className="text-sm font-medium">
+                          Hours fasted: <strong>
+                            {selectedFastingLog.hoursFasted ??
+                              (selectedFastingLog.startedAt && selectedFastingLog.completedAt
+                                ? hoursBetween(selectedFastingLog.startedAt, selectedFastingLog.completedAt)
+                                : 0)}
+                            h
+                          </strong>
+                        </span>
+                      </div>
+                    )}
+
                     {/* Note */}
                     <div>
                       <Label className="flex items-center gap-2 text-sm font-medium mb-1">
@@ -454,17 +661,28 @@ const DashboardSchedule = () => {
                       />
                     </div>
 
-                    {/* Meal plan */}
+                    {/* Meal plan (short text) */}
                     <div>
                       <Label className="flex items-center gap-2 text-sm font-medium mb-2">
                         <Utensils className="w-4 h-4" />
-                        Meal plan
+                        Meal plan (notes)
                       </Label>
                       <div className="grid gap-2">
                         <div className="flex items-center gap-2">
-                          <Coffee className="w-4 h-4 text-muted-foreground" />
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="flex items-center gap-1 text-muted-foreground shrink-0">
+                                <Coffee className="w-4 h-4" />
+                                <span className="text-xs">Suhoor</span>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              <p className="font-medium">{EATING_TIME_TOOLTIPS.suhoor.title}</p>
+                              <p className="text-xs mt-1">{EATING_TIME_TOOLTIPS.suhoor.body}</p>
+                            </TooltipContent>
+                          </Tooltip>
                           <Input
-                            placeholder="Suhoor (e.g. Oats & dates or suhoor-1)"
+                            placeholder="e.g. Oats & dates"
                             value={selectedDayMeals?.suhoor ?? ""}
                             onChange={(e) =>
                               setMealPlans((prev) => ({
@@ -479,9 +697,20 @@ const DashboardSchedule = () => {
                           />
                         </div>
                         <div className="flex items-center gap-2">
-                          <Utensils className="w-4 h-4 text-muted-foreground" />
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="flex items-center gap-1 text-muted-foreground shrink-0">
+                                <Utensils className="w-4 h-4" />
+                                <span className="text-xs">Iftar</span>
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              <p className="font-medium">{EATING_TIME_TOOLTIPS.iftar.title}</p>
+                              <p className="text-xs mt-1">{EATING_TIME_TOOLTIPS.iftar.body}</p>
+                            </TooltipContent>
+                          </Tooltip>
                           <Input
-                            placeholder="Iftar (e.g. Harira & dates or iftar-2)"
+                            placeholder="e.g. Harira & dates"
                             value={selectedDayMeals?.iftar ?? ""}
                             onChange={(e) =>
                               setMealPlans((prev) => ({
@@ -496,9 +725,182 @@ const DashboardSchedule = () => {
                           />
                         </div>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Use recipe IDs like suhoor-1, iftar-2 to link to app recipes
+                    </div>
+
+                    {/* Food log: what you ate with portions & macros */}
+                    <div>
+                      <Label className="flex items-center gap-2 text-sm font-medium mb-2">
+                        <Flame className="w-4 h-4" />
+                        Food log (calories & macros)
+                      </Label>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        Add items from recipes or type custom. Set portions; macros are per portion.
                       </p>
+
+                      {/* Suhoor entries */}
+                      <div className="mb-3">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="text-xs font-medium text-muted-foreground flex items-center gap-1 mb-1">
+                              <Coffee className="w-3 h-3" /> Suhoor
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs">
+                            <p className="font-medium">{EATING_TIME_TOOLTIPS.suhoor.title}</p>
+                            <p className="text-xs mt-1">{EATING_TIME_TOOLTIPS.suhoor.body}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                        {(selectedDayFoodLog?.suhoor?.length ?? 0) === 0 ? (
+                          <p className="text-xs text-muted-foreground pl-4">No items logged</p>
+                        ) : (
+                          <ul className="space-y-1.5 pl-4">
+                            {(selectedDayFoodLog?.suhoor ?? []).map((e) => (
+                              <FoodLogRow
+                                key={e.id}
+                                entry={e}
+                                onPortionsChange={(p) => updateFoodPortions("suhoor", e.id, p)}
+                                onRemove={() => removeFoodEntry("suhoor", e.id)}
+                              />
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+
+                      {/* Iftar entries */}
+                      <div className="mb-3">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="text-xs font-medium text-muted-foreground flex items-center gap-1 mb-1">
+                              <Utensils className="w-3 h-3" /> Iftar
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs">
+                            <p className="font-medium">{EATING_TIME_TOOLTIPS.iftar.title}</p>
+                            <p className="text-xs mt-1">{EATING_TIME_TOOLTIPS.iftar.body}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                        {(selectedDayFoodLog?.iftar?.length ?? 0) === 0 ? (
+                          <p className="text-xs text-muted-foreground pl-4">No items logged</p>
+                        ) : (
+                          <ul className="space-y-1.5 pl-4">
+                            {(selectedDayFoodLog?.iftar ?? []).map((e) => (
+                              <FoodLogRow
+                                key={e.id}
+                                entry={e}
+                                onPortionsChange={(p) => updateFoodPortions("iftar", e.id, p)}
+                                onRemove={() => removeFoodEntry("iftar", e.id)}
+                              />
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+
+                      {/* Totals from food log */}
+                      {(selectedDayTotalsFromFood.calories != null && selectedDayTotalsFromFood.calories > 0) && (
+                        <div className="p-2 rounded-lg bg-muted/50 text-xs flex flex-wrap gap-3 mb-3">
+                          <span>Total from log: <strong>{Math.round(selectedDayTotalsFromFood.calories)} cal</strong></span>
+                          {selectedDayTotalsFromFood.protein != null && selectedDayTotalsFromFood.protein > 0 && (
+                            <span>P {Math.round(selectedDayTotalsFromFood.protein)}g</span>
+                          )}
+                          {selectedDayTotalsFromFood.carbs != null && selectedDayTotalsFromFood.carbs > 0 && (
+                            <span>C {Math.round(selectedDayTotalsFromFood.carbs)}g</span>
+                          )}
+                          {selectedDayTotalsFromFood.fat != null && selectedDayTotalsFromFood.fat > 0 && (
+                            <span>F {Math.round(selectedDayTotalsFromFood.fat)}g</span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Add food */}
+                      <div className="space-y-2">
+                        {addFoodMeal === null ? (
+                          <div className="flex gap-2">
+                            <Button type="button" variant="outline" size="sm" onClick={() => setAddFoodMeal("suhoor")} className="gap-1">
+                              <Plus className="w-3 h-3" /> Add Suhoor
+                            </Button>
+                            <Button type="button" variant="outline" size="sm" onClick={() => setAddFoodMeal("iftar")} className="gap-1">
+                              <Plus className="w-3 h-3" /> Add Iftar
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="p-3 rounded-xl border border-border bg-background space-y-3">
+                            <p className="text-xs font-medium">
+                              Add to {addFoodMeal === "suhoor" ? "Suhoor" : "Iftar"}
+                            </p>
+                            <div className="flex flex-wrap gap-2 items-end">
+                              <div className="min-w-[160px]">
+                                <Label className="text-xs">From recipe</Label>
+                                <Select
+                                  onValueChange={(v) => addFoodFromRecipe(addFoodMeal, v)}
+                                  value=""
+                                >
+                                  <SelectTrigger className="mt-0.5 h-9">
+                                    <SelectValue placeholder="Pick recipe..." />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {allRecipesForPicker
+                                      .filter((r) => r.mealType === addFoodMeal)
+                                      .map(({ recipe, mealType }) => (
+                                        <SelectItem key={`${mealType}-${recipe.id}`} value={`${mealType}-${recipe.id}`}>
+                                          {recipe.name} ({recipe.nutrition?.calories ?? "?"} cal)
+                                        </SelectItem>
+                                      ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <span className="text-xs text-muted-foreground">or custom:</span>
+                              <Input
+                                placeholder="Name"
+                                className="w-28 h-9"
+                                value={addFoodCustomInputs.name}
+                                onChange={(e) => setAddFoodCustomInputs((c) => ({ ...c, name: e.target.value }))}
+                              />
+                              <Input
+                                type="number"
+                                placeholder="Cal/portion"
+                                className="w-20 h-9"
+                                value={addFoodCustomInputs.cal}
+                                onChange={(e) => setAddFoodCustomInputs((c) => ({ ...c, cal: e.target.value }))}
+                              />
+                              <Input
+                                type="number"
+                                step="0.5"
+                                placeholder="Portions"
+                                className="w-16 h-9"
+                                value={addFoodCustomInputs.portions}
+                                onChange={(e) => setAddFoodCustomInputs((c) => ({ ...c, portions: e.target.value }))}
+                              />
+                              <Input
+                                type="number"
+                                placeholder="P"
+                                className="w-12 h-9"
+                                value={addFoodCustomInputs.protein}
+                                onChange={(e) => setAddFoodCustomInputs((c) => ({ ...c, protein: e.target.value }))}
+                              />
+                              <Input
+                                type="number"
+                                placeholder="C"
+                                className="w-12 h-9"
+                                value={addFoodCustomInputs.carbs}
+                                onChange={(e) => setAddFoodCustomInputs((c) => ({ ...c, carbs: e.target.value }))}
+                              />
+                              <Input
+                                type="number"
+                                placeholder="F"
+                                className="w-12 h-9"
+                                value={addFoodCustomInputs.fat}
+                                onChange={(e) => setAddFoodCustomInputs((c) => ({ ...c, fat: e.target.value }))}
+                              />
+                              <Button type="button" size="sm" onClick={() => submitAddFoodCustom(addFoodMeal)}>
+                                Add
+                              </Button>
+                              <Button type="button" variant="ghost" size="sm" onClick={() => { setAddFoodMeal(null); setAddFoodCustomInputs({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "" }); }}>
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     {/* Calories & macros */}
@@ -627,19 +1029,52 @@ const DashboardSchedule = () => {
 
             {/* Legend */}
             <div className="flex flex-wrap gap-4 mt-6 pt-4 border-t border-border text-xs">
-              <span className="text-muted-foreground">Click any day to view history, meal plan & macros</span>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded bg-secondary" />
-                <span>Completed</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded bg-secondary/20" />
-                <span>Ramadan</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded bg-amber-500/30 border border-amber-500/40" />
-                <span>Laylat al-Qadr</span>
-              </div>
+              <span className="text-muted-foreground">Click any day to log food, hours fasted & macros</span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-2 cursor-help">
+                    <div className="w-4 h-4 rounded bg-secondary" />
+                    <span>Completed</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent><p>Day marked as fast completed</p></TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-2 cursor-help">
+                    <div className="w-4 h-4 rounded bg-secondary/20" />
+                    <span>Ramadan</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p className="font-medium">{EATING_TIME_TOOLTIPS.suhoorEnds.title}</p>
+                  <p className="text-xs mt-1">Days of the blessed month. Fast from Fajr (dawn) to Maghrib (sunset).</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-2 cursor-help">
+                    <div className="w-4 h-4 rounded bg-amber-500/30 border border-amber-500/40" />
+                    <span>Laylat al-Qadr</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p className="font-medium">Laylat al-Qadr</p>
+                  <p className="text-xs mt-1">Odd nights in the last ten days of Ramadan (21, 23, 25, 27, 29). Night of Power.</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-2 cursor-help">
+                    <div className="w-4 h-4 rounded bg-primary/10" />
+                    <span>Sunnah (Mon/Thu)</span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <p className="font-medium">Sunnah fasting</p>
+                  <p className="text-xs mt-1">Monday and Thursday: voluntary fasting days outside Ramadan.</p>
+                </TooltipContent>
+              </Tooltip>
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 rounded ring-2 ring-secondary" />
                 <span>Today</span>

@@ -2,16 +2,19 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { 
-  ArrowLeft, ChevronRight, Sun, Moon, Sunrise, Sunset, SunDim, Check, Bell
+  ArrowLeft, ChevronRight, Sun, Moon, Sunrise, Sunset, SunDim, Check, Bell, Volume2, Play
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { useUserPreferences, useLocalStorage, usePrayerNotificationPrefs } from "@/hooks/useLocalStorage";
+import { useUserPreferences, useLocalStorage, usePrayerNotificationPrefs, useAdhanSoundEnabled } from "@/hooks/useLocalStorage";
 import { usePrayerTimes } from "@/hooks/usePrayerTimes";
+import { useNotifications } from "@/hooks/useNotifications";
+import { playAdhan } from "@/lib/adhanAudio";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { PrayerLocationBadge } from "@/components/PrayerLocationBadge";
 
 const DashboardPrayers = () => {
@@ -19,6 +22,8 @@ const DashboardPrayers = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [prayerTracker, setPrayerTracker] = useLocalStorage<Record<string, Record<string, boolean>>>("tryramadan-prayer-tracker", {});
   const [prayerNotifications, setPrayerNotifications] = usePrayerNotificationPrefs();
+  const [adhanSoundEnabled, setAdhanSoundEnabled] = useAdhanSoundEnabled();
+  const { permission, requestPermission, supported } = useNotifications();
   const todayStr = currentTime.toISOString().split("T")[0];
   const todayPrayers = prayerTracker[todayStr] || {};
   const setTodayPrayer = (name: string, done: boolean) => {
@@ -233,6 +238,63 @@ const DashboardPrayers = () => {
             })}
           </motion.div>
           
+          {/* Adhan: enable notification + play sound + test */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="mt-6 p-4 rounded-2xl bg-card border border-border"
+          >
+            <h3 className="font-display font-bold flex items-center gap-2 mb-3">
+              <Volume2 className="w-4 h-4 text-secondary" />
+              Adhan at prayer times
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Get a browser notification at each prayer time (Fajr, Dhuhr, Asr, Maghrib, Isha). Use the toggles above per prayer. Optionally play adhan sound when the notification fires.
+            </p>
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="adhan-sound"
+                  checked={adhanSoundEnabled}
+                  onCheckedChange={setAdhanSoundEnabled}
+                />
+                <Label htmlFor="adhan-sound" className="text-sm cursor-pointer">
+                  Play adhan sound when notifying
+                </Label>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={async () => {
+                  if (!supported) return;
+                  let canNotify = permission === "granted";
+                  if (!canNotify) {
+                    canNotify = await requestPermission();
+                  }
+                  if (canNotify) {
+                    new Notification("Adhan • Test • أذان", {
+                      body: "This is a test. You will get adhan notifications at prayer times when enabled.",
+                      icon: "/favicon.png",
+                      tag: "adhan-test",
+                    });
+                  }
+                  if (adhanSoundEnabled) playAdhan();
+                }}
+              >
+                <Play className="w-4 h-4" />
+                Test adhan
+              </Button>
+            </div>
+            {supported && permission === "denied" && (
+              <p className="text-xs text-muted-foreground mt-3">
+                Notifications are blocked. Enable them in your browser or device settings for this site to get adhan alerts.
+              </p>
+            )}
+          </motion.div>
+
           {/* Notification note */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}

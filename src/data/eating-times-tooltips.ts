@@ -44,4 +44,16 @@ export const EATING_TIME_TOOLTIPS = {
     title: "Maghrib • المغرب",
     body: "Sunset prayer. Time to break your fast (iftar). Many break fast with dates and water, pray Maghrib, then have the main meal.",
   },
+  dhuhr: {
+    title: "Dhuhr • الظهر",
+    body: "Noon prayer (when the sun passes the meridian). One of the five daily prayers. Fasting continues until Maghrib.",
+  },
+  asr: {
+    title: "Asr • العصر",
+    body: "Afternoon prayer (mid-afternoon). One of the five daily prayers. The fast continues until sunset (Maghrib).",
+  },
+  isha: {
+    title: "Isha • العشاء",
+    body: "Night prayer (after twilight). One of the five daily prayers. Often prayed after iftar and before the next suhoor.",
+  },
 } as const;

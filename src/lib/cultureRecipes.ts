@@ -136,3 +136,10 @@ export function getCountryForRecipe(recipe: Recipe): Country | undefined {
   if (!recipe.countryId) return undefined;
   return getCountryById(recipe.countryId);
 }
+
+/** Parse nutrition string e.g. "22g" to number for macros */
+export function parseNutrient(s: string | undefined): number {
+  if (s == null || s === "") return 0;
+  const n = parseFloat(s.replace(/[^\d.]/g, ""));
+  return Number.isFinite(n) ? n : 0;
+}

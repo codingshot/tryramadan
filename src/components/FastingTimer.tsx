@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
 import { SunnahFastingBadge } from "./SunnahFastingBadge";
+import { RamadanStartInfoDialog } from "./RamadanStartInfoDialog";
 
 interface FastingTimerProps {
   suhoorTime?: string;
@@ -26,6 +27,8 @@ export const FastingTimer = ({
   const [timeRemaining, setTimeRemaining] = useState({ hours: 0, minutes: 0, seconds: 0 });
   const [daysUntilRamadan, setDaysUntilRamadan] = useState(0);
   const [isRamadan, setIsRamadan] = useState(false);
+  const [localTime, setLocalTime] = useState("");
+  const [ramadanInfoOpen, setRamadanInfoOpen] = useState(false);
   const [preferences] = useUserPreferences();
   const { location: autoLocation } = useAutoLocation();
   const displayLocation = preferences.location || (autoLocation ? autoLocation.displayName : null);
@@ -43,6 +46,21 @@ export const FastingTimer = ({
   
   // Get Sunnah fasting info
   const sunnahInfo = getSunnahFastingInfo();
+
+  useEffect(() => {
+    const formatLocalTime = () => {
+      setLocalTime(
+        new Date().toLocaleTimeString(undefined, {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+        })
+      );
+    };
+    formatLocalTime();
+    const t = setInterval(formatLocalTime, 1000);
+    return () => clearInterval(t);
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -108,19 +126,27 @@ export const FastingTimer = ({
           </div>
         )}
 
-        {/* Days until Ramadan Badge */}
+        {/* Days until Ramadan Badge (double-click for when Ramadan starts) */}
         {!isRamadan && daysUntilRamadan > 0 && (
-          <motion.div 
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-center gap-2 mb-4 px-4 py-2 rounded-full bg-secondary/20 mx-auto w-fit"
-          >
-            <Calendar className="w-4 h-4 text-secondary" />
-            <span className="text-secondary font-bold text-lg">{daysUntilRamadan}</span>
-            <span className="text-primary-foreground/80 text-sm">
-              days until Ramadan • أيام حتى رمضان
-            </span>
-          </motion.div>
+          <>
+            <motion.div
+              role="button"
+              tabIndex={0}
+              onDoubleClick={() => setRamadanInfoOpen(true)}
+              onKeyDown={(e) => e.key === "Enter" && setRamadanInfoOpen(true)}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center justify-center gap-2 mb-4 px-4 py-2 rounded-full bg-secondary/20 mx-auto w-fit cursor-pointer select-none hover:bg-secondary/25 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
+              title="Double-click for when Ramadan starts"
+            >
+              <Calendar className="w-4 h-4 text-secondary" />
+              <span className="text-secondary font-bold text-lg">{daysUntilRamadan}</span>
+              <span className="text-primary-foreground/80 text-sm">
+                days until Ramadan • أيام حتى رمضان
+              </span>
+            </motion.div>
+            <RamadanStartInfoDialog open={ramadanInfoOpen} onOpenChange={setRamadanInfoOpen} />
+          </>
         )}
         
         {isRamadan && (
@@ -146,27 +172,30 @@ export const FastingTimer = ({
           </div>
         )}
 
-        {/* Location indicator */}
-        {preferences.location && (
-          <div className="flex items-center justify-center gap-1 mb-3 text-primary-foreground/60">
-            <MapPin className="w-3 h-3" />
-            <span className="text-xs">{preferences.location.split(',')[0]}</span>
-            {loading && <Loader2 className="w-3 h-3 animate-spin ml-1" />}
+        {/* Location + local time (next to city) */}
+        {(locationShort || preferences.location) && (
+          <div className="flex items-center justify-center gap-1.5 mb-3 text-primary-foreground/60 flex-wrap">
+            <MapPin className="w-3 h-3 shrink-0" />
+            <span className="text-xs">{preferences.location ? preferences.location.split(",")[0] : locationShort?.split(",")[0]}</span>
+            {localTime && (
+              <span className="text-xs tabular-nums">· {localTime}</span>
+            )}
+            {loading && <Loader2 className="w-3 h-3 animate-spin shrink-0" />}
           </div>
         )}
 
-        {/* Status indicator */}
+        {/* Status indicator (Currently Fasting / Eating Window) */}
         <div className="flex items-center justify-center gap-2 mb-4">
           {isFasting ? (
             <>
-              <Sun className="w-5 h-5 text-secondary animate-pulse" />
+              <Sun className="w-5 h-5 text-secondary animate-pulse shrink-0" />
               <span className="text-primary-foreground/80 font-medium">
                 Currently Fasting • صائم حالياً
               </span>
             </>
           ) : (
             <>
-              <Moon className="w-5 h-5 text-secondary" />
+              <Moon className="w-5 h-5 text-secondary shrink-0" />
               <span className="text-primary-foreground/80 font-medium">
                 Eating Window • وقت الأكل
               </span>

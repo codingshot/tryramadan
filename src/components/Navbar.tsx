@@ -63,8 +63,12 @@ export const Navbar = () => {
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-6">
-              {navLinks.map((link) =>
-                isHome && link.href.startsWith("#") ? (
+              {navLinks.map((link) => {
+                const isHashLink = link.to.startsWith("/#");
+                const linkTo = !isHome && isHashLink
+                  ? { pathname: "/" as const, hash: link.to.slice(2) }
+                  : link.to;
+                return isHome && link.href.startsWith("#") ? (
                   <a
                     key={link.name}
                     href={link.href}
@@ -75,14 +79,14 @@ export const Navbar = () => {
                 ) : (
                   <Link
                     key={link.name}
-                    to={link.to}
-                    onClick={() => !link.to.startsWith("/#") && setIsOpen(false)}
+                    to={linkTo}
+                    onClick={() => setIsOpen(false)}
                     className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                   >
                     <ArabicHover arabic={link.nameAr}>{link.name}</ArabicHover>
                   </Link>
-                )
-              )}
+                );
+              })}
             </div>
 
             {/* Location, time, profile & CTA */}
@@ -138,8 +142,12 @@ export const Navbar = () => {
               className="lg:hidden py-4 border-t border-border"
             >
               <div className="flex flex-col gap-2">
-                {navLinks.map((link) =>
-                  isHome && link.href.startsWith("#") ? (
+                {navLinks.map((link) => {
+                  const isHashLink = link.to.startsWith("/#");
+                  const linkTo = !isHome && isHashLink
+                    ? { pathname: "/" as const, hash: link.to.slice(2) }
+                    : link.to;
+                  return isHome && link.href.startsWith("#") ? (
                     <a
                       key={link.name}
                       href={link.href}
@@ -153,7 +161,7 @@ export const Navbar = () => {
                   ) : (
                     <Link
                       key={link.name}
-                      to={link.to}
+                      to={linkTo}
                       onClick={() => setIsOpen(false)}
                       className="flex items-center justify-between py-3 px-2 rounded-lg hover:bg-muted transition-colors"
                     >
@@ -161,8 +169,8 @@ export const Navbar = () => {
                         <ArabicHover arabic={link.nameAr}>{link.name}</ArabicHover>
                       </span>
                     </Link>
-                  )
-                )}
+                  );
+                })}
                 <div className="mt-4 pt-4 border-t border-border flex flex-col gap-2">
                   <Link to="/settings" onClick={() => setIsOpen(false)} className="flex items-center gap-2 text-sm text-muted-foreground">
                     <MapPin className="w-4 h-4" />

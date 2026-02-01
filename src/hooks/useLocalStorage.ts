@@ -63,6 +63,8 @@ export interface FastingLogEntry {
   startedAt: string; // ISO datetime when user clicked "I'm fasting"
   completedAt?: string; // ISO datetime when user marked day complete
   status: 'in_progress' | 'completed' | 'broken';
+  /** Hours fasted (from startedAt to completedAt or now). Set when completed/broken. */
+  hoursFasted?: number;
 }
 
 // Fasting progress interface
@@ -142,6 +144,13 @@ export function startFastingToday(
   console.log(`${LOG_PREFIX} You are fasting. Started at ${now} (${today}).`);
 }
 
+/** Hours between two ISO datetime strings (for display). */
+export function hoursBetween(startIso: string, endIso: string): number {
+  const a = new Date(startIso).getTime();
+  const b = new Date(endIso).getTime();
+  return Math.round((b - a) / (1000 * 60 * 60) * 10) / 10;
+}
+
 /** Mark today's fast as completed: update log, add to completedDays, and console.log */
 export function completeFastingToday(
   progress: FastingProgress,
@@ -150,12 +159,14 @@ export function completeFastingToday(
   const today = new Date().toISOString().split('T')[0];
   const now = new Date().toISOString();
   const entry = progress.fastingLog?.find((e) => e.date === today);
+  const startedAt = entry?.startedAt || now;
+  const hoursFasted = hoursBetween(startedAt, now);
 
   const updatedLog = (progress.fastingLog || []).map((e) =>
-    e.date === today ? { ...e, completedAt: now, status: 'completed' as const } : e
+    e.date === today ? { ...e, completedAt: now, status: 'completed' as const, hoursFasted } : e
   );
   if (!updatedLog.some((e) => e.date === today)) {
-    updatedLog.push({ date: today, startedAt: entry?.startedAt || now, completedAt: now, status: 'completed' });
+    updatedLog.push({ date: today, startedAt, completedAt: now, status: 'completed', hoursFasted });
   }
 
   const alreadyCompleted = progress.completedDays.includes(today);
@@ -177,12 +188,15 @@ export function breakFastingToday(
 ): void {
   const today = new Date().toISOString().split('T')[0];
   const now = new Date().toISOString();
+  const entry = progress.fastingLog?.find((e) => e.date === today);
+  const startedAt = entry?.startedAt || now;
+  const hoursFasted = hoursBetween(startedAt, now);
 
   const updatedLog = (progress.fastingLog || []).map((e) =>
-    e.date === today ? { ...e, completedAt: now, status: 'broken' as const } : e
+    e.date === today ? { ...e, completedAt: now, status: 'broken' as const, hoursFasted } : e
   );
   if (!updatedLog.some((e) => e.date === today)) {
-    updatedLog.push({ date: today, startedAt: now, completedAt: now, status: 'broken' });
+    updatedLog.push({ date: today, startedAt, completedAt: now, status: 'broken', hoursFasted });
   }
 
   setProgress({
@@ -265,6 +279,16 @@ export const defaultPrayerNotificationPrefs: PrayerNotificationPrefs = {
 
 export function usePrayerNotificationPrefs() {
   return useLocalStorage<PrayerNotificationPrefs>('tryramadan-prayer-notifications', defaultPrayerNotificationPrefs);
+}
+
+// Adhan: play sound at prayer times when notification fires (default true)
+export function useAdhanSoundEnabled() {
+  return useLocalStorage<boolean>('tryramadan-adhan-sound-enabled', true);
+}
+
+// Which prayers we've already triggered adhan/notification for today (avoid duplicate)
+export function useAdhanNotifiedToday() {
+  return useLocalStorage<Record<string, string[]>>('tryramadan-adhan-notified', {});
 }
 
 // Today's Fast page: intention, hydration, energy entries (per day)
@@ -391,4 +415,55 @@ export interface DayNutrition {
 
 export function useDayNutrition() {
   return useLocalStorage<Record<string, DayNutrition>>('tryramadan-day-nutrition', {});
+}
+
+// --- Per-day food log: recipe or custom items with portions and macros ---
+
+export interface FoodLogEntry {
+  id: string;
+  type: 'recipe' | 'custom';
+  mealType: 'suhoor' | 'iftar';
+  /** Recipe key e.g. "suhoor-1", or custom name */
+  name: string;
+  portions: number;
+  /** Per portion (so total = portions * caloriesPerPortion) */
+  caloriesPerPortion: number;
+  proteinPerPortion?: number;
+  carbsPerPortion?: number;
+  fatPerPortion?: number;
+  /** For recipe: "suhoor-1" / "iftar-2" for link */
+  recipeId?: string;
+}
+
+export interface DayFoodLog {
+  suhoor: FoodLogEntry[];
+  iftar: FoodLogEntry[];
+}
+
+function defaultDayFoodLog(): DayFoodLog {
+  return { suhoor: [], iftar: [] };
+}
+
+export function useDayFoodLog() {
+  return useLocalStorage<Record<string, DayFoodLog>>('tryramadan-day-food-log', {});
+}
+
+/** Get total calories and macros for a day from food log */
+export function getDayTotalsFromFoodLog(dayLog: DayFoodLog | undefined): DayNutrition {
+  if (!dayLog) return {};
+  const entries = [...dayLog.suhoor, ...dayLog.iftar];
+  let calories = 0, protein = 0, carbs = 0, fat = 0;
+  for (const e of entries) {
+    const p = e.portions || 1;
+    calories += (e.caloriesPerPortion || 0) * p;
+    protein += (e.proteinPerPortion || 0) * p;
+    carbs += (e.carbsPerPortion || 0) * p;
+    fat += (e.fatPerPortion || 0) * p;
+  }
+  return { calories, protein, carbs, fat };
+}
+
+/** Get fasting log entry for a date (for hours fasted) */
+export function getFastingLogForDate(progress: FastingProgress, dateStr: string): FastingLogEntry | undefined {
+  return progress.fastingLog?.find((e) => e.date === dateStr);
 }

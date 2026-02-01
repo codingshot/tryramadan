@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { FastingTimer } from "./FastingTimer";
 import { ArabicHover } from "./ArabicHover";
+import { RamadanStartInfoDialog } from "./RamadanStartInfoDialog";
 import heroBg from "@/assets/hero-bg.jpg";
 import logo from "@/assets/logo.png";
 
@@ -16,6 +18,7 @@ const getDaysUntilRamadan = () => {
 
 export const HeroSection = () => {
   const daysUntil = getDaysUntilRamadan();
+  const [ramadanInfoOpen, setRamadanInfoOpen] = useState(false);
 
   return (
     <>
@@ -47,14 +50,21 @@ export const HeroSection = () => {
 
         <div className="relative z-10 container mx-auto px-4 py-24 md:py-32">
           <div className="max-w-5xl mx-auto">
-            {/* Days until Ramadan - prominent banner */}
+            {/* Days until Ramadan - prominent banner (double-click for info) */}
             {daysUntil > 0 && (
               <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="flex justify-center mb-8"
               >
-                <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-secondary/20 backdrop-blur-sm border border-secondary/30">
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onDoubleClick={() => setRamadanInfoOpen(true)}
+                  onKeyDown={(e) => e.key === "Enter" && setRamadanInfoOpen(true)}
+                  className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-secondary/20 backdrop-blur-sm border border-secondary/30 cursor-pointer select-none hover:bg-secondary/25 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
+                  title="Double-click for when Ramadan starts"
+                >
                   <span className="text-2xl md:text-3xl" aria-hidden>📅</span>
                   <div className="text-center">
                     <span className="text-3xl md:text-4xl font-bold text-secondary">{daysUntil}</span>
@@ -65,6 +75,7 @@ export const HeroSection = () => {
                 </div>
               </motion.div>
             )}
+            <RamadanStartInfoDialog open={ramadanInfoOpen} onOpenChange={setRamadanInfoOpen} />
 
             {/* Logo and badge */}
             <motion.div 
