@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Moon, Sun, Clock, Calendar } from "lucide-react";
+import { Moon, Sun, Clock, Calendar, MapPin, Loader2 } from "lucide-react";
+import { usePrayerTimes, getSunnahFastingInfo } from "@/hooks/usePrayerTimes";
+import { useUserPreferences } from "@/hooks/useLocalStorage";
+import { SunnahFastingBadge } from "./SunnahFastingBadge";
 
 interface FastingTimerProps {
   suhoorTime?: string;
@@ -12,13 +15,27 @@ interface FastingTimerProps {
 const RAMADAN_START_DATE = new Date('2025-02-28T00:00:00');
 
 export const FastingTimer = ({ 
-  suhoorTime = "05:23", 
-  iftarTime = "18:47",
+  suhoorTime: propSuhoorTime, 
+  iftarTime: propIftarTime,
   isFasting = true 
 }: FastingTimerProps) => {
   const [timeRemaining, setTimeRemaining] = useState({ hours: 0, minutes: 0, seconds: 0 });
   const [daysUntilRamadan, setDaysUntilRamadan] = useState(0);
   const [isRamadan, setIsRamadan] = useState(false);
+  const [preferences] = useUserPreferences();
+  
+  // Get prayer times from API if location is available
+  const { prayerTimes, hijriDate, loading, error } = usePrayerTimes(
+    preferences.locationCoords?.lat || null,
+    preferences.locationCoords?.lng || null
+  );
+  
+  // Use API times if available, otherwise use props or defaults
+  const suhoorTime = prayerTimes?.imsak || propSuhoorTime || "05:23";
+  const iftarTime = prayerTimes?.maghrib || propIftarTime || "18:47";
+  
+  // Get Sunnah fasting info
+  const sunnahInfo = getSunnahFastingInfo();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -26,7 +43,7 @@ export const FastingTimer = ({
       
       // Calculate days until Ramadan
       const ramadanEnd = new Date(RAMADAN_START_DATE);
-      ramadanEnd.setDate(ramadanEnd.getDate() + 30); // Ramadan is ~30 days
+      ramadanEnd.setDate(ramadanEnd.getDate() + 30);
       
       if (now >= RAMADAN_START_DATE && now <= ramadanEnd) {
         setIsRamadan(true);
@@ -37,7 +54,6 @@ export const FastingTimer = ({
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         setDaysUntilRamadan(diffDays);
       } else {
-        // After Ramadan 2025, calculate for 2026
         const nextRamadan = new Date('2026-02-17T00:00:00');
         const diffTime = nextRamadan.getTime() - now.getTime();
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -45,14 +61,12 @@ export const FastingTimer = ({
         setIsRamadan(false);
       }
       
-      // Parse target time (iftar if fasting, suhoor if not)
       const targetTimeStr = isFasting ? iftarTime : suhoorTime;
       const [targetHours, targetMinutes] = targetTimeStr.split(':').map(Number);
       
       const target = new Date();
       target.setHours(targetHours, targetMinutes, 0, 0);
       
-      // If target time has passed, set it for next day
       if (target <= now) {
         target.setDate(target.getDate() + 1);
       }
@@ -77,10 +91,16 @@ export const FastingTimer = ({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Background pattern */}
       <div className="absolute inset-0 pattern-islamic opacity-10" />
       
       <div className="relative z-10">
+        {/* Sunnah Fasting Badge */}
+        {sunnahInfo && (
+          <div className="mb-4">
+            <SunnahFastingBadge hijriDay={hijriDate ? parseInt(hijriDate.day) : undefined} />
+          </div>
+        )}
+
         {/* Days until Ramadan Badge */}
         {!isRamadan && daysUntilRamadan > 0 && (
           <motion.div 
@@ -107,6 +127,25 @@ export const FastingTimer = ({
               Ramadan Mubarak! • رمضان مبارك
             </span>
           </motion.div>
+        )}
+
+        {/* Hijri Date */}
+        {hijriDate && (
+          <div className="text-center mb-3">
+            <span className="text-sm text-primary-foreground/60">
+              {hijriDate.day} {hijriDate.month} {hijriDate.year} AH
+              <span className="font-arabic ml-2">{hijriDate.monthAr}</span>
+            </span>
+          </div>
+        )}
+
+        {/* Location indicator */}
+        {preferences.location && (
+          <div className="flex items-center justify-center gap-1 mb-3 text-primary-foreground/60">
+            <MapPin className="w-3 h-3" />
+            <span className="text-xs">{preferences.location.split(',')[0]}</span>
+            {loading && <Loader2 className="w-3 h-3 animate-spin ml-1" />}
+          </div>
         )}
 
         {/* Status indicator */}
@@ -183,7 +222,7 @@ export const FastingTimer = ({
           </span>
         </div>
 
-        {/* Prayer times info with Arabic */}
+        {/* Prayer times info */}
         <div className="mt-6 pt-4 border-t border-primary-foreground/10 grid grid-cols-2 gap-4 text-sm">
           <div className="text-center p-3 rounded-lg bg-primary-foreground/5">
             <span className="text-primary-foreground/50 block text-xs mb-1">Suhoor Ends • نهاية السحور</span>
@@ -196,6 +235,13 @@ export const FastingTimer = ({
             <span className="block text-xs text-primary-foreground/40 mt-1">Break Fast • الفطور</span>
           </div>
         </div>
+
+        {/* API status */}
+        {error && (
+          <p className="text-center text-xs text-primary-foreground/50 mt-3">
+            Using default times. Set your location for accurate prayer times.
+          </p>
+        )}
       </div>
     </motion.div>
   );
