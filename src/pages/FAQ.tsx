@@ -5,6 +5,7 @@ import { ArrowLeft, ChevronDown, Search, HelpCircle } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArabicHover } from "@/components/ArabicHover";
+import { PageSEO } from "@/components/PageSEO";
 
 const FAQ = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -113,10 +114,15 @@ const FAQ = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageSEO
+        title="FAQ | TryRamadan.app"
+        description="Frequently asked questions about Ramadan fasting, suhoor and iftar, health and safety, and how TryRamadan.app works for beginners and non-Muslims."
+        path="/faq"
+      />
       <Navbar />
       
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4 max-w-4xl">
+      <main className="main-content">
+        <div className="container mx-auto px-4 max-w-4xl min-w-0">
           <Link 
             to="/" 
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
@@ -183,7 +189,7 @@ const FAQ = () => {
                       >
                         <button
                           onClick={() => setOpenIndex(isOpen ? null : globalIndex)}
-                          className="w-full p-4 flex items-center justify-between text-left bg-card hover:bg-muted/50 transition-colors"
+                          className="w-full p-4 min-h-[44px] flex items-center justify-between text-left bg-card hover:bg-muted/50 transition-colors"
                         >
                           <div>
                             <span className="font-medium">
@@ -233,7 +239,7 @@ const FAQ = () => {
             </p>
             <a 
               href="mailto:support@tryramadan.app"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-secondary text-secondary-foreground font-medium"
+              className="inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-xl bg-secondary text-secondary-foreground font-medium min-h-[44px]"
             >
               Contact Support
             </a>

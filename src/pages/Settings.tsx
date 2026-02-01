@@ -19,6 +19,7 @@ import {
   defaultNotificationSettings
 } from "@/hooks/useLocalStorage";
 import { useNotifications } from "@/hooks/useNotifications";
+import { PageSEO } from "@/components/PageSEO";
 
 const Settings = () => {
   const [preferences, setPreferences] = useUserPreferences();
@@ -90,10 +91,15 @@ const Settings = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageSEO
+        title="Settings | TryRamadan.app"
+        description="TryRamadan.app settings: location for prayer times, notifications for suhoor and iftar, theme, and data export."
+        path="/settings"
+      />
       <Navbar />
       
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4 max-w-2xl">
+      <main className="main-content">
+        <div className="container mx-auto px-4 max-w-2xl min-w-0">
           <Link 
             to="/dashboard" 
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
@@ -183,25 +189,49 @@ const Settings = () => {
                 </div>
                 
                 <div className="space-y-3">
-                  <label className="flex items-center justify-between p-3 rounded-xl bg-muted/50">
+                  <label className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-muted/50">
                     <span className="text-sm">Suhoor reminder</span>
-                    <input 
-                      type="checkbox" 
-                      checked={notifSettings.suhoorEnabled}
-                      onChange={(e) => setNotifSettings({ ...notifSettings, suhoorEnabled: e.target.checked })}
-                      className="rounded"
-                    />
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min={5}
+                        max={120}
+                        value={notifSettings.suhoorMinutesBefore}
+                        onChange={(e) => setNotifSettings({ ...notifSettings, suhoorMinutesBefore: Math.max(5, Math.min(120, Number(e.target.value) || 30)) })}
+                        className="w-14 rounded border border-border bg-background px-2 py-1 text-sm tabular-nums"
+                      />
+                      <span className="text-xs text-muted-foreground">min before</span>
+                      <input
+                        type="checkbox"
+                        checked={notifSettings.suhoorEnabled}
+                        onChange={(e) => setNotifSettings({ ...notifSettings, suhoorEnabled: e.target.checked })}
+                        className="rounded"
+                      />
+                    </div>
                   </label>
+                  <p className="text-xs text-muted-foreground px-1">Notify before Imsak (suhoor ends). Uses today&apos;s prayer times.</p>
                   
-                  <label className="flex items-center justify-between p-3 rounded-xl bg-muted/50">
+                  <label className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-muted/50">
                     <span className="text-sm">Iftar reminder</span>
-                    <input 
-                      type="checkbox" 
-                      checked={notifSettings.iftarEnabled}
-                      onChange={(e) => setNotifSettings({ ...notifSettings, iftarEnabled: e.target.checked })}
-                      className="rounded"
-                    />
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min={5}
+                        max={120}
+                        value={notifSettings.iftarMinutesBefore}
+                        onChange={(e) => setNotifSettings({ ...notifSettings, iftarMinutesBefore: Math.max(5, Math.min(120, Number(e.target.value) || 15)) })}
+                        className="w-14 rounded border border-border bg-background px-2 py-1 text-sm tabular-nums"
+                      />
+                      <span className="text-xs text-muted-foreground">min before</span>
+                      <input
+                        type="checkbox"
+                        checked={notifSettings.iftarEnabled}
+                        onChange={(e) => setNotifSettings({ ...notifSettings, iftarEnabled: e.target.checked })}
+                        className="rounded"
+                      />
+                    </div>
                   </label>
+                  <p className="text-xs text-muted-foreground px-1">Notify before Maghrib (iftar). Plus one at iftar time. Uses today&apos;s prayer times.</p>
                 </div>
               </>
             ) : (

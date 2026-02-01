@@ -4,7 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X, MapPin, User } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { ArabicHover } from "./ArabicHover";
-import { useUserPreferences } from "@/hooks/useLocalStorage";
+import { useUserPreferences, useFastingProgress, isFastingToday } from "@/hooks/useLocalStorage";
 import { useAutoLocation } from "@/hooks/useLocation";
 
 export const Navbar = () => {
@@ -13,7 +13,10 @@ export const Navbar = () => {
   const location = useLocation();
   const isHome = location.pathname === "/";
   const [preferences] = useUserPreferences();
+  const [progress] = useFastingProgress();
   const { location: autoLocation } = useAutoLocation();
+  const fastingToday = isFastingToday(progress);
+  const daysFasting = progress.completedDays.length;
 
   const displayLocation = preferences.location || (autoLocation ? autoLocation.displayName : null);
   const locationShort = displayLocation ? displayLocation.split(",").slice(0, 2).join(",").trim() : "Set location";
@@ -47,19 +50,28 @@ export const Navbar = () => {
       <motion.nav 
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-b border-border"
+        className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-lg border-b border-border safe-area-top"
+        style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
       >
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16 md:h-20">
-            {/* Logo */}
-            <Link to="/" onClick={scrollToTop} className="flex items-center gap-2 md:gap-3">
-              <img src={logo} alt="TryRamadan" className="w-9 h-9 md:w-11 md:h-11" />
-              <ArabicHover arabic="تجربة رمضان" className="border-0">
-                <span className="font-display font-bold text-base md:text-lg leading-tight text-foreground">
-                  Try<span className="text-primary">Ramadan</span>
+        <div className="container mx-auto px-3 sm:px-4">
+          <div className="flex items-center justify-between h-14 sm:h-16 md:h-20 min-h-[44px]">
+            {/* Logo + fasting tag when fasting */}
+            <div className="flex items-center gap-2 min-w-0">
+              <Link to="/" onClick={scrollToTop} className="flex items-center gap-2 md:gap-3 shrink-0">
+                <img src={logo} alt="TryRamadan" className="w-9 h-9 md:w-11 md:h-11" />
+                <ArabicHover arabic="تجربة رمضان" className="border-0">
+                  <span className="font-display font-bold text-base md:text-lg leading-tight text-foreground">
+                    Try<span className="text-primary">Ramadan</span>
+                  </span>
+                </ArabicHover>
+              </Link>
+              {fastingToday && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-secondary/20 text-secondary text-xs font-medium shrink-0" title={`Fasting · ${daysFasting} days completed`}>
+                  <span className="sm:hidden">{daysFasting}d</span>
+                  <span className="hidden sm:inline">Fasting · {daysFasting} days</span>
                 </span>
-              </ArabicHover>
-            </Link>
+              )}
+            </div>
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-6">
@@ -123,14 +135,23 @@ export const Navbar = () => {
               )}
             </div>
 
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors"
-              aria-label="Toggle menu"
-            >
-              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+            {/* Mobile: hamburger then profile icon to the right */}
+            <div className="flex lg:hidden items-center gap-1">
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="p-3 rounded-lg hover:bg-muted transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                aria-label="Toggle menu"
+              >
+                {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+              <Link
+                to="/dashboard"
+                className="p-3 rounded-lg hover:bg-muted transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                aria-label="Go to dashboard"
+              >
+                <User className="w-5 h-5 text-muted-foreground hover:text-foreground" />
+              </Link>
+            </div>
           </div>
 
           {/* Mobile Navigation */}
@@ -141,7 +162,7 @@ export const Navbar = () => {
               exit={{ opacity: 0, height: 0 }}
               className="lg:hidden py-4 border-t border-border"
             >
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-0">
                 {navLinks.map((link) => {
                   const isHashLink = link.to.startsWith("/#");
                   const linkTo = !isHome && isHashLink
@@ -152,7 +173,7 @@ export const Navbar = () => {
                       key={link.name}
                       href={link.href}
                       onClick={() => setIsOpen(false)}
-                      className="flex items-center justify-between py-3 px-2 rounded-lg hover:bg-muted transition-colors"
+                      className="flex items-center justify-between py-3 px-4 rounded-lg hover:bg-muted transition-colors min-h-[44px]"
                     >
                       <span className="text-sm font-medium text-foreground">
                         <ArabicHover arabic={link.nameAr}>{link.name}</ArabicHover>
@@ -163,7 +184,7 @@ export const Navbar = () => {
                       key={link.name}
                       to={linkTo}
                       onClick={() => setIsOpen(false)}
-                      className="flex items-center justify-between py-3 px-2 rounded-lg hover:bg-muted transition-colors"
+                      className="flex items-center justify-between py-3 px-4 rounded-lg hover:bg-muted transition-colors min-h-[44px]"
                     >
                       <span className="text-sm font-medium text-foreground">
                         <ArabicHover arabic={link.nameAr}>{link.name}</ArabicHover>
@@ -172,15 +193,11 @@ export const Navbar = () => {
                   );
                 })}
                 <div className="mt-4 pt-4 border-t border-border flex flex-col gap-2">
-                  <Link to="/settings" onClick={() => setIsOpen(false)} className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Link to="/settings" onClick={() => setIsOpen(false)} className="flex items-center gap-2 text-sm text-muted-foreground min-h-[44px] items-center">
                     <MapPin className="w-4 h-4" />
                     <span className="truncate">{locationShort}</span>
                   </Link>
-                  <span className="text-sm text-muted-foreground tabular-nums">{localTime}</span>
-                  <Link to="/dashboard" onClick={() => setIsOpen(false)} className="flex items-center gap-2 text-sm font-medium">
-                    <User className="w-4 h-4" />
-                    Dashboard
-                  </Link>
+                  <span className="text-sm text-muted-foreground tabular-nums py-2">{localTime}</span>
                 </div>
                 {!preferences.onboardingComplete && (
                   <Link 

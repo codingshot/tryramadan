@@ -48,7 +48,7 @@ export const HeroSection = () => {
           🌙
         </motion.div>
 
-        <div className="relative z-10 container mx-auto px-4 py-24 md:py-32">
+        <div className="relative z-10 container mx-auto px-4 pb-20 sm:pb-24 md:pb-32 pt-[calc(4rem+env(safe-area-inset-top,0px))] md:pt-[calc(5rem+env(safe-area-inset-top,0px))]">
           <div className="max-w-5xl mx-auto">
             {/* Days until Ramadan - prominent banner (double-click for info) */}
             {daysUntil > 0 && (

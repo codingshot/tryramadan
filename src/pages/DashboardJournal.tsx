@@ -1,17 +1,29 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, BookOpen, PenLine, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  ArrowLeft,
+  BookOpen,
+  PenLine,
+  ChevronDown,
+  ChevronUp,
+  Download,
+  Calendar as CalendarIcon,
+  Smile,
+} from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArabicHover } from "@/components/ArabicHover";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { Calendar } from "@/components/ui/calendar";
+import { PageSEO } from "@/components/PageSEO";
 
-interface JournalEntry {
+export interface JournalEntry {
   date: string;
   prompt: string;
   content: string;
   gratitude?: string;
+  mood?: number; // 1-5
 }
 
 const PROMPTS = [
@@ -24,33 +36,76 @@ const PROMPTS = [
   "What intention will you carry into tomorrow?",
 ];
 
-function getDailyPrompt(): string {
-  const day = new Date().getDate();
-  return PROMPTS[day % PROMPTS.length];
+const MOOD_LABELS = ["Low", "Okay", "Good", "Great", "Amazing"];
+const MOOD_EMOJI = ["😢", "😐", "🙂", "😊", "😄"];
+
+function getPromptForDate(isoDate: string): string {
+  const day = parseInt(isoDate.slice(8, 10), 10) || 1;
+  return PROMPTS[(day - 1) % PROMPTS.length];
 }
 
 export default function DashboardJournal() {
   const [entries, setEntries] = useLocalStorage<JournalEntry[]>("tryramadan-journal", []);
-  const [todayContent, setTodayContent] = useState("");
-  const [todayGratitude, setTodayGratitude] = useState("");
   const today = new Date().toISOString().split("T")[0];
-  const existingToday = entries.find((e) => e.date === today);
-  const prompt = getDailyPrompt();
+
+  const [writeDate, setWriteDate] = useState(today);
+  const [content, setContent] = useState("");
+  const [gratitude, setGratitude] = useState("");
+  const [mood, setMood] = useState<number | undefined>(undefined);
+
+  const existingForWriteDate = entries.find((e) => e.date === writeDate);
+  const prompt = getPromptForDate(writeDate);
+
+  useEffect(() => {
+    const entry = entries.find((e) => e.date === writeDate);
+    setContent(entry?.content ?? "");
+    setGratitude(entry?.gratitude ?? "");
+    setMood(entry?.mood);
+  }, [writeDate, entries]);
 
   const handleSave = () => {
-    if (!todayContent.trim()) return;
+    if (!content.trim()) return;
     const newEntry: JournalEntry = {
-      date: today,
+      date: writeDate,
       prompt,
-      content: todayContent,
-      gratitude: todayGratitude.trim() || undefined,
+      content: content.trim(),
+      gratitude: gratitude.trim() || undefined,
+      mood,
     };
     setEntries((prev) => {
-      const rest = prev.filter((e) => e.date !== today);
+      const rest = prev.filter((e) => e.date !== writeDate);
       return [...rest, newEntry].sort((a, b) => b.date.localeCompare(a.date));
     });
-    setTodayContent("");
-    setTodayGratitude("");
+  };
+
+  const handleSelectDate = (date: Date | undefined) => {
+    if (!date) return;
+    const iso = date.toISOString().split("T")[0];
+    setWriteDate(iso);
+    const existing = entries.find((e) => e.date === iso);
+    setContent(existing?.content ?? "");
+    setGratitude(existing?.gratitude ?? "");
+    setMood(existing?.mood);
+  };
+
+  const handleExport = () => {
+    const data = {
+      exportedAt: new Date().toISOString(),
+      entries: entries.map((e) => ({
+        date: e.date,
+        prompt: e.prompt,
+        content: e.content,
+        gratitude: e.gratitude,
+        mood: e.mood,
+      })),
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `tryramadan-journal-${today}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const [expandedDate, setExpandedDate] = useState<string | null>(null);
@@ -59,11 +114,22 @@ export default function DashboardJournal() {
   const displayEntries = entries.slice(0, showCount);
   const hasMore = entries.length > showCount;
 
+  const entryDates = useMemo(() => new Set(entries.map((e) => e.date)), [entries]);
+  const [calendarMonth, setCalendarMonth] = useState(() => {
+    const d = new Date(writeDate + "T12:00:00");
+    return new Date(d.getFullYear(), d.getMonth(), 1);
+  });
+
   return (
     <div className="min-h-screen bg-background">
+      <PageSEO
+        title="Journal | TryRamadan.app"
+        description="Ramadan fasting journal: mood tracking, daily prompts, gratitude, and calendar. Reflect on your fasting journey."
+        path="/dashboard/journal"
+      />
       <Navbar />
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4 max-w-2xl">
+      <main className="main-content">
+        <div className="container mx-auto px-4 max-w-2xl min-w-0">
           <Link
             to="/dashboard"
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
@@ -84,57 +150,134 @@ export default function DashboardJournal() {
             </p>
           </motion.div>
 
+          {/* Calendar of entries */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="mb-8 p-6 rounded-2xl bg-card border border-border"
+          >
+            <h3 className="font-display font-bold mb-2 flex items-center gap-2">
+              <CalendarIcon className="w-5 h-5 text-secondary" />
+              Calendar
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Days with an entry are marked. Click a day to write or edit.
+            </p>
+            <Calendar
+              mode="single"
+              selected={new Date(writeDate + "T12:00:00")}
+              onSelect={handleSelectDate}
+              month={calendarMonth}
+              onMonthChange={(month) => month && setCalendarMonth(month)}
+              className="rounded-xl border border-border inline-block"
+              modifiers={{
+                hasEntry: (date) => entryDates.has(date.toISOString().split("T")[0]),
+              }}
+              modifiersClassNames={{
+                hasEntry: "bg-secondary/20 font-semibold",
+              }}
+            />
+            <p className="text-xs text-muted-foreground mt-2">
+              {entries.length} entr{entries.length === 1 ? "y" : "ies"} total
+            </p>
+          </motion.div>
+
+          {/* Write for date + prompt + content + gratitude + mood */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             className="mb-8 p-6 rounded-2xl bg-card border border-border"
           >
-            <h3 className="font-display font-bold mb-2 flex items-center gap-2">
-              <PenLine className="w-5 h-5 text-secondary" />
-              Today's prompt
-            </h3>
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+              <h3 className="font-display font-bold flex items-center gap-2">
+                <PenLine className="w-5 h-5 text-secondary" />
+                {writeDate === today ? "Today's prompt" : `Entry for ${writeDate}`}
+              </h3>
+              <label className="text-sm text-muted-foreground flex items-center gap-2">
+                Date
+                <input
+                  type="date"
+                  value={writeDate}
+                  onChange={(e) => handleSelectDate(new Date(e.target.value + "T12:00:00"))}
+                  className="px-2 py-1 rounded-lg border border-border bg-background text-sm"
+                />
+              </label>
+            </div>
             <p className="text-sm text-muted-foreground mb-4">{prompt}</p>
             <textarea
-              value={existingToday?.content ?? todayContent}
-              onChange={(e) => setTodayContent(e.target.value)}
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
               placeholder="Write a few lines..."
               className="w-full p-4 rounded-xl border border-border bg-background min-h-[100px] text-sm resize-none focus:ring-2 focus:ring-secondary outline-none"
-              disabled={!!existingToday}
             />
-            <label className="block text-sm font-medium mt-3 mb-1">One thing I'm grateful for (optional)</label>
+            <label className="block text-sm font-medium mt-3 mb-1 flex items-center gap-2">
+              <Smile className="w-4 h-4 text-secondary" />
+              How was your day? (optional)
+            </label>
+            <div className="flex gap-2 mb-3">
+              {(MOOD_EMOJI as string[]).map((emoji, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setMood(i + 1)}
+                  title={MOOD_LABELS[i]}
+                  className={`p-2 rounded-xl border-2 text-lg transition-all ${
+                    mood === i + 1
+                      ? "border-secondary bg-secondary/10"
+                      : "border-border hover:border-secondary/50"
+                  }`}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+            <label className="block text-sm font-medium mb-1">One thing I'm grateful for (optional)</label>
             <input
               type="text"
-              value={existingToday?.gratitude ?? todayGratitude}
-              onChange={(e) => setTodayGratitude(e.target.value)}
+              value={gratitude}
+              onChange={(e) => setGratitude(e.target.value)}
               placeholder="e.g. Family, health, this moment..."
               className="w-full p-3 rounded-xl border border-border bg-background text-sm focus:ring-2 focus:ring-secondary outline-none"
-              disabled={!!existingToday}
             />
-            {!existingToday && (
-              <button
-                onClick={handleSave}
-                className="mt-4 py-2 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90"
-              >
-                Save today's entry
-              </button>
-            )}
-            {existingToday && (
-              <p className="mt-3 text-sm text-muted-foreground">Entry saved for today.</p>
-            )}
+            <button
+              onClick={handleSave}
+              className="mt-4 py-2 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90"
+            >
+              {existingForWriteDate ? "Update entry" : "Save entry"}
+            </button>
           </motion.div>
 
+          {/* Export */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+            transition={{ delay: 0.12 }}
+            className="mb-8"
+          >
+            <button
+              type="button"
+              onClick={handleExport}
+              className="inline-flex items-center gap-2 py-2 px-4 rounded-xl border border-border bg-card hover:bg-muted/50 text-sm font-medium"
+            >
+              <Download className="w-4 h-4" />
+              Export journal (JSON)
+            </button>
+          </motion.div>
+
+          {/* Past entries list */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
           >
             <h3 className="font-display font-bold mb-4 flex items-center gap-2">
               <BookOpen className="w-5 h-5 text-secondary" />
               Past entries
             </h3>
             {displayEntries.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No entries yet. Start with today's prompt above.</p>
+              <p className="text-sm text-muted-foreground">No entries yet. Pick a date above and write.</p>
             ) : (
               <ul className="space-y-3">
                 {displayEntries.map((entry) => {
@@ -144,24 +287,40 @@ export default function DashboardJournal() {
                       key={entry.date}
                       className="p-4 rounded-xl bg-card border border-border"
                     >
-                      <span className="text-xs text-muted-foreground">{entry.date}</span>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs text-muted-foreground">{entry.date}</span>
+                        {entry.mood != null && (
+                          <span className="text-sm" title={MOOD_LABELS[entry.mood - 1]}>
+                            {MOOD_EMOJI[entry.mood - 1]}
+                          </span>
+                        )}
+                      </div>
                       <p className={`text-sm mt-1 ${isExpanded ? "" : "line-clamp-2"}`}>
                         {entry.content}
                       </p>
                       {entry.gratitude && (
                         <p className="text-xs text-secondary mt-2">Grateful: {entry.gratitude}</p>
                       )}
-                      <button
-                        type="button"
-                        onClick={() => setExpandedDate(isExpanded ? null : entry.date)}
-                        className="mt-2 flex items-center gap-1 text-xs font-medium text-secondary hover:underline"
-                      >
-                        {isExpanded ? (
-                          <>Show less <ChevronUp className="w-3 h-3" /></>
-                        ) : (
-                          <>View full <ChevronDown className="w-3 h-3" /></>
-                        )}
-                      </button>
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setWriteDate(entry.date);
+                            setCalendarMonth(new Date(entry.date + "T12:00:00"));
+                            handleSelectDate(new Date(entry.date + "T12:00:00"));
+                          }}
+                          className="text-xs font-medium text-secondary hover:underline"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setExpandedDate(isExpanded ? null : entry.date)}
+                          className="text-xs font-medium text-secondary hover:underline"
+                        >
+                          {isExpanded ? "Show less" : "View full"}
+                        </button>
+                      </div>
                     </li>
                   );
                 })}

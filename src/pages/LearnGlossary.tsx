@@ -8,6 +8,7 @@ import { ArabicHover } from "@/components/ArabicHover";
 import { QuranLink } from "@/components/QuranLink";
 import { HadithSunnahLink } from "@/components/HadithSunnahLink";
 import glossaryData from "@/data/glossary.json";
+import { PageSEO } from "@/components/PageSEO";
 
 const LearnGlossary = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -28,10 +29,15 @@ const LearnGlossary = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageSEO
+        title="Glossary | TryRamadan.app"
+        description="Ramadan and Islamic terms glossary: suhoor, iftar, sawm, laylat al-Qadr, and more. Learn the vocabulary of Ramadan fasting."
+        path="/learn/glossary"
+      />
       <Navbar />
       
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4 max-w-4xl">
+      <main className="main-content">
+        <div className="container mx-auto px-4 max-w-4xl min-w-0">
           <Link 
             to="/dashboard/learn" 
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"

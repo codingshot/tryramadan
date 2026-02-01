@@ -16,13 +16,16 @@ import { DailyHadith } from "@/components/DailyHadith";
 import { LocationDisplay } from "@/components/LocationDisplay";
 import { PrayerLocationBadge } from "@/components/PrayerLocationBadge";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
+import { GoalsUntilRamadanCard } from "@/components/GoalsUntilRamadanCard";
 import {
   useUserPreferences,
   useFastingProgress,
   startFastingToday,
+  breakFastingToday,
   completeFastingToday,
   uncompleteFastingToday,
   getTodayFastingLog,
+  getBrokenReasonLabel,
   isFastingToday,
   setDayCompleted,
   useDayMealPlans,
@@ -30,11 +33,13 @@ import {
   useDailyGoals,
   useLocalStorage,
 } from "@/hooks/useLocalStorage";
+import { BreakFastReasonDialog } from "@/components/BreakFastReasonDialog";
 import { usePrayerTimes, usePrayerTimesForDate, getSunnahFastingInfo, checkAyyamAlBeed } from "@/hooks/usePrayerTimes";
 import { useAutoLocation } from "@/hooks/useLocation";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
 import { Footer } from "@/components/Footer";
+import { PageSEO } from "@/components/PageSEO";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -43,6 +48,7 @@ const Dashboard = () => {
   const [isFasting, setIsFasting] = useState(true);
   const [ayyamAlBeed, setAyyamAlBeed] = useState<{ isAyyamAlBeed: boolean; hijriDay: number } | null>(null);
   const [locationEditorOpen, setLocationEditorOpen] = useState(false);
+  const [showBreakFastDialog, setShowBreakFastDialog] = useState(false);
   const todayStr = new Date().toISOString().split("T")[0];
   const [selectedDate, setSelectedDate] = useState(todayStr);
   
@@ -191,10 +197,15 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageSEO
+        title="Dashboard | TryRamadan.app"
+        description="Your Ramadan fasting dashboard: timer, prayer times, daily goals, and progress. Track suhoor and iftar, log fasting days, and stay on track."
+        path="/dashboard"
+      />
       <Navbar />
       
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4">
+      <main className="main-content">
+        <div className="container mx-auto px-4 min-w-0 max-w-5xl">
           {/* Header */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -236,25 +247,17 @@ const Dashboard = () => {
               )}
             </div>
 
-            {/* Day selector — click through days */}
+            {/* Day selector — arrows, then date with "Go to today" next to it */}
             <div className="flex flex-wrap items-center justify-between gap-2 mt-4 p-3 rounded-xl bg-muted/50 border border-border">
-              <button
-                type="button"
-                onClick={goPrevDay}
-                className="p-2 rounded-lg hover:bg-muted transition-colors"
-                aria-label="Previous day"
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <div className="flex items-center gap-2">
-                <span className="font-display font-semibold">
-                  {selectedDateObj.toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
-                </span>
-                {isSelectedToday && (
-                  <span className="px-2 py-0.5 rounded-full bg-secondary/20 text-secondary text-xs font-medium">Today</span>
-                )}
-              </div>
               <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={goPrevDay}
+                  className="p-2 rounded-lg hover:bg-muted transition-colors"
+                  aria-label="Previous day"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
                 <button
                   type="button"
                   onClick={goNextDay}
@@ -263,7 +266,14 @@ const Dashboard = () => {
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
-                {!isSelectedToday && (
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-display font-semibold">
+                  {selectedDateObj.toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
+                </span>
+                {isSelectedToday ? (
+                  <span className="px-2 py-0.5 rounded-full bg-secondary/20 text-secondary text-xs font-medium">Today</span>
+                ) : (
                   <button
                     type="button"
                     onClick={goToToday}
@@ -331,7 +341,7 @@ const Dashboard = () => {
             >
               <Link
                 to="/dashboard/schedule"
-                className="block p-4 rounded-2xl bg-card border border-border grid grid-cols-2 sm:grid-cols-4 gap-3 hover:border-secondary/50 transition-colors"
+                className="block p-3 sm:p-4 rounded-2xl bg-card border border-border grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 hover:border-secondary/50 transition-colors min-h-[72px] sm:min-h-0"
               >
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -408,13 +418,27 @@ const Dashboard = () => {
               </button>
             )}
             {fastingToday && todayLog && (
-              <div className="mt-4 py-3 px-4 rounded-xl bg-secondary/20 border border-secondary/40 text-center text-sm">
-                <span className="font-medium text-secondary">You're fasting</span>
-                <span className="text-muted-foreground ml-2">
-                  (started {new Date(todayLog.startedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })})
-                </span>
+              <div className="mt-4 space-y-2">
+                <div className="py-3 px-4 rounded-xl bg-secondary/20 border border-secondary/40 text-center text-sm">
+                  <span className="font-medium text-secondary">You're fasting</span>
+                  <span className="text-muted-foreground ml-2">
+                    (started {new Date(todayLog.startedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })})
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowBreakFastDialog(true)}
+                  className="w-full py-2.5 px-4 rounded-xl border border-destructive/40 bg-destructive/10 text-destructive font-medium text-sm hover:bg-destructive/20 transition-colors"
+                >
+                  I broke my fast — choose reason
+                </button>
               </div>
             )}
+            <BreakFastReasonDialog
+              open={showBreakFastDialog}
+              onOpenChange={setShowBreakFastDialog}
+              onSelectReason={(reasonId) => breakFastingToday(progress, setProgress, reasonId)}
+            />
           </motion.div>
           
           {/* Quick Actions Grid */}
@@ -422,14 +446,14 @@ const Dashboard = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+            className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8"
           >
             {/* Mark Complete */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
                   onClick={toggleTodayComplete}
-                  className={`p-4 rounded-2xl border-2 transition-all ${
+                  className={`p-3 sm:p-4 rounded-2xl border-2 transition-all min-h-[100px] sm:min-h-0 ${
                     todayComplete 
                       ? 'bg-secondary/20 border-secondary' 
                       : 'bg-card border-border hover:border-secondary'
@@ -465,12 +489,12 @@ const Dashboard = () => {
             {/* Streak */}
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="p-4 rounded-2xl bg-card border border-border">
+                <div className="p-3 sm:p-4 rounded-2xl bg-card border border-border min-h-[100px] sm:min-h-0 flex flex-col items-center justify-center">
                   <div className="flex flex-col items-center gap-2">
                     <div className="w-10 h-10 rounded-full bg-gradient-gold flex items-center justify-center">
                       <Flame className="w-5 h-5 text-foreground" />
                     </div>
-                    <span className="text-2xl font-bold text-secondary">{streak}</span>
+                    <span className="text-xl sm:text-2xl font-bold text-secondary">{streak}</span>
                     <span className="text-xs text-muted-foreground">Day Streak • أيام متتالية</span>
                   </div>
                 </div>
@@ -483,12 +507,12 @@ const Dashboard = () => {
             {/* Total Days */}
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="p-4 rounded-2xl bg-card border border-border">
+                <div className="p-3 sm:p-4 rounded-2xl bg-card border border-border min-h-[100px] sm:min-h-0 flex flex-col items-center justify-center">
                   <div className="flex flex-col items-center gap-2">
                     <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                       <Calendar className="w-5 h-5 text-foreground" />
                     </div>
-                    <span className="text-2xl font-bold">{progress.completedDays.length}</span>
+                    <span className="text-xl sm:text-2xl font-bold">{progress.completedDays.length}</span>
                     <span className="text-xs text-muted-foreground">Total Days • إجمالي الأيام</span>
                   </div>
                 </div>
@@ -501,12 +525,12 @@ const Dashboard = () => {
             {/* Sunnah Days */}
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="p-4 rounded-2xl bg-card border border-border">
+                <div className="p-3 sm:p-4 rounded-2xl bg-card border border-border min-h-[100px] sm:min-h-0 flex flex-col items-center justify-center">
                   <div className="flex flex-col items-center gap-2">
                     <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
                       <Moon className="w-5 h-5 text-primary" />
                     </div>
-                    <span className="text-2xl font-bold">{progress.sunnahDaysCompleted}</span>
+                    <span className="text-xl sm:text-2xl font-bold">{progress.sunnahDaysCompleted}</span>
                     <span className="text-xs text-muted-foreground">Sunnah Days • أيام السنة</span>
                   </div>
                 </div>
@@ -780,6 +804,16 @@ const Dashboard = () => {
             </motion.div>
           )}
 
+          {/* Goals until Ramadan */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.24 }}
+            className="mb-8"
+          >
+            <GoalsUntilRamadanCard />
+          </motion.div>
+
           {/* Quick links to dashboard features */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -793,6 +827,7 @@ const Dashboard = () => {
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
               <Link to="/dashboard/today" className="p-3 rounded-xl bg-card border border-border hover:border-secondary/50 text-center text-sm font-medium transition-colors">Today</Link>
+              <Link to="/dashboard/goals" className="p-3 rounded-xl bg-card border border-border hover:border-secondary/50 text-center text-sm font-medium transition-colors">Goals</Link>
               <Link to="/dashboard/schedule" className="p-3 rounded-xl bg-card border border-border hover:border-secondary/50 text-center text-sm font-medium transition-colors">Schedule</Link>
               <Link to="/dashboard/prayers" className="p-3 rounded-xl bg-card border border-border hover:border-secondary/50 text-center text-sm font-medium transition-colors">Prayers</Link>
               <Link to="/dashboard/meals" className="p-3 rounded-xl bg-card border border-border hover:border-secondary/50 text-center text-sm font-medium transition-colors">Meals</Link>
@@ -835,7 +870,7 @@ const Dashboard = () => {
                 </Link>
                 <PrayerLocationBadge onClickToUpdate={() => setLocationEditorOpen(true)} />
               </div>
-              <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 sm:gap-3">
                 {[
                   { name: 'Fajr', nameAr: 'الفجر', time: prayerTimes.fajr, highlight: true, Icon: Sunrise },
                   { name: 'Sunrise', nameAr: 'الشروق', time: prayerTimes.sunrise, Icon: Sun },
@@ -933,7 +968,7 @@ const Dashboard = () => {
                             : 'bg-primary/20 text-primary'
                       }`}
                     >
-                      {entry.status === 'completed' ? 'Done' : entry.status === 'broken' ? 'Broken' : 'In progress'}
+                      {entry.status === 'completed' ? 'Done' : entry.status === 'broken' ? (entry.brokenReason ? `Broken (${getBrokenReasonLabel(entry.brokenReason)})` : 'Broken') : 'In progress'}
                     </span>
                   </li>
                 ))}
@@ -962,9 +997,12 @@ const Dashboard = () => {
               <h3 className="font-display font-bold">
                 This Week • هذا الأسبوع
               </h3>
-              <button className="text-sm text-secondary flex items-center gap-1">
-                View All <ChevronRight className="w-4 h-4" />
-              </button>
+              <Link
+                to="/dashboard/schedule"
+                className="text-sm text-secondary hover:underline flex items-center gap-1"
+              >
+                View full calendar <ChevronRight className="w-4 h-4" />
+              </Link>
             </div>
             
             <div className="flex gap-2 justify-between">

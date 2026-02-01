@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Coffee, Utensils, Globe, Clock, ChevronRight } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -23,8 +23,20 @@ const countries = getAllCountries();
 const allRecipes = getRecipes();
 
 export default function Recipes() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const mealFromUrl = searchParams.get("meal");
   const [countryFilter, setCountryFilter] = useState<string>("all");
-  const [mealFilter, setMealFilter] = useState<string>("all");
+  const [mealFilter, setMealFilter] = useState<string>(mealFromUrl === "suhoor" || mealFromUrl === "iftar" ? mealFromUrl : "all");
+
+  useEffect(() => {
+    if (mealFromUrl === "suhoor" || mealFromUrl === "iftar") setMealFilter(mealFromUrl);
+  }, [mealFromUrl]);
+
+  const setMealFilterAndUrl = (value: string) => {
+    setMealFilter(value);
+    if (value === "suhoor" || value === "iftar") setSearchParams({ meal: value });
+    else setSearchParams({});
+  };
 
   const filtered = useMemo(() => {
     return allRecipes.filter(({ mealType, recipe }) => {
@@ -42,8 +54,8 @@ export default function Recipes() {
         path="/recipes"
       />
       <Navbar />
-      <main className="pt-20 pb-16" role="main" aria-label="Recipes">
-        <div className="container mx-auto px-4 max-w-4xl">
+      <main className="main-content" role="main" aria-label="Recipes">
+        <div className="container mx-auto px-4 max-w-4xl min-w-0">
           <Link
             to="/"
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 min-h-[44px] items-center"
@@ -57,13 +69,34 @@ export default function Recipes() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
-            <h1 className="text-2xl md:text-4xl font-display font-bold">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold">
               Ramadan Recipes
               <span className="block font-arabic text-lg text-secondary mt-1">وصفات رمضان</span>
             </h1>
             <p className="text-muted-foreground mt-2">
-              Suhoor and iftar recipes from Muslim communities worldwide. Filter by culture or meal type.
+              Suhoor (pre-dawn) and Iftar (evening break-fast) recipes from Muslim communities worldwide. Filter by culture or meal type; open any recipe for ingredients and steps.
             </p>
+            <div className="flex flex-wrap gap-3 mt-4">
+              <Link
+                to="/recipes?meal=suhoor"
+                onClick={() => setMealFilterAndUrl("suhoor")}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary/10 text-secondary text-sm font-medium hover:bg-secondary/20 transition-colors"
+              >
+                <Coffee className="w-4 h-4" aria-hidden />
+                Suhoor only
+              </Link>
+              <Link
+                to="/recipes?meal=iftar"
+                onClick={() => setMealFilterAndUrl("iftar")}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors"
+              >
+                <Utensils className="w-4 h-4" aria-hidden />
+                Iftar only
+              </Link>
+              <Link to="/dashboard/meals" className="text-sm text-muted-foreground hover:text-secondary transition-colors">
+                Plan meals in Dashboard →
+              </Link>
+            </div>
           </motion.header>
 
           {/* Culture-based search */}
@@ -91,7 +124,7 @@ export default function Recipes() {
               </Select>
             </div>
             <div className="flex items-center gap-2">
-              <Select value={mealFilter} onValueChange={setMealFilter}>
+              <Select value={mealFilter} onValueChange={setMealFilterAndUrl}>
                 <SelectTrigger className="w-[160px]" id="filter-meal" aria-label="Filter by meal type">
                   <SelectValue placeholder="All meals" />
                 </SelectTrigger>
@@ -116,9 +149,11 @@ export default function Recipes() {
           </section>
 
           <p className="mt-8 text-sm text-muted-foreground">
+            Add these to your day:{" "}
             <Link to="/dashboard/meals" className="text-secondary hover:underline">
-              Plan meals in Dashboard →
+              Dashboard → Meals
             </Link>
+            {" "}to plan suhoor and iftar and build your grocery list.
           </p>
         </div>
       </main>

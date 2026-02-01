@@ -8,6 +8,7 @@ import { ArabicHover } from "@/components/ArabicHover";
 import { HadithSunnahLink } from "@/components/HadithSunnahLink";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import hadithsData from "@/data/hadiths.json";
+import { PageSEO } from "@/components/PageSEO";
 
 const LearnHadith = () => {
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
@@ -20,10 +21,15 @@ const LearnHadith = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageSEO
+        title="Hadith Collection | TryRamadan.app"
+        description="Prophetic sayings about fasting, Ramadan, and spiritual conduct. Browse hadith by topic for daily reflection."
+        path="/learn/hadith"
+      />
       <Navbar />
       
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4 max-w-4xl">
+      <main className="main-content">
+        <div className="container mx-auto px-4 max-w-4xl min-w-0">
           <Link 
             to="/dashboard/learn" 
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"

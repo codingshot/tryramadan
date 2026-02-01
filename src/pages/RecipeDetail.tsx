@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Coffee, Utensils, Clock, Globe, BookOpen, Flame } from "lucide-react";
+import { ArrowLeft, Coffee, Utensils, Clock, Globe, BookOpen, Flame, ListOrdered } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { PageSEO } from "@/components/PageSEO";
@@ -23,7 +23,7 @@ export default function RecipeDetail() {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main className="pt-20 pb-16 container mx-auto px-4 max-w-4xl">
+        <main className="main-content container mx-auto px-4 max-w-4xl min-w-0">
           <h1 className="text-2xl font-display font-bold">Recipe not found</h1>
           <p className="text-muted-foreground mt-2">The recipe you're looking for doesn't exist or was removed.</p>
           <Link to="/recipes" className="mt-4 inline-block text-secondary hover:underline">
@@ -49,8 +49,8 @@ export default function RecipeDetail() {
         type="article"
       />
       <Navbar />
-      <main className="pt-20 pb-16" role="main" aria-label="Recipe">
-        <div className="container mx-auto px-4 max-w-3xl">
+      <main className="main-content" role="main" aria-label="Recipe">
+        <div className="container mx-auto px-4 max-w-3xl min-w-0">
           <Link
             to="/recipes"
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 min-h-[44px] items-center"
@@ -78,7 +78,7 @@ export default function RecipeDetail() {
                   <span className="text-sm text-muted-foreground">{recipe.region}</span>
                 )}
               </div>
-              <h1 className="text-2xl md:text-4xl font-display font-bold">{recipe.name}</h1>
+              <h1 className="text-xl sm:text-2xl md:text-4xl font-display font-bold break-words">{recipe.name}</h1>
               <p className="text-muted-foreground mt-2">{recipe.description}</p>
             </header>
 
@@ -117,6 +117,20 @@ export default function RecipeDetail() {
                 ))}
               </ul>
             </section>
+
+            {recipe.steps && recipe.steps.length > 0 && (
+              <section className="mb-6" aria-labelledby="steps-heading">
+                <h2 id="steps-heading" className="font-display font-bold text-lg mb-3 flex items-center gap-2">
+                  <ListOrdered className="w-5 h-5 text-secondary" aria-hidden />
+                  Instructions
+                </h2>
+                <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
+                  {recipe.steps.map((step, i) => (
+                    <li key={i} className="pl-1">{step}</li>
+                  ))}
+                </ol>
+              </section>
+            )}
 
             <section className="mb-6" aria-labelledby="details-heading">
               <h2 id="details-heading" className="font-display font-bold text-lg mb-3">Details</h2>

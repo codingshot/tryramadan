@@ -54,7 +54,28 @@ export const defaultPreferences: UserPreferences = {
 };
 
 export function useUserPreferences() {
-  return useLocalStorage<UserPreferences>('tryramadan-preferences', defaultPreferences);
+  const [stored, setStored] = useLocalStorage<UserPreferences>('tryramadan-preferences', defaultPreferences);
+  // Ensure we always have all keys (merge with defaults for old or partial localStorage)
+  const preferences: UserPreferences = { ...defaultPreferences, ...stored };
+  return [preferences, setStored] as const;
+}
+
+/** Predetermined reasons for breaking a fast (stored by id). */
+export const BROKEN_FAST_REASONS = [
+  { id: 'mistake', label: 'Ate or drank by mistake' },
+  { id: 'illness', label: 'Illness / not well' },
+  { id: 'travel', label: 'Travel (musafir)' },
+  { id: 'menstruation', label: 'Menstruation' },
+  { id: 'medical', label: 'Medical need / doctor\'s advice' },
+  { id: 'other', label: 'Other' },
+] as const;
+
+export type BrokenFastReasonId = (typeof BROKEN_FAST_REASONS)[number]['id'];
+
+export function getBrokenReasonLabel(id: string | undefined): string {
+  if (!id) return '—';
+  const r = BROKEN_FAST_REASONS.find((x) => x.id === id);
+  return r ? r.label : id;
 }
 
 // Fasting log entry - one per day when user logs fasting
@@ -65,6 +86,8 @@ export interface FastingLogEntry {
   status: 'in_progress' | 'completed' | 'broken';
   /** Hours fasted (from startedAt to completedAt or now). Set when completed/broken. */
   hoursFasted?: number;
+  /** Predetermined reason id when status is 'broken'. */
+  brokenReason?: string;
 }
 
 // Fasting progress interface
@@ -181,22 +204,24 @@ export function completeFastingToday(
   console.log(`${LOG_PREFIX} Fast completed. ${today} logged at ${now}. Total days: ${completedDays.length}`);
 }
 
-/** Mark today's fast as broken (e.g. early break): update log, optionally remove from completedDays */
+/** Mark today's fast as broken (e.g. early break): update log, optionally remove from completedDays. Reason is a predetermined id from BROKEN_FAST_REASONS. */
 export function breakFastingToday(
   progress: FastingProgress,
-  setProgress: (value: FastingProgress | ((prev: FastingProgress) => FastingProgress)) => void
+  setProgress: (value: FastingProgress | ((prev: FastingProgress) => FastingProgress)) => void,
+  reason?: string
 ): void {
   const today = new Date().toISOString().split('T')[0];
   const now = new Date().toISOString();
   const entry = progress.fastingLog?.find((e) => e.date === today);
   const startedAt = entry?.startedAt || now;
   const hoursFasted = hoursBetween(startedAt, now);
+  const reasonId = reason && BROKEN_FAST_REASONS.some((r) => r.id === reason) ? reason : 'other';
 
   const updatedLog = (progress.fastingLog || []).map((e) =>
-    e.date === today ? { ...e, completedAt: now, status: 'broken' as const, hoursFasted } : e
+    e.date === today ? { ...e, completedAt: now, status: 'broken' as const, hoursFasted, brokenReason: reasonId } : e
   );
   if (!updatedLog.some((e) => e.date === today)) {
-    updatedLog.push({ date: today, startedAt, completedAt: now, status: 'broken', hoursFasted });
+    updatedLog.push({ date: today, startedAt, completedAt: now, status: 'broken', hoursFasted, brokenReason: reasonId });
   }
 
   setProgress({
@@ -205,7 +230,7 @@ export function breakFastingToday(
     completedDays: progress.completedDays.filter((d) => d !== today),
   });
 
-  console.log(`${LOG_PREFIX} Fast broken (health/other). ${today} at ${now}.`);
+  console.log(`${LOG_PREFIX} Fast broken (${getBrokenReasonLabel(reasonId)}). ${today} at ${now}.`);
 }
 
 /** Unmark today's fast (undo complete): remove from completedDays, set log to in_progress */
@@ -263,7 +288,9 @@ export const defaultNotificationSettings: NotificationSettings = {
 };
 
 export function useNotificationSettings() {
-  return useLocalStorage<NotificationSettings>('tryramadan-notifications', defaultNotificationSettings);
+  const [stored, setStored] = useLocalStorage<NotificationSettings>('tryramadan-notifications', defaultNotificationSettings);
+  const settings: NotificationSettings = { ...defaultNotificationSettings, ...stored };
+  return [settings, setStored] as const;
 }
 
 // Per-prayer notification toggles (Fajr, Dhuhr, Asr, Maghrib, Isha)
@@ -352,6 +379,45 @@ export function useTodayData() {
 // Recipe favorites: array of "suhoor-1", "iftar-2", etc.
 export function useRecipeFavorites() {
   return useLocalStorage<string[]>('tryramadan-recipe-favorites', []);
+}
+
+// Goals until Ramadan: pre-Ramadan checklist (e.g. read Quran, give charity)
+export interface GoalUntilRamadan {
+  id: string;
+  title: string;
+  completed: boolean;
+  dueDate?: string; // ISO date optional
+  createdAt: string; // ISO
+}
+
+export function useGoalsUntilRamadan() {
+  return useLocalStorage<GoalUntilRamadan[]>('tryramadan-goals-until-ramadan', []);
+}
+
+// Calendar events: quick-add suhoor, iftar, prayers, get food, custom — for export to .ics
+export type CalendarEventType =
+  | 'suhoor'
+  | 'iftar'
+  | 'fajr'
+  | 'dhuhr'
+  | 'asr'
+  | 'maghrib'
+  | 'isha'
+  | 'taraweeh'
+  | 'get_food'
+  | 'custom';
+
+export interface CalendarEvent {
+  id: string;
+  title: string;
+  type: CalendarEventType;
+  time: string; // "HH:mm"
+  durationMinutes?: number;
+  date: string; // YYYY-MM-DD (redundant with key but handy for export)
+}
+
+export function useCalendarEvents() {
+  return useLocalStorage<Record<string, CalendarEvent[]>>('tryramadan-calendar-events', {});
 }
 
 // Wellness check-in: morning/evening mood (1-5) and optional note per day

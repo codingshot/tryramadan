@@ -28,7 +28,7 @@ export const RecipeSection = () => {
                 </ArabicTerm>
                 {" "}Recipes
               </h3>
-              <p className="text-muted-foreground text-sm">Pre-dawn meals to fuel your fast</p>
+              <p className="text-muted-foreground text-sm">Pre-dawn meals to fuel your fast. Each links to the full recipe with ingredients and steps.</p>
             </div>
           </div>
 
@@ -80,9 +80,12 @@ export const RecipeSection = () => {
               </Link>
             ))}
           </div>
-          <p className="mt-4 text-center">
-            <Link to="/recipes" className="text-sm font-medium text-secondary hover:underline">
-              View all recipes →
+          <p className="mt-4 text-center flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+            <Link to="/recipes?meal=suhoor" className="text-sm font-medium text-secondary hover:underline">
+              View all Suhoor recipes →
+            </Link>
+            <Link to="/dashboard/meals" className="text-sm text-muted-foreground hover:text-secondary transition-colors">
+              Plan meals in Dashboard
             </Link>
           </p>
         </motion.div>
@@ -107,7 +110,7 @@ export const RecipeSection = () => {
                 </ArabicTerm>
                 {" "}Recipes
               </h3>
-              <p className="text-muted-foreground text-sm">Evening meals to break your fast</p>
+              <p className="text-muted-foreground text-sm">Evening meals to break your fast. Each links to the full recipe with ingredients and steps.</p>
             </div>
           </div>
 
@@ -159,9 +162,12 @@ export const RecipeSection = () => {
               </Link>
             ))}
           </div>
-          <p className="mt-4 text-center">
-            <Link to="/recipes" className="text-sm font-medium text-secondary hover:underline">
-              View all recipes →
+          <p className="mt-4 text-center flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+            <Link to="/recipes?meal=iftar" className="text-sm font-medium text-secondary hover:underline">
+              View all Iftar recipes →
+            </Link>
+            <Link to="/dashboard/meals" className="text-sm text-muted-foreground hover:text-secondary transition-colors">
+              Plan meals in Dashboard
             </Link>
           </p>
         </motion.div>

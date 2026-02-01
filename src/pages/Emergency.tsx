@@ -8,13 +8,18 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArabicHover } from "@/components/ArabicHover";
 import { useFastingProgress, breakFastingToday } from "@/hooks/useLocalStorage";
+import { BreakFastReasonDialog } from "@/components/BreakFastReasonDialog";
+import { PageSEO } from "@/components/PageSEO";
+import { useState } from "react";
 
 const Emergency = () => {
   const navigate = useNavigate();
   const [progress, setProgress] = useFastingProgress();
+  const [showReasonDialog, setShowReasonDialog] = useState(false);
 
-  const handleBreakFast = () => {
-    breakFastingToday(progress, setProgress);
+  const handleBreakFastWithReason = (reasonId: string) => {
+    breakFastingToday(progress, setProgress, reasonId);
+    navigate("/dashboard");
   };
   
   const steps = [
@@ -25,10 +30,15 @@ const Emergency = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageSEO
+        title="Break Fast Safely | TryRamadan.app"
+        description="Break your fast safely: step-by-step guidance, when to seek help, and how to log breaking a fast. Your health comes first."
+        path="/emergency"
+      />
       <Navbar />
       
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4 max-w-2xl">
+      <main className="main-content">
+        <div className="container mx-auto px-4 max-w-2xl min-w-0">
           <Link 
             to="/dashboard" 
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
@@ -107,7 +117,7 @@ const Emergency = () => {
             transition={{ delay: 0.5 }}
             className="p-6 rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 border border-border mb-8 text-center"
           >
-            <p className="font-arabic text-2xl text-secondary mb-3">
+            <p className="font-arabic text-xl sm:text-2xl text-secondary mb-3 break-words">
               ذَهَبَ الظَّمَأُ وَابْتَلَّتِ الْعُرُوقُ وَثَبَتَ الْأَجْرُ إِنْ شَاءَ اللَّهُ
             </p>
             <p className="text-muted-foreground italic">
@@ -166,18 +176,21 @@ const Emergency = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8 }}
-            className="flex flex-col gap-3"
+            className="flex flex-col gap-3 [&_button]:min-h-[48px]"
           >
             <button
-              onClick={() => {
-                handleBreakFast();
-                navigate('/dashboard');
-              }}
+              onClick={() => setShowReasonDialog(true)}
               className="w-full py-4 rounded-2xl bg-secondary text-secondary-foreground font-medium flex items-center justify-center gap-2"
             >
               <Check className="w-5 h-5" />
-              I've broken my fast - Return to Dashboard
+              I've broken my fast — choose reason & return
             </button>
+            <BreakFastReasonDialog
+              open={showReasonDialog}
+              onOpenChange={setShowReasonDialog}
+              onSelectReason={handleBreakFastWithReason}
+              title="Why did you break your fast?"
+            />
             
             <button
               onClick={() => navigate('/dashboard')}

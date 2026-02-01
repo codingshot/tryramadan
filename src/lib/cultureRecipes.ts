@@ -21,6 +21,8 @@ export interface Recipe {
   nutrition?: { calories: number; protein: string; carbs: string; fat: string };
   significance?: string;
   dietary?: string[];
+  /** Step-by-step instructions (optional). When present, shown on recipe detail page. */
+  steps?: string[];
 }
 
 export interface CityPractice {

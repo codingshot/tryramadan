@@ -9,27 +9,51 @@
    All colors in HSL format
 */
 
-/* Mobile-first container padding */
+/* Mobile-first container padding + safe areas */
 @layer base {
   .container {
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
   }
   @media (min-width: 640px) {
     .container {
-      padding-left: 1.5rem;
-      padding-right: 1.5rem;
+      padding-left: max(1.5rem, env(safe-area-inset-left));
+      padding-right: max(1.5rem, env(safe-area-inset-right));
     }
   }
   @media (min-width: 1024px) {
     .container {
-      padding-left: 2rem;
-      padding-right: 2rem;
+      padding-left: max(2rem, env(safe-area-inset-left));
+      padding-right: max(2rem, env(safe-area-inset-right));
     }
   }
   /* Prevent horizontal overflow on small screens */
   html, body {
     overflow-x: hidden;
+  }
+  #root {
+    min-width: 0;
+    max-width: 100%;
+  }
+  /* Main content area: below fixed navbar + safe area (notch/home indicator) */
+  .main-content {
+    padding-top: calc(4rem + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+  }
+  @media (min-width: 768px) {
+    .main-content {
+      padding-top: calc(5rem + env(safe-area-inset-top, 0px));
+      padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+    }
+  }
+  /* When fasting bottom bar is visible (mobile), add extra bottom padding so content isn't hidden */
+  body.has-fasting-bottom-bar .main-content {
+    padding-bottom: calc(4rem + 52px + env(safe-area-inset-bottom, 0px));
+  }
+  @media (min-width: 768px) {
+    body.has-fasting-bottom-bar .main-content {
+      padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+    }
   }
 }
 
@@ -48,6 +72,10 @@
     padding-bottom: 0.5rem;
     display: inline-flex;
     align-items: center;
+  }
+  /* Responsive text: avoid oversized headings on very small screens */
+  .text-balance {
+    text-wrap: balance;
   }
 }
 

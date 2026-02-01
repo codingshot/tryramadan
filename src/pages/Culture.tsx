@@ -5,13 +5,19 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { CulturalCarousel } from "@/components/CulturalCarousel";
 import { ArabicHover } from "@/components/ArabicHover";
+import { PageSEO } from "@/components/PageSEO";
 
 const Culture = () => {
   return (
     <div className="min-h-screen bg-background">
+      <PageSEO
+        title="Ramadan Around the World | TryRamadan.app"
+        description="Explore Ramadan traditions, foods, and customs from Muslim communities across the globe. Cultural education for interfaith understanding."
+        path="/culture"
+      />
       <Navbar />
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
+      <main className="main-content">
+        <div className="container mx-auto px-4 sm:px-6 max-w-5xl min-w-0">
           <Link
             to="/"
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 min-h-[44px] items-center"

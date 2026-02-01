@@ -38,10 +38,12 @@ const Index = () => {
     .filter((n): n is number => n != null);
   const hasRealProgress = completedDayNumbers.length > 0 || (todayRamadanDay != null && todayRamadanDay <= TOTAL_DAYS);
 
-  // Scroll to hash when landing on home with a hash (e.g. navbar/footer "Features" from another page)
+  // Scroll to section when landing on home with hash or state (e.g. footer "Features" / "About")
   useEffect(() => {
-    if (location.pathname !== "/" || !location.hash) return;
-    const id = location.hash.replace("#", "");
+    if (location.pathname !== "/") return;
+    const id =
+      (location.state as { scrollTo?: string } | null)?.scrollTo ||
+      (location.hash ? location.hash.replace("#", "") : null);
     const el = id ? document.getElementById(id) : null;
     if (el) {
       const raf = requestAnimationFrame(() => {
@@ -49,7 +51,7 @@ const Index = () => {
       });
       return () => cancelAnimationFrame(raf);
     }
-  }, [location.pathname, location.hash]);
+  }, [location.pathname, location.hash, location.state]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -226,7 +228,7 @@ const Index = () => {
               </h2>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
               <div className="card-cultural">
                 <h3 className="font-display font-bold text-xl mb-4">Our Mission</h3>
                 <p className="text-muted-foreground leading-relaxed">

@@ -9,15 +9,13 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
 import { SunnahFastingBadge } from "./SunnahFastingBadge";
 import { RamadanStartInfoDialog } from "./RamadanStartInfoDialog";
+import { getDaysUntilRamadan, isCurrentlyRamadan } from "@/lib/ramadan";
 
 interface FastingTimerProps {
   suhoorTime?: string;
   iftarTime?: string;
   isFasting?: boolean;
 }
-
-// Ramadan 2025 starts on February 28, 2025 (approximate)
-const RAMADAN_START_DATE = new Date('2025-02-28T00:00:00');
 
 export const FastingTimer = ({ 
   suhoorTime: propSuhoorTime, 
@@ -27,6 +25,16 @@ export const FastingTimer = ({
   const [timeRemaining, setTimeRemaining] = useState({ hours: 0, minutes: 0, seconds: 0 });
   const [daysUntilRamadan, setDaysUntilRamadan] = useState(0);
   const [isRamadan, setIsRamadan] = useState(false);
+
+  useEffect(() => {
+    setDaysUntilRamadan(getDaysUntilRamadan());
+    setIsRamadan(isCurrentlyRamadan());
+    const t = setInterval(() => {
+      setDaysUntilRamadan(getDaysUntilRamadan());
+      setIsRamadan(isCurrentlyRamadan());
+    }, 60000); // update once per minute
+    return () => clearInterval(t);
+  }, []);
   const [localTime, setLocalTime] = useState("");
   const [ramadanInfoOpen, setRamadanInfoOpen] = useState(false);
   const [preferences] = useUserPreferences();
@@ -64,28 +72,6 @@ export const FastingTimer = ({
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const now = new Date();
-      
-      // Calculate days until Ramadan
-      const ramadanEnd = new Date(RAMADAN_START_DATE);
-      ramadanEnd.setDate(ramadanEnd.getDate() + 30);
-      
-      if (now >= RAMADAN_START_DATE && now <= ramadanEnd) {
-        setIsRamadan(true);
-        setDaysUntilRamadan(0);
-      } else if (now < RAMADAN_START_DATE) {
-        setIsRamadan(false);
-        const diffTime = RAMADAN_START_DATE.getTime() - now.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        setDaysUntilRamadan(diffDays);
-      } else {
-        const nextRamadan = new Date('2026-02-17T00:00:00');
-        const diffTime = nextRamadan.getTime() - now.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        setDaysUntilRamadan(diffDays);
-        setIsRamadan(false);
-      }
-      
       const targetTimeStr = isFasting ? iftarTime : suhoorTime;
       const [targetHours, targetMinutes] = targetTimeStr.split(':').map(Number);
       

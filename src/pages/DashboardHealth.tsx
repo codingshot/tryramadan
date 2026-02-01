@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { PageSEO } from "@/components/PageSEO";
 
 const SYMPTOM_OPTIONS = ["Headache", "Dizziness", "Fatigue", "Nausea", "Low energy", "Other"];
 
@@ -78,9 +79,14 @@ export default function DashboardHealth() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageSEO
+        title="Health | TryRamadan.app"
+        description="Track wellness and symptoms during Ramadan: mood, hydration, energy, and when to seek medical advice."
+        path="/dashboard/health"
+      />
       <Navbar />
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4 max-w-4xl">
+      <main className="main-content">
+        <div className="container mx-auto px-4 max-w-4xl min-w-0">
           <Link
             to="/dashboard"
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
@@ -315,7 +321,7 @@ export default function DashboardHealth() {
           >
             <Link
               to="/emergency"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-destructive/50 text-destructive hover:bg-destructive/10 transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-xl border-2 border-destructive/50 text-destructive hover:bg-destructive/10 transition-colors min-h-[44px]"
             >
               <AlertTriangle className="w-5 h-5" />
               Need to break fast early?

@@ -7,10 +7,11 @@ import {
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { useFastingProgress, getTodayFastingLog, isFastingToday, useLocalStorage } from "@/hooks/useLocalStorage";
+import { useFastingProgress, getTodayFastingLog, getBrokenReasonLabel, isFastingToday, useLocalStorage } from "@/hooks/useLocalStorage";
 import type { EnergyEntry } from "@/hooks/useLocalStorage";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
+import { PageSEO } from "@/components/PageSEO";
 
 type TodayStore = Record<string, { energyEntries?: EnergyEntry[] }>;
 
@@ -118,10 +119,15 @@ const DashboardProgress = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageSEO
+        title="Progress | TryRamadan.app"
+        description="Track your Ramadan fasting progress: completed days, streaks, and export your fasting report."
+        path="/dashboard/progress"
+      />
       <Navbar />
       
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4 max-w-4xl">
+      <main className="main-content">
+        <div className="container mx-auto px-4 max-w-4xl min-w-0">
           <Link 
             to="/dashboard" 
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
@@ -149,26 +155,26 @@ const DashboardProgress = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+            className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8"
           >
             <div className="p-4 rounded-2xl bg-secondary/10 border border-secondary/20 text-center">
               <Calendar className="w-6 h-6 text-secondary mx-auto mb-2" />
-              <span className="text-3xl font-bold text-secondary">{completedDays}</span>
+              <span className="text-xl sm:text-2xl md:text-3xl font-bold text-secondary">{completedDays}</span>
               <span className="block text-sm text-muted-foreground">Days Completed</span>
             </div>
             <div className="p-4 rounded-2xl bg-card border border-border text-center">
               <Flame className="w-6 h-6 text-orange-500 mx-auto mb-2" />
-              <span className="text-3xl font-bold">{currentStreak}</span>
+              <span className="text-xl sm:text-2xl md:text-3xl font-bold">{currentStreak}</span>
               <span className="block text-sm text-muted-foreground">Current Streak</span>
             </div>
             <div className="p-4 rounded-2xl bg-card border border-border text-center">
               <TrendingUp className="w-6 h-6 text-green-500 mx-auto mb-2" />
-              <span className="text-3xl font-bold">{completionRate}%</span>
+              <span className="text-xl sm:text-2xl md:text-3xl font-bold">{completionRate}%</span>
               <span className="block text-sm text-muted-foreground">Completion Rate</span>
             </div>
             <div className="p-4 rounded-2xl bg-card border border-border text-center">
               <Trophy className="w-6 h-6 text-amber-500 mx-auto mb-2" />
-              <span className="text-3xl font-bold">{unlockedBadges.length}</span>
+              <span className="text-xl sm:text-2xl md:text-3xl font-bold">{unlockedBadges.length}</span>
               <span className="block text-sm text-muted-foreground">Badges Earned</span>
             </div>
           </motion.div>
@@ -273,7 +279,7 @@ const DashboardProgress = () => {
                             : 'bg-primary/20 text-primary'
                       }`}
                     >
-                      {entry.status === 'completed' ? 'Done' : entry.status === 'broken' ? 'Broken' : 'In progress'}
+                      {entry.status === 'completed' ? 'Done' : entry.status === 'broken' ? (entry.brokenReason ? `Broken (${getBrokenReasonLabel(entry.brokenReason)})` : 'Broken') : 'In progress'}
                     </span>
                   </li>
                 ))}
@@ -297,7 +303,7 @@ const DashboardProgress = () => {
                   <Trophy className="w-5 h-5 text-secondary" />
                   Earned Badges • الشارات المكتسبة
                 </h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                   {unlockedBadges.map((badge, index) => (
                     <motion.div
                       key={badge.id}
@@ -321,7 +327,7 @@ const DashboardProgress = () => {
                 <span className="opacity-50">🔒</span>
                 Upcoming Badges • الشارات القادمة
               </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                 {lockedBadges.map((badge) => (
                   <Tooltip key={badge.id}>
                     <TooltipTrigger asChild>

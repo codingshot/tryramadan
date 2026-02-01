@@ -12,6 +12,7 @@ import { useLocalStorage } from "@/hooks/useLocalStorage";
 import dailyFactsData from "@/data/daily-facts.json";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { PageSEO } from "@/components/PageSEO";
 
 const QUIZ_QUESTIONS = [
   { q: "In which month of the Islamic calendar does Ramadan fall?", options: ["Seventh", "Eighth", "Ninth", "Tenth"], correct: 2 },
@@ -126,10 +127,15 @@ const DashboardLearn = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageSEO
+        title="Learn | TryRamadan.app"
+        description="Learn about Ramadan: daily hadith, Islamic facts, glossary, and quiz. Build knowledge while you fast."
+        path="/dashboard/learn"
+      />
       <Navbar />
       
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4 max-w-4xl">
+      <main className="main-content">
+        <div className="container mx-auto px-4 max-w-4xl min-w-0">
           <Link 
             to="/dashboard" 
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"

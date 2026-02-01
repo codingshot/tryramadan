@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PageSEO } from "@/components/PageSEO";
 
 type MealType = "suhoor" | "iftar";
 type Recipe = {
@@ -113,10 +114,15 @@ const DashboardMeals = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageSEO
+        title="Meals | TryRamadan.app"
+        description="Suhoor and iftar meal ideas: recipes by region, favorites, and meal planning. Plan nutritious meals for Ramadan fasting."
+        path="/dashboard/meals"
+      />
       <Navbar />
       
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4 max-w-4xl">
+      <main className="main-content">
+        <div className="container mx-auto px-4 max-w-4xl min-w-0">
           <Link 
             to="/dashboard" 
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
@@ -135,7 +141,12 @@ const DashboardMeals = () => {
               <span className="block font-arabic text-lg text-secondary mt-1">تخطيط الوجبات</span>
             </h1>
             <p className="text-muted-foreground mt-2">
-              Nutritious recipes for Suhoor and Iftar from around the world
+              Suhoor (pre-dawn) and Iftar (evening break-fast) recipes from around the world. Pick recipes to add to today’s schedule; open any for full ingredients and step-by-step instructions.
+            </p>
+            <p className="mt-2 text-sm">
+              <Link to="/recipes" className="text-secondary hover:underline font-medium">
+                Browse all recipes by culture →
+              </Link>
             </p>
           </motion.div>
           
@@ -387,7 +398,7 @@ const DashboardMeals = () => {
                 </button>
               </div>
               
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {uniqueGroceries.map((item, i) => (
                   <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-muted/50">
                     <input type="checkbox" className="rounded" />

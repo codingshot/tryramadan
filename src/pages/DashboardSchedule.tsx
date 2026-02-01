@@ -18,6 +18,7 @@ import {
   Clock,
   Plus,
   Trash2,
+  Download,
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -31,10 +32,19 @@ import {
   getDayTotalsFromFoodLog,
   getFastingLogForDate,
   hoursBetween,
+  useUserPreferences,
+  useCalendarEvents,
   type FoodLogEntry,
+  type CalendarEvent,
+  type CalendarEventType,
 } from "@/hooks/useLocalStorage";
+import { isRamadanDay, getRamadanDayNumber, getCurrentRamadanStart, getRamadanEndForYear } from "@/lib/ramadan";
+import { usePrayerTimesForDate } from "@/hooks/usePrayerTimes";
+import { buildIcalContent, downloadIcal } from "@/lib/ical";
+import { fetchPrayerTimesForMonth } from "@/hooks/usePrayerTimes";
 import { getRecipes, getRecipe, parseNutrient, type MealType } from "@/lib/cultureRecipes";
 import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
+import { PageSEO } from "@/components/PageSEO";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -94,7 +104,24 @@ function FoodLogRow({
   );
 }
 
+function eventId(): string {
+  return `ev-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+const QUICK_ADD_TEMPLATES: { type: CalendarEventType; title: string; timeKey: keyof import("@/hooks/usePrayerTimes").PrayerTimes }[] = [
+  { type: "suhoor", title: "Suhoor (eat before)", timeKey: "imsak" },
+  { type: "iftar", title: "Iftar (break fast)", timeKey: "maghrib" },
+  { type: "fajr", title: "Fajr", timeKey: "fajr" },
+  { type: "dhuhr", title: "Dhuhr", timeKey: "dhuhr" },
+  { type: "asr", title: "Asr", timeKey: "asr" },
+  { type: "maghrib", title: "Maghrib", timeKey: "maghrib" },
+  { type: "isha", title: "Isha", timeKey: "isha" },
+  { type: "taraweeh", title: "Taraweeh (optional)", timeKey: "isha" },
+  { type: "get_food", title: "Get food / prepare", timeKey: "maghrib" },
+];
+
 const DashboardSchedule = () => {
+  const [preferences] = useUserPreferences();
   const [progress, setProgress] = useFastingProgress();
   const [scheduleNotes, setScheduleNotes] = useLocalStorage<Record<string, string>>(
     "tryramadan-schedule-notes",
@@ -104,6 +131,7 @@ const DashboardSchedule = () => {
   const [mealPlans, setMealPlans] = useDayMealPlans();
   const [nutrition, setNutrition] = useDayNutrition();
   const [foodLogs, setFoodLogs] = useDayFoodLog();
+  const [calendarEvents, setCalendarEvents] = useCalendarEvents();
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [noteInput, setNoteInput] = useState("");
@@ -111,9 +139,18 @@ const DashboardSchedule = () => {
   const [showGoalsEditor, setShowGoalsEditor] = useState(false);
   const [addFoodMeal, setAddFoodMeal] = useState<MealType | null>(null);
   const [addFoodCustomInputs, setAddFoodCustomInputs] = useState({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "" });
+  const [exportLoading, setExportLoading] = useState(false);
+  const [customEventTitle, setCustomEventTitle] = useState("");
+  const [customEventTime, setCustomEventTime] = useState("18:00");
 
-  const RAMADAN_START = new Date("2025-02-28");
-  const RAMADAN_END = new Date("2025-03-29");
+  const [journalEntries] = useLocalStorage<{ date: string }[]>("tryramadan-journal", []);
+  const journalDates = new Set(journalEntries.map((e) => e.date));
+
+  const locationCoords = preferences.locationCoords;
+  const lat = locationCoords?.lat ?? null;
+  const lng = locationCoords?.lng ?? null;
+  const { prayerTimes: selectedDayPrayerTimes } = usePrayerTimesForDate(lat, lng, selectedDate);
+
   const today = new Date();
   const todayStr = today.toISOString().split("T")[0];
 
@@ -121,13 +158,6 @@ const DashboardSchedule = () => {
     new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
   const getFirstDayOfMonth = (date: Date) =>
     new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-  const isRamadanDay = (date: Date) => date >= RAMADAN_START && date <= RAMADAN_END;
-  const getRamadanDayNumber = (date: Date) => {
-    if (!isRamadanDay(date)) return null;
-    return (
-      Math.floor((date.getTime() - RAMADAN_START.getTime()) / (1000 * 60 * 60 * 24)) + 1
-    );
-  };
   const isLaylatAlQadrNight = (date: Date) => {
     const day = getRamadanDayNumber(date);
     return day !== null && [21, 23, 25, 27, 29].includes(day);
@@ -171,6 +201,13 @@ const DashboardSchedule = () => {
     setSelectedDate(todayStr);
     setNoteInput(scheduleNotes[todayStr] || "");
   }, [todayStr, scheduleNotes]);
+
+  const goToRamadan = useCallback(() => {
+    const start = getCurrentRamadanStart();
+    setCurrentMonth(new Date(start.getFullYear(), start.getMonth(), 1));
+    setSelectedDate(start.toISOString().split("T")[0]);
+    setNoteInput(scheduleNotes[start.toISOString().split("T")[0]] || "");
+  }, [scheduleNotes]);
 
   const selectDay = useCallback(
     (dateStr: string) => {
@@ -293,12 +330,119 @@ const DashboardSchedule = () => {
     });
   };
 
+  const addCalendarEvent = (type: CalendarEventType, title: string, time: string, durationMinutes: number = 15) => {
+    if (!selectedDate) return;
+    const entry: CalendarEvent = {
+      id: eventId(),
+      title,
+      type,
+      time,
+      durationMinutes,
+      date: selectedDate,
+    };
+    setCalendarEvents((prev) => {
+      const day = prev[selectedDate] ?? [];
+      return { ...prev, [selectedDate]: [...day, entry] };
+    });
+  };
+
+  const quickAddCalendarEvent = (type: CalendarEventType, template: typeof QUICK_ADD_TEMPLATES[0]) => {
+    if (!selectedDate) return;
+    const pt = selectedDayPrayerTimes;
+    let time = "06:00";
+    if (pt && template.timeKey in pt) {
+      time = (pt as Record<string, string>)[template.timeKey] ?? time;
+      if (template.type === "taraweeh" && pt.isha) {
+        const [h, m] = pt.isha.split(":").map(Number);
+        const th = h + 1;
+        const tm = (m || 0) + 30;
+        time = `${(th + Math.floor(tm / 60)).toString().padStart(2, "0")}:${(tm % 60).toString().padStart(2, "0")}`;
+      }
+      if (template.type === "get_food") {
+        const [h, m] = (pt.maghrib ?? "18:00").split(":").map(Number);
+        time = `${h.toString().padStart(2, "0")}:${(Math.max(0, (m || 0) - 30)).toString().padStart(2, "0")}`;
+      }
+    }
+    const duration = template.type === "taraweeh" ? 60 : template.type === "get_food" ? 30 : 15;
+    addCalendarEvent(type, template.title, time, duration);
+  };
+
+  const addCustomCalendarEvent = () => {
+    const title = customEventTitle.trim() || "Custom event";
+    if (!selectedDate) return;
+    addCalendarEvent("custom", title, customEventTime, 30);
+    setCustomEventTitle("");
+    setCustomEventTime("18:00");
+  };
+
+  const removeCalendarEvent = (id: string) => {
+    if (!selectedDate) return;
+    setCalendarEvents((prev) => {
+      const day = (prev[selectedDate] ?? []).filter((e) => e.id !== id);
+      return { ...prev, [selectedDate]: day };
+    });
+  };
+
+  const selectedDayCalendarEvents = selectedDate ? (calendarEvents[selectedDate] ?? []) : [];
+
+  const handleExportIcal = async (range: "month" | "30days" | "ramadan") => {
+    if (!lat || !lng) return;
+    setExportLoading(true);
+    try {
+      const now = new Date();
+      let start: Date;
+      let end: Date;
+      if (range === "month") {
+        start = new Date(now.getFullYear(), now.getMonth(), 1);
+        end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      } else if (range === "30days") {
+        start = new Date(now);
+        end = new Date(now);
+        end.setDate(end.getDate() + 29);
+      } else {
+        const ramadanStart = getCurrentRamadanStart();
+        const ramadanEnd = getRamadanEndForYear(ramadanStart.getFullYear());
+        start = new Date(ramadanStart.getFullYear(), ramadanStart.getMonth(), ramadanStart.getDate());
+        end = new Date(ramadanEnd.getFullYear(), ramadanEnd.getMonth(), ramadanEnd.getDate());
+      }
+      const startStr = start.toISOString().split("T")[0];
+      const endStr = end.toISOString().split("T")[0];
+      const prayerTimesMap: Record<string, import("@/hooks/usePrayerTimes").PrayerTimes> = {};
+      const startYear = start.getFullYear();
+      const endYear = end.getFullYear();
+      for (let y = startYear; y <= endYear; y++) {
+        for (let m = 1; m <= 12; m++) {
+          const monthStart = new Date(y, m - 1, 1);
+          const monthEnd = new Date(y, m, 0);
+          if (monthEnd < start || monthStart > end) continue;
+          const data = await fetchPrayerTimesForMonth(lat, lng, y, m);
+          Object.assign(prayerTimesMap, data);
+        }
+      }
+      const ics = buildIcalContent({
+        prayerTimesMap,
+        customEvents: calendarEvents,
+        dateRange: [startStr, endStr],
+        includeTaraweeh: true,
+        includePrayers: true,
+      });
+      downloadIcal(ics, `tryramadan-${startStr}-to-${endStr}.ics`);
+    } finally {
+      setExportLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <PageSEO
+        title="Schedule | TryRamadan.app"
+        description="Ramadan fasting schedule: calendar, suhoor and iftar times, events, and iCal export. Plan your fasting days."
+        path="/dashboard/schedule"
+      />
       <Navbar />
 
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4 max-w-4xl">
+      <main className="main-content">
+        <div className="container mx-auto px-4 max-w-4xl min-w-0">
           <Link
             to="/dashboard"
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
@@ -345,7 +489,7 @@ const DashboardSchedule = () => {
                   exit={{ height: 0, opacity: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 pt-4 border-t border-border">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-4 pt-4 border-t border-border">
                     <div>
                       <Label className="text-xs">Calories</Label>
                       <Input
@@ -400,11 +544,59 @@ const DashboardSchedule = () => {
             </AnimatePresence>
           </motion.div>
 
+          {/* Export to calendar (.ics) */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            transition={{ delay: 0.07 }}
+            className="mb-6 p-4 rounded-2xl bg-card border border-border"
+          >
+            <h3 className="font-display font-bold mb-2 flex items-center gap-2">
+              <Download className="w-5 h-5 text-secondary" />
+              Export to calendar
+            </h3>
+            <p className="text-sm text-muted-foreground mb-3">
+              Download an .ics file with Suhoor, Iftar, all prayers, optional Taraweeh, and any events you add. Import into Google Calendar, Apple Calendar, or Outlook.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleExportIcal("month")}
+                disabled={exportLoading || !lat || !lng}
+                className="gap-2"
+              >
+                {exportLoading ? <span className="animate-pulse">Loading…</span> : <Download className="w-4 h-4" />}
+                This month
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleExportIcal("30days")}
+                disabled={exportLoading || !lat || !lng}
+                className="gap-2"
+              >
+                Next 30 days
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleExportIcal("ramadan")}
+                disabled={exportLoading || !lat || !lng}
+                className="gap-2"
+              >
+                Ramadan
+              </Button>
+            </div>
+            {(!lat || !lng) && (
+              <p className="text-xs text-muted-foreground mt-2">Set your location in Settings to include prayer times.</p>
+            )}
+          </motion.div>
+
           {/* Stats: Ramadan, Sunnah, completed, hours fasted */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             transition={{ delay: 0.1 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"
+            className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6"
           >
             <Tooltip>
               <TooltipTrigger asChild>
@@ -455,7 +647,7 @@ const DashboardSchedule = () => {
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
-                <h3 className="font-display font-bold text-lg min-w-[180px] text-center">
+                <h3 className="font-display font-bold text-base sm:text-lg min-w-0 text-center">
                   {monthName}
                 </h3>
                 <button
@@ -466,13 +658,18 @@ const DashboardSchedule = () => {
                   <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
-              <Button variant="outline" size="sm" onClick={goToToday} className="gap-2">
-                <CalendarDays className="w-4 h-4" />
-                Go to today
-              </Button>
+              <div className="flex gap-2 flex-wrap">
+                <Button variant="outline" size="sm" onClick={goToRamadan} className="gap-2">
+                  <CalendarDays className="w-4 h-4" />
+                  Go to Ramadan
+                </Button>
+                <Button variant="outline" size="sm" onClick={goToToday} className="gap-2">
+                  Go to today
+                </Button>
+              </div>
             </div>
 
-            <div className="grid grid-cols-7 gap-1 mb-2">
+            <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-2">
               {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
                 <div key={day} className="text-center text-xs text-muted-foreground py-2">
                   {day}
@@ -480,7 +677,7 @@ const DashboardSchedule = () => {
               ))}
             </div>
 
-            <div className="grid grid-cols-7 gap-1">
+            <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
               {Array.from({ length: firstDay }).map((_, i) => (
                 <div key={`empty-${i}`} className="aspect-square" />
               ))}
@@ -498,6 +695,7 @@ const DashboardSchedule = () => {
                 const isToday = date.toDateString() === today.toDateString();
                 const isSpecialNight = isLaylatAlQadrNight(date);
                 const hasNote = scheduleNotes[dateStr];
+                const hasJournal = journalDates.has(dateStr);
                 const hasMeals =
                   mealPlans[dateStr]?.suhoor || mealPlans[dateStr]?.iftar;
                 const hasNutrition =
@@ -544,6 +742,9 @@ const DashboardSchedule = () => {
                         {hasNote && (
                           <PenLine className="w-2.5 h-2.5 absolute top-0.5 left-0.5 text-muted-foreground" />
                         )}
+                        {hasJournal && (
+                          <span className="absolute bottom-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-primary" title="Journal entry" />
+                        )}
                         {(hasMeals || hasNutrition) && (
                           <span className="absolute bottom-0.5 left-0.5 text-[10px] opacity-70">
                             •
@@ -558,6 +759,7 @@ const DashboardSchedule = () => {
                       {isSunnah && !isRamadan && " · Sunnah day"}
                       {completed && " · Completed ✓"}
                       {hasNote && " · Has note"}
+                      {hasJournal && " · Journal entry"}
                       {" · Click to view/edit"}
                     </TooltipContent>
                   </Tooltip>
@@ -659,6 +861,71 @@ const DashboardSchedule = () => {
                         placeholder="Reflection or note for this day..."
                         className="w-full p-3 rounded-lg border border-border bg-background text-sm min-h-[72px] resize-none focus:ring-2 focus:ring-secondary outline-none"
                       />
+                    </div>
+
+                    {/* Add to calendar: quick-add events + custom + list */}
+                    <div>
+                      <Label className="flex items-center gap-2 text-sm font-medium mb-2">
+                        <CalendarDays className="w-4 h-4" />
+                        Add to calendar (export .ics above)
+                      </Label>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        Quick-add Suhoor, Iftar, prayers, Taraweeh, get food. These plus your custom events are included when you export.
+                      </p>
+                      <div className="flex flex-wrap gap-1.5 mb-2">
+                        {QUICK_ADD_TEMPLATES.map((t) => (
+                          <Button
+                            key={t.type}
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="text-xs h-8"
+                            onClick={() => quickAddCalendarEvent(t.type, t)}
+                          >
+                            {t.title}
+                          </Button>
+                        ))}
+                      </div>
+                      <div className="flex gap-2 mb-2 flex-wrap items-end">
+                        <Input
+                          placeholder="Custom event title"
+                          value={customEventTitle}
+                          onChange={(e) => setCustomEventTitle(e.target.value)}
+                          className="flex-1 min-w-[120px] h-9 text-sm"
+                        />
+                        <input
+                          type="time"
+                          value={customEventTime}
+                          onChange={(e) => setCustomEventTime(e.target.value)}
+                          className="h-9 px-2 rounded-md border border-border bg-background text-sm"
+                        />
+                        <Button type="button" size="sm" onClick={addCustomCalendarEvent} className="h-9">
+                          Add
+                        </Button>
+                      </div>
+                      {selectedDayCalendarEvents.length > 0 && (
+                        <ul className="space-y-1.5 mt-2">
+                          {selectedDayCalendarEvents.map((e) => (
+                            <li
+                              key={e.id}
+                              className="flex items-center justify-between py-1.5 px-2 rounded-lg bg-muted/50 text-sm"
+                            >
+                              <span className="flex items-center gap-2">
+                                <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                                {e.time} — {e.title}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => removeCalendarEvent(e.id)}
+                                className="p-1 rounded hover:bg-destructive/20 text-muted-foreground hover:text-destructive"
+                                aria-label="Remove"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </div>
 
                     {/* Meal plan (short text) */}
@@ -909,7 +1176,7 @@ const DashboardSchedule = () => {
                         <Flame className="w-4 h-4" />
                         Calories & macros (estimate or log)
                       </Label>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
                         <div>
                           <Label className="text-xs text-muted-foreground">Calories</Label>
                           <Input

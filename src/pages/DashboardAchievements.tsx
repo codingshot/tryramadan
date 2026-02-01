@@ -6,6 +6,7 @@ import { Footer } from "@/components/Footer";
 import { useFastingProgress, useLocalStorage } from "@/hooks/useLocalStorage";
 import { ArabicHover } from "@/components/ArabicHover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { PageSEO } from "@/components/PageSEO";
 
 export default function DashboardAchievements() {
   const [progress] = useFastingProgress();
@@ -45,9 +46,14 @@ export default function DashboardAchievements() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageSEO
+        title="Achievements | TryRamadan.app"
+        description="Ramadan fasting achievements and badges: first fast, streaks, and learning milestones."
+        path="/dashboard/achievements"
+      />
       <Navbar />
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4 max-w-4xl">
+      <main className="main-content">
+        <div className="container mx-auto px-4 max-w-4xl min-w-0">
           <Link
             to="/dashboard"
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"

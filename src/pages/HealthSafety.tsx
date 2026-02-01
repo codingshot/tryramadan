@@ -7,6 +7,7 @@ import {
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArabicHover } from "@/components/ArabicHover";
+import { PageSEO } from "@/components/PageSEO";
 
 const HealthSafety = () => {
   const contraindications = [
@@ -29,10 +30,15 @@ const HealthSafety = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageSEO
+        title="Health & Safety | TryRamadan.app"
+        description="Ramadan fasting health and safety: who should avoid fasting, when to break a fast, hydration and nutrition tips, and when to seek medical advice."
+        path="/health-safety"
+      />
       <Navbar />
       
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4 max-w-4xl">
+      <main className="main-content">
+        <div className="container mx-auto px-4 max-w-4xl min-w-0">
           <Link 
             to="/" 
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"

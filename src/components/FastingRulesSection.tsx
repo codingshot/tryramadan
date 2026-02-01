@@ -1,7 +1,9 @@
 import { motion } from "framer-motion";
-import { AlertTriangle, CheckCircle, XCircle, Info } from "lucide-react";
+import { AlertTriangle, CheckCircle, XCircle, Info, BookOpen } from "lucide-react";
 import ramadanInfo from "@/data/ramadan-info.json";
 import { ArabicTerm } from "./ArabicTerm";
+import { QuranLink } from "./QuranLink";
+import { HadithSunnahLink } from "./HadithSunnahLink";
 
 export const FastingRulesSection = () => {
   const rules = ramadanInfo.fastingRules;
@@ -73,6 +75,33 @@ export const FastingRulesSection = () => {
             </motion.div>
           ))}
         </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mt-12 pt-8 border-t border-border"
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <BookOpen className="w-5 h-5 text-secondary" />
+            <h4 className="font-display font-bold">Sources</h4>
+          </div>
+          <p className="text-sm text-muted-foreground max-w-2xl">
+            These guidelines are based on the Quran and the Sunnah (teachings of the Prophet ﷺ). Fasting is prescribed in the Quran in{" "}
+            <QuranLink chapterNumber={2} className="font-medium">
+              Surah Al-Baqarah 2:183–187
+            </QuranLink>
+            . Rules and details are found in the hadith collections, including{" "}
+            <HadithSunnahLink source="Sahih al-Bukhari fasting" className="font-medium">
+              Sahih al-Bukhari, Book of Fasting
+            </HadithSunnahLink>
+            {" "}and{" "}
+            <HadithSunnahLink source="Sahih Muslim fasting" className="font-medium">
+              Sahih Muslim, Book of Fasting
+            </HadithSunnahLink>
+            .
+          </p>
+        </motion.div>
       </div>
     </section>
   );

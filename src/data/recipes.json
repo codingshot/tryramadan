@@ -12,7 +12,14 @@
       "nutrition": { "calories": 420, "protein": "22g", "carbs": "38g", "fat": "18g" },
       "significance": "Ful medames has been a staple suhoor in Egypt and the Levant for centuries, providing lasting energy for the long fast.",
       "dietary": ["vegetarian"],
-      "countryId": "egypt"
+      "countryId": "egypt",
+      "steps": [
+        "If using dried fava beans, soak overnight and simmer until tender; or use canned, drained fava beans.",
+        "Warm the beans in a pan with a little olive oil and cumin. Mash lightly with a fork.",
+        "Fry or poach eggs to your liking.",
+        "Slice tomatoes and cucumber. Warm pita.",
+        "Serve beans in a bowl, top with tahini, egg, vegetables, and a drizzle of olive oil. Serve with pita."
+      ]
     },
     {
       "id": 2,
@@ -59,7 +66,13 @@
       "nutrition": { "calories": 380, "protein": "12g", "carbs": "52g", "fat": "14g" },
       "significance": "Dates and oats align with the Sunnah of breaking fast with dates while providing sustained energy.",
       "dietary": ["vegetarian", "vegan-option"],
-      "countryId": "western-communities"
+      "countryId": "western-communities",
+      "steps": [
+        "In a jar or bowl, combine oats, milk, a pinch of cinnamon, and a drizzle of honey. Stir well.",
+        "Chop 2–3 dates and add to the mixture. Add a handful of almonds (whole or sliced).",
+        "Cover and refrigerate overnight (or at least 4 hours).",
+        "In the morning, stir and eat cold or microwave briefly. Add extra dates or nuts on top if you like."
+      ]
     },
     {
       "id": 6,
@@ -139,7 +152,12 @@
       "benefits": "Natural sugars provide quick energy; dates are easily digestible",
       "tips": "Eat 1-3 dates and drink water, then pray Maghrib before the main meal",
       "significance": "The Prophet (peace be upon him) broke his fast with dates and water; this tradition is followed by Muslims worldwide at iftar.",
-      "dietary": ["vegetarian", "vegan-option"]
+      "dietary": ["vegetarian", "vegan-option"],
+      "steps": [
+        "At Maghrib (sunset), break your fast with 1–3 dates (Medjool or any variety).",
+        "Drink a glass of water. Optionally drink a little milk.",
+        "Pray Maghrib, then proceed to your main iftar meal."
+      ]
     },
     {
       "id": 2,
@@ -153,7 +171,13 @@
       "nutrition": { "calories": 280, "protein": "14g", "carbs": "42g", "fat": "6g" },
       "significance": "Harira is the iconic iftar soup in Morocco, often served with dates and chebakia during Ramadan.",
       "dietary": ["vegetarian"],
-      "countryId": "morocco"
+      "countryId": "morocco",
+      "steps": [
+        "Sauté chopped celery, onion, and ginger in olive oil until soft. Add tomatoes and cook until broken down.",
+        "Add lentils, chickpeas (canned or pre-cooked), water or broth, and spices (turmeric, cinnamon, pepper). Bring to a boil, then simmer until lentils are tender (about 25–30 min).",
+        "Stir in chopped cilantro and a little lemon juice. Adjust salt to taste.",
+        "Serve hot with dates and chebakia (honey cookies) on the side for a traditional Moroccan iftar."
+      ]
     },
     {
       "id": 3,
@@ -175,7 +199,13 @@
       "prepTime": "40 min",
       "benefits": "Traditional celebration dessert (enjoy in moderation)",
       "tips": "Balance sweet treats with protein-rich main dishes",
-      "countryId": "egypt"
+      "countryId": "egypt",
+      "steps": [
+        "Thaw kadaif (shredded phyllo) if frozen. Mix with melted butter. Press half into a greased baking dish.",
+        "Layer akkawi (or mild white) cheese over the kadaif. Top with the remaining kadaif and press gently.",
+        "Bake in a preheated 350°F (180°C) oven until golden and crisp (about 25–30 min).",
+        "Meanwhile, make sugar syrup: boil sugar, water, and a splash of rose water; cool slightly. Pour syrup over hot konafa. Let absorb before serving."
+      ]
     },
     {
       "id": 5,

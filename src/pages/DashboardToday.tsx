@@ -12,14 +12,17 @@ import {
   useUserPreferences,
   useFastingProgress,
   startFastingToday,
+  breakFastingToday,
   getTodayFastingLog,
   isFastingToday,
   useTodayData,
 } from "@/hooks/useLocalStorage";
+import { BreakFastReasonDialog } from "@/components/BreakFastReasonDialog";
 import { usePrayerTimes } from "@/hooks/usePrayerTimes";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
 import { PrayerLocationBadge } from "@/components/PrayerLocationBadge";
+import { PageSEO } from "@/components/PageSEO";
 
 const HYDRATION_GOAL = 8;
 
@@ -29,6 +32,7 @@ const DashboardToday = () => {
   const { intention, hydrationGlasses, energyEntries, setIntention, setHydrationGlasses, addEnergyEntry } = useTodayData();
   const [energyLevel, setEnergyLevel] = useState<1 | 2 | 3 | 4 | 5>(3);
   const [showBreakFast, setShowBreakFast] = useState(false);
+  const [showBreakFastDialog, setShowBreakFastDialog] = useState(false);
   const [countdownSuhoorEnd, setCountdownSuhoorEnd] = useState({ h: 0, m: 0 });
   const [countdownIftar, setCountdownIftar] = useState({ h: 0, m: 0 });
   
@@ -98,10 +102,15 @@ const DashboardToday = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageSEO
+        title="Today | TryRamadan.app"
+        description="Today's fasting view: countdown to iftar, hydration and energy tracking, intention, and break-fast options. Stay mindful during your fast."
+        path="/dashboard/today"
+      />
       <Navbar />
       
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4 max-w-4xl">
+      <main className="main-content">
+        <div className="container mx-auto px-4 max-w-4xl min-w-0">
           {/* Back link */}
           <Link 
             to="/dashboard" 
@@ -148,13 +157,27 @@ const DashboardToday = () => {
               </button>
             )}
             {fastingToday && todayLog && (
-              <div className="mt-4 py-3 px-4 rounded-xl bg-secondary/20 border border-secondary/40 text-center text-sm">
-                <span className="font-medium text-secondary">You're fasting</span>
-                <span className="text-muted-foreground ml-2">
-                  since {new Date(todayLog.startedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
-                </span>
+              <div className="mt-4 space-y-2">
+                <div className="py-3 px-4 rounded-xl bg-secondary/20 border border-secondary/40 text-center text-sm">
+                  <span className="font-medium text-secondary">You're fasting</span>
+                  <span className="text-muted-foreground ml-2">
+                    since {new Date(todayLog.startedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowBreakFastDialog(true)}
+                  className="w-full py-2.5 px-4 rounded-xl border border-destructive/40 bg-destructive/10 text-destructive font-medium text-sm hover:bg-destructive/20 transition-colors"
+                >
+                  I broke my fast — choose reason
+                </button>
               </div>
             )}
+            <BreakFastReasonDialog
+              open={showBreakFastDialog}
+              onOpenChange={setShowBreakFastDialog}
+              onSelectReason={(reasonId) => breakFastingToday(progress, setProgress, reasonId)}
+            />
           </motion.div>
           
           {/* Dual countdown */}
@@ -163,7 +186,7 @@ const DashboardToday = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.12 }}
-              className="mb-6 grid grid-cols-2 gap-4"
+              className="mb-6 grid grid-cols-2 gap-3 sm:gap-4"
             >
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -351,7 +374,7 @@ const DashboardToday = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="grid grid-cols-2 gap-4 mb-8"
+            className="grid grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8"
           >
             <div className="p-4 rounded-2xl bg-card border border-border text-center">
               <Droplets className="w-6 h-6 text-blue-500 mx-auto mb-2" />
@@ -374,7 +397,7 @@ const DashboardToday = () => {
           >
             <button
               onClick={() => setShowBreakFast(true)}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-destructive/50 text-destructive hover:bg-destructive/10 transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-xl border-2 border-destructive/50 text-destructive hover:bg-destructive/10 transition-colors min-h-[44px]"
             >
               <AlertTriangle className="w-5 h-5" />
               Need to Break Fast Early?

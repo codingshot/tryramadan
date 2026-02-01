@@ -45,6 +45,7 @@ export const ROUTES = [
   "/dashboard/culture",
   "/dashboard/health",
   "/dashboard/journal",
+  "/dashboard/goals",
   "/dashboard/achievements",
   "/onboarding/welcome",
   "/onboarding/mode",
@@ -54,6 +55,7 @@ export const ROUTES = [
   "/onboarding/schedule",
   "/onboarding/notifications",
   "/onboarding/goals",
+  "/guides",
 ] as const;
 
 describe("Routes", () => {

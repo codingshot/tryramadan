@@ -17,7 +17,7 @@ export default function CultureCountry() {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main className="pt-20 pb-16 container mx-auto px-4 max-w-4xl">
+        <main className="main-content container mx-auto px-4 max-w-4xl min-w-0">
           <h1 className="text-2xl font-display font-bold">Country not found</h1>
           <p className="text-muted-foreground mt-2">This culture or country page doesn't exist.</p>
           <Link to="/culture" className="mt-4 inline-block text-secondary hover:underline">
@@ -44,8 +44,8 @@ export default function CultureCountry() {
         type="article"
       />
       <Navbar />
-      <main className="pt-20 pb-16" role="main" aria-label={`Ramadan traditions in ${country.name}`}>
-        <div className="container mx-auto px-4 max-w-4xl">
+      <main className="main-content" role="main" aria-label={`Ramadan traditions in ${country.name}`}>
+        <div className="container mx-auto px-4 max-w-4xl min-w-0">
           <Link
             to="/culture"
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 min-h-[44px] items-center"

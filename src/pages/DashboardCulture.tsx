@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PageSEO } from "@/components/PageSEO";
 
 type Country = {
   id: string;
@@ -38,9 +39,14 @@ export default function DashboardCulture() {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageSEO
+        title="Culture | TryRamadan.app"
+        description="Compare Ramadan traditions across countries. Explore foods, customs, and regional practices."
+        path="/dashboard/culture"
+      />
       <Navbar />
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
+      <main className="main-content">
+        <div className="container mx-auto px-4 sm:px-6 max-w-5xl min-w-0">
           <Link
             to="/dashboard"
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
@@ -105,7 +111,7 @@ export default function DashboardCulture() {
                 </Select>
               </div>
             </div>
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               {countryA && (
                 <div className="p-4 rounded-xl bg-muted/50 border border-border">
                   <div className="flex items-center gap-2 mb-3">

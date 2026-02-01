@@ -16,6 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { PrayerLocationBadge } from "@/components/PrayerLocationBadge";
+import { PageSEO } from "@/components/PageSEO";
 
 const DashboardPrayers = () => {
   const [preferences] = useUserPreferences();
@@ -73,10 +74,15 @@ const DashboardPrayers = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageSEO
+        title="Prayer Times | TryRamadan.app"
+        description="Daily prayer times for your location: Fajr, Dhuhr, Asr, Maghrib, Isha. Track prayers and set suhoor/iftar reminders."
+        path="/dashboard/prayers"
+      />
       <Navbar />
       
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4 max-w-4xl">
+      <main className="main-content">
+        <div className="container mx-auto px-4 max-w-4xl min-w-0">
           <Link 
             to="/dashboard" 
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"

@@ -17,6 +17,7 @@ import DashboardCulture from "./pages/DashboardCulture";
 import DashboardHealth from "./pages/DashboardHealth";
 import DashboardJournal from "./pages/DashboardJournal";
 import DashboardAchievements from "./pages/DashboardAchievements";
+import DashboardGoals from "./pages/DashboardGoals";
 import OnboardingLayout from "./pages/onboarding/OnboardingLayout";
 import OnboardingWelcome from "./pages/onboarding/OnboardingWelcome";
 import OnboardingMode from "./pages/onboarding/OnboardingMode";
@@ -40,8 +41,12 @@ import RecipeDetail from "./pages/RecipeDetail";
 import Terms from "./pages/Terms";
 import Legal from "./pages/Legal";
 import Privacy from "./pages/Privacy";
+import Guides from "./pages/Guides";
+import GuidePage from "./pages/GuidePage";
 import NotFound from "./pages/NotFound";
 import { AdhanScheduler } from "./components/AdhanScheduler";
+import { FastingBottomBar } from "./components/FastingBottomBar";
+import { ReminderScheduler } from "./components/ReminderScheduler";
 
 const queryClient = new QueryClient();
 
@@ -78,6 +83,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AdhanScheduler />
+        <ReminderScheduler />
+        <FastingBottomBar />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route
@@ -109,6 +116,7 @@ const App = () => (
           <Route path="/dashboard/health" element={<DashboardHealth />} />
           <Route path="/dashboard/journal" element={<DashboardJournal />} />
           <Route path="/dashboard/achievements" element={<DashboardAchievements />} />
+          <Route path="/dashboard/goals" element={<DashboardGoals />} />
           <Route path="/learn/glossary" element={<LearnGlossary />} />
           <Route path="/learn/hadith" element={<LearnHadith />} />
           <Route path="/health-safety" element={<HealthSafety />} />
@@ -123,6 +131,8 @@ const App = () => (
           <Route path="/terms" element={<Terms />} />
           <Route path="/legal" element={<Legal />} />
           <Route path="/privacy" element={<Privacy />} />
+          <Route path="/guides" element={<Guides />} />
+          <Route path="/guides/:slug" element={<GuidePage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

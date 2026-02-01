@@ -14,8 +14,8 @@ export default function Privacy() {
     <div className="min-h-screen bg-background">
       <PageSEO title={PRIVACY_TITLE} description={PRIVACY_DESCRIPTION} path="/privacy" />
       <Navbar />
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4 max-w-3xl">
+      <main className="main-content">
+        <div className="container mx-auto px-4 max-w-3xl min-w-0">
           <Link
             to="/"
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-8"
@@ -28,7 +28,7 @@ export default function Privacy() {
             animate={{ opacity: 1, y: 0 }}
             className="prose prose-neutral dark:prose-invert max-w-none"
           >
-            <h1 className="text-3xl md:text-4xl font-display font-bold mb-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold mb-2">
               Privacy Policy
             </h1>
             <p className="text-muted-foreground text-sm mb-8">

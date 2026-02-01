@@ -5,13 +5,19 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FastingPrograms } from "@/components/FastingPrograms";
 import { ArabicHover } from "@/components/ArabicHover";
+import { PageSEO } from "@/components/PageSEO";
 
 const Programs = () => {
   return (
     <div className="min-h-screen bg-background">
+      <PageSEO
+        title="Fasting Programs | TryRamadan.app"
+        description="Progressive Ramadan fasting programs for beginners: gentle start, half-day, and full Ramadan experience. Choose a path that fits you."
+        path="/programs"
+      />
       <Navbar />
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4 sm:px-6 max-w-5xl">
+      <main className="main-content">
+        <div className="container mx-auto px-4 sm:px-6 max-w-5xl min-w-0">
           <Link
             to="/"
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 min-h-[44px] items-center"

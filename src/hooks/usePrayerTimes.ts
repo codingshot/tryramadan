@@ -35,11 +35,34 @@ interface AladhanResponse {
   };
 }
 
+/** Today's date as YYYY-MM-DD (updates at midnight). */
+function useTodayStr() {
+  const [todayStr, setTodayStr] = useState(() => new Date().toISOString().split('T')[0]);
+  useEffect(() => {
+    const tick = () => {
+      const next = new Date().toISOString().split('T')[0];
+      setTodayStr((prev) => (prev !== next ? next : prev));
+    };
+    const t = setInterval(tick, 60 * 1000); // check every minute for date change
+    return () => clearInterval(t);
+  }, []);
+  return todayStr;
+}
+
+/** Format YYYY-MM-DD or Date to DD-MM-YYYY for Aladhan API (padded). */
+function toAladhanDateStr(date: Date): string {
+  const d = String(date.getDate()).padStart(2, '0');
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const y = date.getFullYear();
+  return `${d}-${m}-${y}`;
+}
+
 export function usePrayerTimes(lat: number | null, lng: number | null) {
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
   const [hijriDate, setHijriDate] = useState<{ day: string; month: string; monthAr: string; year: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const todayStr = useTodayStr();
 
   useEffect(() => {
     if (!lat || !lng) return;
@@ -49,10 +72,11 @@ export function usePrayerTimes(lat: number | null, lng: number | null) {
       setError(null);
 
       try {
-        const today = new Date();
-        const dateStr = `${today.getDate()}-${today.getMonth() + 1}-${today.getFullYear()}`;
+        const [y, m, d] = todayStr.split('-').map(Number);
+        const date = new Date(y, m - 1, d);
+        const dateStr = toAladhanDateStr(date);
         
-        // Using Aladhan API - free and open source
+        // Using Aladhan API - free and open source (date-specific so each day updates)
         const response = await fetch(
           `https://api.aladhan.com/v1/timings/${dateStr}?latitude=${lat}&longitude=${lng}&method=2`
         );
@@ -91,7 +115,7 @@ export function usePrayerTimes(lat: number | null, lng: number | null) {
     };
 
     fetchPrayerTimes();
-  }, [lat, lng]);
+  }, [lat, lng, todayStr]);
 
   return { prayerTimes, hijriDate, loading, error };
 }
@@ -161,6 +185,66 @@ export function usePrayerTimesForDate(
   }, [lat, lng, isoDate]);
 
   return { prayerTimes, hijriDate, loading, error };
+}
+
+/** Strip " (GMT)" or " (BST)" etc. from API time string to get HH:mm */
+function stripTimeSuffix(s: string): string {
+  if (!s) return '';
+  const i = s.indexOf(' ');
+  return i >= 0 ? s.slice(0, i) : s;
+}
+
+/** Aladhan calendar API: returns prayer times for each day of a month. */
+interface AladhanCalendarDay {
+  timings: {
+    Fajr?: string;
+    Sunrise?: string;
+    Dhuhr?: string;
+    Asr?: string;
+    Maghrib?: string;
+    Isha?: string;
+    Imsak?: string;
+  };
+  date?: {
+    readable?: string;
+    gregorian?: { date?: string; day?: string; month?: { number?: number }; year?: string };
+  };
+}
+
+/** Fetch prayer times for a full month (for iCal export). Returns Record<YYYY-MM-DD, PrayerTimes>. */
+export async function fetchPrayerTimesForMonth(
+  lat: number,
+  lng: number,
+  year: number,
+  month: number
+): Promise<Record<string, PrayerTimes>> {
+  const response = await fetch(
+    `https://api.aladhan.com/v1/calendar?latitude=${lat}&longitude=${lng}&method=2&month=${month}&year=${year}`
+  );
+  if (!response.ok) throw new Error('Failed to fetch prayer times calendar');
+  const json = await response.json();
+  const days: AladhanCalendarDay[] = json.data ?? [];
+  const out: Record<string, PrayerTimes> = {};
+  days.forEach((day) => {
+    const greg = day.date?.gregorian;
+    if (!greg || !day.timings) return;
+    const d = greg.day?.padStart(2, '0') ?? '';
+    const m = String(greg.month?.number ?? '').padStart(2, '0');
+    const y = greg.year ?? '';
+    if (!d || !m || !y) return;
+    const iso = `${y}-${m}-${d}`;
+    out[iso] = {
+      fajr: stripTimeSuffix(day.timings.Fajr ?? ''),
+      sunrise: stripTimeSuffix(day.timings.Sunrise ?? ''),
+      dhuhr: stripTimeSuffix(day.timings.Dhuhr ?? ''),
+      asr: stripTimeSuffix(day.timings.Asr ?? ''),
+      maghrib: stripTimeSuffix(day.timings.Maghrib ?? ''),
+      isha: stripTimeSuffix(day.timings.Isha ?? ''),
+      imsak: stripTimeSuffix(day.timings.Imsak ?? ''),
+      date: day.date?.readable ?? iso,
+    };
+  });
+  return out;
 }
 
 // Check if today is a Sunnah fasting day

@@ -9,17 +9,17 @@ export const Footer = () => {
   return (
     <footer className="bg-primary text-primary-foreground">
       {/* Main footer content */}
-      <div className="container mx-auto px-4 py-16">
-        <div className="grid md:grid-cols-4 gap-12">
+      <div className="container mx-auto px-4 py-10 sm:py-12 md:py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
           {/* Brand */}
-          <div className="md:col-span-2">
+          <div className="sm:col-span-2">
             <div className="flex items-center gap-3 mb-4">
               <img src={logo} alt="TryRamadan" className="w-12 h-12" />
               <span className="font-display font-bold text-xl">
                 Try<span className="text-secondary">Ramadan</span>
               </span>
             </div>
-            <p className="text-primary-foreground/70 mb-6 max-w-md">
+            <p className="text-primary-foreground/70 mb-6 max-w-md text-sm sm:text-base">
               A culturally immersive wellness app that introduces non-Muslims to the practice 
               of Ramadan fasting through a progressive, educational, and respectful approach.
             </p>
@@ -30,7 +30,7 @@ export const Footer = () => {
             <h4 className="font-display font-bold mb-4">Quick Links</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/#features" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
+                <Link to="/" state={{ scrollTo: "features" }} className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
                   Features
                 </Link>
               </li>
@@ -50,7 +50,7 @@ export const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/#health" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
+                <Link to="/health-safety" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
                   Health Benefits
                 </Link>
               </li>
@@ -61,6 +61,11 @@ export const Footer = () => {
           <div>
             <h4 className="font-display font-bold mb-4">Resources</h4>
             <ul className="space-y-2">
+              <li>
+                <Link to="/guides" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
+                  User Guides
+                </Link>
+              </li>
               <li>
                 <Link to="/learn/glossary" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
                   Glossary
@@ -112,7 +117,7 @@ export const Footer = () => {
                 </a>
               </li>
               <li>
-                <Link to="/#about" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
+                <Link to="/" state={{ scrollTo: "about" }} className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
                   About Us
                 </Link>
               </li>
@@ -123,19 +128,19 @@ export const Footer = () => {
 
       {/* Bottom bar */}
       <div className="border-t border-primary-foreground/10">
-        <div className="container mx-auto px-4 py-6">
+        <div className="container mx-auto px-4 py-4 sm:py-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-primary-foreground/60">
+            <p className="text-xs sm:text-sm text-primary-foreground/60 text-center md:text-left">
               © {currentYear} TryRamadan.app. All rights reserved.
             </p>
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-              <Link to="/terms" className="text-sm text-primary-foreground/60 hover:text-secondary transition-colors">
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+              <Link to="/terms" className="text-xs sm:text-sm text-primary-foreground/60 hover:text-secondary transition-colors min-h-[44px] min-w-[44px] inline-flex items-center justify-center">
                 Terms
               </Link>
-              <Link to="/legal" className="text-sm text-primary-foreground/60 hover:text-secondary transition-colors">
+              <Link to="/legal" className="text-xs sm:text-sm text-primary-foreground/60 hover:text-secondary transition-colors min-h-[44px] min-w-[44px] inline-flex items-center justify-center">
                 Legal
               </Link>
-              <Link to="/privacy" className="text-sm text-primary-foreground/60 hover:text-secondary transition-colors">
+              <Link to="/privacy" className="text-xs sm:text-sm text-primary-foreground/60 hover:text-secondary transition-colors min-h-[44px] min-w-[44px] inline-flex items-center justify-center">
                 Privacy
               </Link>
               <a 
