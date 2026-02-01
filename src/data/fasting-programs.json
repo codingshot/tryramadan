@@ -1,8 +1,28 @@
 {
   "programs": [
     {
+      "id": "traditional",
+      "name": "Full Ramadan Fast",
+      "nameAr": "صيام رمضان الكامل",
+      "duration": "Dawn to Sunset",
+      "description": "Experience fasting as Muslims do during Ramadan - from the pre-dawn suhoor until sunset iftar. This is the authentic Ramadan experience.",
+      "recommended": true,
+      "weeklySchedule": [
+        { "week": 1, "hours": "Full", "focus": "Embracing the complete experience" },
+        { "week": 2, "hours": "Full", "focus": "Deepening understanding" },
+        { "week": 3, "hours": "Full", "focus": "Finding your rhythm" },
+        { "week": 4, "hours": "Full", "focus": "Completion and reflection" }
+      ],
+      "tips": [
+        "Suhoor is essential - never skip it",
+        "Break your fast gently with dates and water",
+        "Listen to your body throughout the day"
+      ]
+    },
+    {
       "id": "beginner",
       "name": "Gentle Start",
+      "nameAr": "البداية اللطيفة",
       "duration": "12 hours",
       "description": "Perfect for those new to fasting. Start with a comfortable 12-hour window, similar to overnight fasting most people already do naturally.",
       "weeklySchedule": [
@@ -20,6 +40,7 @@
     {
       "id": "intermediate",
       "name": "Building Strength",
+      "nameAr": "بناء القوة",
       "duration": "16 hours",
       "description": "For those with some fasting experience. This mirrors popular 16:8 intermittent fasting protocols used for wellness.",
       "weeklySchedule": [
@@ -32,23 +53,6 @@
         "Plan your meals carefully to maximize nutrition",
         "Consider light activity during fasting hours",
         "Use this time for reflection and mindfulness"
-      ]
-    },
-    {
-      "id": "traditional",
-      "name": "Full Ramadan",
-      "duration": "Dawn to Sunset",
-      "description": "Experience fasting as Muslims do during Ramadan - from the pre-dawn suhoor until sunset iftar. Duration varies by location and season.",
-      "weeklySchedule": [
-        { "week": 1, "hours": "Full", "focus": "Embracing the complete experience" },
-        { "week": 2, "hours": "Full", "focus": "Deepening understanding" },
-        { "week": 3, "hours": "Full", "focus": "Finding your rhythm" },
-        { "week": 4, "hours": "Full", "focus": "Completion and reflection" }
-      ],
-      "tips": [
-        "Suhoor is essential - never skip it",
-        "Break your fast gently with dates and water",
-        "Listen to your body throughout the day"
       ]
     }
   ],
