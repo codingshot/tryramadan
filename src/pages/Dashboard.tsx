@@ -10,6 +10,7 @@ import { Navbar } from "@/components/Navbar";
 import { FastingTimer } from "@/components/FastingTimer";
 import { SunnahFastingBadge } from "@/components/SunnahFastingBadge";
 import { DailyHadith } from "@/components/DailyHadith";
+import { LocationDisplay } from "@/components/LocationDisplay";
 import { useUserPreferences, useFastingProgress } from "@/hooks/useLocalStorage";
 import { usePrayerTimes, getSunnahFastingInfo, checkAyyamAlBeed } from "@/hooks/usePrayerTimes";
 import { useAutoLocation } from "@/hooks/useLocation";
@@ -151,20 +152,17 @@ const Dashboard = () => {
               
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button className="p-2 rounded-full hover:bg-muted transition-colors">
+                  <Link to="/settings" className="p-2 rounded-full hover:bg-muted transition-colors">
                     <Settings className="w-5 h-5 text-muted-foreground" />
-                  </button>
+                  </Link>
                 </TooltipTrigger>
                 <TooltipContent>Settings • الإعدادات</TooltipContent>
               </Tooltip>
             </div>
             
-            {/* Location display */}
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <MapPin className="w-4 h-4" />
-              <span className="text-sm">
-                {preferences.location?.split(',')[0] || autoLocation?.name || 'Detecting location...'}
-              </span>
+            {/* Location display with edit option */}
+            <div className="flex items-center gap-2">
+              <LocationDisplay showTimezone />
               {(locationLoading || timesLoading) && (
                 <span className="text-xs text-muted-foreground animate-pulse">updating...</span>
               )}
