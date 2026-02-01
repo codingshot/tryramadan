@@ -1,51 +1,50 @@
 import { motion } from "framer-motion";
-import { Clock, BookOpen, Heart, Bell, Shield, Globe, Utensils, Calendar } from "lucide-react";
 
 const features = [
   {
-    icon: <Clock className="w-6 h-6" />,
+    emoji: "🕐",
     title: "Smart Fasting Timer",
     titleAr: "مؤقت الصيام الذكي",
     description: "Location-based sunrise/sunset calculations synced with actual Ramadan fasting times in your area.",
   },
   {
-    icon: <Calendar className="w-6 h-6" />,
+    emoji: "📅",
     title: "Progressive Program",
     titleAr: "برنامج تدريجي",
     description: "Start with 12-hour fasts and gradually build up to full dawn-to-sunset fasting over 4 weeks.",
   },
   {
-    icon: <BookOpen className="w-6 h-6" />,
+    emoji: "📖",
     title: "Cultural Education",
     titleAr: "التعليم الثقافي",
     description: "Daily content about Ramadan traditions, customs from different countries, and spiritual themes.",
   },
   {
-    icon: <Bell className="w-6 h-6" />,
+    emoji: "🔔",
     title: "Smart Reminders",
     titleAr: "تذكيرات ذكية",
     description: "Customizable Suhoor (سحور) and Iftar (إفطار) notifications, plus hydration reminders.",
   },
   {
-    icon: <Shield className="w-6 h-6" />,
+    emoji: "🛡️",
     title: "Health & Safety",
     titleAr: "الصحة والسلامة",
     description: "Health screening, contraindication warnings, emergency 'break fast' button, and wellness check-ins.",
   },
   {
-    icon: <Utensils className="w-6 h-6" />,
+    emoji: "🍽️",
     title: "Meal Planning",
     titleAr: "تخطيط الوجبات",
     description: "Nutritious Suhoor (سحور) and Iftar (إفطار) recipes from various cultures to sustain energy.",
   },
   {
-    icon: <Heart className="w-6 h-6" />,
+    emoji: "❤️",
     title: "Progress Tracking",
     titleAr: "تتبع التقدم",
     description: "Visual streak counters, achievement badges, energy level monitoring, and reflection journaling.",
   },
   {
-    icon: <Globe className="w-6 h-6" />,
+    emoji: "🌍",
     title: "Global Traditions",
     titleAr: "التقاليد العالمية",
     description: "Explore how Ramadan is celebrated across different cultures and countries worldwide.",
@@ -90,8 +89,8 @@ export const FeaturesSection = () => {
               transition={{ delay: index * 0.1 }}
               className="card-cultural group"
             >
-              <div className="p-3 rounded-xl bg-gradient-gold text-foreground w-fit mb-4 group-hover:scale-110 transition-transform">
-                {feature.icon}
+              <div className="p-3 rounded-xl bg-gradient-gold text-foreground w-fit mb-4 group-hover:scale-110 transition-transform text-2xl" aria-hidden>
+                {feature.emoji}
               </div>
               <h3 className="font-display font-bold text-lg mb-1">{feature.title}</h3>
               <p className="font-arabic text-secondary text-sm mb-2">{feature.titleAr}</p>

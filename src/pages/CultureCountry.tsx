@@ -1,0 +1,215 @@
+import { useParams, Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { ArrowLeft, Coffee, Utensils, ChevronRight, Globe, MapPin } from "lucide-react";
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
+import { PageSEO } from "@/components/PageSEO";
+import {
+  getCountryById,
+  getRecipes,
+} from "@/lib/cultureRecipes";
+
+export default function CultureCountry() {
+  const { countryId } = useParams<{ countryId: string }>();
+  const country = countryId ? getCountryById(countryId) : undefined;
+
+  if (!country) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="pt-20 pb-16 container mx-auto px-4 max-w-4xl">
+          <h1 className="text-2xl font-display font-bold">Country not found</h1>
+          <p className="text-muted-foreground mt-2">This culture or country page doesn't exist.</p>
+          <Link to="/culture" className="mt-4 inline-block text-secondary hover:underline">
+            Explore all cultures →
+          </Link>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  const recipesFromCountry = getRecipes({ countryId: country.id });
+  const title = `Ramadan in ${country.name} | Traditions & Recipes | TryRamadan`;
+  const description =
+    country.specialNote ||
+    `Explore Ramadan traditions, foods, and customs in ${country.name}. ${country.traditions.length} traditions and ${country.foods.join(", ")}.`;
+
+  return (
+    <div className="min-h-screen bg-background">
+      <PageSEO
+        title={title}
+        description={description.slice(0, 160)}
+        path={`/culture/${country.id}`}
+        type="article"
+      />
+      <Navbar />
+      <main className="pt-20 pb-16" role="main" aria-label={`Ramadan traditions in ${country.name}`}>
+        <div className="container mx-auto px-4 max-w-4xl">
+          <Link
+            to="/culture"
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 min-h-[44px] items-center"
+          >
+            <ArrowLeft className="w-4 h-4 flex-shrink-0" aria-hidden />
+            Back to Cultural Explorer
+          </Link>
+
+          <motion.article
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-10"
+          >
+            <header className="mb-8">
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-4xl" aria-hidden>{country.flag}</span>
+                <div>
+                  <span className="text-sm text-muted-foreground">{country.regionName}</span>
+                </div>
+              </div>
+              <h1 className="text-2xl md:text-4xl font-display font-bold">
+                Ramadan in {country.name}
+                <span className="block font-arabic text-lg text-secondary mt-1">رمضان في {country.name}</span>
+              </h1>
+            </header>
+
+            <section className="mb-8" aria-labelledby="traditions-heading">
+              <h2 id="traditions-heading" className="font-display font-bold text-lg mb-4">Traditions</h2>
+              <ul className="space-y-4">
+                {country.traditions.map((t, i) => (
+                  <li key={i} className="p-4 rounded-2xl bg-card border border-border">
+                    <h3 className="font-medium">{t.name}</h3>
+                    {t.arabicName && (
+                      <p className="text-sm text-secondary font-arabic">{t.arabicName}</p>
+                    )}
+                    <p className="text-sm text-muted-foreground mt-1">{t.description}</p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            <section className="mb-8" aria-labelledby="foods-heading">
+              <h2 id="foods-heading" className="font-display font-bold text-lg mb-3">Traditional foods</h2>
+              <p className="text-muted-foreground">{country.foods.join(", ")}</p>
+            </section>
+
+            {country.cities && country.cities.length > 0 && (
+              <section className="mb-8" aria-labelledby="cities-heading">
+                <h2 id="cities-heading" className="font-display font-bold text-lg mb-4 flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-secondary" aria-hidden />
+                  Practices by city
+                </h2>
+                <div className="space-y-6">
+                  {country.cities.map((city, idx) => (
+                    <motion.div
+                      key={city.name}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.05 }}
+                      className="p-5 rounded-2xl bg-card border border-border"
+                    >
+                      <h3 className="font-display font-bold text-base mb-3">{city.name}</h3>
+                      <div className="grid gap-3 text-sm">
+                        <div>
+                          <span className="font-medium text-muted-foreground">Suhoor</span>
+                          <p className="mt-0.5">{city.suhoor_meals.join(", ")}</p>
+                        </div>
+                        <div>
+                          <span className="font-medium text-muted-foreground">Iftar</span>
+                          <p className="mt-0.5">{city.iftar_meals.join(", ")}</p>
+                        </div>
+                        <div>
+                          <span className="font-medium text-muted-foreground">Desserts & drinks</span>
+                          <p className="mt-0.5">{city.desserts_and_drinks.join(", ")}</p>
+                        </div>
+                        {city.rituals_and_traditions.length > 0 && (
+                          <div>
+                            <span className="font-medium text-muted-foreground">Rituals & traditions</span>
+                            <ul className="mt-0.5 list-disc pl-4 space-y-0.5">
+                              {city.rituals_and_traditions.map((r, i) => (
+                                <li key={i}>{r}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {city.notes && (
+                          <p className="text-muted-foreground italic border-l-2 border-secondary/40 pl-3">{city.notes}</p>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {country.specialNote && (
+              <section className="p-4 rounded-2xl bg-secondary/10 border border-secondary/20 mb-8" aria-labelledby="note-heading">
+                <h2 id="note-heading" className="font-medium mb-2">Did you know?</h2>
+                <p className="text-sm">{country.specialNote}</p>
+              </section>
+            )}
+
+            {/* Recipes from this region */}
+            <section aria-labelledby="recipes-heading">
+              <h2 id="recipes-heading" className="font-display font-bold text-lg mb-4 flex items-center gap-2">
+                <Globe className="w-5 h-5 text-secondary" aria-hidden />
+                Recipes from this region
+              </h2>
+              {recipesFromCountry.length === 0 ? (
+                <p className="text-muted-foreground text-sm">
+                  No recipes are tagged with this region yet.{" "}
+                  <Link to="/recipes" className="text-secondary hover:underline">
+                    Browse all recipes
+                  </Link>
+                  .
+                </p>
+              ) : (
+                <ul className="space-y-3">
+                  {recipesFromCountry.map(({ mealType, recipe }) => (
+                    <li key={`${mealType}-${recipe.id}`}>
+                      <Link
+                        to={`/recipe/${mealType}/${recipe.id}`}
+                        className="flex items-center justify-between p-4 rounded-2xl bg-card border border-border hover:border-secondary/50 transition-all group"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span
+                            className={`p-2 rounded-lg ${
+                              mealType === "suhoor" ? "bg-secondary/20" : "bg-primary/20"
+                            }`}
+                          >
+                            {mealType === "suhoor" ? (
+                              <Coffee className="w-4 h-4 text-secondary" aria-hidden />
+                            ) : (
+                              <Utensils className="w-4 h-4 text-primary" aria-hidden />
+                            )}
+                          </span>
+                          <div>
+                            <span className="font-medium">{recipe.name}</span>
+                            <span className="text-sm text-muted-foreground block">
+                              {mealType === "suhoor" ? "Suhoor" : "Iftar"} · {recipe.prepTime}
+                            </span>
+                          </div>
+                        </div>
+                        <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-secondary" aria-hidden />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          </motion.article>
+
+          <p className="text-sm text-muted-foreground">
+            <Link to="/culture" className="text-secondary hover:underline">
+              Explore all cultures →
+            </Link>
+            {" · "}
+            <Link to="/recipes" className="text-secondary hover:underline">
+              All recipes
+            </Link>
+          </p>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+}

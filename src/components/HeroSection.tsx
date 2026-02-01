@@ -1,8 +1,8 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Users, BookOpen, Heart, Calendar } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 import { FastingTimer } from "./FastingTimer";
-import { OnboardingModal } from "./OnboardingModal";
+import { ArabicHover } from "./ArabicHover";
 import heroBg from "@/assets/hero-bg.jpg";
 import logo from "@/assets/logo.png";
 
@@ -15,19 +15,7 @@ const getDaysUntilRamadan = () => {
 };
 
 export const HeroSection = () => {
-  const [showOnboarding, setShowOnboarding] = useState(false);
-  const [userMode, setUserMode] = useState<"new" | "muslim" | null>(null);
   const daysUntil = getDaysUntilRamadan();
-
-  const handleStartJourney = () => {
-    setShowOnboarding(true);
-  };
-
-  const handleOnboardingComplete = (data: any) => {
-    console.log("Onboarding complete:", data);
-    setUserMode(data.userType);
-    // Here you would save to state/context/backend
-  };
 
   return (
     <>
@@ -67,16 +55,13 @@ export const HeroSection = () => {
                 className="flex justify-center mb-8"
               >
                 <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-secondary/20 backdrop-blur-sm border border-secondary/30">
-                  <Calendar className="w-6 h-6 text-secondary" />
+                  <span className="text-2xl md:text-3xl" aria-hidden>📅</span>
                   <div className="text-center">
                     <span className="text-3xl md:text-4xl font-bold text-secondary">{daysUntil}</span>
-                    <span className="text-primary-foreground/80 ml-2 text-sm md:text-base">
+                    <ArabicHover arabic="يوم حتى رمضان" className="text-primary-foreground/80 ml-2 text-sm md:text-base border-0">
                       days until Ramadan
-                    </span>
+                    </ArabicHover>
                   </div>
-                  <span className="font-arabic text-secondary text-sm md:text-base">
-                    يوم حتى رمضان
-                  </span>
                 </div>
               </motion.div>
             )}
@@ -96,7 +81,7 @@ export const HeroSection = () => {
               />
               <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/20 text-secondary text-sm font-medium backdrop-blur-sm">
                 <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
-                Ramadan 2025 • رمضان ٢٠٢٥
+                <ArabicHover arabic="رمضان ٢٠٢٥" className="border-0">Ramadan 2025</ArabicHover>
               </span>
             </motion.div>
 
@@ -108,8 +93,9 @@ export const HeroSection = () => {
               className="text-3xl md:text-5xl lg:text-6xl font-display font-bold text-center text-primary-foreground mb-4 leading-tight"
             >
               Experience{" "}
-              <span className="text-gradient-gold">Ramadan</span>
-              <span className="font-arabic text-2xl md:text-4xl text-secondary ml-3">رمضان</span>
+              <ArabicHover arabic="رمضان" className="border-0 text-gradient-gold text-2xl md:text-4xl">
+                Ramadan
+              </ArabicHover>
               <br />
               <span className="text-primary-foreground/90 text-2xl md:text-4xl">Through Cultural Immersion</span>
             </motion.h1>
@@ -122,7 +108,9 @@ export const HeroSection = () => {
               className="text-base md:text-lg text-primary-foreground/80 text-center max-w-2xl mx-auto mb-8"
             >
               A wellness journey combining{" "}
-              <span className="text-secondary font-semibold">Sawm (صوم)</span> fasting 
+              <ArabicHover arabic="صوم" transliteration="Sawm" className="text-secondary font-semibold">
+                Sawm
+              </ArabicHover>{" "}fasting 
               with cultural education and interfaith understanding.
             </motion.p>
 
@@ -133,21 +121,19 @@ export const HeroSection = () => {
               transition={{ delay: 0.3 }}
               className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12"
             >
-              <button 
-                onClick={handleStartJourney}
+              <Link 
+                to="/onboarding/welcome"
                 className="btn-hero group flex items-center gap-2 w-full sm:w-auto justify-center"
               >
-                <span>Start Your Journey</span>
-                <span className="font-arabic text-sm">ابدأ رحلتك</span>
+                <ArabicHover arabic="ابدأ رحلتك" className="border-0 text-inherit">Start Your Journey</ArabicHover>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </button>
-              <button 
-                onClick={handleStartJourney}
+              </Link>
+              <Link 
+                to="/onboarding/welcome"
                 className="btn-hero-outline w-full sm:w-auto flex items-center justify-center gap-2"
               >
-                <span>I'm Already Muslim</span>
-                <span className="font-arabic text-sm">أنا مسلم</span>
-              </button>
+                <ArabicHover arabic="أنا مسلم" className="border-0 text-inherit">I'm Already Muslim</ArabicHover>
+              </Link>
             </motion.div>
 
             {/* Timer preview */}
@@ -168,17 +154,17 @@ export const HeroSection = () => {
               className="grid grid-cols-3 gap-4 md:gap-8 max-w-2xl mx-auto mt-12"
             >
               <div className="text-center">
-                <Users className="w-5 h-5 md:w-6 md:h-6 text-secondary mx-auto mb-2" />
+                <p className="text-2xl md:text-3xl mb-2" aria-hidden>👥</p>
                 <p className="text-xl md:text-2xl font-bold text-primary-foreground">1.8B+</p>
                 <p className="text-xs md:text-sm text-primary-foreground/60">Muslims • مسلمين</p>
               </div>
               <div className="text-center">
-                <BookOpen className="w-5 h-5 md:w-6 md:h-6 text-secondary mx-auto mb-2" />
+                <p className="text-2xl md:text-3xl mb-2" aria-hidden>📖</p>
                 <p className="text-xl md:text-2xl font-bold text-primary-foreground">30</p>
                 <p className="text-xs md:text-sm text-primary-foreground/60">Days • يوم</p>
               </div>
               <div className="text-center">
-                <Heart className="w-5 h-5 md:w-6 md:h-6 text-secondary mx-auto mb-2" />
+                <p className="text-2xl md:text-3xl mb-2" aria-hidden>❤️</p>
                 <p className="text-xl md:text-2xl font-bold text-primary-foreground">100+</p>
                 <p className="text-xs md:text-sm text-primary-foreground/60">Traditions • تقاليد</p>
               </div>
@@ -197,13 +183,6 @@ export const HeroSection = () => {
           </div>
         </motion.div>
       </section>
-
-      {/* Onboarding Modal */}
-      <OnboardingModal
-        isOpen={showOnboarding}
-        onClose={() => setShowOnboarding(false)}
-        onComplete={handleOnboardingComplete}
-      />
     </>
   );
 };

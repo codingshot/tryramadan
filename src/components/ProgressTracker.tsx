@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { Check, Star, Calendar } from "lucide-react";
 
 interface ProgressTrackerProps {
   currentDay: number;
@@ -25,7 +24,7 @@ export const ProgressTracker = ({
       {/* Header with Arabic */}
       <div className="text-center">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/10 text-secondary text-sm font-medium mb-2">
-          <Calendar className="w-4 h-4" />
+          <span aria-hidden>📅</span>
           <span>Ramadan Calendar</span>
           <span className="font-arabic">تقويم رمضان</span>
         </div>
@@ -82,9 +81,9 @@ export const ProgressTracker = ({
               `}
             >
               {isCompleted ? (
-                <Check className="w-4 h-4" />
+                <span aria-hidden>✅</span>
               ) : isCurrent ? (
-                <Star className="w-4 h-4 fill-current" />
+                <span aria-hidden>⭐</span>
               ) : (
                 day
               )}

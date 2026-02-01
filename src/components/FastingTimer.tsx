@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { Moon, Sun, Clock, Calendar, MapPin, Loader2 } from "lucide-react";
 import { usePrayerTimes, getSunnahFastingInfo } from "@/hooks/usePrayerTimes";
 import { useUserPreferences } from "@/hooks/useLocalStorage";
+import { useAutoLocation } from "@/hooks/useLocation";
+import { Link } from "react-router-dom";
 import { SunnahFastingBadge } from "./SunnahFastingBadge";
 
 interface FastingTimerProps {
@@ -23,7 +25,10 @@ export const FastingTimer = ({
   const [daysUntilRamadan, setDaysUntilRamadan] = useState(0);
   const [isRamadan, setIsRamadan] = useState(false);
   const [preferences] = useUserPreferences();
-  
+  const { location: autoLocation } = useAutoLocation();
+  const displayLocation = preferences.location || (autoLocation ? autoLocation.displayName : null);
+  const locationShort = displayLocation ? displayLocation.split(",").slice(0, 2).join(",").trim() : null;
+
   // Get prayer times from API if location is available
   const { prayerTimes, hijriDate, loading, error } = usePrayerTimes(
     preferences.locationCoords?.lat || null,
@@ -236,12 +241,18 @@ export const FastingTimer = ({
           </div>
         </div>
 
-        {/* API status */}
-        {error && (
-          <p className="text-center text-xs text-primary-foreground/50 mt-3">
-            Using default times. Set your location for accurate prayer times.
-          </p>
-        )}
+        {/* Location / API status */}
+        <div className="mt-3 flex justify-center">
+          {error ? (
+            <p className="text-center text-xs text-primary-foreground/50">
+              Using default times. <Link to="/settings" className="underline hover:text-primary-foreground/80">Set location</Link> for accurate prayer times.
+            </p>
+          ) : (
+            <p className="text-center text-xs text-primary-foreground/60">
+              {locationShort ? `Prayer times for ${locationShort}` : "Prayer times for your location"} · <Link to="/settings" className="underline hover:text-primary-foreground/90">Update</Link>
+            </p>
+          )}
+        </div>
       </div>
     </motion.div>
   );

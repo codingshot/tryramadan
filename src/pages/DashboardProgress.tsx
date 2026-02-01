@@ -1,17 +1,56 @@
+import { useCallback } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { 
-  ArrowLeft, TrendingUp, Flame, Calendar, Check, Trophy, 
-  BookOpen, ChevronRight
+  ArrowLeft, TrendingUp, Flame, Calendar, Trophy, 
+  BookOpen, ChevronRight, Download, FileText
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { useFastingProgress } from "@/hooks/useLocalStorage";
+import { useFastingProgress, getTodayFastingLog, isFastingToday } from "@/hooks/useLocalStorage";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Button } from "@/components/ui/button";
 
 const DashboardProgress = () => {
   const [progress] = useFastingProgress();
-  
+
+  const exportCsv = useCallback(() => {
+    const totalDays = 30;
+    const completedDays = progress.completedDays.length;
+    const completionRate = Math.round((completedDays / totalDays) * 100);
+    const rows = [
+      ["TryRamadan Progress Report", ""],
+      ["Generated", new Date().toISOString().split("T")[0]],
+      ["", ""],
+      ["Summary", ""],
+      ["Days completed", String(completedDays)],
+      ["Total days", String(totalDays)],
+      ["Completion rate (%)", String(completionRate)],
+      ["Current streak", String(progress.currentStreak)],
+      ["Longest streak", String(progress.longestStreak)],
+      ["", ""],
+      ["Fasting log", ""],
+      ["Date", "Started", "Completed", "Status"],
+      ...(progress.fastingLog || []).slice().reverse().map((e) => [
+        e.date,
+        e.startedAt ? new Date(e.startedAt).toLocaleTimeString() : "",
+        e.completedAt ? new Date(e.completedAt).toLocaleTimeString() : "",
+        e.status,
+      ]),
+    ];
+    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `tryramadan-progress-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [progress]);
+  const fastingToday = isFastingToday(progress);
+  const todayLog = getTodayFastingLog(progress);
+  const recentLog = (progress.fastingLog || []).slice(-14).reverse();
+
   // Calculate stats
   const totalDays = 30;
   const completedDays = progress.completedDays.length;
@@ -136,6 +175,53 @@ const DashboardProgress = () => {
               </motion.div>
             </div>
           </motion.div>
+
+          {/* Fasting tracker status + log */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="p-6 rounded-2xl bg-card border border-border mb-8"
+          >
+            <h3 className="font-display font-bold mb-3 flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-secondary" />
+              Fasting tracker
+            </h3>
+            {fastingToday && todayLog && (
+              <p className="text-sm text-secondary font-medium mb-3">
+                Today: You're fasting (started {new Date(todayLog.startedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })})
+              </p>
+            )}
+            {recentLog.length > 0 ? (
+              <ul className="space-y-2 text-sm">
+                {recentLog.map((entry) => (
+                  <li
+                    key={entry.date}
+                    className="flex items-center justify-between py-2 border-b border-border last:border-0"
+                  >
+                    <span className="font-medium">{entry.date}</span>
+                    <span className="text-muted-foreground">
+                      {new Date(entry.startedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                      {entry.completedAt && ` → ${new Date(entry.completedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`}
+                    </span>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                        entry.status === 'completed'
+                          ? 'bg-secondary/20 text-secondary'
+                          : entry.status === 'broken'
+                            ? 'bg-destructive/20 text-destructive'
+                            : 'bg-primary/20 text-primary'
+                      }`}
+                    >
+                      {entry.status === 'completed' ? 'Done' : entry.status === 'broken' ? 'Broken' : 'In progress'}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground">Log your fasts from the Dashboard or Today page.</p>
+            )}
+          </motion.div>
           
           {/* Badges */}
           <motion.div
@@ -192,12 +278,46 @@ const DashboardProgress = () => {
             </div>
           </motion.div>
           
+          {/* Export & Journal */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="grid gap-4 md:grid-cols-2 mt-8"
+          >
+            <div className="p-4 rounded-2xl bg-card border border-border flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <Download className="w-6 h-6 text-secondary" />
+                <div>
+                  <span className="font-medium block">Export progress</span>
+                  <p className="text-sm text-muted-foreground">Download report as CSV</p>
+                </div>
+              </div>
+              <Button variant="outline" size="sm" onClick={exportCsv}>
+                Download CSV
+              </Button>
+            </div>
+            <Link
+              to="/dashboard/journal"
+              className="flex items-center justify-between p-4 rounded-2xl bg-card border border-border hover:border-secondary/50 transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <FileText className="w-6 h-6 text-secondary" />
+                <div>
+                  <span className="font-medium block">Journal archive</span>
+                  <p className="text-sm text-muted-foreground">View all reflection entries</p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-muted-foreground" />
+            </Link>
+          </motion.div>
+
           {/* View full calendar */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="mt-8"
+            className="mt-6"
           >
             <Link 
               to="/dashboard/schedule"

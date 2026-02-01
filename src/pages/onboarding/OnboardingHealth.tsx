@@ -1,0 +1,84 @@
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, ArrowRight, AlertTriangle } from "lucide-react";
+import { useOnboarding } from "@/contexts/OnboardingContext";
+
+const HEALTH_OPTIONS = [
+  { id: "none", label: "None of these", safe: true },
+  { id: "diabetes", label: "Diabetes or blood sugar issues", safe: false },
+  { id: "pregnancy", label: "Pregnancy or breastfeeding", safe: false },
+  { id: "heart", label: "Heart or blood pressure conditions", safe: false },
+  { id: "chronic", label: "Chronic illness or on regular medication", safe: false },
+  { id: "other", label: "Other health concern", safe: false },
+];
+
+export default function OnboardingHealth() {
+  const { state, setHealthWarnings } = useOnboarding();
+  const [selected, setSelected] = useState<string[]>(state.healthWarnings);
+  const navigate = useNavigate();
+
+  const toggle = (id: string) => {
+    if (id === "none") {
+      setSelected([]);
+      return;
+    }
+    setSelected((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : prev.filter((x) => x !== "none").concat(id)
+    );
+  };
+
+  const handleContinue = () => {
+    setHealthWarnings(selected.filter((x) => x !== "none"));
+    navigate("/onboarding/location");
+  };
+
+  const hasWarning = selected.some((id) => id !== "none" && HEALTH_OPTIONS.find((o) => o.id === id)?.safe === false);
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <Link
+        to="/onboarding/knowledge"
+        className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6"
+      >
+        <ArrowLeft className="w-4 h-4" /> Back
+      </Link>
+      <h2 className="font-display text-2xl font-bold mb-2">Health screening</h2>
+      <p className="text-muted-foreground mb-6">
+        So we can show relevant safety information. Always consult a doctor before fasting.
+      </p>
+
+      <div className="space-y-2 mb-6">
+        {HEALTH_OPTIONS.map((opt) => (
+          <button
+            key={opt.id}
+            onClick={() => toggle(opt.id)}
+            className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
+              selected.includes(opt.id)
+                ? "border-secondary bg-secondary/5"
+                : "border-border hover:border-secondary/50"
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+
+      {hasWarning && (
+        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex gap-3 mb-6">
+          <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-muted-foreground">
+            We'll show health & safety guidance. Please speak to your doctor before fasting.
+          </p>
+        </div>
+      )}
+
+      <button
+        onClick={handleContinue}
+        className="w-full py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2"
+      >
+        Continue <ArrowRight className="w-5 h-5" />
+      </button>
+    </motion.div>
+  );
+}

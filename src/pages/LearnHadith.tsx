@@ -4,6 +4,9 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, BookOpen, ExternalLink, Filter } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { ArabicHover } from "@/components/ArabicHover";
+import { HadithSunnahLink } from "@/components/HadithSunnahLink";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import hadithsData from "@/data/hadiths.json";
 
 const LearnHadith = () => {
@@ -35,8 +38,7 @@ const LearnHadith = () => {
             className="mb-8"
           >
             <h1 className="text-2xl md:text-3xl font-display font-bold">
-              Hadith Collection
-              <span className="block font-arabic text-lg text-secondary mt-1">مجموعة الأحاديث</span>
+              <ArabicHover arabic="مجموعة الأحاديث">Hadith Collection</ArabicHover>
             </h1>
             <p className="text-muted-foreground mt-2">
               Prophetic sayings about fasting, Ramadan, and spiritual conduct
@@ -86,25 +88,27 @@ const LearnHadith = () => {
                 transition={{ delay: 0.15 + index * 0.05 }}
                 className="p-6 rounded-2xl bg-card border border-border"
               >
-                <div className="flex items-center gap-2 mb-4">
-                  <BookOpen className="w-5 h-5 text-secondary" />
-                  <span className="text-sm text-secondary font-medium">{hadith.topic}</span>
-                </div>
+                <Tooltip delayDuration={200}>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-2 mb-4">
+                      <BookOpen className="w-5 h-5 text-secondary" />
+                      <span className="text-sm text-secondary font-medium">{hadith.topic}</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>View this hadith on Sunnah.com</p>
+                  </TooltipContent>
+                </Tooltip>
                 
                 <blockquote className="text-lg leading-relaxed mb-4 pl-4 border-l-4 border-secondary">
                   "{hadith.text}"
                 </blockquote>
                 
                 <div className="flex items-center justify-between">
-                  <a 
-                    href={`https://sunnah.com/search?q=${encodeURIComponent(hadith.source)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-muted-foreground hover:text-secondary transition-colors flex items-center gap-1"
-                  >
+                  <HadithSunnahLink source={hadith.source} className="text-sm text-muted-foreground hover:text-secondary transition-colors flex items-center gap-1">
                     {hadith.source}
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
+                    <ExternalLink className="w-3 h-3 ml-0.5" />
+                  </HadithSunnahLink>
                 </div>
                 
                 <div className="mt-4 pt-4 border-t border-border">

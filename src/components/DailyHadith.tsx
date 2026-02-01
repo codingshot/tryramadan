@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import { Quote } from "lucide-react";
 import hadiths from "@/data/hadiths.json";
 import { useState, useEffect } from "react";
+import { HadithSunnahLink } from "@/components/HadithSunnahLink";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export const DailyHadith = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -30,9 +32,16 @@ export const DailyHadith = () => {
       </div>
 
       <div className="relative z-10">
-        <span className="inline-block px-3 py-1 rounded-full bg-secondary/20 text-secondary text-xs font-medium mb-4">
-          Daily Hadith
-        </span>
+        <Tooltip delayDuration={200}>
+          <TooltipTrigger asChild>
+            <span className="inline-block px-3 py-1 rounded-full bg-secondary/20 text-secondary text-xs font-medium mb-4">
+              Daily Hadith
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>View this hadith on Sunnah.com</p>
+          </TooltipContent>
+        </Tooltip>
 
         <blockquote className="text-lg md:text-xl leading-relaxed mb-6 font-display">
           "{hadith.text}"
@@ -40,7 +49,11 @@ export const DailyHadith = () => {
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-primary-foreground/20">
           <div>
-            <p className="text-sm font-semibold text-secondary">{hadith.source}</p>
+            <p className="text-sm font-semibold">
+              <HadithSunnahLink source={hadith.source} className="text-secondary hover:text-secondary/90">
+                {hadith.source}
+              </HadithSunnahLink>
+            </p>
             <p className="text-xs text-primary-foreground/60">Topic: {hadith.topic}</p>
           </div>
           

@@ -4,6 +4,9 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Search, BookOpen, Volume2 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { ArabicHover } from "@/components/ArabicHover";
+import { QuranLink } from "@/components/QuranLink";
+import { HadithSunnahLink } from "@/components/HadithSunnahLink";
 import glossaryData from "@/data/glossary.json";
 
 const LearnGlossary = () => {
@@ -43,8 +46,7 @@ const LearnGlossary = () => {
             className="mb-8"
           >
             <h1 className="text-2xl md:text-3xl font-display font-bold">
-              Islamic Glossary
-              <span className="block font-arabic text-lg text-secondary mt-1">المصطلحات الإسلامية</span>
+              <ArabicHover arabic="المصطلحات الإسلامية">Islamic Glossary</ArabicHover>
             </h1>
             <p className="text-muted-foreground mt-2">
               Learn essential Arabic and Islamic terms with English definitions
@@ -115,8 +117,23 @@ const LearnGlossary = () => {
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <div className="flex items-center gap-3 mb-1">
-                      <h3 className="font-display font-bold text-xl">{item.term}</h3>
-                      <span className="font-arabic text-2xl text-secondary">{item.arabic}</span>
+                      <h3 className="font-display font-bold text-xl flex items-center gap-2 flex-wrap">
+                        {item.term === "Quran" ? (
+                          <>
+                            <QuranLink>{item.term}</QuranLink>
+                            <span className="font-arabic text-secondary" title={item.pronunciation}>{item.arabic}</span>
+                          </>
+                        ) : item.term === "Hadith" ? (
+                          <>
+                            <HadithSunnahLink source="hadith">{item.term}</HadithSunnahLink>
+                            <span className="font-arabic text-secondary" title={item.pronunciation}>{item.arabic}</span>
+                          </>
+                        ) : (
+                          <ArabicHover arabic={item.arabic} transliteration={item.pronunciation}>
+                            {item.term}
+                          </ArabicHover>
+                        )}
+                      </h3>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Volume2 className="w-4 h-4" />

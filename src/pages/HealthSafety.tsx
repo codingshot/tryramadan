@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { ArabicHover } from "@/components/ArabicHover";
 
 const HealthSafety = () => {
   const contraindications = [
@@ -46,8 +47,7 @@ const HealthSafety = () => {
             className="mb-8"
           >
             <h1 className="text-2xl md:text-3xl font-display font-bold">
-              Health & Safety
-              <span className="block font-arabic text-lg text-secondary mt-1">الصحة والسلامة</span>
+              <ArabicHover arabic="الصحة والسلامة">Health & Safety</ArabicHover>
             </h1>
             <p className="text-muted-foreground mt-2">
               Important information for safe fasting practices
@@ -81,9 +81,9 @@ const HealthSafety = () => {
             transition={{ delay: 0.2 }}
             className="mb-8"
           >
-            <h2 className="font-display font-bold text-xl mb-4 flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-amber-500" />
-              Who Should Not Fast • من لا يجب أن يصوم
+            <h2 className="font-display font-bold text-xl mb-4 flex items-center gap-2 flex-wrap">
+              <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0" />
+              <ArabicHover arabic="من لا يجب أن يصوم">Who Should Not Fast</ArabicHover>
             </h2>
             
             <div className="grid md:grid-cols-2 gap-4">
@@ -96,8 +96,9 @@ const HealthSafety = () => {
                         <Icon className="w-5 h-5 text-amber-600" />
                       </div>
                       <div>
-                        <h4 className="font-medium">{item.title}</h4>
-                        <span className="text-sm text-secondary font-arabic">{item.titleAr}</span>
+                        <h4 className="font-medium">
+                          <ArabicHover arabic={item.titleAr}>{item.title}</ArabicHover>
+                        </h4>
                         <p className="text-sm text-muted-foreground mt-1">{item.desc}</p>
                       </div>
                     </div>
@@ -114,9 +115,9 @@ const HealthSafety = () => {
             transition={{ delay: 0.3 }}
             className="mb-8"
           >
-            <h2 className="font-display font-bold text-xl mb-4 flex items-center gap-2">
-              <Shield className="w-5 h-5 text-secondary" />
-              Safe Fasting Guidelines • إرشادات الصيام الآمن
+            <h2 className="font-display font-bold text-xl mb-4 flex items-center gap-2 flex-wrap">
+              <Shield className="w-5 h-5 text-secondary flex-shrink-0" />
+              <ArabicHover arabic="إرشادات الصيام الآمن">Safe Fasting Guidelines</ArabicHover>
             </h2>
             
             <div className="grid md:grid-cols-2 gap-3">

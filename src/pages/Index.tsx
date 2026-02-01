@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Link, useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
 import { FeaturesSection } from "@/components/FeaturesSection";
@@ -14,6 +15,7 @@ import { Footer } from "@/components/Footer";
 import { ArabicTerm } from "@/components/ArabicTerm";
 
 const Index = () => {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -33,11 +35,16 @@ const Index = () => {
             viewport={{ once: true }}
             className="text-center max-w-3xl mx-auto mb-16"
           >
-            <span className="inline-block px-4 py-1.5 rounded-full bg-secondary/10 text-secondary text-sm font-medium mb-4">
+            <Link
+              to="/programs"
+              className="inline-block px-4 py-1.5 rounded-full bg-secondary/10 text-secondary text-sm font-medium mb-4 hover:bg-secondary/20 transition-colors"
+            >
               Programs
-            </span>
+            </Link>
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-              Choose Your <span className="text-gradient-gold">Fasting Path</span>
+              <Link to="/programs" className="hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-secondary rounded">
+                Choose Your <span className="text-gradient-gold">Fasting Path</span>
+              </Link>
             </h2>
             <p className="text-muted-foreground">
               Whether you're new to fasting or ready for the full experience, 
@@ -45,7 +52,7 @@ const Index = () => {
             </p>
           </motion.div>
 
-          <FastingPrograms />
+          <FastingPrograms onSelectProgram={() => navigate("/programs")} />
         </div>
       </section>
 
@@ -95,11 +102,16 @@ const Index = () => {
             viewport={{ once: true }}
             className="text-center max-w-3xl mx-auto mb-16"
           >
-            <span className="inline-block px-4 py-1.5 rounded-full bg-secondary/10 text-secondary text-sm font-medium mb-4">
+            <Link
+              to="/culture"
+              className="inline-block px-4 py-1.5 rounded-full bg-secondary/10 text-secondary text-sm font-medium mb-4 hover:bg-secondary/20 transition-colors"
+            >
               Cultural Education
-            </span>
+            </Link>
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-              Ramadan Around the <span className="text-gradient-gold">World</span>
+              <Link to="/culture" className="hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-secondary rounded">
+                Ramadan Around the <span className="text-gradient-gold">World</span>
+              </Link>
             </h2>
             <p className="text-muted-foreground">
               Explore the rich traditions, unique customs, and delicious foods from 

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Heart, ExternalLink, Hammer } from "lucide-react";
+import { Heart, ExternalLink } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 export const Footer = () => {
@@ -30,22 +30,22 @@ export const Footer = () => {
             <h4 className="font-display font-bold mb-4">Quick Links</h4>
             <ul className="space-y-2">
               <li>
-                <a href="#features" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
+                <a href="/#features" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
                   Features
                 </a>
               </li>
               <li>
-                <a href="#programs" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
+                <Link to="/programs" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
                   Fasting Programs
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#culture" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
-                  Cultural Education
-                </a>
+                <Link to="/culture" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
+                  Culture
+                </Link>
               </li>
               <li>
-                <a href="#health" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
+                <a href="/#health" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
                   Health Benefits
                 </a>
               </li>
@@ -56,6 +56,36 @@ export const Footer = () => {
           <div>
             <h4 className="font-display font-bold mb-4">Resources</h4>
             <ul className="space-y-2">
+              <li>
+                <Link to="/learn/glossary" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
+                  Glossary
+                </Link>
+              </li>
+              <li>
+                <Link to="/learn/hadith" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
+                  Hadith
+                </Link>
+              </li>
+              <li>
+                <Link to="/health-safety" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
+                  Health & Safety
+                </Link>
+              </li>
+              <li>
+                <Link to="/faq" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
+                  FAQ
+                </Link>
+              </li>
+              <li>
+                <Link to="/emergency" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
+                  Emergency
+                </Link>
+              </li>
+              <li>
+                <Link to="/settings" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
+                  Settings
+                </Link>
+              </li>
               <li>
                 <a 
                   href="https://sunnah.com" 
@@ -77,7 +107,7 @@ export const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="#about" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
+                <a href="/#about" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
                   About Us
                 </a>
               </li>
@@ -93,15 +123,26 @@ export const Footer = () => {
             <p className="text-sm text-primary-foreground/60">
               © {currentYear} TryRamadan.app. All rights reserved.
             </p>
-            <a 
-              href="https://ummah.build" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-sm text-primary-foreground/60 flex items-center gap-1 hover:text-secondary transition-colors"
-            >
-              Built with <Heart className="w-4 h-4 text-secondary fill-secondary" /> by{" "}
-              <span className="text-secondary font-semibold">ummah.build</span>
-            </a>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+              <Link to="/terms" className="text-sm text-primary-foreground/60 hover:text-secondary transition-colors">
+                Terms
+              </Link>
+              <Link to="/legal" className="text-sm text-primary-foreground/60 hover:text-secondary transition-colors">
+                Legal
+              </Link>
+              <Link to="/privacy" className="text-sm text-primary-foreground/60 hover:text-secondary transition-colors">
+                Privacy
+              </Link>
+              <a 
+                href="https://ummah.build" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sm text-primary-foreground/60 flex items-center gap-1 hover:text-secondary transition-colors"
+              >
+                Built with <Heart className="w-4 h-4 text-secondary fill-secondary" /> by{" "}
+                <span className="text-secondary font-semibold">ummah.build</span>
+              </a>
+            </div>
           </div>
         </div>
       </div>

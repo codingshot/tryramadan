@@ -8,7 +8,11 @@
       "ingredients": ["Fava beans", "Eggs", "Tahini", "Olive oil", "Tomatoes", "Cucumber", "Pita bread"],
       "prepTime": "20 min",
       "benefits": "High protein and fiber for sustained energy throughout the fast",
-      "tips": "Add a drizzle of olive oil for healthy fats"
+      "tips": "Add a drizzle of olive oil for healthy fats",
+      "nutrition": { "calories": 420, "protein": "22g", "carbs": "38g", "fat": "18g" },
+      "significance": "Ful medames has been a staple suhoor in Egypt and the Levant for centuries, providing lasting energy for the long fast.",
+      "dietary": ["vegetarian"],
+      "countryId": "egypt"
     },
     {
       "id": 2,
@@ -18,7 +22,8 @@
       "ingredients": ["Whole wheat flour", "Eggs", "Onions", "Spices", "Yogurt"],
       "prepTime": "30 min",
       "benefits": "Complex carbohydrates and protein keep you full longer",
-      "tips": "Yogurt-based lassi helps with hydration"
+      "tips": "Yogurt-based lassi helps with hydration",
+      "countryId": "pakistan"
     },
     {
       "id": 3,
@@ -28,7 +33,8 @@
       "ingredients": ["Feta cheese", "Olives", "Eggs", "Fresh bread", "Tomatoes", "Honey"],
       "prepTime": "15 min",
       "benefits": "Balanced meal with proteins, healthy fats, and carbohydrates",
-      "tips": "Limit caffeine intake; opt for herbal tea if possible"
+      "tips": "Limit caffeine intake; opt for herbal tea if possible",
+      "countryId": "turkey"
     },
     {
       "id": 4,
@@ -38,7 +44,8 @@
       "ingredients": ["Rice", "Chicken", "Ginger", "Fried shallots", "Soy sauce", "Eggs"],
       "prepTime": "45 min",
       "benefits": "Easily digestible, warming, and hydrating",
-      "tips": "Prepare the night before for easy morning reheating"
+      "tips": "Prepare the night before for easy morning reheating",
+      "countryId": "indonesia"
     },
     {
       "id": 5,
@@ -48,7 +55,11 @@
       "ingredients": ["Oats", "Dates", "Almonds", "Milk", "Honey", "Cinnamon"],
       "prepTime": "5 min (prep night before)",
       "benefits": "Slow-release energy, easy to digest, no morning cooking needed",
-      "tips": "Add chia seeds for extra fiber and omega-3s"
+      "tips": "Add chia seeds for extra fiber and omega-3s",
+      "nutrition": { "calories": 380, "protein": "12g", "carbs": "52g", "fat": "14g" },
+      "significance": "Dates and oats align with the Sunnah of breaking fast with dates while providing sustained energy.",
+      "dietary": ["vegetarian", "vegan-option"],
+      "countryId": "western-communities"
     }
   ],
   "iftar": [
@@ -60,7 +71,9 @@
       "ingredients": ["Medjool dates", "Water", "Milk (optional)"],
       "prepTime": "0 min",
       "benefits": "Natural sugars provide quick energy; dates are easily digestible",
-      "tips": "Eat 1-3 dates and drink water, then pray Maghrib before the main meal"
+      "tips": "Eat 1-3 dates and drink water, then pray Maghrib before the main meal",
+      "significance": "The Prophet (peace be upon him) broke his fast with dates and water; this tradition is followed by Muslims worldwide at iftar.",
+      "dietary": ["vegetarian", "vegan-option"]
     },
     {
       "id": 2,
@@ -70,7 +83,11 @@
       "ingredients": ["Tomatoes", "Lentils", "Chickpeas", "Celery", "Cilantro", "Ginger"],
       "prepTime": "45 min",
       "benefits": "Rehydrating, protein-rich, and gentle on the stomach after fasting",
-      "tips": "Serve with chebakia (honey cookies) for a traditional experience"
+      "tips": "Serve with chebakia (honey cookies) for a traditional experience",
+      "nutrition": { "calories": 280, "protein": "14g", "carbs": "42g", "fat": "6g" },
+      "significance": "Harira is the iconic iftar soup in Morocco, often served with dates and chebakia during Ramadan.",
+      "dietary": ["vegetarian"],
+      "countryId": "morocco"
     },
     {
       "id": 3,
@@ -80,7 +97,8 @@
       "ingredients": ["Seasonal fruits", "Chaat masala", "Lime juice", "Mint"],
       "prepTime": "15 min",
       "benefits": "Hydrating fruits with electrolytes and vitamins",
-      "tips": "Use a variety of colorful fruits for maximum nutrition"
+      "tips": "Use a variety of colorful fruits for maximum nutrition",
+      "countryId": "pakistan"
     },
     {
       "id": 4,
@@ -90,7 +108,8 @@
       "ingredients": ["Kadaif pastry", "Akkawi cheese", "Butter", "Sugar syrup", "Rose water"],
       "prepTime": "40 min",
       "benefits": "Traditional celebration dessert (enjoy in moderation)",
-      "tips": "Balance sweet treats with protein-rich main dishes"
+      "tips": "Balance sweet treats with protein-rich main dishes",
+      "countryId": "egypt"
     },
     {
       "id": 5,
@@ -100,7 +119,8 @@
       "ingredients": ["Basmati rice", "Chicken", "Arabian spices", "Dried lime", "Onions"],
       "prepTime": "90 min",
       "benefits": "Complete meal with proteins and carbohydrates for recovery",
-      "tips": "Serve with raita and fresh salad for balance"
+      "tips": "Serve with raita and fresh salad for balance",
+      "countryId": "saudi-arabia"
     }
   ]
 }

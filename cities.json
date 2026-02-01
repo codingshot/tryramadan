@@ -1,0 +1,339 @@
+{
+  "schema": {
+    "country": "string",
+    "region": "string",
+    "cities": [
+      {
+        "name": "string",
+        "suhoor_meals": ["string"],
+        "iftar_meals": ["string"],
+        "desserts_and_drinks": ["string"],
+        "rituals_and_traditions": ["string"],
+        "notes": "string"
+      }
+    ]
+  },
+  "data": [
+    {
+      "country": "Nigeria",
+      "region": "Africa",
+      "cities": [
+        {
+          "name": "Kano",
+          "suhoor_meals": ["kunu (millet-based drink/porridge)", "light rice or tuwo dishes"],
+          "iftar_meals": ["dates and water", "dambu (shredded spiced meat)", "masa (rice pancakes)", "jollof rice"],
+          "desserts_and_drinks": ["kunu variations", "local juices"],
+          "rituals_and_traditions": [
+            "Community iftar in mosques and family homes",
+            "Women preparing large communal spreads for extended family"
+          ],
+          "notes": "Hausa communities commonly serve dambu, kunu, and masa at iftar.[web:1][web:3]"
+        },
+        {
+          "name": "Lagos",
+          "suhoor_meals": ["bread and tea", "rice dishes", "kunu where available"],
+          "iftar_meals": ["jollof rice with chicken or fish", "fried plantains (dodo)"],
+          "desserts_and_drinks": ["local soft drinks", "fruit juices"],
+          "rituals_and_traditions": [
+            "Urban mosques host iftar for travelers and the poor",
+            "Strong West African jollof culture at large family gatherings"
+          ],
+          "notes": "Jollof rice is a core celebratory dish across Nigeria and is common at Ramadan gatherings.[web:3]"
+        }
+      ]
+    },
+    {
+      "country": "Egypt",
+      "region": "Middle East/North Africa",
+      "cities": [
+        {
+          "name": "Cairo",
+          "suhoor_meals": ["fava beans (ful medames)", "baladi bread", "cheese and eggs"],
+          "iftar_meals": ["dates and water", "ful medames with bread", "various stews and rice"],
+          "desserts_and_drinks": ["karkadeh (hibiscus drink)", "kunafa and basbousa"],
+          "rituals_and_traditions": [
+            "Fanoos (Ramadan lanterns) decorating streets and homes",
+            "Lanterns carried by children while singing Ramadan songs",
+            "Family iftars that often extend into late-night socializing"
+          ],
+          "notes": "Colorful fanoos lanterns and ful with karkadeh are widely associated with Egyptian Ramadan.[web:1]"
+        },
+        {
+          "name": "Alexandria",
+          "suhoor_meals": ["ful medames", "bread and cheese"],
+          "iftar_meals": ["seafood dishes alongside standard Egyptian iftar items"],
+          "desserts_and_drinks": ["karkadeh", "local sweets"],
+          "rituals_and_traditions": [
+            "Coastal iftars with extended families",
+            "Neighborhood lantern displays similar to Cairo"
+          ],
+          "notes": "Coastal influence adds more fish/seafood to otherwise typical Egyptian Ramadan meals.[web:1]"
+        }
+      ]
+    },
+    {
+      "country": "Kenya",
+      "region": "East Africa",
+      "cities": [
+        {
+          "name": "Nairobi",
+          "suhoor_meals": ["rice with vegetables and stews", "bread and tea"],
+          "iftar_meals": ["dates and water", "pilau (spiced rice)", "samosas", "bhajias"],
+          "desserts_and_drinks": ["fresh juices", "sweet chai"],
+          "rituals_and_traditions": [
+            "Multicultural mosques with diverse cuisines at iftar",
+            "Family-focused iftars with a mix of local and South Asian dishes"
+          ],
+          "notes": "Nairobi’s Ramadan reflects its multicultural population with both Swahili and South Asian influences.[web:6]"
+        },
+        {
+          "name": "Mombasa",
+          "suhoor_meals": ["ugali with fish or vegetables", "mandazi with tea"],
+          "iftar_meals": ["street iftar with ugali", "grilled fish", "kaimati (sweet fried dough balls)"],
+          "desserts_and_drinks": ["sugarcane juice", "fresh juices"],
+          "rituals_and_traditions": [
+            "Street iftar gatherings hosted by mosques and community centers",
+            "Strong Swahili coastal culture in food and dress"
+          ],
+          "notes": "Zanzibar and Mombasa are known for public street iftars and Swahili dishes like kaimati.[web:1]"
+        }
+      ]
+    },
+    {
+      "country": "Tanzania",
+      "region": "East Africa",
+      "cities": [
+        {
+          "name": "Zanzibar City",
+          "suhoor_meals": ["ugali", "rice and beans", "mandazi"],
+          "iftar_meals": ["dates and water", "grilled fish", "kaimati", "Swahili rice dishes"],
+          "desserts_and_drinks": ["sugarcane juice", "fresh tropical juices"],
+          "rituals_and_traditions": [
+            "Street iftar gatherings near mosques",
+            "Communal sharing of food along the seafront"
+          ],
+          "notes": "Swahili Coast Ramadan is marked by public iftar tables and seafood-rich meals.[web:1]"
+        }
+      ]
+    },
+    {
+      "country": "Morocco",
+      "region": "North Africa",
+      "cities": [
+        {
+          "name": "Casablanca",
+          "suhoor_meals": ["bread with olive oil and cheese", "tagines in lighter portions"],
+          "iftar_meals": ["dates and water", "harira (hearty soup)", "chebakia (sesame honey pastry)", "breads and tagines"],
+          "desserts_and_drinks": ["mint tea", "fresh juices"],
+          "rituals_and_traditions": [
+            "Family-centered iftar centered around harira",
+            "Traditional clothing like djellaba and kaftan for prayers and gatherings"
+          ],
+          "notes": "Harira, rfissa, and tangia are highlighted as signature Moroccan Ramadan dishes.[web:9]"
+        },
+        {
+          "name": "Marrakesh",
+          "suhoor_meals": ["bread, olive oil, and local cheeses"],
+          "iftar_meals": ["harira", "tanjia marrakchia", "rfissa (chicken and lentils over shredded bread)"],
+          "desserts_and_drinks": ["mint tea", "chebakia"],
+          "rituals_and_traditions": [
+            "Large family gatherings after Maghrib",
+            "Old city squares buzzing at night with food stalls"
+          ],
+          "notes": "Tanjia Marrakchia is particularly linked to Marrakesh Ramadan tables.[web:9]"
+        }
+      ]
+    },
+    {
+      "country": "Saudi Arabia",
+      "region": "Middle East",
+      "cities": [
+        {
+          "name": "Riyadh",
+          "suhoor_meals": ["light rice dishes", "bread with cheese and dates"],
+          "iftar_meals": ["dates and water", "thareed (bread soaked in lamb and vegetable stew)", "kabsa (spiced rice with chicken or lamb)"],
+          "desserts_and_drinks": ["qamar al-din (apricot drink)", "Arabic coffee and dates"],
+          "rituals_and_traditions": [
+            "Large family and tribal gatherings",
+            "Night prayers (taraweeh) with packed mosques"
+          ],
+          "notes": "Thareed is a classic Saudi iftar stew, while kabsa is a national dish popular in Ramadan.[web:5][web:7]"
+        },
+        {
+          "name": "Jeddah",
+          "suhoor_meals": ["similar to Riyadh with more seafood options"],
+          "iftar_meals": ["thareed", "kabsa", "fried and grilled fish"],
+          "desserts_and_drinks": ["regional desserts and juices"],
+          "rituals_and_traditions": [
+            "Coastal city gatherings with extended families",
+            "Charity iftars near major mosques"
+          ],
+          "notes": "Jeddah shares core Saudi Ramadan dishes with additional Red Sea seafood.[web:5][web:7]"
+        }
+      ]
+    },
+    {
+      "country": "Turkey",
+      "region": "Middle East/Europe",
+      "cities": [
+        {
+          "name": "Istanbul",
+          "suhoor_meals": ["olives, cheese, bread, eggs", "soups"],
+          "iftar_meals": ["dates and water", "soup", "Ramazan pidesi (special Ramadan flatbread) with meat or vegetable dishes"],
+          "desserts_and_drinks": ["güllaç (milk and pomegranate dessert)", "tea"],
+          "rituals_and_traditions": [
+            "Mosques hang mahya (illuminated messages) between minarets",
+            "Public iftar tents by municipalities",
+            "Street drummers waking people for suhoor in some districts"
+          ],
+          "notes": "Ramazan pidesi is a special bread baked only in Ramadan and widely eaten for iftar and sahur.[web:2][web:7]"
+        },
+        {
+          "name": "Ankara",
+          "suhoor_meals": ["bread, cheese, olives, eggs"],
+          "iftar_meals": ["Ramazan pidesi with stews and kebabs"],
+          "desserts_and_drinks": ["tea", "regional sweets"],
+          "rituals_and_traditions": [
+            "Mahya lights on major mosques",
+            "Municipal iftar programs"
+          ],
+          "notes": "Patterns are similar nationwide with local variations in main dishes.[web:2]"
+        }
+      ]
+    },
+    {
+      "country": "Pakistan",
+      "region": "South Asia",
+      "cities": [
+        {
+          "name": "Karachi",
+          "suhoor_meals": ["paratha with eggs or curry", "tea"],
+          "iftar_meals": ["dates and water", "samosas", "pakoras", "fruit chaat", "haleem"],
+          "desserts_and_drinks": ["rooh afza or rose-flavored sharbat", "falooda"],
+          "rituals_and_traditions": [
+            "Bustling iftar bazaars selling fried snacks",
+            "Charity iftar tables along main roads",
+            "Chaand raat shopping before Eid with henna and bangles"
+          ],
+          "notes": "Iftar in Pakistan commonly features fried snacks, rose-flavored drinks, and haleem; chaand raat is a key end-of-Ramadan celebration.[web:4][web:7]"
+        },
+        {
+          "name": "Lahore",
+          "suhoor_meals": ["paratha and nihari or other meat stews"],
+          "iftar_meals": ["samosas", "pakoras", "dahi bhalle", "fruit chaat"],
+          "desserts_and_drinks": ["sweet lassi", "rooh afza drinks"],
+          "rituals_and_traditions": [
+            "Old-city food streets packed after iftar",
+            "Strong communal culture around late-night eating"
+          ],
+          "notes": "Lahore’s Ramadan is famous for its food streets and rich meaty dishes.[web:4][web:7]"
+        }
+      ]
+    },
+    {
+      "country": "Indonesia",
+      "region": "Southeast Asia",
+      "cities": [
+        {
+          "name": "Jakarta",
+          "suhoor_meals": ["rice with side dishes", "soups"],
+          "iftar_meals": ["dates and water", "kolak (sweet banana, coconut, palm sugar dessert)", "gorengan (fried snacks)"],
+          "desserts_and_drinks": ["es buah (fruit drink)", "sweet iced teas"],
+          "rituals_and_traditions": [
+            "Nyekar/nyadran style grave visits and prayers in some Javanese communities before Ramadan",
+            "Crowded street food markets (pasar Ramadan) each evening"
+          ],
+          "notes": "Indonesian Ramadan includes cemetery visits (nyekar/nyadran) and abundant sweet snacks at iftar.[web:2][web:4][web:9]"
+        },
+        {
+          "name": "Yogyakarta",
+          "suhoor_meals": ["rice with local dishes"],
+          "iftar_meals": ["kolak", "local snacks and rice dishes"],
+          "desserts_and_drinks": ["iced teas and juices"],
+          "rituals_and_traditions": [
+            "Padusan ritual cleansing in springs or lakes before Ramadan",
+            "Javanese cultural elements woven into pre-Ramadan observances"
+          ],
+          "notes": "Padusan is a Javanese ritual cleansing used to welcome Ramadan.[web:2]"
+        },
+        {
+          "name": "Aceh",
+          "suhoor_meals": ["rice and fish or meat dishes"],
+          "iftar_meals": ["dates", "meugang meat dishes (beef, goat, or buffalo) eaten around start of Ramadan"],
+          "desserts_and_drinks": ["local sweets and drinks"],
+          "rituals_and_traditions": [
+            "Meugang, a communal meat feast with family just before Ramadan begins"
+          ],
+          "notes": "Meugang is a distinctive Acehnese pre-Ramadan meat feast.[web:2]"
+        }
+      ]
+    },
+    {
+      "country": "Lebanon",
+      "region": "Middle East",
+      "cities": [
+        {
+          "name": "Beirut",
+          "suhoor_meals": ["man’oushe (flatbread with toppings)", "foul (fava beans)"],
+          "iftar_meals": ["dates and water", "rice with stews and grilled meats"],
+          "desserts_and_drinks": ["qatayef", "jallab (date and grape drink)"],
+          "rituals_and_traditions": [
+            "Midfa al-iftar (iftar cannons) to signal sunset",
+            "Family and neighborhood gatherings"
+          ],
+          "notes": "Iftar cannons are a long-standing tradition used to mark the end of each fasting day.[web:4]"
+        }
+      ]
+    },
+    {
+      "country": "Bosnia and Herzegovina",
+      "region": "Europe",
+      "cities": [
+        {
+          "name": "Sarajevo",
+          "suhoor_meals": ["bread, cheese, local meats"],
+          "iftar_meals": ["dates", "soups and meat dishes"],
+          "desserts_and_drinks": ["local sweets and coffee"],
+          "rituals_and_traditions": [
+            "Iftar cannon fired from Yellow Fortress to signal sunset",
+            "People gather around the fortress and mosques for iftar"
+          ],
+          "notes": "Sarajevo maintains the iftar cannon tradition with crowds gathering at the Yellow Fortress.[web:2]"
+        }
+      ]
+    },
+    {
+      "country": "South Africa",
+      "region": "Africa",
+      "cities": [
+        {
+          "name": "Cape Town",
+          "suhoor_meals": ["bread, tea, light stews"],
+          "iftar_meals": ["dates and water", "Cape Malay biryani", "samosas"],
+          "desserts_and_drinks": ["koeksisters (syrup-soaked dough twists)", "boeber (sweet milk drink in some communities)"],
+          "rituals_and_traditions": [
+            "Cape Malay Muslim community hosting large family iftars",
+            "Mix of Asian and African influences in food and dress"
+          ],
+          "notes": "Cape Malay biryani and koeksisters are iconic Cape Town Ramadan foods.[web:1]"
+        }
+      ]
+    },
+    {
+      "country": "Jordan",
+      "region": "Middle East",
+      "cities": [
+        {
+          "name": "Amman",
+          "suhoor_meals": ["bread, cheese, hummus, foul"],
+          "iftar_meals": ["dates and water", "mansaf (lamb with rice and jameed yogurt)", "various rice and meat dishes"],
+          "desserts_and_drinks": ["qatayef", "juices"],
+          "rituals_and_traditions": [
+            "Mansaf at large family gatherings and special Ramadan occasions"
+          ],
+          "notes": "Mansaf, Jordan’s national dish, is central to celebrations and gatherings, including Ramadan.[web:5]"
+        }
+      ]
+    }
+  ]
+}

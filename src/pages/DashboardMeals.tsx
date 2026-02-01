@@ -1,32 +1,76 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { 
-  ArrowLeft, Coffee, Utensils, Clock, ChefHat, ShoppingCart, 
-  ChevronRight, Flame, Droplets, Plus
+  ArrowLeft, Coffee, Utensils, Clock, ShoppingCart, 
+  Flame, Plus, Heart, Filter, Globe, BookOpen
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import recipesData from "@/data/recipes.json";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useRecipeFavorites } from "@/hooks/useLocalStorage";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+type MealType = "suhoor" | "iftar";
+type Recipe = {
+  id: number;
+  name: string;
+  region: string;
+  description: string;
+  ingredients: string[];
+  prepTime: string;
+  benefits: string;
+  tips: string;
+  nutrition?: { calories: number; protein: string; carbs: string; fat: string };
+  significance?: string;
+  dietary?: string[];
+  countryId?: string;
+};
+
+const allSuhoor = (recipesData as { suhoor: Recipe[]; iftar: Recipe[] }).suhoor;
+const allIftar = (recipesData as { suhoor: Recipe[]; iftar: Recipe[] }).iftar;
+const allRegions = [...new Set([...allSuhoor.map(r => r.region), ...allIftar.map(r => r.region)])].sort();
+const dietaryOptions = ["vegetarian", "vegan-option", "halal"] as const;
 
 const DashboardMeals = () => {
-  const [activeTab, setActiveTab] = useState<'suhoor' | 'iftar'>('suhoor');
+  const [activeTab, setActiveTab] = useState<MealType>("suhoor");
   const [selectedRecipes, setSelectedRecipes] = useState<number[]>([]);
-  
-  const recipes = activeTab === 'suhoor' ? recipesData.suhoor : recipesData.iftar;
-  
+  const [favorites, setFavorites] = useRecipeFavorites();
+  const [regionFilter, setRegionFilter] = useState<string>("all");
+  const [dietaryFilter, setDietaryFilter] = useState<string>("all");
+
+  const baseRecipes = activeTab === "suhoor" ? allSuhoor : allIftar;
+  const recipes = useMemo(() => {
+    let list = baseRecipes;
+    if (regionFilter !== "all") list = list.filter(r => r.region === regionFilter);
+    if (dietaryFilter !== "all") list = list.filter(r => r.dietary?.includes(dietaryFilter));
+    return list;
+  }, [baseRecipes, regionFilter, dietaryFilter]);
+
+  const favoriteKey = (type: MealType, id: number) => `${type}-${id}`;
+  const isFavorite = (type: MealType, id: number) => favorites.includes(favoriteKey(type, id));
+  const toggleFavorite = (type: MealType, id: number) => {
+    const key = favoriteKey(type, id);
+    setFavorites(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]);
+  };
+
   const toggleRecipe = (id: number) => {
     setSelectedRecipes(prev => 
       prev.includes(id) ? prev.filter(r => r !== id) : [...prev, id]
     );
   };
-  
-  // Generate grocery list from selected recipes
-  const groceryList = recipes
+
+  // Grocery list from selected recipes (from current filtered list that user added)
+  const groceryList = baseRecipes
     .filter(r => selectedRecipes.includes(r.id))
     .flatMap(r => r.ingredients);
-  
   const uniqueGroceries = [...new Set(groceryList)];
 
   return (
@@ -94,6 +138,43 @@ const DashboardMeals = () => {
             </button>
           </motion.div>
           
+          {/* Filters */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.12 }}
+            className="flex flex-wrap gap-3 mb-6"
+          >
+            <div className="flex items-center gap-2">
+              <Globe className="w-4 h-4 text-muted-foreground" />
+              <Select value={regionFilter} onValueChange={setRegionFilter}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Region" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All regions</SelectItem>
+                  {allRegions.map(r => (
+                    <SelectItem key={r} value={r}>{r}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-muted-foreground" />
+              <Select value={dietaryFilter} onValueChange={setDietaryFilter}>
+                <SelectTrigger className="w-[160px]">
+                  <SelectValue placeholder="Diet" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  {dietaryOptions.map(d => (
+                    <SelectItem key={d} value={d}>{d.replace("-", " ")}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </motion.div>
+
           {/* Meal tips */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -142,26 +223,69 @@ const DashboardMeals = () => {
                   <div>
                     <h3 className="font-display font-bold text-lg">{recipe.name}</h3>
                     <span className="text-sm text-secondary">{recipe.region}</span>
+                    {recipe.dietary && recipe.dietary.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {recipe.dietary.map(d => (
+                          <span key={d} className="px-1.5 py-0.5 rounded bg-muted text-[10px] capitalize">
+                            {d.replace("-", " ")}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button className={`p-2 rounded-full transition-colors ${
-                        selectedRecipes.includes(recipe.id)
-                          ? 'bg-secondary text-secondary-foreground'
-                          : 'bg-muted'
-                      }`}>
-                        <Plus className={`w-4 h-4 transition-transform ${
-                          selectedRecipes.includes(recipe.id) ? 'rotate-45' : ''
-                        }`} />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      {selectedRecipes.includes(recipe.id) ? 'Remove from meal plan' : 'Add to meal plan'}
-                    </TooltipContent>
-                  </Tooltip>
+                  <div className="flex items-center gap-1">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); toggleFavorite(activeTab, recipe.id); }}
+                          className={`p-2 rounded-full transition-colors ${
+                            isFavorite(activeTab, recipe.id) ? "text-red-500 bg-red-500/10" : "bg-muted hover:bg-muted/80"
+                          }`}
+                        >
+                          <Heart className={`w-4 h-4 ${isFavorite(activeTab, recipe.id) ? "fill-current" : ""}`} />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {isFavorite(activeTab, recipe.id) ? "Remove from favorites" : "Save to favorites"}
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); toggleRecipe(recipe.id); }}
+                          className={`p-2 rounded-full transition-colors ${
+                            selectedRecipes.includes(recipe.id) ? "bg-secondary text-secondary-foreground" : "bg-muted"
+                          }`}
+                        >
+                          <Plus className={`w-4 h-4 transition-transform ${selectedRecipes.includes(recipe.id) ? "rotate-45" : ""}`} />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {selectedRecipes.includes(recipe.id) ? "Remove from meal plan" : "Add to meal plan"}
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
                 </div>
-                
-                <p className="text-muted-foreground text-sm mb-4">{recipe.description}</p>
+
+                <p className="text-muted-foreground text-sm mb-3">{recipe.description}</p>
+
+                {recipe.significance && (
+                  <div className="flex items-start gap-2 p-3 rounded-xl bg-secondary/10 border border-secondary/20 mb-3">
+                    <BookOpen className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
+                    <p className="text-xs text-foreground/90">{recipe.significance}</p>
+                  </div>
+                )}
+
+                {recipe.nutrition && (
+                  <div className="flex flex-wrap gap-3 text-xs text-muted-foreground mb-3">
+                    <span><strong className="text-foreground">{recipe.nutrition.calories}</strong> cal</span>
+                    <span>P: {recipe.nutrition.protein}</span>
+                    <span>C: {recipe.nutrition.carbs}</span>
+                    <span>F: {recipe.nutrition.fat}</span>
+                  </div>
+                )}
                 
                 <div className="flex flex-wrap gap-2 mb-4">
                   {recipe.ingredients.slice(0, 5).map((ingredient, i) => (
@@ -183,12 +307,19 @@ const DashboardMeals = () => {
                   </div>
                   <div className="flex items-center gap-1">
                     <Flame className="w-4 h-4" />
-                    {recipe.benefits.split(' ').slice(0, 3).join(' ')}...
+                    {recipe.benefits.split(" ").slice(0, 3).join(" ")}...
                   </div>
                 </div>
                 
-                <div className="mt-3 pt-3 border-t border-border">
+                <div className="mt-3 pt-3 border-t border-border flex items-center justify-between gap-2 flex-wrap">
                   <p className="text-xs text-secondary">💡 {recipe.tips}</p>
+                  <Link
+                    to={`/recipe/${activeTab}/${recipe.id}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-xs font-medium text-secondary hover:underline"
+                  >
+                    View full recipe →
+                  </Link>
                 </div>
               </motion.div>
             ))}

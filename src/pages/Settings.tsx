@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { ArabicHover } from "@/components/ArabicHover";
 import { LocationSearch } from "@/components/LocationSearch";
 import { LocationResult, getLocationFromIP } from "@/hooks/useLocation";
 import { 
@@ -107,8 +108,7 @@ const Settings = () => {
             className="mb-8"
           >
             <h1 className="text-2xl md:text-3xl font-display font-bold">
-              Settings
-              <span className="block font-arabic text-lg text-secondary mt-1">الإعدادات</span>
+              <ArabicHover arabic="الإعدادات">Settings</ArabicHover>
             </h1>
           </motion.div>
           
@@ -119,9 +119,9 @@ const Settings = () => {
             transition={{ delay: 0.1 }}
             className="p-6 rounded-2xl bg-card border border-border mb-6"
           >
-            <h2 className="font-display font-bold mb-4 flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-secondary" />
-              Location • الموقع
+            <h2 className="font-display font-bold mb-4 flex items-center gap-2 flex-wrap">
+              <MapPin className="w-5 h-5 text-secondary flex-shrink-0" />
+              <ArabicHover arabic="الموقع">Location</ArabicHover>
             </h2>
             
             <p className="text-sm text-muted-foreground mb-4">
@@ -166,9 +166,9 @@ const Settings = () => {
             transition={{ delay: 0.2 }}
             className="p-6 rounded-2xl bg-card border border-border mb-6"
           >
-            <h2 className="font-display font-bold mb-4 flex items-center gap-2">
-              <Bell className="w-5 h-5 text-secondary" />
-              Notifications • الإشعارات
+            <h2 className="font-display font-bold mb-4 flex items-center gap-2 flex-wrap">
+              <Bell className="w-5 h-5 text-secondary flex-shrink-0" />
+              <ArabicHover arabic="الإشعارات">Notifications</ArabicHover>
             </h2>
             
             {!supported ? (
@@ -221,9 +221,9 @@ const Settings = () => {
             transition={{ delay: 0.3 }}
             className="p-6 rounded-2xl bg-card border border-border mb-6"
           >
-            <h2 className="font-display font-bold mb-4 flex items-center gap-2">
-              <Sun className="w-5 h-5 text-secondary" />
-              Theme • المظهر
+            <h2 className="font-display font-bold mb-4 flex items-center gap-2 flex-wrap">
+              <Sun className="w-5 h-5 text-secondary flex-shrink-0" />
+              <ArabicHover arabic="المظهر">Theme</ArabicHover>
             </h2>
             
             <div className="flex gap-2">
@@ -259,7 +259,7 @@ const Settings = () => {
             className="p-6 rounded-2xl bg-card border border-border"
           >
             <h2 className="font-display font-bold mb-4">
-              Data Management • إدارة البيانات
+              <ArabicHover arabic="إدارة البيانات">Data Management</ArabicHover>
             </h2>
             
             <div className="space-y-3">

@@ -1,0 +1,115 @@
+import { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import { LocationResult } from "@/hooks/useLocation";
+
+export type OnboardingMode = "new" | "muslim" | null;
+
+export interface OnboardingState {
+  mode: OnboardingMode;
+  experience: string;
+  knowledgeScore: number; // 0-5 from quiz
+  healthWarnings: string[]; // e.g. ["diabetes", "pregnancy"]
+  location: LocationResult | null;
+  selectedProgram: string; // beginner | intermediate | traditional
+  notifications: {
+    suhoor: boolean;
+    iftar: boolean;
+    hydration: boolean;
+    suhoorTime: string;
+    iftarTime: string;
+  };
+  goals: string[];
+  intention: string;
+}
+
+const defaultState: OnboardingState = {
+  mode: null,
+  experience: "",
+  knowledgeScore: 0,
+  healthWarnings: [],
+  location: null,
+  selectedProgram: "traditional",
+  notifications: {
+    suhoor: true,
+    iftar: true,
+    hydration: false,
+    suhoorTime: "04:30",
+    iftarTime: "18:30",
+  },
+  goals: [],
+  intention: "",
+};
+
+type OnboardingContextValue = {
+  state: OnboardingState;
+  setMode: (mode: OnboardingMode) => void;
+  setExperience: (exp: string) => void;
+  setKnowledgeScore: (score: number) => void;
+  setHealthWarnings: (warnings: string[]) => void;
+  setLocation: (loc: LocationResult | null) => void;
+  setSelectedProgram: (id: string) => void;
+  setNotifications: (n: Partial<OnboardingState["notifications"]>) => void;
+  setGoals: (goals: string[]) => void;
+  setIntention: (text: string) => void;
+  reset: () => void;
+};
+
+const OnboardingContext = createContext<OnboardingContextValue | null>(null);
+
+export function OnboardingProvider({ children }: { children: ReactNode }) {
+  const [state, setState] = useState<OnboardingState>(defaultState);
+
+  const setMode = useCallback((mode: OnboardingMode) => {
+    setState((s) => ({ ...s, mode }));
+  }, []);
+  const setExperience = useCallback((experience: string) => {
+    setState((s) => ({ ...s, experience }));
+  }, []);
+  const setKnowledgeScore = useCallback((knowledgeScore: number) => {
+    setState((s) => ({ ...s, knowledgeScore }));
+  }, []);
+  const setHealthWarnings = useCallback((healthWarnings: string[]) => {
+    setState((s) => ({ ...s, healthWarnings }));
+  }, []);
+  const setLocation = useCallback((location: LocationResult | null) => {
+    setState((s) => ({ ...s, location }));
+  }, []);
+  const setSelectedProgram = useCallback((selectedProgram: string) => {
+    setState((s) => ({ ...s, selectedProgram }));
+  }, []);
+  const setNotifications = useCallback((n: Partial<OnboardingState["notifications"]>) => {
+    setState((s) => ({ ...s, notifications: { ...s.notifications, ...n } }));
+  }, []);
+  const setGoals = useCallback((goals: string[]) => {
+    setState((s) => ({ ...s, goals }));
+  }, []);
+  const setIntention = useCallback((intention: string) => {
+    setState((s) => ({ ...s, intention }));
+  }, []);
+  const reset = useCallback(() => setState(defaultState), []);
+
+  const value: OnboardingContextValue = {
+    state,
+    setMode,
+    setExperience,
+    setKnowledgeScore,
+    setHealthWarnings,
+    setLocation,
+    setSelectedProgram,
+    setNotifications,
+    setGoals,
+    setIntention,
+    reset,
+  };
+
+  return (
+    <OnboardingContext.Provider value={value}>
+      {children}
+    </OnboardingContext.Provider>
+  );
+}
+
+export function useOnboarding() {
+  const ctx = useContext(OnboardingContext);
+  if (!ctx) throw new Error("useOnboarding must be used within OnboardingProvider");
+  return ctx;
+}

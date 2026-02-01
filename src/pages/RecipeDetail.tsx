@@ -1,0 +1,155 @@
+import { useParams, Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { ArrowLeft, Coffee, Utensils, Clock, Globe, BookOpen, Flame } from "lucide-react";
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
+import { PageSEO } from "@/components/PageSEO";
+import {
+  getRecipeWithType,
+  getCountryForRecipe,
+  type MealType,
+} from "@/lib/cultureRecipes";
+
+export default function RecipeDetail() {
+  const { mealType, id } = useParams<{ mealType: string; id: string }>();
+  const meal = mealType as MealType | undefined;
+  const recipeId = id ? parseInt(id, 10) : NaN;
+
+  const result = meal && !isNaN(recipeId) ? getRecipeWithType(meal, recipeId) : undefined;
+  const recipe = result?.recipe;
+  const country = recipe ? getCountryForRecipe(recipe) : undefined;
+
+  if (!recipe || !result) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="pt-20 pb-16 container mx-auto px-4 max-w-4xl">
+          <h1 className="text-2xl font-display font-bold">Recipe not found</h1>
+          <p className="text-muted-foreground mt-2">The recipe you're looking for doesn't exist or was removed.</p>
+          <Link to="/recipes" className="mt-4 inline-block text-secondary hover:underline">
+            Browse all recipes →
+          </Link>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  const { mealType: type } = result;
+  const title = `${recipe.name} | ${type === "suhoor" ? "Suhoor" : "Iftar"} Recipe | TryRamadan`;
+  const description =
+    recipe.significance || recipe.description;
+
+  return (
+    <div className="min-h-screen bg-background">
+      <PageSEO
+        title={title}
+        description={description.slice(0, 160)}
+        path={`/recipe/${type}/${recipe.id}`}
+        type="article"
+      />
+      <Navbar />
+      <main className="pt-20 pb-16" role="main" aria-label="Recipe">
+        <div className="container mx-auto px-4 max-w-3xl">
+          <Link
+            to="/recipes"
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 min-h-[44px] items-center"
+          >
+            <ArrowLeft className="w-4 h-4 flex-shrink-0" aria-hidden />
+            Back to Recipes
+          </Link>
+
+          <motion.article
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <header className="mb-6">
+              <div className="flex items-center gap-2 mb-2">
+                <span
+                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-sm font-medium ${
+                    type === "suhoor" ? "bg-secondary/20 text-secondary" : "bg-primary/20 text-primary"
+                  }`}
+                >
+                  {type === "suhoor" ? <Coffee className="w-4 h-4" /> : <Utensils className="w-4 h-4" />}
+                  {type === "suhoor" ? "Suhoor" : "Iftar"}
+                </span>
+                {recipe.region && (
+                  <span className="text-sm text-muted-foreground">{recipe.region}</span>
+                )}
+              </div>
+              <h1 className="text-2xl md:text-4xl font-display font-bold">{recipe.name}</h1>
+              <p className="text-muted-foreground mt-2">{recipe.description}</p>
+            </header>
+
+            {recipe.significance && (
+              <section className="p-4 rounded-2xl bg-secondary/10 border border-secondary/20 mb-6" aria-labelledby="significance-heading">
+                <h2 id="significance-heading" className="font-medium flex items-center gap-2 mb-2">
+                  <BookOpen className="w-4 h-4 text-secondary" aria-hidden />
+                  Cultural significance
+                </h2>
+                <p className="text-sm">{recipe.significance}</p>
+              </section>
+            )}
+
+            {country && (
+              <section className="mb-6">
+                <h2 className="sr-only">Part of this culture</h2>
+                <Link
+                  to={`/culture/${country.id}`}
+                  className="inline-flex items-center gap-2 p-4 rounded-2xl bg-card border border-border hover:border-secondary/50 transition-all"
+                >
+                  <span className="text-2xl" aria-hidden>{country.flag}</span>
+                  <div>
+                    <span className="font-medium">Part of {country.name} traditions</span>
+                    <p className="text-sm text-muted-foreground">Explore Ramadan customs in {country.name}</p>
+                  </div>
+                  <Globe className="w-5 h-5 text-muted-foreground ml-auto" aria-hidden />
+                </Link>
+              </section>
+            )}
+
+            <section className="mb-6" aria-labelledby="ingredients-heading">
+              <h2 id="ingredients-heading" className="font-display font-bold text-lg mb-3">Ingredients</h2>
+              <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                {recipe.ingredients.map((ing, i) => (
+                  <li key={i}>{ing}</li>
+                ))}
+              </ul>
+            </section>
+
+            <section className="mb-6" aria-labelledby="details-heading">
+              <h2 id="details-heading" className="font-display font-bold text-lg mb-3">Details</h2>
+              <div className="flex flex-wrap gap-4 text-sm">
+                <span className="flex items-center gap-1">
+                  <Clock className="w-4 h-4" aria-hidden />
+                  Prep: {recipe.prepTime}
+                </span>
+                {recipe.nutrition && (
+                  <span>
+                    {recipe.nutrition.calories} cal · P: {recipe.nutrition.protein} · C: {recipe.nutrition.carbs} · F: {recipe.nutrition.fat}
+                  </span>
+                )}
+              </div>
+              <p className="mt-2 text-muted-foreground flex items-start gap-2">
+                <Flame className="w-4 h-4 shrink-0 mt-0.5" aria-hidden />
+                {recipe.benefits}
+              </p>
+              <p className="mt-2 text-secondary text-sm flex items-start gap-2">
+                <span className="shrink-0">💡</span>
+                {recipe.tips}
+              </p>
+            </section>
+
+            {recipe.dietary && recipe.dietary.length > 0 && (
+              <p className="text-xs text-muted-foreground">
+                Dietary: {recipe.dietary.map((d) => d.replace("-", " ")).join(", ")}
+              </p>
+            )}
+          </motion.article>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+}

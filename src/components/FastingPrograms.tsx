@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Clock, Check, Target, Star } from "lucide-react";
+import { ArabicHover } from "@/components/ArabicHover";
 import fastingData from "@/data/fasting-programs.json";
 
 interface FastingProgramsProps {
@@ -33,37 +33,40 @@ export const FastingPrograms = ({ onSelectProgram, selectedProgram = "traditiona
             {program.recommended && (
               <div className="absolute top-0 left-0 right-0 bg-gradient-gold py-1 px-3 text-center">
                 <span className="text-xs font-bold text-foreground flex items-center justify-center gap-1">
-                  <Star className="w-3 h-3 fill-current" />
-                  Recommended • موصى به
+                  <span aria-hidden>⭐</span>
+                  <ArabicHover arabic="موصى به" className="border-0 text-foreground">Recommended</ArabicHover>
                 </span>
               </div>
             )}
 
             {/* Selected indicator */}
             {selectedProgram === program.id && (
-              <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-gradient-gold flex items-center justify-center">
-                <Check className="w-4 h-4 text-foreground" />
+              <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-gradient-gold flex items-center justify-center text-sm" aria-hidden>
+                ✅
               </div>
             )}
 
             <div className={program.recommended ? "pt-6" : ""}>
               {/* Duration badge */}
               <div className="flex items-center gap-2 mb-3">
-                <Clock className="w-4 h-4 text-secondary" />
+                <span className="text-base" aria-hidden>🕐</span>
                 <span className="text-sm font-semibold text-secondary">{program.duration}</span>
               </div>
 
-              <h3 className="font-display text-xl font-bold mb-1">{program.name}</h3>
-              {program.nameAr && (
-                <p className="font-arabic text-secondary text-sm mb-2">{program.nameAr}</p>
-              )}
+              <h3 className="font-display text-xl font-bold mb-1">
+                {program.nameAr ? (
+                  <ArabicHover arabic={program.nameAr}>{program.name}</ArabicHover>
+                ) : (
+                  program.name
+                )}
+              </h3>
               <p className="text-sm text-muted-foreground mb-4">{program.description}</p>
 
               {/* Weekly schedule preview */}
               <div className="space-y-2 mb-4">
                 {program.weeklySchedule.slice(0, 2).map((week, weekIndex) => (
                   <div key={weekIndex} className="flex items-center gap-2 text-xs">
-                    <Target className="w-3 h-3 text-muted-foreground" />
+                    <span className="text-sm" aria-hidden>🎯</span>
                     <span className="text-muted-foreground">
                       Week {week.week}: {typeof week.hours === 'number' ? `${week.hours}h` : week.hours}
                     </span>
@@ -98,11 +101,10 @@ export const FastingPrograms = ({ onSelectProgram, selectedProgram = "traditiona
           <span className="text-3xl">☪️</span>
           <div>
             <h4 className="font-display text-lg font-bold mb-1">
-              {fastingData.sunnahFasting.title}
+              <ArabicHover arabic={fastingData.sunnahFasting.arabicName}>
+                {fastingData.sunnahFasting.title}
+              </ArabicHover>
             </h4>
-            <p className="font-arabic text-secondary mb-2">
-              {fastingData.sunnahFasting.arabicName}
-            </p>
             <p className="text-sm text-muted-foreground mb-4">
               {fastingData.sunnahFasting.description}
             </p>

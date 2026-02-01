@@ -1,21 +1,8 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { ArrowRight, Users, Heart, Shield, Moon } from "lucide-react";
-import { OnboardingModal } from "./OnboardingModal";
 
 export const CTASection = () => {
-  const [showOnboarding, setShowOnboarding] = useState(false);
-
-  const handleStartJourney = () => {
-    setShowOnboarding(true);
-  };
-
-  const handleOnboardingComplete = (data: any) => {
-    console.log("Onboarding complete:", data);
-    // Scroll to top after completing
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   return (
     <>
       <section className="py-24 relative overflow-hidden">
@@ -52,22 +39,22 @@ export const CTASection = () => {
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-              <button 
-                onClick={handleStartJourney}
+              <Link 
+                to="/onboarding/welcome"
                 className="btn-hero group flex items-center gap-2"
               >
                 <Moon className="w-5 h-5" />
                 <span>Begin Your Ramadan Journey</span>
                 <span className="font-arabic text-sm">ابدأ</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </button>
-              <a 
-                href="#programs"
+              </Link>
+              <Link 
+                to="/programs"
                 className="btn-hero-outline flex items-center gap-2"
               >
                 <span>View Fasting Programs</span>
                 <span className="font-arabic text-sm">البرامج</span>
-              </a>
+              </Link>
             </div>
 
             {/* Trust indicators */}
@@ -88,13 +75,6 @@ export const CTASection = () => {
           </motion.div>
         </div>
       </section>
-
-      {/* Onboarding Modal */}
-      <OnboardingModal
-        isOpen={showOnboarding}
-        onClose={() => setShowOnboarding(false)}
-        onComplete={handleOnboardingComplete}
-      />
     </>
   );
 };

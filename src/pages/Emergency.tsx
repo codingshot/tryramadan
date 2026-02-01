@@ -6,19 +6,15 @@ import {
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { useFastingProgress } from "@/hooks/useLocalStorage";
+import { ArabicHover } from "@/components/ArabicHover";
+import { useFastingProgress, breakFastingToday } from "@/hooks/useLocalStorage";
 
 const Emergency = () => {
   const navigate = useNavigate();
   const [progress, setProgress] = useFastingProgress();
-  
+
   const handleBreakFast = () => {
-    // Don't count today as complete
-    const today = new Date().toISOString().split('T')[0];
-    setProgress({
-      ...progress,
-      completedDays: progress.completedDays.filter(d => d !== today)
-    });
+    breakFastingToday(progress, setProgress);
   };
   
   const steps = [
@@ -50,8 +46,7 @@ const Emergency = () => {
               <AlertTriangle className="w-10 h-10 text-destructive" />
             </div>
             <h1 className="text-2xl md:text-3xl font-display font-bold">
-              It's Okay to Break Your Fast
-              <span className="block font-arabic text-lg text-secondary mt-2">لا بأس أن تفطر</span>
+              <ArabicHover arabic="لا بأس أن تفطر">It's Okay to Break Your Fast</ArabicHover>
             </h1>
           </motion.div>
           
@@ -63,7 +58,7 @@ const Emergency = () => {
             className="p-6 rounded-2xl bg-card border border-border mb-8"
           >
             <p className="text-center text-lg leading-relaxed">
-              Your health is a trust (<span className="text-secondary font-arabic">أمانة</span>) from Allah. 
+              Your health is a trust (<ArabicHover arabic="أمانة">trust</ArabicHover>) from Allah. 
               Taking care of your body is an act of worship. 
               <strong className="block mt-2">You are not a failure.</strong>
             </p>
@@ -77,7 +72,7 @@ const Emergency = () => {
             className="mb-8"
           >
             <h2 className="font-display font-bold text-lg mb-4 text-center">
-              What to do now • ماذا تفعل الآن
+              <ArabicHover arabic="ماذا تفعل الآن">What to do now</ArabicHover>
             </h2>
             
             <div className="space-y-3">
@@ -95,8 +90,9 @@ const Emergency = () => {
                       <Icon className="w-6 h-6 text-secondary" />
                     </div>
                     <div>
-                      <span className="font-medium block">{step.text}</span>
-                      <span className="text-sm text-secondary font-arabic">{step.textAr}</span>
+                      <span className="font-medium block">
+                        <ArabicHover arabic={step.textAr}>{step.text}</ArabicHover>
+                      </span>
                     </div>
                   </motion.div>
                 );

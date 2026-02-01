@@ -8,15 +8,28 @@ import {
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FastingTimer } from "@/components/FastingTimer";
-import { useUserPreferences, useFastingProgress } from "@/hooks/useLocalStorage";
+import {
+  useUserPreferences,
+  useFastingProgress,
+  startFastingToday,
+  getTodayFastingLog,
+  isFastingToday,
+  useTodayData,
+} from "@/hooks/useLocalStorage";
 import { usePrayerTimes } from "@/hooks/usePrayerTimes";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { PrayerLocationBadge } from "@/components/PrayerLocationBadge";
+
+const HYDRATION_GOAL = 8;
 
 const DashboardToday = () => {
   const [preferences] = useUserPreferences();
   const [progress, setProgress] = useFastingProgress();
+  const { intention, hydrationGlasses, energyEntries, setIntention, setHydrationGlasses, addEnergyEntry } = useTodayData();
   const [energyLevel, setEnergyLevel] = useState<1 | 2 | 3 | 4 | 5>(3);
   const [showBreakFast, setShowBreakFast] = useState(false);
+  const [countdownSuhoorEnd, setCountdownSuhoorEnd] = useState({ h: 0, m: 0 });
+  const [countdownIftar, setCountdownIftar] = useState({ h: 0, m: 0 });
   
   const { prayerTimes } = usePrayerTimes(
     preferences.locationCoords?.lat || null,
@@ -42,6 +55,35 @@ const DashboardToday = () => {
   };
   
   const fastingProgress = getFastingProgress();
+  const fastingToday = isFastingToday(progress);
+  const todayLog = getTodayFastingLog(progress);
+
+  // Dual countdown: time until Suhoor ends (Fajr) and time until Iftar (Maghrib)
+  useEffect(() => {
+    if (!prayerTimes) return;
+    const interval = setInterval(() => {
+      const now = new Date();
+      const [fajrH, fajrM] = prayerTimes.fajr.split(':').map(Number);
+      const [maghribH, maghribM] = prayerTimes.maghrib.split(':').map(Number);
+      const fajr = new Date(); fajr.setHours(fajrH, fajrM, 0);
+      const maghrib = new Date(); maghrib.setHours(maghribH, maghribM, 0);
+      if (now < fajr) {
+        const d = fajr.getTime() - now.getTime();
+        setCountdownSuhoorEnd({ h: Math.floor(d / 36e5), m: Math.floor((d % 36e5) / 6e4) });
+      } else {
+        setCountdownSuhoorEnd({ h: 0, m: 0 });
+      }
+      if (now < maghrib) {
+        const d = maghrib.getTime() - now.getTime();
+        setCountdownIftar({ h: Math.floor(d / 36e5), m: Math.floor((d % 36e5) / 6e4) });
+      } else {
+        const nextMaghrib = new Date(maghrib); nextMaghrib.setDate(nextMaghrib.getDate() + 1);
+        const d = nextMaghrib.getTime() - now.getTime();
+        setCountdownIftar({ h: Math.floor(d / 36e5), m: Math.floor((d % 36e5) / 6e4) });
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [prayerTimes]);
   
   const energyIcons = {
     1: BatteryLow,
@@ -94,8 +136,45 @@ const DashboardToday = () => {
               suhoorTime={prayerTimes?.imsak}
               iftarTime={prayerTimes?.maghrib}
             />
+            {/* Log that you're fasting */}
+            {!fastingToday && !progress.completedDays.includes(new Date().toISOString().split('T')[0]) && (
+              <button
+                onClick={() => startFastingToday(progress, setProgress)}
+                className="mt-4 w-full py-3 px-4 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+              >
+                <Moon className="w-5 h-5" />
+                I'm fasting — Log it
+              </button>
+            )}
+            {fastingToday && todayLog && (
+              <div className="mt-4 py-3 px-4 rounded-xl bg-secondary/20 border border-secondary/40 text-center text-sm">
+                <span className="font-medium text-secondary">You're fasting</span>
+                <span className="text-muted-foreground ml-2">
+                  since {new Date(todayLog.startedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                </span>
+              </div>
+            )}
           </motion.div>
           
+          {/* Dual countdown */}
+          {prayerTimes && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.12 }}
+              className="mb-6 grid grid-cols-2 gap-4"
+            >
+              <div className="p-4 rounded-2xl bg-card border border-border text-center">
+                <span className="text-xs text-muted-foreground block">Until Suhoor ends (Fajr)</span>
+                <span className="text-xl font-bold text-secondary">{String(countdownSuhoorEnd.h).padStart(2, '0')}:{String(countdownSuhoorEnd.m).padStart(2, '0')}</span>
+              </div>
+              <div className="p-4 rounded-2xl bg-card border border-border text-center">
+                <span className="text-xs text-muted-foreground block">Until Iftar</span>
+                <span className="text-xl font-bold text-secondary">{String(countdownIftar.h).padStart(2, '0')}:{String(countdownIftar.m).padStart(2, '0')}</span>
+              </div>
+            </motion.div>
+          )}
+
           {/* Progress Bar */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -119,6 +198,26 @@ const DashboardToday = () => {
               <span>Fajr {prayerTimes?.fajr || '05:30'}</span>
               <span>Maghrib {prayerTimes?.maghrib || '18:30'}</span>
             </div>
+            <div className="mt-2 pt-2 border-t border-border">
+              <PrayerLocationBadge />
+            </div>
+          </motion.div>
+
+          {/* Today's intention */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.22 }}
+            className="mb-8 p-6 rounded-2xl bg-card border border-border"
+          >
+            <h3 className="font-display font-bold mb-2">Today's intention</h3>
+            <p className="text-sm text-muted-foreground mb-3">Set a short intention or goal for today's fast.</p>
+            <textarea
+              value={intention}
+              onChange={(e) => setIntention(e.target.value)}
+              placeholder="e.g. Patience, gratitude, or a small act of kindness..."
+              className="w-full p-3 rounded-xl border border-border bg-background min-h-[80px] text-sm resize-none focus:ring-2 focus:ring-secondary outline-none"
+            />
           </motion.div>
           
           {/* Energy Level Check-in */}
@@ -138,7 +237,10 @@ const DashboardToday = () => {
                 <Tooltip key={level}>
                   <TooltipTrigger asChild>
                     <button
-                      onClick={() => setEnergyLevel(level as 1 | 2 | 3 | 4 | 5)}
+                      onClick={() => {
+                        setEnergyLevel(level as 1 | 2 | 3 | 4 | 5);
+                        addEnergyEntry(level as 1 | 2 | 3 | 4 | 5);
+                      }}
                       className={`flex-1 p-4 rounded-xl border-2 transition-all ${
                         energyLevel === level 
                           ? 'border-secondary bg-secondary/10' 
@@ -175,6 +277,55 @@ const DashboardToday = () => {
                 {energyLevel === 3 && "You're doing well! Keep a steady pace today."}
                 {energyLevel >= 4 && "Great energy! You're handling the fast beautifully."}
               </span>
+            </div>
+            {energyEntries.length > 0 && (
+              <div className="mt-3 text-xs text-muted-foreground">
+                <span className="font-medium">Check-ins today:</span>{" "}
+                {energyEntries.slice(-5).map((e, i) => (
+                  <span key={i}>
+                    {new Date(e.time).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} ({e.level}/5)
+                    {i < Math.min(5, energyEntries.length) - 1 ? ", " : ""}
+                  </span>
+                ))}
+              </div>
+            )}
+          </motion.div>
+
+          {/* Hydration tracker */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.32 }}
+            className="mb-8 p-6 rounded-2xl bg-card border border-border"
+          >
+            <h3 className="font-display font-bold mb-2 flex items-center gap-2">
+              <Droplets className="w-5 h-5 text-blue-500" />
+              Hydration (non-fasting hours)
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">Goal: {HYDRATION_GOAL} glasses after iftar</p>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setHydrationGlasses(hydrationGlasses - 1)}
+                className="w-10 h-10 rounded-full border-2 border-border hover:border-secondary font-bold text-lg"
+              >
+                −
+              </button>
+              <span className="text-3xl font-bold min-w-[3rem] text-center">{hydrationGlasses}</span>
+              <button
+                onClick={() => setHydrationGlasses(hydrationGlasses + 1)}
+                className="w-10 h-10 rounded-full border-2 border-secondary bg-secondary/10 font-bold text-lg"
+              >
+                +
+              </button>
+              <span className="text-sm text-muted-foreground">glasses</span>
+            </div>
+            <div className="mt-2 h-2 bg-muted rounded-full overflow-hidden">
+              <motion.div
+                className="h-full bg-blue-500 rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${Math.min(100, (hydrationGlasses / HYDRATION_GOAL) * 100)}%` }}
+                transition={{ duration: 0.3 }}
+              />
             </div>
           </motion.div>
           
