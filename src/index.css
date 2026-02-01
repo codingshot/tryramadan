@@ -140,9 +140,19 @@
     @apply border-border;
   }
   
+  html {
+    scroll-behavior: smooth;
+  }
+  
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-body);
+  }
+  
+  /* Ensure proper contrast */
+  ::selection {
+    background: hsl(42 85% 55% / 0.3);
+    color: hsl(160 30% 15%);
   }
   
   h1, h2, h3, h4, h5, h6 {

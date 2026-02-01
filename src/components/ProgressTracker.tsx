@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check, Star } from "lucide-react";
+import { Check, Star, Calendar } from "lucide-react";
 
 interface ProgressTrackerProps {
   currentDay: number;
@@ -22,12 +22,23 @@ export const ProgressTracker = ({
 
   return (
     <div className="space-y-6">
+      {/* Header with Arabic */}
+      <div className="text-center">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/10 text-secondary text-sm font-medium mb-2">
+          <Calendar className="w-4 h-4" />
+          <span>Ramadan Calendar</span>
+          <span className="font-arabic">تقويم رمضان</span>
+        </div>
+      </div>
+
       {/* Overall progress bar */}
       <div className="space-y-2">
         <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Ramadan Progress</span>
+          <span className="text-muted-foreground">
+            Progress • التقدم
+          </span>
           <span className="font-semibold text-secondary">
-            Day {currentDay} of {totalDays}
+            Day {currentDay} • اليوم {currentDay} من {totalDays}
           </span>
         </div>
         <div className="progress-ramadan">
@@ -39,8 +50,8 @@ export const ProgressTracker = ({
           />
         </div>
         <div className="flex justify-between text-xs text-muted-foreground">
-          <span>{completedDays.length} days completed</span>
-          <span>{totalDays - completedDays.length} days remaining</span>
+          <span>{completedDays.length} completed • مكتمل</span>
+          <span>{totalDays - completedDays.length} remaining • متبقي</span>
         </div>
       </div>
 
@@ -53,7 +64,7 @@ export const ProgressTracker = ({
 
           return (
             <motion.div
-              key={day}
+              key={`day-${day}`}
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.05 }}
@@ -96,6 +107,7 @@ export const ProgressTracker = ({
         >
           <span className="text-2xl">🔥</span>
           <span className="font-bold">{completedDays.length} Day Streak!</span>
+          <span className="font-arabic text-sm">سلسلة أيام!</span>
         </motion.div>
       </div>
     </div>
