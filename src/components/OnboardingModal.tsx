@@ -1,9 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ArrowLeft, Check, Moon, BookOpen, Heart, MapPin } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ArrowRight, ArrowLeft, Check, Moon, BookOpen, Heart, Bell, Loader2 } from "lucide-react";
+import { LocationSearch } from "./LocationSearch";
+import { LocationResult } from "@/hooks/useLocation";
+import { useUserPreferences, defaultPreferences } from "@/hooks/useLocalStorage";
+import { useNotifications } from "@/hooks/useNotifications";
 
 type UserType = "new" | "muslim" | null;
-type Step = "welcome" | "userType" | "experience" | "location" | "complete";
+type Step = "welcome" | "userType" | "experience" | "location" | "notifications" | "complete";
 
 interface OnboardingModalProps {
   isOpen: boolean;
@@ -15,6 +20,7 @@ interface OnboardingData {
   userType: UserType;
   experience: string;
   location: string;
+  locationCoords: { lat: number; lng: number } | null;
   fastingGoal: string;
 }
 
@@ -22,12 +28,55 @@ export const OnboardingModal = ({ isOpen, onClose, onComplete }: OnboardingModal
   const [step, setStep] = useState<Step>("welcome");
   const [userType, setUserType] = useState<UserType>(null);
   const [experience, setExperience] = useState("");
-  const [location, setLocation] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState<LocationResult | null>(null);
   const [fastingGoal, setFastingGoal] = useState("");
+  const [preferences, setPreferences] = useUserPreferences();
+  const { permission, supported, requestPermission, sendTestNotification } = useNotifications();
+  const [notifLoading, setNotifLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleComplete = () => {
-    onComplete({ userType, experience, location, fastingGoal });
+    const data: OnboardingData = {
+      userType,
+      experience,
+      location: selectedLocation?.displayName || '',
+      locationCoords: selectedLocation ? { lat: selectedLocation.lat, lng: selectedLocation.lng } : null,
+      fastingGoal,
+    };
+    
+    // Save to localStorage
+    setPreferences({
+      ...preferences,
+      userType,
+      experience,
+      location: selectedLocation?.displayName || '',
+      locationCoords: selectedLocation ? { lat: selectedLocation.lat, lng: selectedLocation.lng } : null,
+      fastingGoal: fastingGoal || 'full',
+      onboardingComplete: true,
+      notificationsEnabled: permission === 'granted',
+    });
+    
+    onComplete(data);
     onClose();
+    
+    // Scroll to timer section
+    const timerSection = document.getElementById('programs');
+    if (timerSection) {
+      timerSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleLocationSelect = (location: LocationResult) => {
+    setSelectedLocation(location);
+  };
+
+  const handleEnableNotifications = async () => {
+    setNotifLoading(true);
+    const granted = await requestPermission();
+    if (granted) {
+      sendTestNotification();
+    }
+    setNotifLoading(false);
   };
 
   const experienceLevels = [
@@ -72,10 +121,11 @@ export const OnboardingModal = ({ isOpen, onClose, onComplete }: OnboardingModal
               className="h-full bg-gradient-gold"
               initial={{ width: "0%" }}
               animate={{ 
-                width: step === "welcome" ? "20%" : 
-                       step === "userType" ? "40%" :
-                       step === "experience" ? "60%" :
-                       step === "location" ? "80%" : "100%"
+                width: step === "welcome" ? "16%" : 
+                       step === "userType" ? "33%" :
+                       step === "experience" ? "50%" :
+                       step === "location" ? "66%" :
+                       step === "notifications" ? "83%" : "100%"
               }}
             />
           </div>
@@ -271,32 +321,100 @@ export const OnboardingModal = ({ isOpen, onClose, onComplete }: OnboardingModal
                   ))}
                 </div>
 
-                {/* Location input */}
+                {/* Location input with typeahead */}
                 <div className="mb-6">
                   <label className="block text-sm font-medium mb-2">
                     Your Location • موقعك
-                    <span className="text-muted-foreground font-normal ml-2">(for prayer times)</span>
+                    <span className="text-muted-foreground font-normal ml-2">(for accurate prayer times)</span>
                   </label>
-                  <div className="relative">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                    <input
-                      type="text"
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      placeholder="Enter city or use auto-detect"
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all"
-                    />
-                  </div>
+                  <LocationSearch
+                    value={selectedLocation?.name || ''}
+                    onSelect={handleLocationSelect}
+                    placeholder="Search city or click 📍 to detect"
+                  />
+                  {selectedLocation && (
+                    <p className="text-xs text-secondary mt-2">
+                      📍 {selectedLocation.displayName}
+                    </p>
+                  )}
                 </div>
 
                 <button 
-                  onClick={() => setStep("complete")}
+                  onClick={() => setStep("notifications")}
                   disabled={!fastingGoal}
                   className="btn-hero w-full flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                  Complete Setup • إكمال الإعداد
+                  Continue • متابعة
                   <ArrowRight className="w-5 h-5" />
                 </button>
+              </motion.div>
+            )}
+
+            {/* Notifications */}
+            {step === "notifications" && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+              >
+                <button 
+                  onClick={() => setStep("location")}
+                  className="text-muted-foreground hover:text-foreground mb-4 flex items-center gap-1"
+                >
+                  <ArrowLeft className="w-4 h-4" /> Back
+                </button>
+
+                <div className="text-center">
+                  <div className="w-16 h-16 rounded-full bg-secondary/20 mx-auto mb-4 flex items-center justify-center">
+                    <Bell className="w-8 h-8 text-secondary" />
+                  </div>
+                  
+                  <h2 className="font-display text-2xl font-bold mb-2">
+                    Enable Reminders
+                  </h2>
+                  <p className="font-arabic text-secondary mb-4">تفعيل التذكيرات</p>
+                  
+                  <p className="text-muted-foreground mb-6">
+                    Get notified before Suhoor ends and when it's time for Iftar. Never miss a meal!
+                  </p>
+
+                  {!supported ? (
+                    <p className="text-muted-foreground text-sm mb-6">
+                      Notifications are not supported in your browser.
+                    </p>
+                  ) : permission === 'granted' ? (
+                    <div className="p-4 rounded-xl bg-secondary/10 border border-secondary/20 mb-6">
+                      <Check className="w-6 h-6 text-secondary mx-auto mb-2" />
+                      <p className="text-sm font-medium">Notifications enabled!</p>
+                    </div>
+                  ) : permission === 'denied' ? (
+                    <p className="text-muted-foreground text-sm mb-6">
+                      Notifications are blocked. Please enable them in your browser settings.
+                    </p>
+                  ) : (
+                    <button
+                      onClick={handleEnableNotifications}
+                      disabled={notifLoading}
+                      className="btn-hero-outline w-full mb-4 flex items-center justify-center gap-2"
+                    >
+                      {notifLoading ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <>
+                          <Bell className="w-5 h-5" />
+                          Enable Notifications
+                        </>
+                      )}
+                    </button>
+                  )}
+
+                  <button 
+                    onClick={() => setStep("complete")}
+                    className="btn-hero w-full flex items-center justify-center gap-2"
+                  >
+                    {permission === 'granted' ? 'Continue' : 'Skip for now'}
+                    <ArrowRight className="w-5 h-5" />
+                  </button>
+                </div>
               </motion.div>
             )}
 
