@@ -134,3 +134,19 @@ export function isCurrentlyRamadan(): boolean {
   const end = getRamadanEndForYear(start.getFullYear());
   return today >= start && today <= end;
 }
+
+/** Date range for the next (or current) Ramadan as YYYY-MM-DD and Date. For calendar export and prayer fetch. */
+export function getRamadanDateRange(): {
+  startStr: string;
+  endStr: string;
+  startDate: Date;
+  endDate: Date;
+  year: number;
+} {
+  const start = getCurrentRamadanStart();
+  const end = getRamadanEndForYear(start.getFullYear());
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  const startStr = `${start.getFullYear()}-${pad(start.getMonth() + 1)}-${pad(start.getDate())}`;
+  const endStr = `${end.getFullYear()}-${pad(end.getMonth() + 1)}-${pad(end.getDate())}`;
+  return { startStr, endStr, startDate: new Date(start), endDate: new Date(end), year: start.getFullYear() };
+}

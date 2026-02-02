@@ -1,17 +1,48 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Target, ChevronRight, Check, Circle, Moon } from "lucide-react";
-import { useGoalsUntilRamadan } from "@/hooks/useLocalStorage";
-import { getDaysUntilRamadan, isCurrentlyRamadan } from "@/lib/ramadan";
+import { Target, ChevronRight, Check, Circle, Moon, CalendarPlus, MapPin, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
+import { useGoalsUntilRamadan, useUserPreferences } from "@/hooks/useLocalStorage";
+import { getDaysUntilRamadan, isCurrentlyRamadan, getRamadanDateRange } from "@/lib/ramadan";
+import { useRamadanPrayerTimes } from "@/hooks/usePrayerTimes";
+import { buildIcalContent, downloadIcal } from "@/lib/ical";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
+import { Button } from "@/components/ui/button";
 
 export function GoalsUntilRamadanCard() {
   const [goals, setGoals] = useGoalsUntilRamadan();
+  const [preferences] = useUserPreferences();
+  const [showExplanation, setShowExplanation] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const daysUntil = getDaysUntilRamadan();
   const inRamadan = isCurrentlyRamadan();
   const completedCount = goals.filter((g) => g.completed).length;
   const displayGoals = goals.slice(0, 4);
+  const coords = preferences.locationCoords;
+  const lat = coords?.lat ?? null;
+  const lng = coords?.lng ?? null;
+  const { prayerTimesMap, loading: prayersLoading, error: prayersError, refetch } = useRamadanPrayerTimes(lat, lng);
+  const ramadanRange = getRamadanDateRange();
+  const hasLocation = lat != null && lng != null;
+  const hasPrayerData = Object.keys(prayerTimesMap).length > 0;
+
+  const handleAddToCalendar = async () => {
+    if (!hasLocation || !hasPrayerData) return;
+    setExporting(true);
+    try {
+      const ics = buildIcalContent({
+        prayerTimesMap,
+        customEvents: {},
+        dateRange: [ramadanRange.startStr, ramadanRange.endStr],
+        includeTaraweeh: true,
+        includePrayers: true,
+      });
+      downloadIcal(ics, `ramadan-${ramadanRange.startStr}-to-${ramadanRange.endStr}.ics`);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const toggleGoal = (id: string) => {
     setGoals((prev) =>
@@ -48,33 +79,127 @@ export function GoalsUntilRamadanCard() {
         </Link>
       </div>
       {inRamadan ? (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-secondary/10 border border-secondary/20 mb-4 cursor-help">
-              <Moon className="w-5 h-5 text-secondary" />
-              <span className="font-medium text-secondary border-b border-dotted border-secondary/40">Ramadan Mubarak! • رمضان مبارك</span>
+        <>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-secondary/10 border border-secondary/20 mb-3 cursor-help">
+                <Moon className="w-5 h-5 text-secondary" />
+                <span className="font-medium text-secondary border-b border-dotted border-secondary/40">Ramadan Mubarak!</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs p-3">
+              <p className="font-medium">{GENERAL_TOOLTIPS.ramadanMubarak.title}</p>
+              <p className="text-xs mt-1 text-muted-foreground">{GENERAL_TOOLTIPS.ramadanMubarak.body}</p>
+              <p className="text-xs text-muted-foreground mt-1 font-arabic" dir="rtl">{GENERAL_TOOLTIPS.ramadanMubarak.bodyAr}</p>
+            </TooltipContent>
+          </Tooltip>
+          <button
+            type="button"
+            onClick={() => setShowExplanation(!showExplanation)}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground mb-3"
+          >
+            {showExplanation ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            {showExplanation ? "Hide" : "Add Ramadan times to calendar"}
+          </button>
+          {showExplanation && (
+            <div className="mb-4 p-3 rounded-xl bg-muted/50 border border-border text-sm space-y-2">
+              {hasLocation ? (
+                <>
+                  <p className="text-muted-foreground">
+                    Add all Ramadan fasting and iftar times (Suhoor end, Maghrib, and daily prayers) for your location to Google Calendar, Apple Calendar, or Outlook.
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={handleAddToCalendar}
+                    disabled={!hasPrayerData || exporting}
+                    className="w-full sm:w-auto"
+                  >
+                    {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <CalendarPlus className="w-4 h-4" />}
+                    <span className="ml-2">{exporting ? "Preparing…" : "Add Ramadan to calendar"}</span>
+                  </Button>
+                  {prayersLoading && !hasPrayerData && (
+                    <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Loading prayer times…
+                    </p>
+                  )}
+                  {prayersError && (
+                    <p className="text-xs text-destructive">Could not load prayer times. <button type="button" onClick={() => refetch()} className="underline">Try again</button></p>
+                  )}
+                </>
+              ) : (
+                <p className="text-muted-foreground flex items-center gap-2">
+                  <MapPin className="w-4 h-4 shrink-0" />
+                  <Link to="/settings" className="text-secondary hover:underline font-medium">Set your location in Settings</Link> to add Ramadan times to your calendar.
+                </p>
+              )}
             </div>
-          </TooltipTrigger>
-          <TooltipContent className="max-w-xs p-3">
-            <p className="font-medium">{GENERAL_TOOLTIPS.ramadanMubarak.title}</p>
-            <p className="text-xs mt-1 text-muted-foreground">{GENERAL_TOOLTIPS.ramadanMubarak.body}</p>
-            <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.ramadanMubarak.bodyAr}</p>
-          </TooltipContent>
-        </Tooltip>
+          )}
+        </>
       ) : daysUntil > 0 ? (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-secondary/10 border border-secondary/20 mb-4 cursor-help">
-              <span className="text-2xl font-bold text-secondary">{daysUntil}</span>
-              <span className="text-sm text-muted-foreground border-b border-dotted border-muted-foreground/40">days until Ramadan</span>
+        <>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-secondary/10 border border-secondary/20 mb-3 cursor-help">
+                <span className="text-2xl font-bold text-secondary">{daysUntil}</span>
+                <span className="text-sm text-muted-foreground border-b border-dotted border-muted-foreground/40">days until Ramadan</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs p-3">
+              <p className="font-medium">{GENERAL_TOOLTIPS.ramadan.title}</p>
+              <p className="text-xs mt-1 text-muted-foreground">{GENERAL_TOOLTIPS.ramadan.body}</p>
+              <p className="text-xs text-muted-foreground mt-1 font-arabic" dir="rtl">{GENERAL_TOOLTIPS.ramadan.bodyAr}</p>
+            </TooltipContent>
+          </Tooltip>
+          <button
+            type="button"
+            onClick={() => setShowExplanation(!showExplanation)}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground mb-3"
+          >
+            {showExplanation ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            {showExplanation ? "Hide details" : "What does this mean? Add to calendar"}
+          </button>
+          {showExplanation && (
+            <div className="mb-4 p-3 rounded-xl bg-muted/50 border border-border text-sm space-y-2">
+              <p className="text-muted-foreground">
+                Ramadan is the ninth month of the Islamic (lunar) calendar. The countdown is based on the <strong>approximate</strong> start date for your region. The actual start is confirmed by moon sighting and can vary by a day.
+              </p>
+              <p className="text-muted-foreground">
+                <strong>Expected start:</strong> {ramadanRange.startDate.toLocaleDateString("en", { weekday: "long", month: "long", day: "numeric", year: "numeric" })} — <strong>End:</strong> {ramadanRange.endDate.toLocaleDateString("en", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}.
+              </p>
+              {hasLocation ? (
+                <>
+                  <p className="text-muted-foreground">
+                    Prayer times (Suhoor end / Iftar and all five daily prayers) for this Ramadan are calculated for your selected location. Add them to your calendar so you never miss a fast or prayer time.
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={handleAddToCalendar}
+                    disabled={!hasPrayerData || exporting}
+                    className="w-full sm:w-auto"
+                  >
+                    {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <CalendarPlus className="w-4 h-4" />}
+                    <span className="ml-2">{exporting ? "Preparing…" : "Add Ramadan to calendar"}</span>
+                  </Button>
+                  {prayersLoading && !hasPrayerData && (
+                    <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Loading prayer times for your location…
+                    </p>
+                  )}
+                  {prayersError && (
+                    <p className="text-xs text-destructive">Could not load prayer times. <button type="button" onClick={() => refetch()} className="underline">Try again</button></p>
+                  )}
+                </>
+              ) : (
+                <p className="text-muted-foreground flex items-center gap-2">
+                  <MapPin className="w-4 h-4 shrink-0" />
+                  <Link to="/settings" className="text-secondary hover:underline font-medium">Set your location in Settings</Link> to add all Ramadan fasting and iftar times (Suhoor end &amp; Maghrib) for your region to your calendar.
+                </p>
+              )}
             </div>
-          </TooltipTrigger>
-          <TooltipContent className="max-w-xs p-3">
-            <p className="font-medium">{GENERAL_TOOLTIPS.ramadan.title}</p>
-            <p className="text-xs mt-1 text-muted-foreground">{GENERAL_TOOLTIPS.ramadan.body}</p>
-            <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.ramadan.bodyAr}</p>
-          </TooltipContent>
-        </Tooltip>
+          )}
+        </>
       ) : null}
       {goals.length === 0 ? (
         <>

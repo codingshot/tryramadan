@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { ArabicHover } from "@/components/ArabicHover";
 import { Clock, Sunrise, Sunset, Moon } from "lucide-react";
 import type { PrayerTimes } from "@/hooks/usePrayerTimes";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -108,8 +109,7 @@ export function TodayScheduleTimeline({
       <div className="p-3 border-b border-border">
         <h3 className="font-display font-bold text-sm flex items-center gap-2">
           <Clock className="w-4 h-4 text-secondary" />
-          Today&apos;s schedule
-          <span className="font-arabic text-xs font-normal text-muted-foreground">جدول اليوم</span>
+          <ArabicHover arabic="جدول اليوم" explanation="Today's schedule — key fasting and prayer times">Today&apos;s schedule</ArabicHover>
         </h3>
         <p className="text-xs text-muted-foreground mt-0.5">
           Key times for fasting and prayer

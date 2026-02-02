@@ -174,8 +174,7 @@ const DashboardToday = () => {
             className="mb-8"
           >
             <h1 className="text-2xl md:text-3xl font-display font-bold">
-              Today's Fast
-              <span className="block font-arabic text-lg text-secondary mt-1">صيام اليوم</span>
+              <ArabicHover arabic="صيام اليوم" explanation="Today's fast — track from suhoor end until iftar">Today&apos;s Fast</ArabicHover>
             </h1>
             <p className="text-muted-foreground mt-2">
               Track your current fast and monitor how you're feeling
@@ -192,7 +191,7 @@ const DashboardToday = () => {
             <Tooltip>
               <TooltipTrigger asChild>
                 <h3 className="font-display font-bold text-sm mb-3 text-muted-foreground cursor-help border-b border-dotted border-muted-foreground/40 w-fit">
-                  Today&apos;s fast • صيام اليوم
+                  Today&apos;s fast
                 </h3>
               </TooltipTrigger>
               <TooltipContent>
@@ -211,7 +210,6 @@ const DashboardToday = () => {
                     <p className="text-xs mt-1 text-muted-foreground">You logged that you completed dawn-to-sunset fasting today.</p>
                   </TooltipContent>
                 </Tooltip>
-                <span className="font-arabic text-secondary ml-2">صمت اليوم</span>
               </div>
             ) : todayBrokenEntry ? (
               <div className="py-3 px-4 rounded-xl border border-destructive/40 bg-destructive/10 text-center text-sm">

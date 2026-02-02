@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { useLocation } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -9,18 +9,20 @@ import { OnboardingProvider } from "@/contexts/OnboardingContext";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import DashboardToday from "./pages/DashboardToday";
-import DashboardSchedule from "./pages/DashboardSchedule";
 import DashboardPrayers from "./pages/DashboardPrayers";
-import DashboardMeals from "./pages/DashboardMeals";
 import DashboardLearn from "./pages/DashboardLearn";
-import DashboardProgress from "./pages/DashboardProgress";
-import DashboardCulture from "./pages/DashboardCulture";
 import DashboardHealth from "./pages/DashboardHealth";
 import DashboardJournal from "./pages/DashboardJournal";
 import DashboardAchievements from "./pages/DashboardAchievements";
 import DashboardGoals from "./pages/DashboardGoals";
-import DashboardQuran from "./pages/DashboardQuran";
-import DashboardMacros from "./pages/DashboardMacros";
+import { LoadingSpinner } from "./components/LoadingSpinner";
+
+const DashboardSchedule = lazy(() => import("./pages/DashboardSchedule").then((m) => ({ default: m.default })));
+const DashboardMeals = lazy(() => import("./pages/DashboardMeals").then((m) => ({ default: m.default })));
+const DashboardProgress = lazy(() => import("./pages/DashboardProgress").then((m) => ({ default: m.default })));
+const DashboardCulture = lazy(() => import("./pages/DashboardCulture").then((m) => ({ default: m.default })));
+const DashboardQuran = lazy(() => import("./pages/DashboardQuran").then((m) => ({ default: m.default })));
+const DashboardMacros = lazy(() => import("./pages/DashboardMacros").then((m) => ({ default: m.default })));
 import OnboardingLayout from "./pages/onboarding/OnboardingLayout";
 import OnboardingWelcome from "./pages/onboarding/OnboardingWelcome";
 import OnboardingMode from "./pages/onboarding/OnboardingMode";
@@ -56,6 +58,14 @@ import { FastingBottomBar } from "./components/FastingBottomBar";
 import { ReminderScheduler } from "./components/ReminderScheduler";
 
 const queryClient = new QueryClient();
+
+function PageFallback() {
+  return (
+    <div className="min-h-[50vh] flex items-center justify-center p-8">
+      <LoadingSpinner size="md" showLogo />
+    </div>
+  );
+}
 
 /** Scroll to top when the route changes so each page starts at the top. */
 function ScrollToTop() {
@@ -126,18 +136,60 @@ const App = () => (
           </Route>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/today" element={<DashboardToday />} />
-          <Route path="/dashboard/schedule" element={<DashboardSchedule />} />
+          <Route
+            path="/dashboard/schedule"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <DashboardSchedule />
+              </Suspense>
+            }
+          />
           <Route path="/dashboard/prayers" element={<DashboardPrayers />} />
-          <Route path="/dashboard/meals" element={<DashboardMeals />} />
+          <Route
+            path="/dashboard/meals"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <DashboardMeals />
+              </Suspense>
+            }
+          />
           <Route path="/dashboard/learn" element={<DashboardLearn />} />
-          <Route path="/dashboard/progress" element={<DashboardProgress />} />
-          <Route path="/dashboard/culture" element={<DashboardCulture />} />
+          <Route
+            path="/dashboard/progress"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <DashboardProgress />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/dashboard/culture"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <DashboardCulture />
+              </Suspense>
+            }
+          />
           <Route path="/dashboard/health" element={<DashboardHealth />} />
           <Route path="/dashboard/journal" element={<DashboardJournal />} />
           <Route path="/dashboard/achievements" element={<DashboardAchievements />} />
           <Route path="/dashboard/goals" element={<DashboardGoals />} />
-          <Route path="/dashboard/quran" element={<DashboardQuran />} />
-          <Route path="/dashboard/macros" element={<DashboardMacros />} />
+          <Route
+            path="/dashboard/quran"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <DashboardQuran />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/dashboard/macros"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <DashboardMacros />
+              </Suspense>
+            }
+          />
           <Route path="/dashboard/glossary" element={<LearnGlossary />} />
           <Route path="/learn/glossary" element={<LearnGlossary />} />
           <Route path="/learn/hadith" element={<LearnHadith />} />

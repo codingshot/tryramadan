@@ -8,6 +8,7 @@ import {
   AlertTriangle, Trophy, HelpCircle
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
+import { ArabicHover } from "@/components/ArabicHover";
 import { FastingTimer } from "@/components/FastingTimer";
 import { ProgressRing } from "@/components/ProgressRing";
 import dailyFactsData from "@/data/daily-facts.json";
@@ -208,7 +209,7 @@ const Dashboard = () => {
       />
       <Navbar />
       
-      <main className="main-content">
+      <main id="main-content" className="main-content">
         <div className="container mx-auto px-4 min-w-0 max-w-5xl">
           {/* Header */}
           <motion.div 
@@ -219,10 +220,11 @@ const Dashboard = () => {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h1 className="text-2xl md:text-3xl font-display font-bold">
-                  {preferences.userType === 'muslim' ? 'Ramadan Mubarak' : 'Your Fasting Journey'}
-                  <span className="block font-arabic text-lg text-secondary mt-1">
-                    {preferences.userType === 'muslim' ? 'رمضان مبارك' : 'رحلة صيامك'}
-                  </span>
+                  {preferences.userType === 'muslim' ? (
+                    <ArabicHover arabic="رمضان مبارك" explanation={GENERAL_TOOLTIPS.ramadanMubarak.body}>Ramadan Mubarak</ArabicHover>
+                  ) : (
+                    <ArabicHover arabic="رحلة صيامك" explanation="Your fasting journey and progress">Your Fasting Journey</ArabicHover>
+                  )}
                 </h1>
               </div>
               
@@ -232,7 +234,7 @@ const Dashboard = () => {
                     <Settings className="w-5 h-5 text-muted-foreground" />
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent>Settings • الإعدادات</TooltipContent>
+                <TooltipContent>Settings</TooltipContent>
               </Tooltip>
             </div>
             
@@ -553,9 +555,6 @@ const Dashboard = () => {
                     <span className="text-xs text-muted-foreground text-center">
                       {todayComplete ? "You logged this day" : "Log that you completed dawn to sunset"}
                     </span>
-                    <span className="text-xs text-muted-foreground font-arabic">
-                      {todayComplete ? 'مكتمل' : 'تم الصيام'}
-                    </span>
                   </div>
                 </button>
               </TooltipTrigger>
@@ -563,16 +562,15 @@ const Dashboard = () => {
                 {todayComplete 
                   ? (
                     <>
-                      <p className="font-semibold text-sm">Today's fast is logged • مكتمل</p>
+                      <p className="font-semibold text-sm">Today&apos;s fast is logged</p>
                       <p className="text-xs text-muted-foreground mt-1">Tap to undo (unmark this day).</p>
-                      <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">انقر للتراجع</p>
                     </>
                   )
                   : (
                     <>
                       <p className="font-semibold text-sm">{GENERAL_TOOLTIPS.markComplete.title}</p>
                       <p className="text-xs text-muted-foreground mt-1">{GENERAL_TOOLTIPS.markComplete.body}</p>
-                      <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.markComplete.bodyAr}</p>
+                      <p className="text-xs text-muted-foreground mt-1 font-arabic" dir="rtl">{GENERAL_TOOLTIPS.markComplete.bodyAr}</p>
                     </>
                   )}
               </TooltipContent>
@@ -1030,13 +1028,15 @@ const Dashboard = () => {
               className="mb-8"
             >
               <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-                <Link
-                  to="/dashboard/prayers"
-                  className="font-display font-bold flex items-center gap-2 hover:text-secondary transition-colors"
-                >
-                  <Clock className="w-5 h-5 text-secondary" />
-                  Today's Prayer Times • أوقات الصلاة
-                </Link>
+                <ArabicHover arabic="أوقات الصلاة" explanation={GENERAL_TOOLTIPS.prayerTimes.body}>
+                  <Link
+                    to="/dashboard/prayers"
+                    className="font-display font-bold flex items-center gap-2 hover:text-secondary transition-colors"
+                  >
+                    <Clock className="w-5 h-5 text-secondary" />
+                    Today&apos;s Prayer Times
+                  </Link>
+                </ArabicHover>
                 <PrayerLocationBadge onClickToUpdate={() => setLocationEditorOpen(true)} />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
@@ -1058,9 +1058,20 @@ const Dashboard = () => {
                           : 'bg-card border border-border'
                       }`}>
                         <PrayerIcon className={`w-5 h-5 mx-auto mb-1 block ${prayer.highlight ? 'text-secondary' : 'text-muted-foreground'}`} aria-hidden />
-                        <span className="text-xs text-muted-foreground block">{prayer.name}</span>
+                        <ArabicHover
+                          arabic={prayer.nameAr}
+                          explanation={
+                            prayer.name === 'Fajr' ? EATING_TIME_TOOLTIPS.fajr.body :
+                            prayer.name === 'Maghrib' ? EATING_TIME_TOOLTIPS.maghrib.body :
+                            prayer.name === 'Sunrise' ? EATING_TIME_TOOLTIPS.sunrise.body :
+                            prayer.name === 'Dhuhr' ? EATING_TIME_TOOLTIPS.dhuhr.body :
+                            prayer.name === 'Asr' ? EATING_TIME_TOOLTIPS.asr.body :
+                            prayer.name === 'Isha' ? EATING_TIME_TOOLTIPS.isha.body : ''
+                          }
+                        >
+                          <span className="text-xs text-muted-foreground block">{prayer.name}</span>
+                        </ArabicHover>
                         <span className="text-lg font-bold block">{prayer.time}</span>
-                        <span className="text-xs font-arabic text-secondary">{prayer.nameAr}</span>
                       </div>
                     </TooltipTrigger>
                     <TooltipContent className="max-w-xs p-3">
@@ -1077,7 +1088,7 @@ const Dashboard = () => {
                         </>
                       )}
                       {!['Fajr', 'Maghrib'].includes(prayer.name) && (
-                        <p className="text-sm">{prayer.name} prayer time • {prayer.nameAr}</p>
+                        <p className="text-sm">{prayer.name} prayer time</p>
                       )}
                     </TooltipContent>
                   </Tooltip>
@@ -1099,8 +1110,14 @@ const Dashboard = () => {
                 <tip.icon className="w-5 h-5 text-secondary" />
               </div>
               <div>
-                <p className="font-medium">{tip.text}</p>
-                <p className="text-sm text-muted-foreground font-arabic mt-1">{tip.textAr}</p>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="font-medium cursor-help border-b border-dotted border-transparent hover:border-muted-foreground/40 w-fit">{tip.text}</p>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs p-3">
+                    <p className="text-sm text-muted-foreground font-arabic" dir="rtl">{tip.textAr}</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </div>
           </motion.div>

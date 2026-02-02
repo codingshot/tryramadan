@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { toLocalDateString } from '@/lib/utils';
+import { getRamadanDateRange } from '@/lib/ramadan';
 
 export interface PrayerTimes {
   fajr: string;
@@ -65,60 +66,51 @@ export function usePrayerTimes(lat: number | null, lng: number | null) {
   const [error, setError] = useState<string | null>(null);
   const todayStr = useTodayStr();
 
-  useEffect(() => {
+  const fetchPrayerTimes = useCallback(async () => {
     if (!lat || !lng) return;
-
-    const fetchPrayerTimes = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const [y, m, d] = todayStr.split('-').map(Number);
-        const date = new Date(y, m - 1, d);
-        const dateStr = toAladhanDateStr(date);
-        
-        // Using Aladhan API - free and open source (date-specific so each day updates)
-        const response = await fetch(
-          `https://api.aladhan.com/v1/timings/${dateStr}?latitude=${lat}&longitude=${lng}&method=2`
-        );
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch prayer times');
-        }
-
-        const data: AladhanResponse = await response.json();
-
-        if (data.code === 200) {
-          setPrayerTimes({
-            fajr: data.data.timings.Fajr,
-            sunrise: data.data.timings.Sunrise,
-            dhuhr: data.data.timings.Dhuhr,
-            asr: data.data.timings.Asr,
-            maghrib: data.data.timings.Maghrib,
-            isha: data.data.timings.Isha,
-            imsak: data.data.timings.Imsak,
-            date: data.data.date.readable,
-          });
-
-          setHijriDate({
-            day: data.data.date.hijri.day,
-            month: data.data.date.hijri.month.en,
-            monthAr: data.data.date.hijri.month.ar,
-            year: data.data.date.hijri.year,
-          });
-        }
-      } catch (err) {
-        console.error('Prayer times error:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load prayer times');
-      } finally {
-        setLoading(false);
+    setLoading(true);
+    setError(null);
+    try {
+      const [y, m, d] = todayStr.split('-').map(Number);
+      const date = new Date(y, m - 1, d);
+      const dateStr = toAladhanDateStr(date);
+      const response = await fetch(
+        `https://api.aladhan.com/v1/timings/${dateStr}?latitude=${lat}&longitude=${lng}&method=2`
+      );
+      if (!response.ok) throw new Error('Failed to fetch prayer times');
+      const data: AladhanResponse = await response.json();
+      if (data.code === 200) {
+        setPrayerTimes({
+          fajr: data.data.timings.Fajr,
+          sunrise: data.data.timings.Sunrise,
+          dhuhr: data.data.timings.Dhuhr,
+          asr: data.data.timings.Asr,
+          maghrib: data.data.timings.Maghrib,
+          isha: data.data.timings.Isha,
+          imsak: data.data.timings.Imsak,
+          date: data.data.date.readable,
+        });
+        setHijriDate({
+          day: data.data.date.hijri.day,
+          month: data.data.date.hijri.month.en,
+          monthAr: data.data.date.hijri.month.ar,
+          year: data.data.date.hijri.year,
+        });
       }
-    };
-
-    fetchPrayerTimes();
+    } catch (err) {
+      console.error('Prayer times error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load prayer times');
+    } finally {
+      setLoading(false);
+    }
   }, [lat, lng, todayStr]);
 
-  return { prayerTimes, hijriDate, loading, error };
+  useEffect(() => {
+    if (!lat || !lng) return;
+    fetchPrayerTimes();
+  }, [lat, lng, fetchPrayerTimes]);
+
+  return { prayerTimes, hijriDate, loading, error, refetch: fetchPrayerTimes };
 }
 
 /** Format YYYY-MM-DD to DD-MM-YYYY for Aladhan API */
@@ -246,6 +238,102 @@ export async function fetchPrayerTimesForMonth(
     };
   });
   return out;
+}
+
+const RAMADAN_PRAYERS_CACHE_KEY = 'tryramadan-ramadan-prayers';
+const CACHE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+interface RamadanPrayersCacheEntry {
+  prayerTimesMap: Record<string, PrayerTimes>;
+  fetchedAt: number;
+}
+
+function getRamadanPrayersCache(): Record<string, RamadanPrayersCacheEntry> {
+  try {
+    const raw = window.localStorage.getItem(RAMADAN_PRAYERS_CACHE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function setRamadanPrayersCache(cache: Record<string, RamadanPrayersCacheEntry>) {
+  try {
+    window.localStorage.setItem(RAMADAN_PRAYERS_CACHE_KEY, JSON.stringify(cache));
+  } catch (e) {
+    console.warn('Ramadan prayers cache write failed', e);
+  }
+}
+
+/** Fetch prayer times for the full Ramadan month (current/next). Covers Ramadan spanning two Gregorian months. */
+export async function fetchRamadanPrayerTimes(
+  lat: number,
+  lng: number
+): Promise<Record<string, PrayerTimes>> {
+  const { startStr, endStr, startDate, endDate, year } = getRamadanDateRange();
+  const out: Record<string, PrayerTimes> = {};
+  const startYear = startDate.getFullYear();
+  const endYear = endDate.getFullYear();
+  for (let y = startYear; y <= endYear; y++) {
+    for (let m = 1; m <= 12; m++) {
+      const monthStart = new Date(y, m - 1, 1);
+      const monthEnd = new Date(y, m, 0);
+      if (monthEnd < startDate || monthStart > endDate) continue;
+      const data = await fetchPrayerTimesForMonth(lat, lng, y, m);
+      Object.assign(out, data);
+    }
+  }
+  return out;
+}
+
+/** Cache key for Ramadan prayer times (location + Ramadan year). */
+export function getRamadanPrayersCacheKey(lat: number, lng: number, ramadanYear: number): string {
+  return `${lat.toFixed(4)}_${lng.toFixed(4)}_${ramadanYear}`;
+}
+
+/** Hook: Ramadan prayer times for the full month. Caches in localStorage by location + Ramadan year. */
+export function useRamadanPrayerTimes(lat: number | null, lng: number | null) {
+  const [prayerTimesMap, setPrayerTimesMap] = useState<Record<string, PrayerTimes>>({});
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { startStr, endStr, year } = getRamadanDateRange();
+  const cacheKey = lat != null && lng != null ? getRamadanPrayersCacheKey(lat, lng, year) : null;
+
+  const fetchAndCache = useCallback(async () => {
+    if (lat == null || lng == null) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const map = await fetchRamadanPrayerTimes(lat, lng);
+      setPrayerTimesMap(map);
+      const cache = getRamadanPrayersCache();
+      cache[cacheKey!] = { prayerTimesMap: map, fetchedAt: Date.now() };
+      setRamadanPrayersCache(cache);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load Ramadan prayer times');
+    } finally {
+      setLoading(false);
+    }
+  }, [lat, lng, cacheKey]);
+
+  useEffect(() => {
+    if (lat == null || lng == null) {
+      setPrayerTimesMap({});
+      setError(null);
+      return;
+    }
+    const cache = getRamadanPrayersCache();
+    const entry = cache[cacheKey!];
+    if (entry && Date.now() - entry.fetchedAt < CACHE_MAX_AGE_MS) {
+      setPrayerTimesMap(entry.prayerTimesMap);
+      setError(null);
+      return;
+    }
+    fetchAndCache();
+  }, [lat, lng, cacheKey, fetchAndCache]);
+
+  return { prayerTimesMap, loading, error, refetch: fetchAndCache };
 }
 
 // Check if today is a Sunnah fasting day

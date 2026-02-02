@@ -17,6 +17,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { PrayerLocationBadge } from "@/components/PrayerLocationBadge";
+import { ArabicHover } from "@/components/ArabicHover";
 import { PageSEO } from "@/components/PageSEO";
 import { getNowInTimezone, toLocalDateString } from "@/lib/utils";
 
@@ -39,9 +40,9 @@ const DashboardPrayers = () => {
     }));
   };
   
-  const { prayerTimes, hijriDate, loading } = usePrayerTimes(
-    preferences.locationCoords?.lat || null,
-    preferences.locationCoords?.lng || null
+  const { prayerTimes, hijriDate, loading, error: prayerError, refetch: refetchPrayers } = usePrayerTimes(
+    preferences.locationCoords?.lat ?? null,
+    preferences.locationCoords?.lng ?? null
   );
   
   useEffect(() => {
@@ -91,7 +92,7 @@ const DashboardPrayers = () => {
       />
       <Navbar />
       
-      <main className="main-content">
+      <main id="main-content" className="main-content">
         <div className="container mx-auto px-4 max-w-4xl min-w-0">
           <Link 
             to="/dashboard" 
@@ -109,14 +110,15 @@ const DashboardPrayers = () => {
             <Tooltip>
               <TooltipTrigger asChild>
                 <h1 className="text-2xl md:text-3xl font-display font-bold cursor-help border-b border-dotted border-transparent hover:border-muted-foreground/40 w-fit">
-                  Prayer Times
-                  <span className="block font-arabic text-lg text-secondary mt-1">أوقات الصلاة</span>
+                  <ArabicHover arabic="أوقات الصلاة" explanation={GENERAL_TOOLTIPS.prayerTimes.body}>
+                    Prayer Times
+                  </ArabicHover>
                 </h1>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs p-3">
-                <p className="font-semibold text-sm">{GENERAL_TOOLTIPS.prayerTimes.title}</p>
+                <p className="font-semibold text-sm">Prayer Times</p>
                 <p className="text-xs text-muted-foreground mt-1">{GENERAL_TOOLTIPS.prayerTimes.body}</p>
-                <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.prayerTimes.bodyAr}</p>
+                <p className="text-xs text-muted-foreground mt-1 font-arabic" dir="rtl">{GENERAL_TOOLTIPS.prayerTimes.bodyAr}</p>
               </TooltipContent>
             </Tooltip>
             <p className="text-muted-foreground mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
@@ -146,13 +148,12 @@ const DashboardPrayers = () => {
                   <TooltipTrigger asChild>
                     <p className="text-sm opacity-80 mb-3 cursor-help border-b border-dotted border-primary-foreground/30 w-fit">
                       {hijriDate.day} {hijriDate.month} {hijriDate.year} AH
-                      <span className="font-arabic ml-2">{hijriDate.monthAr}</span>
                     </p>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs p-3">
-                    <p className="font-semibold text-sm">{GENERAL_TOOLTIPS.hijriDate.title}</p>
+                    <p className="font-semibold text-sm">Hijri date</p>
                     <p className="text-xs text-muted-foreground mt-1">{GENERAL_TOOLTIPS.hijriDate.body}</p>
-                    <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.hijriDate.bodyAr}</p>
+                    <p className="text-xs text-muted-foreground mt-1 font-arabic" dir="rtl">{hijriDate.monthAr} · {GENERAL_TOOLTIPS.hijriDate.bodyAr}</p>
                   </TooltipContent>
                 </Tooltip>
               )}
@@ -183,7 +184,27 @@ const DashboardPrayers = () => {
             className="space-y-3"
           >
             {loading ? (
-              <div className="text-center py-8 text-muted-foreground">Loading prayer times...</div>
+              <div className="text-center py-8 text-muted-foreground">Loading prayer times…</div>
+            ) : prayerError ? (
+              <div className="py-8 px-4 rounded-2xl border border-destructive/30 bg-destructive/5 text-center">
+                <p className="text-destructive font-medium mb-1">Could not load prayer times</p>
+                <p className="text-sm text-muted-foreground mb-3">{prayerError}</p>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <Button variant="secondary" size="sm" onClick={() => refetchPrayers()}>
+                    Try again
+                  </Button>
+                  <Link to="/settings">
+                    <Button variant="outline" size="sm">Set location</Button>
+                  </Link>
+                </div>
+              </div>
+            ) : !preferences.locationCoords?.lat && !preferences.locationCoords?.lng ? (
+              <div className="py-8 px-4 rounded-2xl border border-border bg-muted/30 text-center">
+                <p className="text-muted-foreground mb-3">Set your location for accurate prayer times.</p>
+                <Link to="/settings">
+                  <Button variant="secondary" size="sm">Set location in Settings</Button>
+                </Link>
+              </div>
             ) : prayers.map((prayer, index) => {
               const Icon = prayer.icon;
               const isNext = prayer.name === nextPrayer;
@@ -210,38 +231,19 @@ const DashboardPrayers = () => {
                     
                     <div className="flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <span className="font-bold cursor-help border-b border-dotted border-muted-foreground/40">{prayer.name}</span>
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom" className="max-w-xs p-3">
-                            <p className="font-semibold text-sm">
-                              {prayer.name === "Fajr" && EATING_TIME_TOOLTIPS.fajr.title}
-                              {prayer.name === "Sunrise" && EATING_TIME_TOOLTIPS.sunrise.title}
-                              {prayer.name === "Dhuhr" && EATING_TIME_TOOLTIPS.dhuhr.title}
-                              {prayer.name === "Asr" && EATING_TIME_TOOLTIPS.asr.title}
-                              {prayer.name === "Maghrib" && EATING_TIME_TOOLTIPS.maghrib.title}
-                              {prayer.name === "Isha" && EATING_TIME_TOOLTIPS.isha.title}
-                            </p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {prayer.name === "Fajr" && EATING_TIME_TOOLTIPS.fajr.body}
-                              {prayer.name === "Sunrise" && EATING_TIME_TOOLTIPS.sunrise.body}
-                              {prayer.name === "Dhuhr" && EATING_TIME_TOOLTIPS.dhuhr.body}
-                              {prayer.name === "Asr" && EATING_TIME_TOOLTIPS.asr.body}
-                              {prayer.name === "Maghrib" && EATING_TIME_TOOLTIPS.maghrib.body}
-                              {prayer.name === "Isha" && EATING_TIME_TOOLTIPS.isha.body}
-                            </p>
-                            {(prayer.name === "Sunrise" || prayer.name === "Dhuhr" || prayer.name === "Asr" || prayer.name === "Isha") && (
-                              <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">
-                                {prayer.name === "Sunrise" && EATING_TIME_TOOLTIPS.sunrise.bodyAr}
-                                {prayer.name === "Dhuhr" && EATING_TIME_TOOLTIPS.dhuhr.bodyAr}
-                                {prayer.name === "Asr" && EATING_TIME_TOOLTIPS.asr.bodyAr}
-                                {prayer.name === "Isha" && EATING_TIME_TOOLTIPS.isha.bodyAr}
-                              </p>
-                            )}
-                          </TooltipContent>
-                        </Tooltip>
-                        <span className="text-secondary font-arabic">{prayer.nameAr}</span>
+                        <ArabicHover
+                          arabic={prayer.nameAr}
+                          explanation={
+                            prayer.name === "Fajr" ? EATING_TIME_TOOLTIPS.fajr.body :
+                            prayer.name === "Sunrise" ? EATING_TIME_TOOLTIPS.sunrise.body :
+                            prayer.name === "Dhuhr" ? EATING_TIME_TOOLTIPS.dhuhr.body :
+                            prayer.name === "Asr" ? EATING_TIME_TOOLTIPS.asr.body :
+                            prayer.name === "Maghrib" ? EATING_TIME_TOOLTIPS.maghrib.body :
+                            prayer.name === "Isha" ? EATING_TIME_TOOLTIPS.isha.body : prayer.description
+                          }
+                        >
+                          <span className="font-bold">{prayer.name}</span>
+                        </ArabicHover>
                         {isNext && (
                           <span className="px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-xs">
                             Next
@@ -303,7 +305,7 @@ const DashboardPrayers = () => {
                           </button>
                         </TooltipTrigger>
                         <TooltipContent side="left">
-                          {todayPrayers[prayer.name] ? "Mark as not prayed" : "Mark as prayed"} • {prayer.nameAr}
+                          {todayPrayers[prayer.name] ? "Mark as not prayed" : "Mark as prayed"}
                         </TooltipContent>
                       </Tooltip>
                     </div>

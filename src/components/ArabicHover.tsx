@@ -6,12 +6,12 @@ interface ArabicHoverProps {
   children: React.ReactNode;
   /** Arabic form shown only in tooltip (next to English on hover) */
   arabic: string;
-  /** Optional short explanation of the English term */
+  /** Short explanation of the English term (shown in tooltip) */
   explanation?: string;
   /** Optional transliteration */
   transliteration?: string;
-  /** Optional hint text (e.g. "Arabic") */
-  hint?: string;
+  /** Label above explanation (e.g. "Explanation") */
+  explanationLabel?: string;
   className?: string;
 }
 
@@ -24,7 +24,7 @@ export const ArabicHover = ({
   arabic,
   explanation,
   transliteration,
-  hint = "Arabic",
+  explanationLabel = "Explanation",
   className = "",
 }: ArabicHoverProps) => {
   return (
@@ -58,7 +58,7 @@ export const ArabicHover = ({
           )}
           {explanation && (
             <>
-              <p className="text-xs text-muted-foreground uppercase tracking-wide">{hint}</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide">{explanationLabel}</p>
               <p className="text-sm text-foreground leading-relaxed">{explanation}</p>
             </>
           )}

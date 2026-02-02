@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Users, Heart, Shield, Moon } from "lucide-react";
+import { ArabicHover } from "@/components/ArabicHover";
 
 export const CTASection = () => {
   return (
@@ -20,15 +21,15 @@ export const CTASection = () => {
             {/* Badge */}
             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/20 text-secondary text-sm font-medium mb-6">
               <Heart className="w-4 h-4 fill-current" />
-              <span>Join the Community</span>
-              <span className="font-arabic">انضم إلينا</span>
+              <ArabicHover arabic="انضم إلينا" explanation="Join us — connect with others exploring Ramadan">Join the Community</ArabicHover>
             </span>
 
             {/* Headline */}
             <h2 className="text-3xl md:text-5xl font-display font-bold text-primary-foreground mb-6">
               Ready to Experience the<br />
-              <span className="text-gradient-gold">Beauty of Ramadan?</span>
-              <span className="block font-arabic text-2xl text-secondary mt-2">جمال رمضان</span>
+              <ArabicHover arabic="جمال رمضان" explanation="The beauty of Ramadan — spirituality, community, and wellness" className="text-gradient-gold border-0">
+                <span className="text-gradient-gold">Beauty of Ramadan?</span>
+              </ArabicHover>
             </h2>
 
             {/* Description */}

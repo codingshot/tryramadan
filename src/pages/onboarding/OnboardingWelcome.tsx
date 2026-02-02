@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
+import { ArabicHover } from "@/components/ArabicHover";
 
 export default function OnboardingWelcome() {
   return (
@@ -11,8 +12,7 @@ export default function OnboardingWelcome() {
     >
       <span className="text-6xl mb-6 block">🌙</span>
       <h1 className="font-display text-2xl md:text-3xl font-bold mb-4">
-        Welcome to TryRamadan
-        <span className="block font-arabic text-xl text-secondary mt-2">مرحباً بك في تجربة رمضان</span>
+        <ArabicHover arabic="مرحباً بك في تجربة رمضان" explanation="Welcome to Try Ramadan — your personalized fasting journey">Welcome to TryRamadan</ArabicHover>
       </h1>
       <p className="text-muted-foreground mb-6">
         Fast like a Muslim for the holy month of Ramadan. We'll personalize your journey with a few quick steps.

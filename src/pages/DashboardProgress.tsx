@@ -6,6 +6,7 @@ import {
   BookOpen, ChevronRight, Download, FileText
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
+import { ArabicHover } from "@/components/ArabicHover";
 import { Footer } from "@/components/Footer";
 import { useFastingProgress, getTodayFastingLog, getBrokenReasonLabel, isFastingToday, useLocalStorage, calculateStreak, getLongestStreak } from "@/hooks/useLocalStorage";
 import type { EnergyEntry } from "@/hooks/useLocalStorage";
@@ -122,8 +123,7 @@ const DashboardProgress = () => {
             className="mb-8"
           >
             <h1 className="text-2xl md:text-3xl font-display font-bold">
-              Your Progress
-              <span className="block font-arabic text-lg text-secondary mt-1">تقدمك</span>
+              <ArabicHover arabic="تقدمك" explanation="Your progress — track fasting days and achievements">Your Progress</ArabicHover>
             </h1>
             <p className="text-muted-foreground mt-2">
               Track your fasting journey and celebrate your achievements

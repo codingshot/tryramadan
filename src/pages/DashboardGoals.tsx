@@ -7,6 +7,7 @@ import { Footer } from "@/components/Footer";
 import { ArabicHover } from "@/components/ArabicHover";
 import { useGoalsUntilRamadan, type GoalUntilRamadan } from "@/hooks/useLocalStorage";
 import { getDaysUntilRamadan, getNextRamadanStart, isCurrentlyRamadan } from "@/lib/ramadan";
+import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
 import { PageSEO } from "@/components/PageSEO";
 
 function generateId(): string {
@@ -86,8 +87,9 @@ export default function DashboardGoals() {
               <Moon className="w-8 h-8 text-secondary" />
               {inRamadan ? (
                 <div>
-                  <h2 className="font-display font-bold text-secondary">Ramadan Mubarak!</h2>
-                  <p className="text-sm text-muted-foreground font-arabic">رمضان مبارك</p>
+                  <h2 className="font-display font-bold text-secondary">
+                    <ArabicHover arabic="رمضان مبارك" explanation={GENERAL_TOOLTIPS.ramadanMubarak.body}>Ramadan Mubarak!</ArabicHover>
+                  </h2>
                 </div>
               ) : daysUntil > 0 ? (
                 <div>

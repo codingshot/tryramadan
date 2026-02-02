@@ -25,6 +25,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
+import { ArabicHover } from "@/components/ArabicHover";
 import { Footer } from "@/components/Footer";
 import {
   useFastingProgress,
@@ -493,8 +494,7 @@ const DashboardSchedule = () => {
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
             <h1 className="text-2xl md:text-3xl font-display font-bold">
-              Fasting Schedule
-              <span className="block font-arabic text-lg text-secondary mt-1">جدول الصيام</span>
+              <ArabicHover arabic="جدول الصيام" explanation="Your fasting calendar and meal plan for each day">Fasting Schedule</ArabicHover>
             </h1>
             <p className="text-muted-foreground mt-2">
               Click a calendar day to view or edit its meal plan, food log, and macros. Hover stats and labels for tips.

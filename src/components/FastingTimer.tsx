@@ -156,15 +156,21 @@ export const FastingTimer = ({
               onKeyDown={(e) => e.key === "Enter" && setRamadanInfoOpen(true)}
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex items-center justify-center gap-2 mb-4 px-4 py-2 rounded-full bg-secondary/20 mx-auto w-fit cursor-pointer select-none hover:bg-secondary/25 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
+              className="flex items-center justify-center gap-2 mb-2 px-4 py-2 rounded-full bg-secondary/20 mx-auto w-fit cursor-pointer select-none hover:bg-secondary/25 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
               title="Double-click for when Ramadan starts"
             >
               <Calendar className="w-4 h-4 text-secondary" />
               <span className="text-secondary font-bold text-lg">{daysUntilRamadan}</span>
               <span className="text-primary-foreground/80 text-sm">
-                days until Ramadan • أيام حتى رمضان
+                days until Ramadan
               </span>
             </motion.div>
+            <Link
+              to="/dashboard"
+              className="text-xs text-primary-foreground/70 hover:text-primary-foreground underline mb-4 block text-center"
+            >
+              Add Ramadan fasting & iftar times to calendar →
+            </Link>
             <RamadanStartInfoDialog open={ramadanInfoOpen} onOpenChange={setRamadanInfoOpen} />
           </>
         )}
@@ -187,7 +193,6 @@ export const FastingTimer = ({
           <div className="text-center mb-3">
             <span className="text-sm text-primary-foreground/60">
               {hijriDate.day} {hijriDate.month} {hijriDate.year} AH
-              <span className="font-arabic ml-2">{hijriDate.monthAr}</span>
             </span>
           </div>
         )}
@@ -219,7 +224,7 @@ export const FastingTimer = ({
                   <TooltipContent side="top" className="max-w-xs bg-card border-border p-3">
                     <p className="font-semibold text-sm">{GENERAL_TOOLTIPS.eatingPeriod.title}</p>
                     <p className="text-xs text-muted-foreground mt-1">{GENERAL_TOOLTIPS.eatingPeriod.body}</p>
-                    <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.eatingPeriod.bodyAr}</p>
+                    <p className="text-xs text-muted-foreground mt-1 font-arabic" dir="rtl">{GENERAL_TOOLTIPS.eatingPeriod.bodyAr}</p>
                   </TooltipContent>
                 </Tooltip>
               </>
@@ -235,7 +240,7 @@ export const FastingTimer = ({
                   <TooltipContent side="top" className="max-w-xs bg-card border-border p-3">
                     <p className="font-semibold text-sm">{GENERAL_TOOLTIPS.fastingPeriod.title}</p>
                     <p className="text-xs text-muted-foreground mt-1">{GENERAL_TOOLTIPS.fastingPeriod.body}</p>
-                    <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.fastingPeriod.bodyAr}</p>
+                    <p className="text-xs text-muted-foreground mt-1 font-arabic" dir="rtl">{GENERAL_TOOLTIPS.fastingPeriod.bodyAr}</p>
                   </TooltipContent>
                 </Tooltip>
               </>

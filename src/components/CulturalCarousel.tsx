@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight, ExternalLink, Keyboard } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import culturalData from "@/data/cultural-traditions.json";
+import { ArabicHover } from "@/components/ArabicHover";
 
 export const CulturalCarousel = () => {
   const [activeRegion, setActiveRegion] = useState(0);
@@ -160,11 +161,12 @@ export const CulturalCarousel = () => {
                 className="p-4 rounded-xl bg-muted/50"
               >
                 <div className="flex items-start justify-between gap-2 mb-2">
-                  <span className="font-semibold text-foreground">{tradition.name}</span>
-                  {tradition.arabicName && (
-                    <span className="font-arabic text-lg text-secondary">
-                      {tradition.arabicName}
-                    </span>
+                  {tradition.arabicName ? (
+                    <ArabicHover arabic={tradition.arabicName} explanation={tradition.description}>
+                      <span className="font-semibold text-foreground">{tradition.name}</span>
+                    </ArabicHover>
+                  ) : (
+                    <span className="font-semibold text-foreground">{tradition.name}</span>
                   )}
                 </div>
                 {tradition.transliteration && (
