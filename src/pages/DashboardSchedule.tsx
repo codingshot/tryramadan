@@ -39,6 +39,7 @@ import {
   getDayTotalsFromFoodLog,
   normalizeDayFoodLog,
   getFastingLogForDate,
+  getBrokenReasonLabel,
   hoursBetween,
   useUserPreferences,
   useCalendarEvents,
@@ -163,8 +164,9 @@ const DashboardSchedule = () => {
   const [customEventTitle, setCustomEventTitle] = useState("");
   const [customEventTime, setCustomEventTime] = useState("18:00");
 
-  const [journalEntries] = useLocalStorage<{ date: string }[]>("tryramadan-journal", []);
+  const [journalEntries] = useLocalStorage<{ date: string; content?: string; gratitude?: string }[]>("tryramadan-journal", []);
   const journalDates = new Set(journalEntries.map((e) => e.date));
+  const selectedDayJournal = selectedDate ? journalEntries.find((e) => e.date === selectedDate) : undefined;
 
   const locationCoords = preferences.locationCoords;
   const lat = locationCoords?.lat ?? null;
@@ -1007,6 +1009,58 @@ const DashboardSchedule = () => {
                       >
                         <X className="w-5 h-5" />
                       </button>
+                    </div>
+
+                    {/* Day summary: prayer times, meals, journal, fasting context */}
+                    <div className="rounded-xl bg-card border border-border p-3 space-y-2 text-sm">
+                      <p className="font-semibold text-muted-foreground text-xs uppercase tracking-wide">Day at a glance</p>
+                      {selectedDayPrayerTimes && (
+                        <p className="text-muted-foreground">
+                          <span className="font-medium text-foreground">Prayer:</span> Fajr {selectedDayPrayerTimes.fajr} · Maghrib ({iftarLabelShort}) {selectedDayPrayerTimes.maghrib}
+                        </p>
+                      )}
+                      <p className="text-muted-foreground">
+                        <span className="font-medium text-foreground">Meals:</span> Suhoor {selectedDayMeals?.suhoor?.trim() ? `— ${selectedDayMeals.suhoor}` : "—"} · {iftarLabel} {selectedDayMeals?.iftar?.trim() ? `— ${selectedDayMeals.iftar}` : "—"}
+                      </p>
+                      {selectedDayJournal && (selectedDayJournal.content || selectedDayJournal.gratitude) && (
+                        <p className="text-muted-foreground">
+                          <span className="font-medium text-foreground">Journal:</span>{" "}
+                          {(selectedDayJournal.content ?? "").slice(0, 80)}
+                          {(selectedDayJournal.content ?? "").length > 80 ? "…" : ""}
+                          {selectedDayJournal.gratitude && (
+                            <span className="block mt-0.5 text-secondary">Grateful: {selectedDayJournal.gratitude}</span>
+                          )}
+                          {" "}
+                          <Link to="/dashboard/journal" className="text-secondary hover:underline text-xs">Open Journal →</Link>
+                        </p>
+                      )}
+                      {(selectedIsRamadan || selectedIsSunnah) && (
+                        <p className="text-muted-foreground">
+                          <span className="font-medium text-foreground">Fast:</span>{" "}
+                          {selectedCompleted
+                            ? "Completed (full day dawn to sunset)"
+                            : selectedFastingLog?.status === "broken"
+                              ? `Broke fast — ${getBrokenReasonLabel(selectedFastingLog.brokenReason)}. ${selectedFastingLog.hoursFasted != null ? `${selectedFastingLog.hoursFasted}h fasted` : ""}`
+                              : selectedFastingLog?.startedAt
+                                ? "Started fasting (not completed)"
+                                : "No fast logged"}
+                          {selectedFastingLog && selectedDayPrayerTimes && (() => {
+                            const fajrTime = new Date((selectedDate ?? "") + "T" + (selectedDayPrayerTimes.fajr?.length === 5 ? selectedDayPrayerTimes.fajr + ":00" : selectedDayPrayerTimes.fajr)).getTime();
+                            const maghribTime = new Date((selectedDate ?? "") + "T" + (selectedDayPrayerTimes.maghrib?.length === 5 ? selectedDayPrayerTimes.maghrib + ":00" : selectedDayPrayerTimes.maghrib)).getTime();
+                            const started = selectedFastingLog.startedAt ? new Date(selectedFastingLog.startedAt).getTime() : 0;
+                            const completed = selectedFastingLog.completedAt ? new Date(selectedFastingLog.completedAt).getTime() : 0;
+                            const parts: string[] = [];
+                            if (started && started < fajrTime) parts.push("started before Fajr (suhoor window)");
+                            else if (started && started < maghribTime) parts.push("started after Fajr (fasting)");
+                            else if (started) parts.push("started after Maghrib (eating window)");
+                            if (completed && selectedFastingLog.status === "broken") {
+                              if (completed < maghribTime) parts.push("broke before Maghrib");
+                              else parts.push("broke at/after Maghrib");
+                            }
+                            return parts.length > 0 ? " · " + parts.join("; ") : null;
+                          })()}
+                        </p>
+                      )}
                     </div>
 
                     {/* Today's schedule timeline for selected day */}
