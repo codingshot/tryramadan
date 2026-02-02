@@ -9,7 +9,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import recipesData from "@/data/recipes.json";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useRecipeFavorites, useRecentRecipes, useDayMealPlans, useDayFoodLog } from "@/hooks/useLocalStorage";
+import { useRecipeFavorites, useRecentRecipes, useDayMealPlans, useDayFoodLog, clampCalories } from "@/hooks/useLocalStorage";
 import { parseNutrient } from "@/lib/cultureRecipes";
 import { toast } from "sonner";
 import {
@@ -196,7 +196,7 @@ const DashboardMeals = () => {
       mealType,
       name,
       portions,
-      caloriesPerPortion: cal,
+      caloriesPerPortion: clampCalories(cal),
       proteinPerPortion: protein || undefined,
       carbsPerPortion: carbs || undefined,
       fatPerPortion: fat || undefined,
@@ -274,7 +274,7 @@ const DashboardMeals = () => {
               <Sunrise className="w-5 h-5 shrink-0" aria-hidden />
               <div className="text-left">
                 <span className="font-bold block">Suhoor</span>
-                <span className="text-xs text-muted-foreground font-arabic">السحور · morning</span>
+                <span className="text-xs text-muted-foreground">Morning</span>
               </div>
             </button>
             <button
@@ -289,7 +289,7 @@ const DashboardMeals = () => {
               <Sunset className="w-5 h-5 shrink-0" aria-hidden />
               <div className="text-left">
                 <span className="font-bold block">Iftar</span>
-                <span className="text-xs text-muted-foreground font-arabic">الإفطار · evening</span>
+                <span className="text-xs text-muted-foreground">Evening</span>
               </div>
             </button>
           </motion.div>

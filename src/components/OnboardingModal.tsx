@@ -202,7 +202,6 @@ export const OnboardingModal = ({ isOpen, onClose, onComplete }: OnboardingModal
                       <span className="text-3xl">🌱</span>
                       <div>
                         <h3 className="font-bold text-lg">I'm New to Ramadan</h3>
-                        <p className="font-arabic text-secondary text-sm">أنا جديد على رمضان</p>
                         <p className="text-muted-foreground text-sm mt-1">
                           Curious about fasting and want to learn
                         </p>
@@ -223,7 +222,6 @@ export const OnboardingModal = ({ isOpen, onClose, onComplete }: OnboardingModal
                       <span className="text-3xl">☪️</span>
                       <div>
                         <h3 className="font-bold text-lg">I'm Already Muslim</h3>
-                        <p className="font-arabic text-secondary text-sm">أنا مسلم بالفعل</p>
                         <p className="text-muted-foreground text-sm mt-1">
                           Ready to track my Ramadan journey
                         </p>
@@ -267,7 +265,6 @@ export const OnboardingModal = ({ isOpen, onClose, onComplete }: OnboardingModal
                         <span className="text-2xl">{level.icon}</span>
                         <div>
                           <span className="font-medium">{level.label}</span>
-                          <span className="text-secondary text-sm ml-2 font-arabic">{level.labelAr}</span>
                         </div>
                         {experience === level.id && (
                           <Check className="w-5 h-5 text-secondary ml-auto" />
@@ -282,7 +279,7 @@ export const OnboardingModal = ({ isOpen, onClose, onComplete }: OnboardingModal
                   disabled={!experience}
                   className="btn-hero w-full flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                  Continue • متابعة
+                  Continue
                   <ArrowRight className="w-5 h-5" />
                 </button>
               </motion.div>
@@ -302,7 +299,7 @@ export const OnboardingModal = ({ isOpen, onClose, onComplete }: OnboardingModal
                 </button>
 
                 <h2 className="font-display text-2xl font-bold mb-2">
-                  Your Goal • هدفك
+                  Your Goal
                 </h2>
                 <p className="text-muted-foreground mb-6">
                   How would you like to approach fasting this Ramadan?
@@ -320,7 +317,6 @@ export const OnboardingModal = ({ isOpen, onClose, onComplete }: OnboardingModal
                       <div className="flex items-center justify-between">
                         <div>
                           <span className="font-medium">{goal.label}</span>
-                          <span className="text-secondary text-sm ml-2 font-arabic">{goal.labelAr}</span>
                           <p className="text-muted-foreground text-sm">{goal.desc}</p>
                         </div>
                         {fastingGoal === goal.id && (
@@ -334,7 +330,7 @@ export const OnboardingModal = ({ isOpen, onClose, onComplete }: OnboardingModal
                 {/* Location input with typeahead */}
                 <div className="mb-6">
                   <label className="block text-sm font-medium mb-2">
-                    Your Location • موقعك
+                    Your Location
                     <span className="text-muted-foreground font-normal ml-2">(for accurate prayer times)</span>
                   </label>
                   
@@ -367,7 +363,7 @@ export const OnboardingModal = ({ isOpen, onClose, onComplete }: OnboardingModal
                   disabled={!fastingGoal}
                   className="btn-hero w-full flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                  Continue • متابعة
+                  Continue
                   <ArrowRight className="w-5 h-5" />
                 </button>
               </motion.div>

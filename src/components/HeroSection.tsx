@@ -94,17 +94,17 @@ export const HeroSection = () => {
               <Link 
                 to="/onboarding/welcome"
                 className="btn-hero group flex items-center justify-center gap-2 w-full sm:w-auto min-h-[48px] px-6 py-3"
-                aria-label="Start your Ramadan journey — go to setup"
+                aria-label="Start your Ramadan journey"
               >
-                <ArabicHover arabic="ابدأ رحلتك" className="border-0 text-inherit">Start your journey → setup</ArabicHover>
+                Start your journey
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform shrink-0" />
               </Link>
               <Link 
                 to="/onboarding/welcome"
                 className="btn-hero-outline w-full sm:w-auto flex items-center justify-center gap-2 min-h-[48px] px-6 py-3"
-                aria-label="I'm Muslim — go to setup"
+                aria-label="I'm Muslim"
               >
-                <ArabicHover arabic="أنا مسلم" className="border-0 text-inherit">I'm Muslim — go to setup</ArabicHover>
+                I'm Muslim
               </Link>
             </motion.div>
 

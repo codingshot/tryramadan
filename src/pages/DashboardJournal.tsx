@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
@@ -129,16 +129,33 @@ export default function DashboardJournal() {
   };
 
   const [expandedDate, setExpandedDate] = useState<string | null>(null);
-  const INITIAL_SHOW = 7;
+  const INITIAL_SHOW = 14;
   const [showCount, setShowCount] = useState(INITIAL_SHOW);
   const displayEntries = entries.slice(0, showCount);
   const hasMore = entries.length > showCount;
+  const editorSectionRef = useRef<HTMLDivElement>(null);
+  const pastEntriesSectionRef = useRef<HTMLDivElement>(null);
+
+  const scrollToPastEntries = useCallback(() => {
+    pastEntriesSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
+  const scrollToEditor = useCallback(() => {
+    editorSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
 
   const entryDates = useMemo(() => new Set(entries.map((e) => e.date)), [entries]);
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const d = new Date(writeDate + "T12:00:00");
     return new Date(d.getFullYear(), d.getMonth(), 1);
   });
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.hash === "#past-entries") {
+      const t = setTimeout(() => scrollToPastEntries(), 300);
+      return () => clearTimeout(t);
+    }
+  }, [scrollToPastEntries]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -168,6 +185,16 @@ export default function DashboardJournal() {
             <p className="text-muted-foreground mt-2">
               Daily gratitude and mindfulness. Write for any date — past, today, or future. Your entries stay on this device.
             </p>
+            {entries.length > 0 && (
+              <button
+                type="button"
+                onClick={scrollToPastEntries}
+                className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-secondary hover:underline"
+              >
+                <BookOpen className="w-4 h-4" />
+                View past entries ({entries.length})
+              </button>
+            )}
           </motion.div>
 
           {/* Calendar of entries */}
@@ -205,6 +232,7 @@ export default function DashboardJournal() {
 
           {/* Write for date + prompt + content + gratitude + mood */}
           <motion.div
+            ref={editorSectionRef}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
@@ -293,6 +321,8 @@ export default function DashboardJournal() {
 
           {/* Past entries list */}
           <motion.div
+            ref={pastEntriesSectionRef}
+            id="past-entries"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
@@ -333,6 +363,7 @@ export default function DashboardJournal() {
                             setWriteDate(entry.date);
                             setCalendarMonth(new Date(entry.date + "T12:00:00"));
                             handleSelectDate(new Date(entry.date + "T12:00:00"));
+                            setTimeout(scrollToEditor, 150);
                           }}
                           className="text-xs font-medium text-secondary hover:underline"
                         >
@@ -358,6 +389,15 @@ export default function DashboardJournal() {
                 className="mt-4 text-sm font-medium text-secondary hover:underline"
               >
                 Show more entries
+              </button>
+            )}
+            {entries.length > 0 && (
+              <button
+                type="button"
+                onClick={scrollToEditor}
+                className="mt-4 block text-sm font-medium text-secondary hover:underline"
+              >
+                ↑ Back to write / edit
               </button>
             )}
           </motion.div>

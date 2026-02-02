@@ -68,40 +68,39 @@ const Index = () => {
       {/* Features Section */}
       <FeaturesSection />
 
-      {/* Fasting path — single option, links to Settings */}
+      {/* Fasting path — clear CTAs to Settings and Programs */}
       <section id="programs" className="py-24">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center max-w-xl mx-auto"
+            className="text-center max-w-2xl mx-auto"
           >
-            <Link
-              to="/settings#settings-fasting-path"
-              className="inline-block px-4 py-1.5 rounded-full bg-secondary/10 text-secondary text-sm font-medium mb-4 hover:bg-secondary/20 transition-colors"
-            >
+            <span className="inline-block px-4 py-1.5 rounded-full bg-secondary/10 text-secondary text-sm font-medium mb-4">
               Fasting path
-            </Link>
-            <Link
-              to="/settings#settings-fasting-path"
-              className="block relative z-10 cursor-pointer py-2 -my-2 mb-4 mx-auto max-w-fit rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-            >
-              <h2 className="text-3xl md:text-4xl font-display font-bold mb-0 hover:opacity-90 transition-opacity">
-                Choose Your <span className="text-gradient-gold">Fasting Path</span>
-              </h2>
-            </Link>
-            <p className="text-muted-foreground mb-6">
-              Set your mode (New/Muslim) and program in Settings.
+            </span>
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-3">
+              Choose Your <span className="text-gradient-gold">Fasting Path</span>
+            </h2>
+            <p className="text-muted-foreground mb-8">
+              Full Ramadan (dawn to sunset) or voluntary Sunnah fasting — set your mode and program once, and we’ll guide you through the month.
             </p>
-            <Link
-              to="/settings#settings-fasting-path"
-              className="inline-flex items-center gap-2 min-h-[48px] px-6 py-3 rounded-2xl bg-secondary/20 border border-secondary/40 text-secondary font-medium hover:bg-secondary/30 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
-            >
-              <span>Full Ramadan Fast</span>
-              <span className="text-sm opacity-90">(dawn to sunset)</span>
-              <ChevronRight className="w-5 h-5 shrink-0" />
-            </Link>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link
+                to="/settings#settings-fasting-path"
+                className="inline-flex items-center gap-2 min-h-[48px] px-6 py-3 rounded-2xl bg-secondary text-secondary-foreground font-semibold shadow-md hover:bg-secondary/90 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              >
+                Set your fasting path
+                <ChevronRight className="w-5 h-5 shrink-0" />
+              </Link>
+              <Link
+                to="/programs"
+                className="inline-flex items-center gap-2 min-h-[48px] px-6 py-3 rounded-2xl border-2 border-secondary/50 text-secondary font-medium hover:bg-secondary/10 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              >
+                Compare programs
+              </Link>
+            </div>
           </motion.div>
         </div>
       </section>

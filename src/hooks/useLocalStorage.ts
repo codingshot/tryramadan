@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { toLocalDateString } from '@/lib/utils';
 
 export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((prev: T) => T)) => void] {
@@ -564,15 +564,40 @@ export const defaultDailyGoals: DailyGoals = {
   fat: 65,
 };
 
-/** Suggested daily calories by sex (rough estimate for BMR-based goal). */
+/** Reasonable daily calorie bounds so we never show impossible amounts. */
+export const CALORIE_MIN = 800;
+export const CALORIE_MAX = 5000;
+
+/** Cap calories at CALORIE_MAX so we never show impossible amounts. Allows 0. */
+export function clampCalories(value: number): number {
+  if (Number.isNaN(value) || value < 0) return 0;
+  if (value > CALORIE_MAX) return CALORIE_MAX;
+  return Math.round(value);
+}
+
+/** Suggested daily calories by sex (rough estimate for BMR-based goal). Clamped to reasonable range. */
 export function getSuggestedCalories(sex: 'male' | 'female' | null): number {
-  if (sex === 'male') return 2200;
-  if (sex === 'female') return 1800;
-  return 2000;
+  if (sex === 'male') return clampCalories(2200);
+  if (sex === 'female') return clampCalories(1800);
+  return clampCalories(2000);
 }
 
 export function useDailyGoals() {
-  return useLocalStorage<DailyGoals>('tryramadan-daily-goals', defaultDailyGoals);
+  const [goals, setGoals] = useLocalStorage<DailyGoals>('tryramadan-daily-goals', defaultDailyGoals);
+  const clampedGoals = useMemo(
+    () => ({ ...goals, calories: clampCalories(goals.calories) }),
+    [goals]
+  );
+  const setDailyGoals = useCallback(
+    (updater: DailyGoals | ((prev: DailyGoals) => DailyGoals)) => {
+      setGoals((prev) => {
+        const next = typeof updater === 'function' ? updater(prev) : updater;
+        return { ...next, calories: clampCalories(next.calories) };
+      });
+    },
+    [setGoals]
+  );
+  return [clampedGoals, setDailyGoals] as const;
 }
 
 /** Recently used recipe keys (e.g. "suhoor-1", "iftar-2") from meal plan/food log; max 20. */

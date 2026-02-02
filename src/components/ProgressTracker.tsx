@@ -122,7 +122,6 @@ export const ProgressTracker = ({
           <span className="font-bold">
             {displayStreak > 0 ? `${displayStreak} Day Streak!` : "No streak yet"}
           </span>
-          <span className="font-arabic text-sm">{displayStreak > 0 ? "سلسلة أيام!" : "ابدأ الصيام"}</span>
         </motion.div>
         {showHoursFasted && (
           <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted text-foreground text-sm font-medium">

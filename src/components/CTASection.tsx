@@ -46,16 +46,14 @@ export const CTASection = () => {
               >
                 <Moon className="w-5 h-5" />
                 <span>Begin your Ramadan journey — start free setup</span>
-                <span className="font-arabic text-sm">ابدأ</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link 
                 to="/programs"
                 className="btn-hero-outline flex items-center gap-2"
-                aria-label="View fasting programs (duration and intensity)"
+                aria-label="Compare fasting programs and set yours"
               >
-                <span>View fasting programs</span>
-                <span className="font-arabic text-sm">البرامج</span>
+                <span>Compare programs & set yours</span>
               </Link>
             </div>
 

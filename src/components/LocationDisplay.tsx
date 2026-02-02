@@ -48,6 +48,7 @@ export const LocationDisplay = ({ compact = false, showTimezone = false, open: c
       <button
         onClick={() => setIsEditing(!isEditing)}
         className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        title={preferences.location || "Set location"}
       >
         <MapPin className="w-3.5 h-3.5" />
         <span className="max-w-[150px] truncate">{locationName}</span>
@@ -65,6 +66,7 @@ export const LocationDisplay = ({ compact = false, showTimezone = false, open: c
             ? 'bg-secondary/10 border border-secondary' 
             : 'bg-muted/50 border border-border hover:border-secondary/50'
         }`}
+        title={preferences.location || "Set location"}
       >
         <MapPin className={`w-4 h-4 ${hasLocation ? 'text-secondary' : 'text-muted-foreground'}`} />
         <div className="text-left">

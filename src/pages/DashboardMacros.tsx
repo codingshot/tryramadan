@@ -28,6 +28,7 @@ import {
   getDayTotalsFromPlanned,
   getDayTotalsFromFoodLog,
   normalizeDayFoodLog,
+  clampCalories,
   type MealCategory,
   type PlannedItem,
   type FoodLogEntry,
@@ -102,7 +103,7 @@ export default function DashboardMacros() {
       mealType,
       name,
       portions,
-      caloriesPerPortion: cal,
+      caloriesPerPortion: clampCalories(cal),
       proteinPerPortion: protein || undefined,
       carbsPerPortion: carbs || undefined,
       fatPerPortion: fat || undefined,
@@ -140,7 +141,7 @@ export default function DashboardMacros() {
       mealType,
       name,
       portions,
-      caloriesPerPortion: cal,
+      caloriesPerPortion: clampCalories(cal),
       proteinPerPortion: protein || undefined,
       carbsPerPortion: carbs || undefined,
       fatPerPortion: fat || undefined,
@@ -349,7 +350,7 @@ export default function DashboardMacros() {
                             <li key={i.id} className="flex items-center justify-between gap-2 text-sm py-1 border-b border-border/50">
                               <span>{i.name}</span>
                               <span className="text-muted-foreground">{i.portions}× {i.caloriesPerPortion} cal = {totalCal} cal</span>
-                              <button type="button" onClick={() => removePlanned(mealType, i.id)} className="p-1 rounded hover:bg-destructive/20 text-muted-foreground hover:text-destructive" aria-label="Remove">
+                              <button type="button" onClick={() => removePlanned(mealType, i.id)} className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded border border-transparent hover:border-destructive/30 hover:bg-destructive/20 text-muted-foreground hover:text-destructive shrink-0" aria-label="Remove">
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             </li>
@@ -451,7 +452,7 @@ export default function DashboardMacros() {
                                 onChange={(ev) => setPortions(mealType, e.id, parseFloat(ev.target.value) || 1)}
                               />
                               <span>× {e.caloriesPerPortion} cal = {totalCal} cal</span>
-                              <button type="button" onClick={() => removeFromLog(mealType, e.id)} className="p-1 rounded hover:bg-destructive/20 text-muted-foreground hover:text-destructive ml-auto" aria-label="Remove">
+                              <button type="button" onClick={() => removeFromLog(mealType, e.id)} className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded border border-transparent hover:border-destructive/30 hover:bg-destructive/20 text-muted-foreground hover:text-destructive ml-auto shrink-0" aria-label="Remove">
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
                             </li>

@@ -33,6 +33,8 @@ import {
   useDayMealPlans,
   useDayNutrition,
   useDailyGoals,
+  clampCalories,
+  CALORIE_MAX,
   useDashboardQuickActions,
   DASHBOARD_QUICK_ACTIONS,
   useLocalStorage,
@@ -653,9 +655,14 @@ const Dashboard = () => {
                   <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">وجبات السحور والإفطار • السحور والإفطار</p>
                 </TooltipContent>
               </Tooltip>
-              <Link to="/dashboard/schedule" className="text-sm text-secondary hover:underline font-medium mb-4 inline-block">
-                View past logs & meal plans (Schedule) →
-              </Link>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 mb-4">
+                <Link to="/dashboard/schedule" className="text-sm text-secondary hover:underline font-medium">
+                  Past logs & meal plans (Schedule) →
+                </Link>
+                <Link to="/dashboard/journal#past-entries" className="text-sm text-secondary hover:underline font-medium">
+                  Past journal entries →
+                </Link>
+              </div>
 
               {/* Prayer times for this day */}
               {selectedDayPrayerTimes && (
@@ -743,6 +750,7 @@ const Dashboard = () => {
                     <input
                       type="number"
                       min={0}
+                      max={CALORIE_MAX}
                       placeholder="Cal"
                       value={selectedDayNutr?.calories ?? ""}
                       onChange={(e) =>
@@ -750,7 +758,7 @@ const Dashboard = () => {
                           ...prev,
                           [selectedDate]: {
                             ...(prev[selectedDate] || {}),
-                            calories: e.target.value ? Number(e.target.value) : undefined,
+                            calories: e.target.value ? clampCalories(Number(e.target.value)) : undefined,
                           },
                         }))
                       }

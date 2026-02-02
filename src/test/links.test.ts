@@ -7,9 +7,6 @@ import { ROUTES } from "./routes.test";
  */
 const INTERNAL_PATHS_USED = new Set([
   "/",
-  "/#features",
-  "/#health",
-  "/#about",
   "/programs",
   "/culture",
   "/recipes",

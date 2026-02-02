@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Menu, X, MapPin, User } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { ArabicHover } from "./ArabicHover";
@@ -10,8 +10,6 @@ import { useAutoLocation } from "@/hooks/useLocation";
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [localTime, setLocalTime] = useState("");
-  const location = useLocation();
-  const isHome = location.pathname === "/";
   const [preferences] = useUserPreferences();
   const [progress] = useFastingProgress();
   const { location: autoLocation } = useAutoLocation();
@@ -39,12 +37,11 @@ export const Navbar = () => {
   }, [preferences.timezone]);
 
   const navLinks = [
-    { name: "Features", nameAr: "المميزات", href: "#features", to: "/#features" },
-    { name: "Programs", nameAr: "البرامج", href: "#programs", to: "/programs" },
-    { name: "Recipes", nameAr: "وصفات", href: "", to: "/recipes" },
-    { name: "Culture", nameAr: "الثقافة", href: "#culture", to: "/culture" },
-    { name: "Health", nameAr: "الصحة", href: "#health", to: "/#health" },
-    { name: "About", nameAr: "عنا", href: "#about", to: "/#about" },
+    { name: "Features", nameAr: "المميزات", to: "/" },
+    { name: "Programs", nameAr: "البرامج", to: "/programs" },
+    { name: "Recipes", nameAr: "وصفات", to: "/recipes" },
+    { name: "Culture", nameAr: "الثقافة", to: "/culture" },
+    { name: "About", nameAr: "عنا", to: "/faq" },
   ];
 
   const scrollToTop = () => {
@@ -83,30 +80,16 @@ export const Navbar = () => {
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-6">
-              {navLinks.map((link) => {
-                const isHashLink = link.to.startsWith("/#");
-                const linkTo = !isHome && isHashLink
-                  ? { pathname: "/" as const, hash: link.to.slice(2) }
-                  : link.to;
-                return isHome && link.href.startsWith("#") ? (
-                  <a
-                    key={link.name}
-                    href={link.href}
-                    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <ArabicHover arabic={link.nameAr}>{link.name}</ArabicHover>
-                  </a>
-                ) : (
-                  <Link
-                    key={link.name}
-                    to={linkTo}
-                    onClick={() => setIsOpen(false)}
-                    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    <ArabicHover arabic={link.nameAr}>{link.name}</ArabicHover>
-                  </Link>
-                );
-              })}
+              {navLinks.map((link) => (
+                <Link
+                  key={link.name}
+                  to={link.to}
+                  onClick={() => setIsOpen(false)}
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {link.name}
+                </Link>
+              ))}
             </div>
 
             {/* Location, time, profile & CTA */}
@@ -135,11 +118,9 @@ export const Navbar = () => {
                   to="/onboarding/welcome"
                   onClick={handleStartJourney}
                   className="bg-primary text-primary-foreground hover:bg-primary/90 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all"
-                  aria-label="Start your journey — go to setup"
+                  aria-label="Start your journey"
                 >
-                  <ArabicHover arabic="ابدأ" className="border-0 text-primary-foreground hover:border-primary-foreground/50">
-                    Start your journey (setup)
-                  </ArabicHover>
+                  Start your journey
                 </Link>
               )}
             </div>
@@ -172,37 +153,20 @@ export const Navbar = () => {
               className="lg:hidden py-4 border-t border-border"
             >
               <div className="flex flex-col gap-0">
-                {navLinks.map((link) => {
-                  const isHashLink = link.to.startsWith("/#");
-                  const linkTo = !isHome && isHashLink
-                    ? { pathname: "/" as const, hash: link.to.slice(2) }
-                    : link.to;
-                  return isHome && link.href.startsWith("#") ? (
-                    <a
-                      key={link.name}
-                      href={link.href}
-                      onClick={() => setIsOpen(false)}
-                      className="flex items-center justify-between py-3 px-4 rounded-lg hover:bg-muted transition-colors min-h-[44px]"
-                    >
-                      <span className="text-sm font-medium text-foreground">
-                        <ArabicHover arabic={link.nameAr}>{link.name}</ArabicHover>
-                      </span>
-                    </a>
-                  ) : (
-                    <Link
-                      key={link.name}
-                      to={linkTo}
-                      onClick={() => setIsOpen(false)}
-                      className="flex items-center justify-between py-3 px-4 rounded-lg hover:bg-muted transition-colors min-h-[44px]"
-                    >
-                      <span className="text-sm font-medium text-foreground">
-                        <ArabicHover arabic={link.nameAr}>{link.name}</ArabicHover>
-                      </span>
-                    </Link>
-                  );
-                })}
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.name}
+                    to={link.to}
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center justify-between py-3 px-4 rounded-lg hover:bg-muted transition-colors min-h-[44px]"
+                  >
+                    <span className="text-sm font-medium text-foreground">
+                      {link.name}
+                    </span>
+                  </Link>
+                ))}
                 <div className="mt-4 pt-4 border-t border-border flex flex-col gap-2">
-                  <Link to="/settings" onClick={() => setIsOpen(false)} className="flex items-center gap-2 text-sm text-muted-foreground min-h-[44px] items-center">
+                  <Link to="/settings" onClick={() => setIsOpen(false)} className="flex items-center gap-2 text-sm text-muted-foreground min-h-[44px] items-center" title={displayLocation || "Set location"}>
                     <MapPin className="w-4 h-4" />
                     <span className="truncate">{locationShort}</span>
                   </Link>
@@ -214,9 +178,7 @@ export const Navbar = () => {
                     onClick={handleStartJourney}
                     className="bg-primary text-primary-foreground hover:bg-primary/90 text-sm w-full mt-4 py-3 min-h-[44px] rounded-xl font-semibold flex items-center justify-center"
                   >
-                    <ArabicHover arabic="ابدأ رحلتك" className="border-0 text-primary-foreground">
-                      Start Your Journey
-                    </ArabicHover>
+                    Start Your Journey
                   </Link>
                 )}
               </div>

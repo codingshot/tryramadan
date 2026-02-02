@@ -266,10 +266,10 @@ const Settings = () => {
                     <button
                       key={v}
                       onClick={() => setPreferences({ ...preferences, learningPriority: v })}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors ${
+                      className={`min-h-[44px] px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors border ${
                         (preferences.learningPriority ?? "moderate") === v
-                          ? "bg-secondary text-secondary-foreground"
-                          : "bg-muted/70 hover:bg-muted text-muted-foreground"
+                          ? "bg-secondary text-secondary-foreground border-secondary"
+                          : "bg-muted/70 hover:bg-muted border-border text-foreground"
                       }`}
                     >
                       {v}
@@ -287,10 +287,10 @@ const Settings = () => {
                     <button
                       key={v}
                       onClick={() => setPreferences({ ...preferences, cultureRecipesPriority: v })}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors ${
+                      className={`min-h-[44px] px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors border ${
                         (preferences.cultureRecipesPriority ?? "some") === v
-                          ? "bg-secondary text-secondary-foreground"
-                          : "bg-muted/70 hover:bg-muted text-muted-foreground"
+                          ? "bg-secondary text-secondary-foreground border-secondary"
+                          : "bg-muted/70 hover:bg-muted border-border text-foreground"
                       }`}
                     >
                       {v}
@@ -308,10 +308,10 @@ const Settings = () => {
                     <button
                       key={v}
                       onClick={() => setPreferences({ ...preferences, quranPriority: v })}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors ${
+                      className={`min-h-[44px] px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors border ${
                         (preferences.quranPriority ?? "some") === v
-                          ? "bg-secondary text-secondary-foreground"
-                          : "bg-muted/70 hover:bg-muted text-muted-foreground"
+                          ? "bg-secondary text-secondary-foreground border-secondary"
+                          : "bg-muted/70 hover:bg-muted border-border text-foreground"
                       }`}
                     >
                       {v}
@@ -327,8 +327,8 @@ const Settings = () => {
                 </div>
                 <button
                   onClick={() => setPreferences({ ...preferences, macroTrackingEnabled: !(preferences.macroTrackingEnabled ?? false) })}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    preferences.macroTrackingEnabled ? "bg-secondary text-secondary-foreground" : "bg-muted/70 hover:bg-muted"
+                  className={`min-h-[44px] px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
+                    preferences.macroTrackingEnabled ? "bg-secondary text-secondary-foreground border-secondary" : "bg-muted/70 hover:bg-muted border-border text-foreground"
                   }`}
                 >
                   {preferences.macroTrackingEnabled ? "On" : "Off"}
@@ -353,8 +353,8 @@ const Settings = () => {
                               setDailyGoals((g) => ({ ...g, calories: getSuggestedCalories(value) }));
                             }
                           }}
-                          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                            isSelected ? "bg-secondary text-secondary-foreground" : "bg-muted/70 hover:bg-muted"
+                          className={`min-h-[44px] px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
+                            isSelected ? "bg-secondary text-secondary-foreground border-secondary" : "bg-muted/70 hover:bg-muted border-border text-foreground"
                           }`}
                         >
                           {label}
@@ -369,8 +369,8 @@ const Settings = () => {
                 <span className="text-sm">Simplify by location</span>
                 <button
                   onClick={() => setPreferences({ ...preferences, simplifyByLocation: !(preferences.simplifyByLocation ?? true) })}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    preferences.simplifyByLocation ? "bg-secondary text-secondary-foreground" : "bg-muted/70 hover:bg-muted"
+                  className={`min-h-[44px] px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
+                    preferences.simplifyByLocation ? "bg-secondary text-secondary-foreground border-secondary" : "bg-muted/70 hover:bg-muted border-border text-foreground"
                   }`}
                 >
                   {preferences.simplifyByLocation ? "On" : "Off"}
@@ -380,7 +380,7 @@ const Settings = () => {
 
             <button
               onClick={applyPrioritiesToDashboard}
-              className="mt-4 w-full py-2.5 rounded-xl border-2 border-secondary/50 text-secondary hover:bg-secondary/10 font-medium text-sm flex items-center justify-center gap-2"
+              className="mt-4 w-full min-h-[44px] py-2.5 rounded-xl border-2 border-secondary/50 text-secondary hover:bg-secondary/10 font-medium text-sm flex items-center justify-center gap-2"
             >
               <Target className="w-4 h-4" />
               Apply to dashboard quick access
@@ -405,7 +405,7 @@ const Settings = () => {
 
             <p className="text-xs font-semibold text-muted-foreground mb-2">Current location</p>
             {preferences.location ? (
-              <div className="p-3 rounded-xl bg-secondary/10 border border-secondary/30 mb-4 flex items-center gap-3">
+              <div className="p-3 rounded-xl bg-secondary/10 border border-secondary/30 mb-4 flex items-center gap-3" title={preferences.location}>
                 <MapPin className="w-5 h-5 text-secondary flex-shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="font-medium truncate">{preferences.location.split(',')[0]}</p>
@@ -428,7 +428,7 @@ const Settings = () => {
             <button
               onClick={handleAutoDetect}
               disabled={locationLoading}
-              className="mt-3 w-full flex items-center justify-center gap-2 p-3 rounded-xl text-sm text-secondary hover:bg-secondary/10 transition-colors border border-border disabled:opacity-50"
+              className="mt-3 w-full min-h-[44px] flex items-center justify-center gap-2 p-3 rounded-xl text-sm text-secondary hover:bg-secondary/10 transition-colors border border-border disabled:opacity-50"
             >
               {locationLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -582,7 +582,7 @@ const Settings = () => {
             ) : (
               <button
                 onClick={handleEnableNotifications}
-                className="w-full py-3 rounded-xl bg-secondary text-secondary-foreground font-medium"
+                className="w-full min-h-[44px] py-3 rounded-xl bg-secondary text-secondary-foreground font-medium"
               >
                 Enable Notifications
               </button>
@@ -692,10 +692,10 @@ const Settings = () => {
                   <button
                     key={theme.id}
                     onClick={() => handleThemeChange(theme.id as 'light' | 'dark' | 'system')}
-                    className={`flex-1 p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
+                    className={`flex-1 min-h-[44px] p-3 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
                       preferences.theme === theme.id 
-                        ? 'border-secondary bg-secondary/10' 
-                        : 'border-border hover:border-secondary/50'
+                        ? 'border-secondary bg-secondary/10 text-foreground' 
+                        : 'border-border hover:border-secondary/50 text-foreground'
                     }`}
                   >
                     <Icon className="w-5 h-5" />
@@ -720,18 +720,18 @@ const Settings = () => {
             <div className="space-y-3">
               <button
                 onClick={handleOpenExportPreview}
-                className="w-full flex items-center justify-between p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+                className="w-full min-h-[44px] flex items-center justify-between p-3 rounded-xl bg-muted/50 hover:bg-muted border border-border transition-colors text-foreground"
               >
                 <div className="flex items-center gap-3">
-                  <Download className="w-5 h-5 text-muted-foreground" />
+                  <Download className="w-5 h-5 text-foreground" />
                   <span className="text-sm">Export my data</span>
                 </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                <ChevronRight className="w-4 h-4 text-foreground" />
               </button>
               
               <button
                 onClick={() => setShowResetConfirm(true)}
-                className="w-full flex items-center justify-between p-3 rounded-xl bg-destructive/10 hover:bg-destructive/20 transition-colors text-destructive"
+                className="w-full min-h-[44px] flex items-center justify-between p-3 rounded-xl bg-destructive/10 hover:bg-destructive/20 border border-destructive/30 transition-colors text-destructive"
               >
                 <div className="flex items-center gap-3">
                   <Trash2 className="w-5 h-5" />
@@ -766,7 +766,7 @@ const Settings = () => {
                   <button
                     type="button"
                     onClick={() => setShowExportPreview(true)}
-                    className="w-full py-2 rounded-lg border-2 border-secondary/50 text-secondary hover:bg-secondary/10 text-sm font-medium flex items-center justify-center gap-2"
+                    className="w-full min-h-[44px] py-2 rounded-lg border-2 border-secondary/50 text-secondary hover:bg-secondary/10 text-sm font-medium flex items-center justify-center gap-2"
                   >
                     <Download className="w-4 h-4" />
                     Download progress (backup before reset)
@@ -774,13 +774,13 @@ const Settings = () => {
                   <div className="flex gap-2">
                     <button
                       onClick={handleResetProgress}
-                      className="flex-1 py-2 rounded-lg bg-destructive text-destructive-foreground text-sm font-medium"
+                      className="flex-1 min-h-[44px] py-2 rounded-lg bg-destructive text-destructive-foreground text-sm font-medium"
                     >
                       Yes, reset everything
                     </button>
                     <button
                       onClick={() => setShowResetConfirm(false)}
-                      className="flex-1 py-2 rounded-lg bg-muted text-sm font-medium"
+                      className="flex-1 min-h-[44px] py-2 rounded-lg bg-muted border border-border text-foreground text-sm font-medium"
                     >
                       Cancel
                     </button>

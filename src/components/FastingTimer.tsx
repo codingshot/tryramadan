@@ -212,7 +212,6 @@ export const FastingTimer = ({
                   <TooltipTrigger asChild>
                     <span className="text-primary-foreground font-semibold cursor-help border-b border-dotted border-primary-foreground/30">
                       Eating period — You can eat now
-                      <span className="font-arabic text-primary-foreground/80 ml-1.5 text-sm">· وقت الأكل</span>
                     </span>
                   </TooltipTrigger>
                   <TooltipContent side="top" className="max-w-xs bg-card border-border p-3">
@@ -229,7 +228,6 @@ export const FastingTimer = ({
                   <TooltipTrigger asChild>
                     <span className="text-primary-foreground font-semibold cursor-help border-b border-dotted border-primary-foreground/30">
                       Fasting period — No eating or drinking
-                      <span className="font-arabic text-primary-foreground/80 ml-1.5 text-sm">· صائم</span>
                     </span>
                   </TooltipTrigger>
                   <TooltipContent side="top" className="max-w-xs bg-card border-border p-3">

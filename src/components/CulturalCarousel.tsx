@@ -23,13 +23,27 @@ export const CulturalCarousel = () => {
     setActiveCountry(0);
   }, [regions.length]);
 
+  /** Next country; at last country in region, switch to next region's first. */
   const nextCountry = useCallback(() => {
-    setActiveCountry((prev) => (prev + 1) % countries.length);
-  }, [countries.length]);
+    if (activeCountry < countries.length - 1) {
+      setActiveCountry((prev) => prev + 1);
+    } else {
+      setActiveRegion((prev) => (prev + 1) % regions.length);
+      setActiveCountry(0);
+    }
+  }, [activeCountry, countries.length, regions.length]);
 
+  /** Previous country; at first country in region, switch to previous region's last. */
   const prevCountry = useCallback(() => {
-    setActiveCountry((prev) => (prev - 1 + countries.length) % countries.length);
-  }, [countries.length]);
+    if (activeCountry > 0) {
+      setActiveCountry((prev) => prev - 1);
+    } else {
+      const prevRegionIndex = (activeRegion - 1 + regions.length) % regions.length;
+      const lastCountryIndex = regions[prevRegionIndex].countries.length - 1;
+      setActiveRegion(prevRegionIndex);
+      setActiveCountry(lastCountryIndex);
+    }
+  }, [activeCountry, activeRegion, regions]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

@@ -30,6 +30,9 @@ import {
   useFastingProgress,
   useLocalStorage,
   useDailyGoals,
+  clampCalories,
+  CALORIE_MIN,
+  CALORIE_MAX,
   useDayMealPlans,
   useDayNutrition,
   useDayFoodLog,
@@ -110,7 +113,7 @@ function FoodLogRow({
           View recipe
         </Link>
       )}
-      <button type="button" onClick={onRemove} className="p-1 rounded hover:bg-destructive/20 text-muted-foreground hover:text-destructive ml-auto" aria-label="Remove">
+      <button type="button" onClick={onRemove} className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded border border-transparent hover:border-destructive/30 hover:bg-destructive/20 text-muted-foreground hover:text-destructive ml-auto" aria-label="Remove">
         <Trash2 className="w-3.5 h-3.5" />
       </button>
     </li>
@@ -546,10 +549,11 @@ const DashboardSchedule = () => {
                       <Label className="text-xs">Calories</Label>
                       <Input
                         type="number"
-                        min={0}
+                        min={CALORIE_MIN}
+                        max={CALORIE_MAX}
                         value={dailyGoals.calories}
                         onChange={(e) =>
-                          setDailyGoals((g) => ({ ...g, calories: parseInt(e.target.value, 10) || 0 }))
+                          setDailyGoals((g) => ({ ...g, calories: clampCalories(parseInt(e.target.value, 10) || 0) }))
                         }
                         className="mt-1"
                       />
@@ -640,7 +644,7 @@ const DashboardSchedule = () => {
                               type="button"
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8"
+                              className="h-8 w-8 border border-transparent hover:border-border"
                               disabled={index === 0}
                               onClick={() => {
                                 if (index === 0) return;
@@ -656,7 +660,7 @@ const DashboardSchedule = () => {
                               type="button"
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8"
+                              className="h-8 w-8 border border-transparent hover:border-border"
                               disabled={index === quickActionOrder.length - 1}
                               onClick={() => {
                                 if (index === quickActionOrder.length - 1) return;
@@ -672,7 +676,7 @@ const DashboardSchedule = () => {
                               type="button"
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                              className="h-8 w-8 border border-transparent hover:border-destructive/30 text-muted-foreground hover:text-destructive"
                               onClick={() => setQuickActionOrder(quickActionOrder.filter((i) => i !== id))}
                               aria-label="Remove from quick access"
                             >
@@ -1133,7 +1137,7 @@ const DashboardSchedule = () => {
                               <button
                                 type="button"
                                 onClick={() => removeCalendarEvent(e.id)}
-                                className="p-1 rounded hover:bg-destructive/20 text-muted-foreground hover:text-destructive"
+                                className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded border border-transparent hover:border-destructive/30 hover:bg-destructive/20 text-muted-foreground hover:text-destructive"
                                 aria-label="Remove"
                               >
                                 <X className="w-3.5 h-3.5" />
@@ -1433,7 +1437,8 @@ const DashboardSchedule = () => {
                           <Label className="text-xs text-muted-foreground">Calories</Label>
                           <Input
                             type="number"
-                            min={0}
+                            min={CALORIE_MIN}
+                            max={CALORIE_MAX}
                             placeholder={String(dailyGoals.calories)}
                             value={selectedDayNutrition?.calories ?? ""}
                             onChange={(e) =>
@@ -1444,7 +1449,7 @@ const DashboardSchedule = () => {
                                   calories:
                                     e.target.value === ""
                                       ? undefined
-                                      : parseInt(e.target.value, 10) || 0,
+                                      : clampCalories(parseInt(e.target.value, 10) || 0),
                                 },
                               }))
                             }
