@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Moon, Sun, Clock, Calendar, MapPin, Loader2, Sunrise, Sunset, Bell, Utensils } from "lucide-react";
 import { usePrayerTimes, getSunnahFastingInfo } from "@/hooks/usePrayerTimes";
-import { useUserPreferences, useNotificationSettings, usePrayerNotificationPrefs, useIftarLabel } from "@/hooks/useLocalStorage";
+import { useUserPreferences, useNotificationSettings, usePrayerNotificationPrefs, useIftarLabel, useDisplayTimezone } from "@/hooks/useLocalStorage";
 import { useAutoLocation } from "@/hooks/useLocation";
 import { Link } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -45,6 +45,7 @@ export const FastingTimer = ({
   const [localTime, setLocalTime] = useState("");
   const [ramadanInfoOpen, setRamadanInfoOpen] = useState(false);
   const [preferences] = useUserPreferences();
+  const displayTimezone = useDisplayTimezone();
   const { location: autoLocation } = useAutoLocation();
   const displayLocation = preferences.location || (autoLocation ? autoLocation.displayName : null);
   const locationShort = displayLocation ? displayLocation.split(",").slice(0, 2).join(",").trim() : null;
@@ -69,13 +70,14 @@ export const FastingTimer = ({
           hour: "numeric",
           minute: "2-digit",
           hour12: true,
+          ...(displayTimezone && { timeZone: displayTimezone }),
         })
       );
     };
     formatLocalTime();
     const t = setInterval(formatLocalTime, 1000);
     return () => clearInterval(t);
-  }, []);
+  }, [displayTimezone]);
 
   // Countdown and period: eating = from iftar until suhoor end (next day); fasting = suhoor end until iftar
   useEffect(() => {

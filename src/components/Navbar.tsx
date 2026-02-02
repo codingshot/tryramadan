@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Menu, X, MapPin, User } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { ArabicHover } from "./ArabicHover";
-import { useUserPreferences, useFastingProgress, isFastingToday } from "@/hooks/useLocalStorage";
+import { useUserPreferences, useFastingProgress, isFastingToday, useDisplayTimezone } from "@/hooks/useLocalStorage";
 import { useAutoLocation } from "@/hooks/useLocation";
 
 export const Navbar = () => {
@@ -18,27 +18,28 @@ export const Navbar = () => {
 
   const displayLocation = preferences.location || (autoLocation ? autoLocation.displayName : null);
   const locationShort = displayLocation ? displayLocation.split(",").slice(0, 2).join(",").trim() : "Set location";
+  const displayTimezone = useDisplayTimezone();
 
   useEffect(() => {
-    const timeZone = preferences.timezone || undefined;
     const formatTime = () => {
       setLocalTime(
         new Date().toLocaleTimeString(undefined, {
           hour: "2-digit",
           minute: "2-digit",
           second: "2-digit",
-          ...(timeZone && { timeZone }),
+          ...(displayTimezone && { timeZone: displayTimezone }),
         })
       );
     };
     formatTime();
     const interval = setInterval(formatTime, 1000);
     return () => clearInterval(interval);
-  }, [preferences.timezone]);
+  }, [displayTimezone]);
 
   const navLinks = [
     { name: "Features", nameAr: "المميزات", to: "/" },
     { name: "Programs", nameAr: "البرامج", to: "/programs" },
+    { name: "Health", nameAr: "الصحة", to: "/health" },
     { name: "Recipes", nameAr: "وصفات", to: "/recipes" },
     { name: "Culture", nameAr: "الثقافة", to: "/culture" },
     { name: "About", nameAr: "عنا", to: "/faq" },

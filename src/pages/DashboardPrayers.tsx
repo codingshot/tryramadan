@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { useUserPreferences, useLocalStorage, usePrayerNotificationPrefs, useAdhanSoundEnabled } from "@/hooks/useLocalStorage";
+import { useUserPreferences, useLocalStorage, usePrayerNotificationPrefs, useAdhanSoundEnabled, useDisplayTimezone } from "@/hooks/useLocalStorage";
 import { usePrayerTimes } from "@/hooks/usePrayerTimes";
 import { useNotifications } from "@/hooks/useNotifications";
 import { playAdhan } from "@/lib/adhanAudio";
@@ -18,15 +18,19 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { PrayerLocationBadge } from "@/components/PrayerLocationBadge";
 import { PageSEO } from "@/components/PageSEO";
+import { getNowInTimezone, toLocalDateString } from "@/lib/utils";
 
 const DashboardPrayers = () => {
   const [preferences] = useUserPreferences();
+  const displayTimezone = useDisplayTimezone();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [prayerTracker, setPrayerTracker] = useLocalStorage<Record<string, Record<string, boolean>>>("tryramadan-prayer-tracker", {});
   const [prayerNotifications, setPrayerNotifications] = usePrayerNotificationPrefs();
   const [adhanSoundEnabled, setAdhanSoundEnabled] = useAdhanSoundEnabled();
   const { permission, requestPermission, supported } = useNotifications();
-  const todayStr = currentTime.toISOString().split("T")[0];
+  const todayStr = displayTimezone
+    ? new Date().toLocaleDateString("en-CA", { timeZone: displayTimezone })
+    : toLocalDateString(new Date());
   const todayPrayers = prayerTracker[todayStr] || {};
   const setTodayPrayer = (name: string, done: boolean) => {
     setPrayerTracker((prev) => ({
@@ -56,15 +60,20 @@ const DashboardPrayers = () => {
   
   const getNextPrayer = (): { name: string; minutesUntil: number } | null => {
     if (!prayerTimes || prayers.length === 0) return null;
-    const now = currentTime.getHours() * 60 + currentTime.getMinutes() + currentTime.getSeconds() / 60;
+    const nowMinutes = displayTimezone
+      ? (() => {
+          const n = getNowInTimezone(displayTimezone);
+          return n.hours * 60 + n.minutes + n.seconds / 60;
+        })()
+      : currentTime.getHours() * 60 + currentTime.getMinutes() + currentTime.getSeconds() / 60;
     for (const prayer of prayers) {
       const [h, m] = prayer.time.split(':').map(Number);
       const prayerMinutes = h * 60 + m;
-      if (prayerMinutes > now) return { name: prayer.name, minutesUntil: prayerMinutes - now };
+      if (prayerMinutes > nowMinutes) return { name: prayer.name, minutesUntil: prayerMinutes - nowMinutes };
     }
     const [fajrH, fajrM] = prayers[0].time.split(':').map(Number);
     const fajrToday = fajrH * 60 + fajrM;
-    const minutesUntilMidnight = 24 * 60 - now;
+    const minutesUntilMidnight = 24 * 60 - nowMinutes;
     return { name: "Fajr", minutesUntil: minutesUntilMidnight + fajrToday };
   };
   
@@ -124,7 +133,13 @@ const DashboardPrayers = () => {
           >
             <div className="text-center">
               <p className="text-sm opacity-80 mb-1">
-                {currentTime.toLocaleDateString('en', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                {currentTime.toLocaleDateString('en', {
+                  weekday: 'long',
+                  month: 'long',
+                  day: 'numeric',
+                  year: 'numeric',
+                  ...(displayTimezone && { timeZone: displayTimezone }),
+                })}
               </p>
               {hijriDate && (
                 <Tooltip>
@@ -142,7 +157,12 @@ const DashboardPrayers = () => {
                 </Tooltip>
               )}
               <p className="text-5xl font-bold font-display">
-                {currentTime.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                {currentTime.toLocaleTimeString('en', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                  ...(displayTimezone && { timeZone: displayTimezone }),
+                })}
               </p>
               {nextPrayer && (
                 <div className="mt-3">

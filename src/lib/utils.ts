@@ -12,3 +12,17 @@ export function toLocalDateString(d: Date): string {
   const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
 }
+
+/** Current time in a given IANA timezone (for display and comparisons). */
+export function getNowInTimezone(timeZone: string): { hours: number; minutes: number; seconds: number } {
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+  const parts = formatter.formatToParts(new Date());
+  const get = (type: string) => parseInt(parts.find((p) => p.type === type)?.value ?? "0", 10);
+  return { hours: get("hour"), minutes: get("minute"), seconds: get("second") };
+}

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { toLocalDateString } from '@/lib/utils';
+import { getTimezoneFromCoords } from '@/hooks/useLocation';
 
 export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((prev: T) => T)) => void] {
   // Get stored value or use initial
@@ -102,6 +103,24 @@ export function useUserPreferences() {
   // Ensure we always have all keys (merge with defaults for old or partial localStorage)
   const preferences: UserPreferences = { ...defaultPreferences, ...stored };
   return [preferences, setStored] as const;
+}
+
+/**
+ * Effective timezone for display (navbar, timer, prayers). Uses preferences.timezone when set;
+ * when a location is set but timezone is missing, backfills from coordinates and persists.
+ */
+export function useDisplayTimezone(): string | null {
+  const [preferences, setPreferences] = useUserPreferences();
+  useEffect(() => {
+    const coords = preferences.locationCoords;
+    if (!coords || preferences.timezone != null) return;
+    let cancelled = false;
+    getTimezoneFromCoords(coords.lat, coords.lng).then((tz) => {
+      if (!cancelled && tz) setPreferences((prev) => ({ ...prev, timezone: tz }));
+    });
+    return () => { cancelled = true; };
+  }, [preferences.locationCoords?.lat, preferences.locationCoords?.lng, preferences.timezone]);
+  return preferences.timezone ?? null;
 }
 
 /** User type from preferences (matches onboarding mode). */

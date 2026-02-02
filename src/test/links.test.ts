@@ -14,6 +14,7 @@ const INTERNAL_PATHS_USED = new Set([
   "/legal",
   "/privacy",
   "/faq",
+  "/health",
   "/health-safety",
   "/emergency",
   "/settings",

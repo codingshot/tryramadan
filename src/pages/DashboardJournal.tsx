@@ -55,6 +55,9 @@ export default function DashboardJournal() {
 
   const existingForWriteDate = entries.find((e) => e.date === writeDate);
   const prompt = getPromptForDate(writeDate);
+  const hasTodayEntry = entries.some((e) => e.date === today);
+  const isFutureDate = writeDate > today;
+  const showWriteTodayPrompt = isFutureDate && !hasTodayEntry;
 
   useEffect(() => {
     const entry = entries.find((e) => e.date === writeDate);
@@ -238,6 +241,28 @@ export default function DashboardJournal() {
             transition={{ delay: 0.1 }}
             className="mb-8 p-6 rounded-2xl bg-card border border-border"
           >
+            {showWriteTodayPrompt && (
+              <div className="mb-4 p-4 rounded-xl border-2 border-secondary/40 bg-secondary/5">
+                <p className="text-sm font-medium text-foreground mb-1">
+                  You're writing for a future date but haven't written for today yet.
+                </p>
+                <p className="text-sm text-muted-foreground mb-3">
+                  We recommend writing today's entry first so you don't miss it.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleSelectDate(new Date(today + "T12:00:00"));
+                    setCalendarMonth(new Date(today + "T12:00:00"));
+                    scrollToEditor();
+                  }}
+                  className="inline-flex items-center gap-2 py-2 px-4 rounded-xl bg-secondary text-secondary-foreground font-medium text-sm hover:bg-secondary/90 transition-colors"
+                >
+                  <PenLine className="w-4 h-4" />
+                  Write for today
+                </button>
+              </div>
+            )}
             <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
               <h3 className="font-display font-bold flex items-center gap-2">
                 <PenLine className="w-5 h-5 text-secondary" />

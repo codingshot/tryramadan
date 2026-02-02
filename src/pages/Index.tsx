@@ -221,6 +221,15 @@ const Index = () => {
           </motion.div>
 
           <HealthBenefits />
+          <div className="text-center mt-8">
+            <Link
+              to="/health"
+              className="inline-flex items-center gap-2 text-secondary font-medium hover:underline"
+            >
+              Full health guide (benefits, safety, when to break fast)
+              <ChevronRight className="w-5 h-5" />
+            </Link>
+          </div>
         </div>
       </section>
 

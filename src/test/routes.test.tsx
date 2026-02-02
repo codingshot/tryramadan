@@ -8,6 +8,7 @@ import Legal from "@/pages/Legal";
 import Privacy from "@/pages/Privacy";
 import FAQ from "@/pages/FAQ";
 import HealthSafety from "@/pages/HealthSafety";
+import Health from "@/pages/Health";
 import NotFound from "@/pages/NotFound";
 
 function renderWithProviders(ui: React.ReactElement, { route = "/" }: { route?: string } = {}) {
@@ -30,6 +31,7 @@ export const ROUTES = [
   "/legal",
   "/privacy",
   "/faq",
+  "/health",
   "/health-safety",
   "/emergency",
   "/settings",
@@ -115,6 +117,16 @@ describe("Routes", () => {
     expect(screen.getByRole("heading", { name: /frequently asked questions/i })).toBeInTheDocument();
   });
 
+  it("renders Health at /health", () => {
+    renderWithProviders(
+      <Routes>
+        <Route path="/health" element={<Health />} />
+      </Routes>,
+      { route: "/health" }
+    );
+    expect(screen.getByRole("heading", { name: /ramadan fasting health guide/i })).toBeInTheDocument();
+  });
+
   it("renders Health & Safety at /health-safety", () => {
     renderWithProviders(
       <Routes>
@@ -148,6 +160,7 @@ describe("Route list", () => {
     expect(ROUTES).toContain("/dashboard/macros");
     expect(ROUTES).toContain("/learn/glossary");
     expect(ROUTES).toContain("/learn/hadith");
+    expect(ROUTES).toContain("/health");
     expect(ROUTES).toContain("/health-safety");
     expect(ROUTES).toContain("/faq");
   });

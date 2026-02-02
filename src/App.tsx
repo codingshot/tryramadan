@@ -34,6 +34,7 @@ import OnboardingGoals from "./pages/onboarding/OnboardingGoals";
 import LearnGlossary from "./pages/LearnGlossary";
 import LearnHadith from "./pages/LearnHadith";
 import HealthSafety from "./pages/HealthSafety";
+import Health from "./pages/Health";
 import FAQ from "./pages/FAQ";
 import Emergency from "./pages/Emergency";
 import Settings from "./pages/Settings";
@@ -56,11 +57,12 @@ import { ReminderScheduler } from "./components/ReminderScheduler";
 
 const queryClient = new QueryClient();
 
-/** Scroll window to top when the route (pathname) changes. */
+/** Scroll to top when the route changes so each page starts at the top. */
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    document.documentElement.scrollTo?.({ top: 0, left: 0, behavior: "auto" });
   }, [pathname]);
   return null;
 }
@@ -139,6 +141,7 @@ const App = () => (
           <Route path="/dashboard/glossary" element={<LearnGlossary />} />
           <Route path="/learn/glossary" element={<LearnGlossary />} />
           <Route path="/learn/hadith" element={<LearnHadith />} />
+          <Route path="/health" element={<Health />} />
           <Route path="/health-safety" element={<HealthSafety />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/emergency" element={<Emergency />} />
