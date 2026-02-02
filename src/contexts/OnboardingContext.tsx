@@ -66,7 +66,7 @@ type OnboardingContextValue = {
   setMode: (mode: OnboardingMode) => void;
   setExperience: (exp: string) => void;
   setKnowledgeScore: (score: number) => void;
-  setHealthWarnings: (warnings: string[]) => void;
+  setHealthWarnings: (warnings: string[] | ((prev: string[]) => string[])) => void;
   setLocation: (loc: LocationResult | null) => void;
   setSelectedProgram: (id: string) => void;
   setNotifications: (n: Partial<OnboardingState["notifications"]>) => void;
@@ -131,8 +131,11 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   const setKnowledgeScore = useCallback((knowledgeScore: number) => {
     setState((s) => ({ ...s, knowledgeScore }));
   }, []);
-  const setHealthWarnings = useCallback((healthWarnings: string[]) => {
-    setState((s) => ({ ...s, healthWarnings }));
+  const setHealthWarnings = useCallback((healthWarnings: string[] | ((prev: string[]) => string[])) => {
+    setState((s) => ({
+      ...s,
+      healthWarnings: typeof healthWarnings === "function" ? healthWarnings(s.healthWarnings) : healthWarnings,
+    }));
   }, []);
   const setLocation = useCallback((location: LocationResult | null) => {
     setState((s) => ({ ...s, location }));

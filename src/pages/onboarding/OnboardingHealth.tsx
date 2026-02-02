@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, AlertTriangle } from "lucide-react";
@@ -15,26 +14,24 @@ const HEALTH_OPTIONS = [
 
 export default function OnboardingHealth() {
   const { state, setHealthWarnings } = useOnboarding();
-  const [selected, setSelected] = useState<string[]>(() =>
-    Array.isArray(state.healthWarnings) ? state.healthWarnings : []
-  );
   const navigate = useNavigate();
 
-  const sel = Array.isArray(selected) ? selected : [];
+  const sel = Array.isArray(state.healthWarnings) ? state.healthWarnings : [];
 
   const toggle = (id: string) => {
     if (id === "none") {
-      setSelected([]);
+      setHealthWarnings([]);
       return;
     }
-    setSelected((prev) => {
+    setHealthWarnings((prev) => {
       const p = Array.isArray(prev) ? prev : [];
-      return p.includes(id) ? p.filter((x) => x !== id) : p.filter((x) => x !== "none").concat(id);
+      return p.includes(id)
+        ? p.filter((x) => x !== id)
+        : [...p.filter((x) => x !== "none"), id];
     });
   };
 
   const handleContinue = () => {
-    setHealthWarnings(sel.filter((x) => x !== "none"));
     navigate("/onboarding/location");
   };
 
@@ -54,13 +51,15 @@ export default function OnboardingHealth() {
       </p>
 
       <div className="space-y-2 mb-6">
-        {HEALTH_OPTIONS.map((opt) => (
+        {HEALTH_OPTIONS.map((opt) => {
+          const isSelected = opt.id === "none" ? sel.length === 0 : sel.includes(opt.id);
+          return (
           <button
             key={opt.id}
             type="button"
             onClick={() => toggle(opt.id)}
             className={`w-full min-h-[44px] p-4 rounded-xl border-2 text-left transition-all cursor-pointer touch-manipulation flex items-center gap-3 ${
-              sel.includes(opt.id)
+              isSelected
                 ? "border-secondary bg-secondary/5"
                 : "border-border hover:border-secondary/50"
             }`}
@@ -68,7 +67,8 @@ export default function OnboardingHealth() {
             <span className="text-2xl shrink-0" aria-hidden>{opt.emoji}</span>
             <span>{opt.label}</span>
           </button>
-        ))}
+          );
+        })}
       </div>
 
       {hasWarning && (

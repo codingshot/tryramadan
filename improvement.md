@@ -4,6 +4,14 @@ Prioritized list of improvements to make. Tick off as done.
 
 ---
 
+## Onboarding & persistence
+
+- [x] **Onboarding flow** – Welcome → Mode → Knowledge → Health → Location → Schedule → Notifications → Priorities → Goals → Dashboard. Health options clickable; Location has skip option.
+- [x] **Local persistence** – Preferences and quick actions persist via persistPreferencesSync/persistQuickActionsSync before navigation; onboarding draft saved to localStorage.
+- [x] **Completion redirect** – Completing onboarding navigates to dashboard (no redirect loop); Dashboard reads fresh preferences from localStorage.
+
+---
+
 ## Identity & config
 
 - [x] **Package name** – Change `package.json` name from `vite_react_shadcn_ts` to `tryramadan` (or `tryramadan-app`).
@@ -61,8 +69,18 @@ Prioritized list of improvements to make. Tick off as done.
 
 ## SEO & meta
 
-- [ ] **Unique descriptions** – Ensure each main page (Dashboard, Today, Schedule, Prayers, Meals, etc.) has a unique meta description and Open Graph title/description.
-- [ ] **Structured data** – Consider HowTo or Event schema for guides and Ramadan calendar export.
+- [x] **Unique descriptions** – Each main page has unique meta description and Open Graph via PageSEO (Dashboard, Today, Schedule, Prayers, Meals, Culture, Learn, Quran, etc.).
+- [x] **Structured data** – Index has WebApplication + FAQPage schema; Health page has Article schema. Guides/culture use PageSEO with unique titles.
+- [x] **Sitemap** – sitemap.xml added with main routes, culture countries, guides. Referenced in robots.txt.
+- [x] **404 page SEO** – NotFound has noindex, nofollow and friendly message.
+
+---
+
+## AI engine optimization
+
+- [x] **robots.txt** – Allow GPTBot, ChatGPT-User, Claude-Web, anthropic-ai. Sitemap reference.
+- [x] **Semantic structure** – Clear titles, meta descriptions, canonical URLs, JSON-LD where applicable.
+- [x] **Content discoverability** – Main pages indexed; onboarding noindexed (flow, not content).
 
 ---
 
@@ -75,8 +93,8 @@ Prioritized list of improvements to make. Tick off as done.
 
 ## Additional improvements (added)
 
-- [ ] **Sitemap** – Add sitemap.xml for SEO (list main routes).
-- [ ] **404 page SEO** – Ensure NotFound has noindex and friendly message.
+- [x] **Sitemap** – sitemap.xml with main routes, culture, guides (see SEO & meta).
+- [x] **404 page SEO** – NotFound has noindex and friendly message.
 - [ ] **Keyboard shortcuts** – Consider global shortcuts (e.g. ? for help, g then d for dashboard).
 - [ ] **Print styles** – Add print-friendly CSS for schedule, progress, and guides.
 - [ ] **Loading skeletons** – Replace generic spinners with skeleton placeholders on dashboard cards.

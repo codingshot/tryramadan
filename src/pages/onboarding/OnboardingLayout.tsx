@@ -2,6 +2,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
+import { PageSEO } from "@/components/PageSEO";
 import { useUserPreferences, getQuickActionOrderFromPriorities, persistPreferencesSync, persistQuickActionsSync } from "@/hooks/useLocalStorage";
 import { useDashboardQuickActions } from "@/hooks/useLocalStorage";
 
@@ -68,6 +69,12 @@ export default function OnboardingLayout() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <PageSEO
+        title="Getting Started | TryRamadan.app"
+        description="Set up your Ramadan fasting journey: mode, health screening, location, schedule, and goals."
+        path="/onboarding"
+        robots="noindex, nofollow"
+      />
       <div className="flex items-center justify-end gap-2 px-4 py-2 bg-muted/30 border-b border-border">
         <span className="text-xs text-muted-foreground mr-auto">Getting started</span>
         <button

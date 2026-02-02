@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://tryramadan.app/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://tryramadan.app/dashboard</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://tryramadan.app/dashboard/today</loc><changefreq>daily</changefreq><priority>0.9</priority></url>
+  <url><loc>https://tryramadan.app/dashboard/schedule</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tryramadan.app/dashboard/prayers</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tryramadan.app/dashboard/meals</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tryramadan.app/dashboard/learn</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tryramadan.app/dashboard/quran</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tryramadan.app/dashboard/culture</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tryramadan.app/dashboard/progress</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/dashboard/health</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/dashboard/journal</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/dashboard/achievements</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/dashboard/goals</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/dashboard/macros</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/culture</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://tryramadan.app/recipes</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://tryramadan.app/learn/glossary</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tryramadan.app/learn/hadith</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tryramadan.app/health</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tryramadan.app/health-safety</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tryramadan.app/faq</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tryramadan.app/emergency</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tryramadan.app/programs</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tryramadan.app/guides</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tryramadan.app/personas</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/settings</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://tryramadan.app/privacy</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://tryramadan.app/terms</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://tryramadan.app/legal</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <!-- Culture country pages -->
+  <url><loc>https://tryramadan.app/culture/egypt</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/culture/saudi-arabia</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/culture/uae</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/culture/pakistan</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/culture/india</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/culture/indonesia</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/culture/turkey</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/culture/morocco</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/culture/malaysia</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/culture/bangladesh</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <!-- Guide pages -->
+  <url><loc>https://tryramadan.app/guides/onboarding</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/guides/dashboard-overview</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/guides/quran</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+</urlset>
