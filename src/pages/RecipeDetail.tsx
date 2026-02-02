@@ -70,7 +70,7 @@ export default function RecipeDetail() {
               <div className="flex items-center gap-2 mb-2">
                 <span
                   className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-sm font-medium ${
-                    type === "suhoor" ? "bg-secondary/20 text-secondary" : "bg-primary/20 text-primary"
+                    type === "suhoor" ? "bg-secondary/20 text-secondary" : "bg-primary/20 text-foreground"
                   }`}
                 >
                   {type === "suhoor" ? <Coffee className="w-4 h-4" /> : <Utensils className="w-4 h-4" />}

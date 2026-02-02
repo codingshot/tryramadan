@@ -1,10 +1,12 @@
 import { motion } from "framer-motion";
 
 interface ProgressRingProps {
-  value: number; // 0–100
+  value: number; // 0–100 (used for ring fill)
   size?: number;
   strokeWidth?: number;
   sublabel?: string;
+  /** When set, show this in the center instead of value% (e.g. days completed) */
+  centerLabel?: React.ReactNode;
   className?: string;
 }
 
@@ -13,6 +15,7 @@ export function ProgressRing({
   size = 120,
   strokeWidth = 10,
   sublabel,
+  centerLabel,
   className = "",
 }: ProgressRingProps) {
   const radius = (size - strokeWidth) / 2;
@@ -52,7 +55,9 @@ export function ProgressRing({
         </defs>
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-bold text-foreground">{Math.round(value)}%</span>
+        <span className="text-2xl font-bold text-foreground">
+          {centerLabel !== undefined ? centerLabel : `${Math.round(value)}%`}
+        </span>
         {sublabel && <span className="text-xs text-muted-foreground mt-0.5">{sublabel}</span>}
       </div>
     </div>

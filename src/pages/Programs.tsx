@@ -12,7 +12,7 @@ const Programs = () => {
     <div className="min-h-screen bg-background">
       <PageSEO
         title="Fasting Programs | TryRamadan.app"
-        description="Progressive Ramadan fasting programs for beginners: gentle start, half-day, and full Ramadan experience. Choose a path that fits you."
+        description="Ramadan fasting: full dawn-to-sunset experience and Sunnah voluntary fasting. TryRamadan.app"
         path="/programs"
       />
       <Navbar />
@@ -34,7 +34,7 @@ const Programs = () => {
               <ArabicHover arabic="البرامج">Fasting Programs</ArabicHover>
             </h1>
             <p className="text-muted-foreground mt-2 text-sm sm:text-base">
-              Choose a path that fits your experience level. Start gently or embrace the full Ramadan experience.
+              Full Ramadan fast (dawn to sunset) and voluntary Sunnah fasting. The authentic Ramadan experience.
             </p>
           </motion.div>
           <FastingPrograms />

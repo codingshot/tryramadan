@@ -56,8 +56,9 @@ export default function OnboardingPriorities() {
           {LEARNING_OPTIONS.map((opt) => (
             <button
               key={opt.value}
+              type="button"
               onClick={() => setPriorities({ learningPriority: opt.value })}
-              className={`w-full p-3 rounded-xl border-2 text-left transition-all flex items-center justify-between ${
+              className={`w-full min-h-[44px] p-3 rounded-xl border-2 text-left transition-all flex items-center justify-between cursor-pointer touch-manipulation ${
                 p.learningPriority === opt.value ? "border-secondary bg-secondary/10" : "border-border hover:border-secondary/50"
               }`}
             >
@@ -78,8 +79,9 @@ export default function OnboardingPriorities() {
           {CULTURE_OPTIONS.map((opt) => (
             <button
               key={opt.value}
+              type="button"
               onClick={() => setPriorities({ cultureRecipesPriority: opt.value })}
-              className={`w-full p-3 rounded-xl border-2 text-left transition-all flex items-center justify-between ${
+              className={`w-full min-h-[44px] p-3 rounded-xl border-2 text-left transition-all flex items-center justify-between cursor-pointer touch-manipulation ${
                 p.cultureRecipesPriority === opt.value ? "border-secondary bg-secondary/10" : "border-border hover:border-secondary/50"
               }`}
             >
@@ -100,8 +102,9 @@ export default function OnboardingPriorities() {
           {QURAN_OPTIONS.map((opt) => (
             <button
               key={opt.value}
+              type="button"
               onClick={() => setPriorities({ quranPriority: opt.value })}
-              className={`w-full p-3 rounded-xl border-2 text-left transition-all flex items-center justify-between ${
+              className={`w-full min-h-[44px] p-3 rounded-xl border-2 text-left transition-all flex items-center justify-between cursor-pointer touch-manipulation ${
                 p.quranPriority === opt.value ? "border-secondary bg-secondary/10" : "border-border hover:border-secondary/50"
               }`}
             >
@@ -120,8 +123,9 @@ export default function OnboardingPriorities() {
         </h3>
         <div className="flex gap-2">
           <button
+            type="button"
             onClick={() => setPriorities({ macroTrackingEnabled: false })}
-            className={`flex-1 p-3 rounded-xl border-2 transition-all ${
+            className={`flex-1 min-h-[44px] p-3 rounded-xl border-2 transition-all cursor-pointer touch-manipulation ${
               !p.macroTrackingEnabled ? "border-secondary bg-secondary/10" : "border-border hover:border-secondary/50"
             }`}
           >
@@ -129,8 +133,9 @@ export default function OnboardingPriorities() {
             <span className="block text-xs text-muted-foreground">Keep it simple</span>
           </button>
           <button
+            type="button"
             onClick={() => setPriorities({ macroTrackingEnabled: true })}
-            className={`flex-1 p-3 rounded-xl border-2 transition-all ${
+            className={`flex-1 min-h-[44px] p-3 rounded-xl border-2 transition-all cursor-pointer touch-manipulation ${
               p.macroTrackingEnabled ? "border-secondary bg-secondary/10" : "border-border hover:border-secondary/50"
             }`}
           >
@@ -151,16 +156,18 @@ export default function OnboardingPriorities() {
         </p>
         <div className="flex gap-2">
           <button
+            type="button"
             onClick={() => setPriorities({ simplifyByLocation: true })}
-            className={`flex-1 p-3 rounded-xl border-2 transition-all ${
+            className={`flex-1 min-h-[44px] p-3 rounded-xl border-2 transition-all cursor-pointer touch-manipulation ${
               p.simplifyByLocation ? "border-secondary bg-secondary/10" : "border-border hover:border-secondary/50"
             }`}
           >
             <span className="font-medium">Yes</span>
           </button>
           <button
+            type="button"
             onClick={() => setPriorities({ simplifyByLocation: false })}
-            className={`flex-1 p-3 rounded-xl border-2 transition-all ${
+            className={`flex-1 min-h-[44px] p-3 rounded-xl border-2 transition-all cursor-pointer touch-manipulation ${
               !p.simplifyByLocation ? "border-secondary bg-secondary/10" : "border-border hover:border-secondary/50"
             }`}
           >
@@ -170,8 +177,9 @@ export default function OnboardingPriorities() {
       </div>
 
       <button
+        type="button"
         onClick={handleContinue}
-        className="w-full py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2"
+        className="w-full min-h-[44px] py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2 cursor-pointer"
       >
         Continue <ArrowRight className="w-5 h-5" />
       </button>

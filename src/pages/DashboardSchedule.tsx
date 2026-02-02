@@ -55,6 +55,7 @@ import { fetchPrayerTimesForMonth } from "@/hooks/usePrayerTimes";
 import { getRecipes, getRecipe, parseNutrient, type MealType } from "@/lib/cultureRecipes";
 import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
 import { PageSEO } from "@/components/PageSEO";
+import { TodayScheduleTimeline } from "@/components/TodayScheduleTimeline";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -496,9 +497,9 @@ const DashboardSchedule = () => {
               animate={{ opacity: 1, y: 0 }}
               className="mb-6 p-4 rounded-2xl bg-primary/15 border-2 border-primary/40 flex items-center gap-3"
             >
-              <Star className="w-6 h-6 text-primary fill-primary shrink-0" aria-hidden />
+              <Star className="w-6 h-6 text-foreground fill-foreground shrink-0" aria-hidden />
               <div>
-                <p className="font-semibold text-primary">Today is a Sunnah fasting day</p>
+                <p className="font-semibold text-foreground">Today is a Sunnah fasting day</p>
                 <p className="text-sm text-muted-foreground mt-0.5">
                   {today.getDay() === 1 ? "Monday" : "Thursday"} — voluntary fasting is recommended in Islamic tradition. • يوم صيام سنة
                 </p>
@@ -793,8 +794,8 @@ const DashboardSchedule = () => {
                 </div>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
-                <p className="font-medium">Days you marked as fast completed</p>
-                <p className="text-xs mt-1">Fasting days you’ve marked complete in this month. Tap a day in the calendar and use “Mark day complete” to update.</p>
+                <p className="font-medium">Days you logged as fasted (dawn to sunset)</p>
+                <p className="text-xs mt-1">Fasting days you’ve marked complete in this month. Tap a day in the calendar and use “I fasted this day — mark complete” to log it.</p>
               </TooltipContent>
             </Tooltip>
             <Tooltip>
@@ -903,7 +904,7 @@ const DashboardSchedule = () => {
                         `}
                       >
                         {isToday && isSunnah && !isRamadan && (
-                          <span className="absolute top-0 left-0 right-0 text-[9px] font-semibold text-primary truncate px-0.5">Today</span>
+                          <span className="absolute top-0 left-0 right-0 text-[9px] font-semibold text-foreground truncate px-0.5">Today</span>
                         )}
                         <span className="font-medium">{i + 1}</span>
                         {ramadanDay != null && (
@@ -918,7 +919,7 @@ const DashboardSchedule = () => {
                           <Check className="w-3 h-3 absolute top-0.5 right-0.5" />
                         )}
                         {isSunnah && !isRamadan && (
-                          <Star className="w-2.5 h-2.5 absolute top-0.5 right-0.5 text-primary fill-primary" aria-hidden />
+                          <Star className="w-2.5 h-2.5 absolute top-0.5 right-0.5 text-foreground fill-foreground" aria-hidden />
                         )}
                         {isSpecialNight && (
                           <Sparkles className="w-2.5 h-2.5 absolute bottom-0.5 text-amber-600" />
@@ -927,7 +928,7 @@ const DashboardSchedule = () => {
                           <PenLine className="w-2.5 h-2.5 absolute top-0.5 left-0.5 text-muted-foreground" />
                         )}
                         {hasJournal && (
-                          <span className="absolute bottom-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-primary" title="Journal entry" />
+                          <span className="absolute bottom-0.5 right-0.5 w-1.5 h-1.5 rounded-full bg-foreground" title="Journal entry" />
                         )}
                         {(hasMeals || hasNutrition) && (
                           <span className="absolute bottom-0.5 left-0.5 text-[10px] opacity-70">
@@ -994,7 +995,18 @@ const DashboardSchedule = () => {
                       </button>
                     </div>
 
-                    {/* Mark complete (Ramadan/Sunnah only) */}
+                    {/* Today's schedule timeline for selected day */}
+                    {selectedDayPrayerTimes && (
+                      <div className="mb-4">
+                        <TodayScheduleTimeline
+                          prayerTimes={selectedDayPrayerTimes}
+                          iftarLabelShort={iftarLabelShort}
+                          includeTaraweeh
+                        />
+                      </div>
+                    )}
+
+                    {/* Mark complete = log that you fasted this day (dawn to sunset) */}
                     {(selectedIsRamadan || selectedIsSunnah) && (
                       <div className="flex items-center gap-2">
                         <Button
@@ -1004,7 +1016,7 @@ const DashboardSchedule = () => {
                           className="gap-2"
                         >
                           <Check className="w-4 h-4" />
-                          {selectedCompleted ? "Marked complete" : "Mark day complete"}
+                          {selectedCompleted ? "Yes, logged ✓" : "I fasted this day — mark complete"}
                         </Button>
                       </div>
                     )}
@@ -1540,7 +1552,7 @@ const DashboardSchedule = () => {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex items-center gap-2 cursor-help">
-                    <div className="w-4 h-4 rounded bg-primary/10" />
+                    <div className="w-4 h-4 rounded bg-primary/20 border border-primary/30" title="Sunnah day" />
                     <span>Sunnah (Mon/Thu)</span>
                   </div>
                 </TooltipTrigger>

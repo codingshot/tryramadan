@@ -102,10 +102,9 @@ export const OnboardingModal = ({ isOpen, onClose, onComplete }: OnboardingModal
     { id: "returning", label: "Returning to practice", labelAr: "عائد للممارسة", icon: "🕌" },
   ];
 
+  /** Only Ramadan-based option; other fasting goals hidden for now. */
   const fastingGoals = [
     { id: "full", label: "Full Ramadan fast", labelAr: "صيام رمضان كامل", desc: "Dawn to sunset" },
-    { id: "progressive", label: "Start gradual", labelAr: "البدء تدريجياً", desc: "Build up slowly" },
-    { id: "learn", label: "Learn first", labelAr: "التعلم أولاً", desc: "Focus on education" },
   ];
 
   if (!isOpen) return null;

@@ -105,9 +105,9 @@ export default function Legal() {
 
             <p className="mt-10 text-sm text-muted-foreground">
               For full terms, see our{" "}
-              <Link to="/terms" className="text-primary hover:underline">Terms of Use</Link>. For
+              <Link to="/terms" className="text-primary-contrast hover:underline">Terms of Use</Link>. For
               how we handle data, see our{" "}
-              <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>.
+              <Link to="/privacy" className="text-primary-contrast hover:underline">Privacy Policy</Link>.
             </p>
           </motion.article>
         </div>

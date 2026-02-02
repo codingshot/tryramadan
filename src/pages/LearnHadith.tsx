@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowLeft, BookOpen, ExternalLink, Filter } from "lucide-react";
@@ -7,11 +7,16 @@ import { Footer } from "@/components/Footer";
 import { ArabicHover } from "@/components/ArabicHover";
 import { HadithSunnahLink } from "@/components/HadithSunnahLink";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { markHadithViewedToday } from "@/hooks/useLocalStorage";
 import hadithsData from "@/data/hadiths.json";
 import { PageSEO } from "@/components/PageSEO";
 
 const LearnHadith = () => {
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+
+  useEffect(() => {
+    markHadithViewedToday();
+  }, []);
   
   const topics = [...new Set(hadithsData.hadiths.map(h => h.topic))];
   

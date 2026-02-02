@@ -117,7 +117,7 @@ export default function Terms() {
               <h2 className="text-xl font-display font-bold mt-8 mb-4">9. Contact</h2>
               <p>
                 For questions about these Terms, please contact us via{" "}
-                <a href="https://ummah.build" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                <a href="https://ummah.build" target="_blank" rel="noopener noreferrer" className="text-primary-contrast hover:underline">
                   ummah.build
                 </a>{" "}
                 or the contact information provided on the App.
@@ -127,8 +127,8 @@ export default function Terms() {
             <p className="mt-10 text-sm text-muted-foreground">
               By using TryRamadan.app, you acknowledge that you have read, understood, and agree
               to these Terms of Use. See also our{" "}
-              <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link> and{" "}
-              <Link to="/legal" className="text-primary hover:underline">Legal</Link> page.
+              <Link to="/privacy" className="text-primary-contrast hover:underline">Privacy Policy</Link> and{" "}
+              <Link to="/legal" className="text-primary-contrast hover:underline">Legal</Link> page.
             </p>
           </motion.article>
         </div>

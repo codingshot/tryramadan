@@ -554,7 +554,7 @@ const DashboardMeals = () => {
                             e.stopPropagation();
                             addRecipeToFoodLog(recipe, activeTab);
                           }}
-                          className="p-2 rounded-full transition-colors bg-muted hover:bg-primary/20 text-primary"
+                          className="p-2 rounded-full transition-colors bg-muted hover:bg-primary/20 text-foreground"
                           aria-label={`Add ${recipe.name} to food log and macro tracker`}
                         >
                           <Flame className="w-4 h-4" />

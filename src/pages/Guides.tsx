@@ -90,7 +90,7 @@ const Guides = () => {
                 className="mb-14"
               >
                 <h2 className="text-xl font-display font-bold mb-6 flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-primary" />
+                  <BookOpen className="w-5 h-5 text-secondary" />
                   {CATEGORY_LABELS[category]}
                 </h2>
                 <ul className="space-y-4">
@@ -102,14 +102,14 @@ const Guides = () => {
                       >
                         <div className="flex items-start justify-between gap-4">
                           <div>
-                            <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
+                            <h3 className="font-semibold text-foreground group-hover:text-secondary transition-colors">
                               {guide.title}
                             </h3>
                             <p className="text-sm text-muted-foreground mt-1">
                               {guide.shortDescription}
                             </p>
                           </div>
-                          <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary shrink-0 mt-0.5" />
+                          <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-secondary shrink-0 mt-0.5" />
                         </div>
                       </Link>
                     </li>

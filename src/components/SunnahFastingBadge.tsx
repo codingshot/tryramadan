@@ -34,10 +34,10 @@ export const SunnahFastingBadge = ({ hijriDay }: SunnahFastingBadgeProps) => {
 
       {isAyyamAlBeed && (
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 border border-primary/30">
-          <Moon className="w-4 h-4 text-primary" />
+          <Moon className="w-4 h-4 text-foreground" aria-hidden />
           <div className="text-sm">
-            <span className="font-semibold text-primary">Ayyam al-Beed</span>
-            <span className="font-arabic text-primary/80 ml-2">أيام البيض</span>
+            <span className="font-semibold text-foreground">Ayyam al-Beed</span>
+            <span className="font-arabic text-muted-foreground ml-2">أيام البيض</span>
             <span className="text-muted-foreground ml-2">(Day {hijriDay} of lunar month)</span>
           </div>
         </div>

@@ -166,7 +166,7 @@ const GuidePage = () => {
         <Navbar />
         <main className="main-content container mx-auto px-4 max-w-2xl">
           <h1 className="text-2xl font-display font-bold mb-4">Guide not found</h1>
-          <Link to="/guides" className="text-primary hover:underline">
+          <Link to="/guides" className="text-primary-contrast hover:underline">
             Back to all guides
           </Link>
         </main>
@@ -290,7 +290,7 @@ const GuidePage = () => {
                     <li key={g.slug}>
                       <Link
                         to={`/guides/${g.slug}`}
-                        className="text-primary hover:underline font-medium"
+                        className="text-primary-contrast hover:underline font-medium"
                       >
                         {g.title}
                       </Link>

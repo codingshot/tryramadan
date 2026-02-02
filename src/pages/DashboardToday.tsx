@@ -87,6 +87,9 @@ const DashboardToday = () => {
   const todayStr = new Date().toISOString().split("T")[0];
   const todayCompleted = progress.completedDays.includes(todayStr);
   const todayBrokenEntry = progress.fastingLog?.find((e) => e.date === todayStr && e.status === "broken");
+  const todayLog = getTodayFastingLog(progress);
+  /** Only show "I broke my fast" when user has started fasting today and has not yet broken or marked complete */
+  const fastingToday = !!todayLog && todayLog.status !== "broken" && !todayCompleted;
 
   // Is currently in fasting window? (after Fajr, before Maghrib) — for timer target
   const isFastingWindow =
@@ -203,7 +206,7 @@ const DashboardToday = () => {
                 )}
               </div>
             ) : (
-              <div className="flex flex-col sm:flex-row gap-2">
+              <div className={`flex flex-col sm:flex-row gap-2 ${fastingToday ? "" : "max-w-md"}`}>
                 <button
                   onClick={() => completeFastingToday(progress, setProgress)}
                   className="flex-1 py-3 px-4 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
@@ -211,14 +214,16 @@ const DashboardToday = () => {
                   <Moon className="w-5 h-5" />
                   I fasted today — mark complete
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setShowBreakFastDialog(true)}
-                  className="flex-1 py-3 px-4 rounded-xl border border-destructive/40 bg-destructive/10 text-destructive font-medium hover:bg-destructive/20 transition-colors flex items-center justify-center gap-2"
-                >
-                  <AlertTriangle className="w-5 h-5" />
-                  I broke my fast
-                </button>
+                {fastingToday && (
+                  <button
+                    type="button"
+                    onClick={() => setShowBreakFastDialog(true)}
+                    className="flex-1 py-3 px-4 rounded-xl border border-destructive/40 bg-destructive/10 text-destructive font-medium hover:bg-destructive/20 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <AlertTriangle className="w-5 h-5" />
+                    I broke my fast
+                  </button>
+                )}
               </div>
             )}
             <BreakFastReasonDialog

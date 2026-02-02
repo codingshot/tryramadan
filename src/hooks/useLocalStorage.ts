@@ -754,3 +754,95 @@ export function getDayTotalsFromFoodLog(dayLog: DayFoodLog | undefined): DayNutr
 export function getFastingLogForDate(progress: FastingProgress, dateStr: string): FastingLogEntry | undefined {
   return progress.fastingLog?.find((e) => e.date === dateStr);
 }
+
+// --- Daily missions (today's actionable tasks) ---
+
+export const SCHEDULE_NOTES_KEY = 'tryramadan-schedule-notes';
+export const HADITH_VIEWED_DATES_KEY = 'tryramadan-hadith-viewed-dates';
+const HADITH_VIEWED_MAX_DAYS = 60;
+
+export interface DailyMission {
+  id: string;
+  label: string;
+  completed: boolean;
+  path?: string;
+}
+
+/** Mark that the user viewed hadith/learn content today (for "Read one hadith" mission). */
+export function markHadithViewedToday(): void {
+  try {
+    const raw = window.localStorage.getItem(HADITH_VIEWED_DATES_KEY);
+    const dates: string[] = raw ? JSON.parse(raw) : [];
+    const today = new Date().toISOString().split('T')[0];
+    if (dates.includes(today)) return;
+    const next = [...dates, today].slice(-HADITH_VIEWED_MAX_DAYS);
+    window.localStorage.setItem(HADITH_VIEWED_DATES_KEY, JSON.stringify(next));
+  } catch {
+    // ignore
+  }
+}
+
+export function useHadithViewedDates(): [string[], () => void] {
+  const [dates, setDates] = useLocalStorage<string[]>(HADITH_VIEWED_DATES_KEY, []);
+  const markToday = useCallback(() => {
+    const today = new Date().toISOString().split('T')[0];
+    if (dates.includes(today)) return;
+    setDates((prev) => [...prev, today].slice(-HADITH_VIEWED_MAX_DAYS));
+  }, [dates, setDates]);
+  return [dates, markToday];
+}
+
+/** Build today's daily missions and completion from progress, meal plans, food log, schedule notes, hadith viewed. */
+export function getDailyMissions(params: {
+  todayStr: string;
+  progress: FastingProgress;
+  mealPlans: Record<string, { suhoor?: string; iftar?: string }>;
+  foodLog: Record<string, DayFoodLog>;
+  scheduleNotes: Record<string, string>;
+  hadithViewedDates: string[];
+  iftarLabelShort?: string;
+}): DailyMission[] {
+  const { todayStr, progress, mealPlans, foodLog, scheduleNotes, hadithViewedDates, iftarLabelShort = 'iftar' } = params;
+  const todayLog = progress.fastingLog?.find((e) => e.date === todayStr);
+  const fastingToday = !!todayLog && todayLog.status !== 'broken' && !progress.completedDays.includes(todayStr);
+  const todayComplete = progress.completedDays.includes(todayStr);
+  const fastCompleteOrBroken = todayComplete || (todayLog?.status === 'broken');
+  const dayMeals = mealPlans[todayStr];
+  const dayLog = normalizeDayFoodLog(foodLog[todayStr]);
+  const hasSuhoor = !!(dayMeals?.suhoor?.trim()) || (dayLog.suhoor?.length ?? 0) > 0;
+  const hasIftar = !!(dayMeals?.iftar?.trim()) || (dayLog.iftar?.length ?? 0) > 0;
+  const hasNote = !!(scheduleNotes[todayStr]?.trim());
+  const readHadith = hadithViewedDates.includes(todayStr);
+
+  return [
+    { id: 'start_fasting', label: "Start fasting (tap I'm fasting)", completed: fastingToday || todayComplete, path: undefined },
+    { id: 'complete_fast', label: `Complete or break your fast at ${iftarLabelShort}`, completed: fastCompleteOrBroken, path: undefined },
+    { id: 'log_suhoor', label: 'Log Suhoor (meal plan or food log)', completed: hasSuhoor, path: '/dashboard/schedule' },
+    { id: 'log_iftar', label: `Log ${iftarLabelShort} (meal plan or food log)`, completed: hasIftar, path: '/dashboard/schedule' },
+    { id: 'add_note', label: 'Add a note for today', completed: hasNote, path: '/dashboard/schedule' },
+    { id: 'read_hadith', label: 'Read one hadith', completed: readHadith, path: '/learn/hadith' },
+  ];
+}
+
+/** Hook: today's daily missions and completion count. Uses progress, meal plans, food log, schedule notes, hadith viewed. */
+export function useDailyMissions(): { missions: DailyMission[]; completedCount: number; totalCount: number } {
+  const [progress] = useFastingProgress();
+  const [mealPlans] = useDayMealPlans();
+  const [foodLogs] = useDayFoodLog();
+  const [scheduleNotes] = useLocalStorage<Record<string, string>>(SCHEDULE_NOTES_KEY, {});
+  const [hadithViewedDates] = useHadithViewedDates();
+  const iftarLabelShort = useIftarLabelShort();
+  const todayStr = new Date().toISOString().split('T')[0];
+  const missions = getDailyMissions({
+    todayStr,
+    progress,
+    mealPlans,
+    foodLog: foodLogs,
+    scheduleNotes,
+    hadithViewedDates,
+    iftarLabelShort,
+  });
+  const completedCount = missions.filter((m) => m.completed).length;
+  const totalCount = missions.length;
+  return { missions, completedCount, totalCount };
+}

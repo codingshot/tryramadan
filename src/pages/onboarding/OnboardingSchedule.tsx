@@ -3,11 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Clock, Check } from "lucide-react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 
+/** Only Ramadan-based option; other fasting plans hidden for now. */
 const PROGRAMS = [
   { id: "traditional", name: "Full Ramadan", desc: "Dawn to sunset (Fajr to Maghrib)", hours: "Full" },
-  { id: "beginner", name: "12-hour", desc: "Gentle start, similar to overnight fasting", hours: "12h" },
-  { id: "intermediate", name: "16-hour", desc: "Popular 16:8 style", hours: "16h" },
-  { id: "advanced", name: "18-hour", desc: "Longer window, build up gradually", hours: "18h" },
 ];
 
 export default function OnboardingSchedule() {
@@ -28,15 +26,16 @@ export default function OnboardingSchedule() {
       </Link>
       <h2 className="font-display text-2xl font-bold mb-2">Fasting schedule</h2>
       <p className="text-muted-foreground mb-6">
-        Choose your progression plan. You can change this later in Settings.
+        Full Ramadan fast (dawn to sunset). Voluntary Sunnah fasting is available in the app.
       </p>
 
       <div className="space-y-3 mb-6">
         {PROGRAMS.map((prog) => (
           <button
             key={prog.id}
+            type="button"
             onClick={() => setSelectedProgram(prog.id)}
-            className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3 ${
+            className={`w-full min-h-[44px] p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3 cursor-pointer touch-manipulation ${
               state.selectedProgram === prog.id ? "border-secondary bg-secondary/5" : "border-border hover:border-secondary/50"
             }`}
           >
@@ -51,8 +50,9 @@ export default function OnboardingSchedule() {
       </div>
 
       <button
+        type="button"
         onClick={handleContinue}
-        className="w-full py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2"
+        className="w-full min-h-[44px] py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2 cursor-pointer"
       >
         Continue <ArrowRight className="w-5 h-5" />
       </button>

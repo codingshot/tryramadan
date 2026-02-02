@@ -138,7 +138,7 @@ export default function Privacy() {
               <h2 className="text-xl font-display font-bold mt-8 mb-4">10. Contact</h2>
               <p>
                 For privacy-related questions or requests, contact us via{" "}
-                <a href="https://ummah.build" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                <a href="https://ummah.build" target="_blank" rel="noopener noreferrer" className="text-primary-contrast hover:underline">
                   ummah.build
                 </a>{" "}
                 or the contact information provided on the App.
@@ -147,8 +147,8 @@ export default function Privacy() {
 
             <p className="mt-10 text-sm text-muted-foreground">
               See also our{" "}
-              <Link to="/terms" className="text-primary hover:underline">Terms of Use</Link> and{" "}
-              <Link to="/legal" className="text-primary hover:underline">Legal</Link> page.
+              <Link to="/terms" className="text-primary-contrast hover:underline">Terms of Use</Link> and{" "}
+              <Link to="/legal" className="text-primary-contrast hover:underline">Legal</Link> page.
             </p>
           </motion.article>
         </div>

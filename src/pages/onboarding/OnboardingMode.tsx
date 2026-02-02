@@ -25,8 +25,9 @@ export default function OnboardingMode() {
 
       <div className="space-y-4">
         <button
+          type="button"
           onClick={() => handleSelect("new")}
-          className={`w-full p-6 rounded-2xl border-2 transition-all text-left hover:border-secondary ${
+          className={`w-full min-h-[44px] p-6 rounded-2xl border-2 transition-all text-left hover:border-secondary cursor-pointer touch-manipulation ${
             state.mode === "new" ? "border-secondary bg-secondary/5" : "border-border"
           }`}
         >
@@ -44,8 +45,9 @@ export default function OnboardingMode() {
         </button>
 
         <button
+          type="button"
           onClick={() => handleSelect("muslim")}
-          className={`w-full p-6 rounded-2xl border-2 transition-all text-left hover:border-secondary ${
+          className={`w-full min-h-[44px] p-6 rounded-2xl border-2 transition-all text-left hover:border-secondary cursor-pointer touch-manipulation ${
             state.mode === "muslim" ? "border-secondary bg-secondary/5" : "border-border"
           }`}
         >

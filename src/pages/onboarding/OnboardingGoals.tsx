@@ -61,8 +61,9 @@ export default function OnboardingGoals() {
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
       <button
+        type="button"
         onClick={() => navigate("/onboarding/priorities")}
-        className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6"
+        className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6 min-h-[44px] cursor-pointer"
       >
         <ArrowLeft className="w-4 h-4" /> Back
       </button>
@@ -75,8 +76,9 @@ export default function OnboardingGoals() {
         {GOAL_OPTIONS.map((g) => (
           <button
             key={g}
+            type="button"
             onClick={() => toggleGoal(g)}
-            className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3 ${
+            className={`w-full min-h-[44px] p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3 cursor-pointer touch-manipulation ${
               selectedGoals.includes(g) ? "border-secondary bg-secondary/5" : "border-border hover:border-secondary/50"
             }`}
           >
@@ -95,8 +97,9 @@ export default function OnboardingGoals() {
       />
 
       <button
+        type="button"
         onClick={handleComplete}
-        className="w-full mt-6 py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2"
+        className="w-full mt-6 min-h-[44px] py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2 cursor-pointer"
       >
         Finish setup and go to dashboard <Check className="w-5 h-5" />
       </button>

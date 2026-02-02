@@ -13,6 +13,8 @@ import { ProgressRing } from "@/components/ProgressRing";
 import dailyFactsData from "@/data/daily-facts.json";
 import { SunnahFastingBadge } from "@/components/SunnahFastingBadge";
 import { DailyHadith } from "@/components/DailyHadith";
+import { DailyMissionsCard } from "@/components/DailyMissionsCard";
+import { TodayScheduleTimeline } from "@/components/TodayScheduleTimeline";
 import { LocationDisplay } from "@/components/LocationDisplay";
 import { PrayerLocationBadge } from "@/components/PrayerLocationBadge";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
@@ -295,7 +297,7 @@ const Dashboard = () => {
                   <button
                     type="button"
                     onClick={goToToday}
-                    className="px-3 py-1.5 rounded-lg bg-primary/20 text-primary text-sm font-medium hover:bg-primary/30"
+                    className="px-3 py-1.5 rounded-lg bg-primary/20 text-foreground text-sm font-medium hover:bg-primary/30"
                   >
                     Go to today's date
                   </button>
@@ -315,7 +317,7 @@ const Dashboard = () => {
           >
             <div className="flex items-center gap-3">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isFasting ? "bg-primary/20" : "bg-muted"}`}>
-                {isFasting ? <Moon className="w-5 h-5 text-primary" /> : <Sun className="w-5 h-5 text-muted-foreground" />}
+                {isFasting ? <Moon className="w-5 h-5 text-foreground" aria-hidden /> : <Sun className="w-5 h-5 text-muted-foreground" aria-hidden />}
               </div>
               <div>
                 <span className="font-semibold block">{isFasting ? "Currently fasting" : "Not fasting"}</span>
@@ -351,17 +353,17 @@ const Dashboard = () => {
             )}
           </motion.div>
 
-          {/* Today's Schedule Overview */}
+          {/* Today's Schedule: overview strip + full timeline */}
           {prayerTimes && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.09 }}
-              className="mb-4"
+              className="mb-4 grid grid-cols-1 lg:grid-cols-3 gap-4"
             >
               <Link
                 to="/dashboard/schedule"
-                className="block p-3 sm:p-4 rounded-2xl bg-card border border-border grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 hover:border-secondary/50 transition-colors min-h-[72px] sm:min-h-0"
+                className="block p-3 sm:p-4 rounded-2xl bg-card border border-border grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 hover:border-secondary/50 transition-colors min-h-[72px] sm:min-h-0 lg:col-span-2"
               >
                 {/* Mobile: 2 cells — Suhoor end (Fajr) and Iftar (Maghrib). Desktop: 4 cells. */}
                 <Tooltip>
@@ -417,6 +419,12 @@ const Dashboard = () => {
                   </TooltipContent>
                 </Tooltip>
               </Link>
+              <TodayScheduleTimeline
+                prayerTimes={prayerTimes}
+                iftarLabelShort={iftarLabelShort}
+                includeTaraweeh
+                className="lg:col-span-1"
+              />
             </motion.div>
           )}
 
@@ -427,7 +435,7 @@ const Dashboard = () => {
             transition={{ delay: 0.1 }}
             className="mb-8"
           >
-            {/* Quick actions: I'm fasting (at suhoor) / Break my fast (at iftar) — above the Currently Fasting timeline */}
+            {/* Quick actions: I'm fasting (at suhoor) — Break my fast only when currently fasting */}
             {(() => {
               const now = new Date();
               const imsakToday = prayerTimes?.imsak
@@ -439,13 +447,13 @@ const Dashboard = () => {
               const isSuhoorWindow = imsakToday ? now < imsakToday : false;
               const isIftarWindow = maghribToday ? now >= maghribToday : false;
               return (
-                <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                <div className={`mb-4 grid grid-cols-1 gap-2 sm:gap-3 ${fastingToday ? 'sm:grid-cols-2' : ''}`}>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button
                         onClick={() => !fastingToday && !todayComplete && startFastingToday(progress, setProgress)}
                         disabled={fastingToday || todayComplete}
-                        className={`w-full py-3 px-3 sm:px-4 rounded-xl border-2 transition-all flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 min-h-[52px] ${
+                        className={`w-full py-3 px-3 sm:px-4 rounded-xl border-2 transition-all flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 min-h-[52px] ${!fastingToday ? 'sm:max-w-full' : ''} ${
                           fastingToday || todayComplete
                             ? 'border-border bg-muted/50 text-muted-foreground cursor-not-allowed'
                             : isSuhoorWindow
@@ -464,31 +472,30 @@ const Dashboard = () => {
                       <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{(EATING_TIME_TOOLTIPS.suhoorEnds as { bodyAr?: string }).bodyAr}</p>
                     </TooltipContent>
                   </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        onClick={() => fastingToday && setShowBreakFastDialog(true)}
-                        disabled={!fastingToday}
-                        className={`w-full py-3 px-3 sm:px-4 rounded-xl border-2 transition-all flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 min-h-[52px] ${
-                          !fastingToday
-                            ? 'border-border bg-muted/50 text-muted-foreground cursor-not-allowed'
-                            : isIftarWindow
+                  {fastingToday && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          onClick={() => setShowBreakFastDialog(true)}
+                          className={`w-full py-3 px-3 sm:px-4 rounded-xl border-2 transition-all flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-2 min-h-[52px] ${
+                            isIftarWindow
                               ? 'border-destructive/60 bg-destructive/20 text-destructive hover:bg-destructive/30'
                               : 'border-destructive/40 bg-destructive/10 text-destructive hover:bg-destructive/20'
-                        }`}
-                      >
-                        <Sunset className="w-5 h-5 shrink-0" aria-hidden />
-                        <span className="text-sm font-medium text-center">Break my fast</span>
-                        <span className="text-xs opacity-80 hidden sm:inline">At {iftarLabelShort}</span>
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="max-w-xs p-3">
-                      <p className="font-semibold text-sm">Break my fast (at {iftarLabelShort}) • أفطر عند المغرب</p>
-                      <p className="text-xs text-muted-foreground mt-1">Tap when you're breaking your fast at Maghrib (or early). Choose a reason to log. {EATING_TIME_TOOLTIPS.iftar.body}</p>
-                      <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{(EATING_TIME_TOOLTIPS.iftar as { bodyAr?: string }).bodyAr}</p>
-                    </TooltipContent>
-                  </Tooltip>
+                          }`}
+                        >
+                          <Sunset className="w-5 h-5 shrink-0" aria-hidden />
+                          <span className="text-sm font-medium text-center">Break my fast</span>
+                          <span className="text-xs opacity-80 hidden sm:inline">At {iftarLabelShort}</span>
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-xs p-3">
+                        <p className="font-semibold text-sm">Break my fast (at {iftarLabelShort}) • أفطر عند المغرب</p>
+                        <p className="text-xs text-muted-foreground mt-1">Tap when you're breaking your fast at Maghrib (or early). Choose a reason to log. {EATING_TIME_TOOLTIPS.iftar.body}</p>
+                        <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{(EATING_TIME_TOOLTIPS.iftar as { bodyAr?: string }).bodyAr}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
                 </div>
               );
             })()}
@@ -510,6 +517,9 @@ const Dashboard = () => {
               iftarTime={prayerTimes?.maghrib}
               isFasting={isFasting}
             />
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <DailyMissionsCard />
+            </div>
           </motion.div>
           
           {/* Quick Actions Grid */}
@@ -519,7 +529,7 @@ const Dashboard = () => {
             transition={{ delay: 0.2 }}
             className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8"
           >
-            {/* Mark Complete */}
+            {/* Mark Complete = log that you completed today's dawn-to-sunset fast */}
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
@@ -536,8 +546,11 @@ const Dashboard = () => {
                     }`}>
                       <Check className="w-5 h-5" />
                     </div>
-                    <span className="text-sm font-medium">
-                      {todayComplete ? 'Completed!' : 'Mark today\'s fast complete'}
+                    <span className="text-sm font-medium text-center">
+                      {todayComplete ? "Today's fast logged ✓" : "I fasted today — mark complete"}
+                    </span>
+                    <span className="text-xs text-muted-foreground text-center">
+                      {todayComplete ? "You logged this day" : "Log that you completed dawn to sunset"}
                     </span>
                     <span className="text-xs text-muted-foreground font-arabic">
                       {todayComplete ? 'مكتمل' : 'تم الصيام'}
@@ -549,14 +562,15 @@ const Dashboard = () => {
                 {todayComplete 
                   ? (
                     <>
-                      <p className="font-semibold text-sm">Today's fast is marked complete! • مكتمل</p>
+                      <p className="font-semibold text-sm">Today's fast is logged • مكتمل</p>
+                      <p className="text-xs text-muted-foreground mt-1">Tap to undo (unmark this day).</p>
                       <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">انقر للتراجع</p>
                     </>
                   )
                   : (
                     <>
-                      <p className="font-semibold text-sm">Mark today's fast complete • تم الصيام</p>
-                      <p className="text-xs text-muted-foreground mt-1">Do this after you break your fast at {iftarLabel} (Maghrib). {EATING_TIME_TOOLTIPS.iftar.body}</p>
+                      <p className="font-semibold text-sm">Log that you completed today's fast • تم الصيام</p>
+                      <p className="text-xs text-muted-foreground mt-1">Tap after you break your fast at {iftarLabel} (Maghrib). This records that you fasted from dawn to sunset today.</p>
                       <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">سجّل إكمال صيام اليوم بعد الإفطار</p>
                     </>
                   )}
@@ -607,7 +621,7 @@ const Dashboard = () => {
                 <div className="p-3 sm:p-4 rounded-2xl bg-card border border-border min-h-[100px] sm:min-h-0 flex flex-col items-center justify-center">
                   <div className="flex flex-col items-center gap-2">
                     <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                      <Moon className="w-5 h-5 text-primary" />
+                      <Moon className="w-5 h-5 text-foreground" aria-hidden />
                     </div>
                     <span className="text-xl sm:text-2xl font-bold">{progress.sunnahDaysCompleted}</span>
                     <span className="text-xs text-muted-foreground">Sunnah Days • أيام السنة</span>
@@ -827,26 +841,32 @@ const Dashboard = () => {
                 )}
               </div>
 
-              {/* Mark day complete */}
-              <div className="flex items-center justify-between pt-3 border-t border-border">
+              {/* Mark day complete = log that you fasted this day (dawn to sunset) */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-3 border-t border-border">
                 <span className="text-sm text-muted-foreground">
-                  {selectedDayComplete ? "Marked as fast completed" : "Mark this day as fast completed"}
+                  {selectedDayComplete ? "Logged: you fasted this day (dawn to sunset)" : "Did you fast this day from dawn to sunset?"}
                 </span>
                 <button
                   type="button"
                   onClick={() => setDayCompleted(progress, setProgress, selectedDate, !selectedDayComplete)}
-                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors shrink-0 ${
                     selectedDayComplete ? "bg-secondary/20 text-secondary border border-secondary/40" : "bg-muted hover:bg-muted/80"
                   }`}
                 >
-                  {selectedDayComplete ? "Completed ✓" : "Mark this day complete"}
+                  {selectedDayComplete ? "Yes, logged ✓" : "Yes, mark complete"}
                 </button>
               </div>
             </motion.div>
 
-            {/* Progress Ring — Ramadan completion */}
+            {/* Progress Ring — days completed (ring fill = % of 30) */}
             <div className="p-4 rounded-2xl bg-card border border-border flex flex-col items-center">
-              <ProgressRing value={ramadanCompletionPct} size={80} strokeWidth={8} sublabel="of Ramadan" />
+              <ProgressRing
+                value={ramadanCompletionPct}
+                size={80}
+                strokeWidth={8}
+                centerLabel={progress.completedDays.length}
+                sublabel={`of ${totalDays} days`}
+              />
             </div>
           </motion.div>
 
@@ -1104,7 +1124,7 @@ const Dashboard = () => {
                           ? 'bg-secondary/20 text-secondary'
                           : entry.status === 'broken'
                             ? 'bg-destructive/20 text-destructive'
-                            : 'bg-primary/20 text-primary'
+                            : 'bg-primary/20 text-foreground'
                       }`}
                     >
                       {entry.status === 'completed' ? 'Done' : entry.status === 'broken' ? (entry.brokenReason ? `Broken (${getBrokenReasonLabel(entry.brokenReason)})` : 'Broken') : 'In progress'}

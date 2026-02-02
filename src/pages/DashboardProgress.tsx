@@ -276,7 +276,7 @@ const DashboardProgress = () => {
                           ? 'bg-secondary/20 text-secondary'
                           : entry.status === 'broken'
                             ? 'bg-destructive/20 text-destructive'
-                            : 'bg-primary/20 text-primary'
+                            : 'bg-primary/20 text-foreground'
                       }`}
                     >
                       {entry.status === 'completed' ? 'Done' : entry.status === 'broken' ? (entry.brokenReason ? `Broken (${getBrokenReasonLabel(entry.brokenReason)})` : 'Broken') : 'In progress'}

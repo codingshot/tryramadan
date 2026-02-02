@@ -52,8 +52,9 @@ export default function OnboardingHealth() {
         {HEALTH_OPTIONS.map((opt) => (
           <button
             key={opt.id}
+            type="button"
             onClick={() => toggle(opt.id)}
-            className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
+            className={`w-full min-h-[44px] p-4 rounded-xl border-2 text-left transition-all cursor-pointer touch-manipulation ${
               selected.includes(opt.id)
                 ? "border-secondary bg-secondary/5"
                 : "border-border hover:border-secondary/50"
@@ -74,8 +75,9 @@ export default function OnboardingHealth() {
       )}
 
       <button
+        type="button"
         onClick={handleContinue}
-        className="w-full py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2"
+        className="w-full min-h-[44px] py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2 cursor-pointer"
       >
         Continue <ArrowRight className="w-5 h-5" />
       </button>

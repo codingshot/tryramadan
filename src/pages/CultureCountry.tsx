@@ -300,7 +300,7 @@ export default function CultureCountry() {
                             {mealType === "suhoor" ? (
                               <Coffee className="w-4 h-4 text-secondary" aria-hidden />
                             ) : (
-                              <Utensils className="w-4 h-4 text-primary" aria-hidden />
+                              <Utensils className="w-4 h-4 text-foreground" aria-hidden />
                             )}
                           </span>
                           <div>

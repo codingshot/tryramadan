@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Moon, Sun, Clock, Calendar, MapPin, Loader2, Sunrise, Sunset, Bell } from "lucide-react";
+import { Moon, Sun, Clock, Calendar, MapPin, Loader2, Sunrise, Sunset, Bell, Utensils } from "lucide-react";
 import { usePrayerTimes, getSunnahFastingInfo } from "@/hooks/usePrayerTimes";
 import { useUserPreferences, useNotificationSettings, usePrayerNotificationPrefs, useIftarLabel } from "@/hooks/useLocalStorage";
 import { useAutoLocation } from "@/hooks/useLocation";
@@ -25,6 +25,7 @@ export const FastingTimer = ({
   const [timeRemaining, setTimeRemaining] = useState({ hours: 0, minutes: 0, seconds: 0 });
   const [nextLabel, setNextLabel] = useState<"Suhoor end" | "Iftar">("Iftar");
   const [nextTimeStr, setNextTimeStr] = useState("");
+  const [isEatingPeriod, setIsEatingPeriod] = useState(false); // true = between iftar and suhoor end (can eat)
   const [daysUntilRamadan, setDaysUntilRamadan] = useState(0);
   const [isRamadan, setIsRamadan] = useState(false);
   const [notifSettings] = useNotificationSettings();
@@ -75,7 +76,7 @@ export const FastingTimer = ({
     return () => clearInterval(t);
   }, []);
 
-  // Countdown to *next* boundary: if past suhoor end show iftar; if past iftar show suhoor end (next day)
+  // Countdown and period: eating = from iftar until suhoor end (next day); fasting = suhoor end until iftar
   useEffect(() => {
     const interval = setInterval(() => {
       const now = new Date();
@@ -89,19 +90,27 @@ export const FastingTimer = ({
 
       let target: Date;
       let label: "Suhoor end" | "Iftar";
+      let eating: boolean;
       if (now < imsakToday) {
+        // After midnight, before dawn — still eating window (until suhoor end)
         target = imsakToday;
         label = "Suhoor end";
+        eating = true;
       } else if (now < maghribToday) {
+        // After dawn, before sunset — fasting
         target = maghribToday;
         label = "Iftar";
+        eating = false;
       } else {
+        // After sunset — eating window (until tomorrow's suhoor end)
         const imsakTomorrow = new Date(imsakToday);
         imsakTomorrow.setDate(imsakTomorrow.getDate() + 1);
         target = imsakTomorrow;
         label = "Suhoor end";
+        eating = true;
       }
 
+      setIsEatingPeriod(eating);
       setNextLabel(label);
       setNextTimeStr(target.getHours().toString().padStart(2, "0") + ":" + target.getMinutes().toString().padStart(2, "0"));
 
@@ -192,23 +201,30 @@ export const FastingTimer = ({
           </div>
         )}
 
-        {/* Status indicator (Currently Fasting / Eating Window) */}
-        <div className="flex items-center justify-center gap-2 mb-4">
-          {isFasting ? (
-            <>
-              <Sun className="w-5 h-5 text-secondary animate-pulse shrink-0" />
-              <span className="text-primary-foreground/80 font-medium">
-                Currently Fasting • صائم حالياً
-              </span>
-            </>
-          ) : (
-            <>
-              <Moon className="w-5 h-5 text-secondary shrink-0" />
-              <span className="text-primary-foreground/80 font-medium">
-                Eating Window • وقت الأكل
-              </span>
-            </>
-          )}
+        {/* Status: Eating period vs Fasting period (from prayer times — clear for everyone) */}
+        <div className="flex flex-col items-center gap-1 mb-4">
+          <div className="flex items-center justify-center gap-2 flex-wrap">
+            {isEatingPeriod ? (
+              <>
+                <Utensils className="w-5 h-5 text-secondary shrink-0" aria-hidden />
+                <span className="text-primary-foreground font-semibold">
+                  Eating period — You can eat now
+                  <span className="font-arabic text-primary-foreground/80 ml-1.5 text-sm">· وقت الأكل</span>
+                </span>
+              </>
+            ) : (
+              <>
+                <Moon className="w-5 h-5 text-secondary animate-pulse shrink-0" aria-hidden />
+                <span className="text-primary-foreground font-semibold">
+                  Fasting period — No eating or drinking
+                  <span className="font-arabic text-primary-foreground/80 ml-1.5 text-sm">· صائم</span>
+                </span>
+              </>
+            )}
+          </div>
+          <span className="text-sm text-primary-foreground/70">
+            {isEatingPeriod ? "Time left to eat until Suhoor end (cut-off)" : `Time until ${iftarLabel} (break fast)`}
+          </span>
         </div>
 
         {/* Main timer display */}
@@ -254,25 +270,45 @@ export const FastingTimer = ({
           </div>
         </div>
 
-        {/* Target time: next boundary (suhoor end or iftar) */}
+        {/* Target time: next boundary — explicit "time left to eat" vs "time until break fast" */}
         <div className="flex items-center justify-center gap-2 text-primary-foreground/70 flex-wrap">
           <Clock className="w-4 h-4 shrink-0" />
           <span className="text-sm">
-            Until{" "}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="text-secondary font-semibold cursor-help border-b border-dotted border-primary-foreground/30">
-                  {nextLabel === "Suhoor end" ? "Suhoor end • نهاية السحور" : `${iftarLabel} • إفطار`}
-                </span>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="max-w-xs bg-card border-border p-3">
-                <p className="font-semibold text-sm">{nextLabel === "Suhoor end" ? EATING_TIME_TOOLTIPS.suhoorEnds.title : EATING_TIME_TOOLTIPS.iftar.title}</p>
-                <p className="text-xs text-muted-foreground mt-1">{nextLabel === "Suhoor end" ? EATING_TIME_TOOLTIPS.suhoorEnds.body : EATING_TIME_TOOLTIPS.iftar.body}</p>
-                <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{nextLabel === "Suhoor end" ? EATING_TIME_TOOLTIPS.suhoorEnds.bodyAr : EATING_TIME_TOOLTIPS.iftar.bodyAr}</p>
-                <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{nextLabel === "Suhoor end" ? (EATING_TIME_TOOLTIPS.suhoorEnds as { bodyAr?: string }).bodyAr : (EATING_TIME_TOOLTIPS.iftar as { bodyAr?: string }).bodyAr}</p>
-              </TooltipContent>
-            </Tooltip>
-            {" "}at {nextTimeStr || (nextLabel === "Suhoor end" ? suhoorTime : iftarTime)}
+            {isEatingPeriod ? (
+              <>
+                Time left to eat until{" "}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="text-secondary font-semibold cursor-help border-b border-dotted border-primary-foreground/30">
+                      Suhoor end • نهاية السحور
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-xs bg-card border-border p-3">
+                    <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.suhoorEnds.title}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.suhoorEnds.body}</p>
+                    <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{EATING_TIME_TOOLTIPS.suhoorEnds.bodyAr}</p>
+                  </TooltipContent>
+                </Tooltip>
+                {" "}at {nextTimeStr || suhoorTime}
+              </>
+            ) : (
+              <>
+                Time until{" "}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="text-secondary font-semibold cursor-help border-b border-dotted border-primary-foreground/30">
+                      {iftarLabel} • إفطار
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-xs bg-card border-border p-3">
+                    <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.iftar.title}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.iftar.body}</p>
+                    <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{(EATING_TIME_TOOLTIPS.iftar as { bodyAr?: string }).bodyAr}</p>
+                  </TooltipContent>
+                </Tooltip>
+                {" "}(break fast) at {nextTimeStr || iftarTime}
+              </>
+            )}
           </span>
           {/* Alarm count: click → settings, hover → tooltip with alarm breakdown */}
           {(() => {

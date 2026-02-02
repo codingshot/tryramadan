@@ -9,7 +9,18 @@ const QUIZ = [
   { q: "When do Muslims break their daily fast?", options: ["At noon", "At sunset (Maghrib)", "At midnight"], correct: 1 },
   { q: "What is Suhoor?", options: ["Evening meal", "Pre-dawn meal", "Midday snack"], correct: 1 },
   { q: "How long does Ramadan last?", options: ["One week", "One lunar month", "One year"], correct: 1 },
-  { q: "What is one of the Five Pillars of Islam?", options: ["Fasting in Ramadan", "Pilgrimage only", "Charity only"], correct: 0 },
+  {
+    q: "Which one is NOT one of the Five Pillars of Islam?",
+    options: [
+      "Declaration of faith (Shahada)",
+      "Five daily prayers (Salat)",
+      "Charity to the needy (Zakat)",
+      "Fasting in Ramadan (Sawm)",
+      "Pilgrimage to Mecca (Hajj)",
+      "Jihad (striving or struggle)",
+    ],
+    correct: 5, // Jihad is not a pillar; the five pillars are Shahada, Salat, Zakat, Sawm, Hajj
+  },
 ];
 
 export default function OnboardingKnowledge() {
@@ -67,8 +78,9 @@ export default function OnboardingKnowledge() {
           {question.options.map((opt, i) => (
             <button
               key={i}
+              type="button"
               onClick={() => handleAnswer(i)}
-              className="w-full p-4 rounded-xl border-2 border-border hover:border-secondary text-left transition-all"
+              className="w-full min-h-[44px] p-4 rounded-xl border-2 border-border hover:border-secondary text-left transition-all cursor-pointer touch-manipulation"
             >
               {opt}
             </button>

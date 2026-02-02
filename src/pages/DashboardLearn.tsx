@@ -73,7 +73,7 @@ const DashboardLearn = () => {
       description: 'What breaks a fast and best practices',
       icon: BookOpen,
       link: '/faq',
-      color: 'bg-primary/20 text-primary',
+      color: 'bg-primary/20 text-foreground',
     },
     {
       title: 'Islamic Glossary',

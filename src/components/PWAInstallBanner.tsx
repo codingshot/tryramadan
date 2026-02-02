@@ -30,7 +30,7 @@ export function PWAInstallBanner() {
       >
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
-            <Smartphone className="w-6 h-6 text-primary" />
+            <Smartphone className="w-6 h-6 text-foreground" aria-hidden />
           </div>
           <div className="min-w-0">
             <p className="font-semibold text-foreground">Install TryRamadan</p>

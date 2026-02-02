@@ -50,9 +50,10 @@ export default function OnboardingNotifications() {
           </div>
         ) : (
           <button
+            type="button"
             onClick={handleEnable}
             disabled={loading}
-            className="w-full py-3 px-6 rounded-xl bg-secondary text-secondary-foreground font-medium hover:bg-secondary/90 mb-6 disabled:opacity-50"
+            className="w-full min-h-[44px] py-3 px-6 rounded-xl bg-secondary text-secondary-foreground font-medium hover:bg-secondary/90 mb-6 disabled:opacity-50 cursor-pointer touch-manipulation"
           >
             {loading ? "Requesting..." : "Enable reminders"}
           </button>
@@ -62,8 +63,9 @@ export default function OnboardingNotifications() {
       )}
 
       <button
+        type="button"
         onClick={handleContinue}
-        className="w-full py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2"
+        className="w-full min-h-[44px] py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2 cursor-pointer"
       >
         Continue <ArrowRight className="w-5 h-5" />
       </button>

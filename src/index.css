@@ -69,8 +69,11 @@
   }
 }
 
-/* Touch targets: minimum 44px for accessibility (WCAG) */
+/* Primary text: contrasts on both light and dark (no green-on-green in dark mode) */
 @layer utilities {
+  .text-primary-contrast {
+    color: hsl(var(--primary-text));
+  }
   .min-touch-target {
     min-height: 44px;
     min-width: 44px;
@@ -130,6 +133,8 @@
     --ring: 158 45% 22%;
     
     --radius: 0.75rem;
+    /* Primary text: same as primary in light (dark green); overridden in .dark for contrast */
+    --primary-text: 158 45% 22%;
     
     /* Extended palette */
     --gold: 42 85% 55%;
@@ -177,7 +182,7 @@
     --font-arabic: 'Amiri', serif;
   }
 
-  /* Dark mode: darker brand green theme */
+  /* Dark mode: darker brand green theme — avoid green-on-green text */
   .dark {
     --background: 158 40% 6%;
     --foreground: 45 25% 92%;
@@ -190,6 +195,8 @@
     
     --primary: 158 45% 28%;
     --primary-foreground: 45 30% 96%;
+    /* Lighter primary for text on dark green backgrounds (no green-on-green) */
+    --primary-text: 45 25% 92%;
     
     --secondary: 42 80% 52%;
     --secondary-foreground: 158 40% 8%;

@@ -7,8 +7,11 @@ interface FastingProgramsProps {
   selectedProgram?: string;
 }
 
+/** Only Ramadan-based program (Full Ramadan Fast); non-Ramadan options hidden for now. */
+const RAMADAN_PROGRAM_IDS = ["traditional"];
+
 export const FastingPrograms = ({ onSelectProgram, selectedProgram = "traditional" }: FastingProgramsProps) => {
-  const programs = fastingData.programs;
+  const programs = fastingData.programs.filter((p) => RAMADAN_PROGRAM_IDS.includes(p.id));
 
   return (
     <div className="space-y-6">

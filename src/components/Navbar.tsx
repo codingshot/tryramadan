@@ -69,7 +69,7 @@ export const Navbar = () => {
                 <img src={logo} alt="TryRamadan" className="w-9 h-9 md:w-11 md:h-11" />
                 <ArabicHover arabic="تجربة رمضان" className="border-0">
                   <span className="font-display font-bold text-base md:text-lg leading-tight text-foreground">
-                    Try<span className="text-primary">Ramadan</span>
+                    Try<span className="text-primary-contrast">Ramadan</span>
                   </span>
                 </ArabicHover>
               </Link>

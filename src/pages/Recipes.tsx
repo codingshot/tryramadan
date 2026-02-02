@@ -88,7 +88,7 @@ export default function Recipes() {
               <Link
                 to="/recipes?meal=iftar"
                 onClick={() => setMealFilterAndUrl("iftar")}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-foreground text-sm font-medium hover:bg-primary/20 transition-colors"
               >
                 <Utensils className="w-4 h-4" aria-hidden />
                 Iftar only
@@ -228,7 +228,7 @@ function RecipeCard({
               <span className="font-display font-bold text-lg">{recipe.name}</span>
               <span
                 className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                  mealType === "suhoor" ? "bg-secondary/20 text-secondary" : "bg-primary/20 text-primary"
+                  mealType === "suhoor" ? "bg-secondary/20 text-secondary" : "bg-primary/20 text-foreground"
                 }`}
               >
                 {mealType === "suhoor" ? <Coffee className="w-3 h-3" /> : <Utensils className="w-3 h-3" />}
