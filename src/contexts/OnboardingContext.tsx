@@ -1,5 +1,7 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
 import { LocationResult } from "@/hooks/useLocation";
+
+const ONBOARDING_DRAFT_KEY = "tryramadan-onboarding-draft";
 
 export type OnboardingMode = "new" | "muslim" | null;
 
@@ -72,12 +74,42 @@ type OnboardingContextValue = {
   setGoals: (goals: string[]) => void;
   setIntention: (text: string) => void;
   reset: () => void;
+  /** Persist current state to localStorage so it can be restored later. */
+  saveDraft: () => void;
 };
+
+/** Load saved onboarding draft from localStorage, if any. */
+function loadDraft(): OnboardingState | null {
+  try {
+    const raw = typeof window !== "undefined" ? window.localStorage.getItem(ONBOARDING_DRAFT_KEY) : null;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as OnboardingState;
+    if (parsed && typeof parsed === "object" && (parsed.mode === null || parsed.mode === "new" || parsed.mode === "muslim")) return parsed;
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+/** Save onboarding state to localStorage. */
+export function saveOnboardingDraft(state: OnboardingState): void {
+  try {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(ONBOARDING_DRAFT_KEY, JSON.stringify(state));
+    }
+  } catch {
+    // ignore
+  }
+}
 
 const OnboardingContext = createContext<OnboardingContextValue | null>(null);
 
 export function OnboardingProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<OnboardingState>(defaultState);
+  const [state, setState] = useState<OnboardingState>(() => loadDraft() ?? defaultState);
+
+  const saveDraft = useCallback(() => {
+    saveOnboardingDraft(state);
+  }, [state]);
 
   const setMode = useCallback((mode: OnboardingMode) => {
     setState((s) => ({ ...s, mode }));
@@ -111,6 +143,10 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   }, []);
   const reset = useCallback(() => setState(defaultState), []);
 
+  useEffect(() => {
+    saveOnboardingDraft(state);
+  }, [state]);
+
   const value: OnboardingContextValue = {
     state,
     setMode,
@@ -124,6 +160,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     setGoals,
     setIntention,
     reset,
+    saveDraft,
   };
 
   return (

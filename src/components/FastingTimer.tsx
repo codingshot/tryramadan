@@ -7,6 +7,7 @@ import { useAutoLocation } from "@/hooks/useLocation";
 import { Link } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
+import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
 import { SunnahFastingBadge } from "./SunnahFastingBadge";
 import { RamadanStartInfoDialog } from "./RamadanStartInfoDialog";
 import { getDaysUntilRamadan, isCurrentlyRamadan } from "@/lib/ramadan";
@@ -207,24 +208,54 @@ export const FastingTimer = ({
             {isEatingPeriod ? (
               <>
                 <Utensils className="w-5 h-5 text-secondary shrink-0" aria-hidden />
-                <span className="text-primary-foreground font-semibold">
-                  Eating period — You can eat now
-                  <span className="font-arabic text-primary-foreground/80 ml-1.5 text-sm">· وقت الأكل</span>
-                </span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="text-primary-foreground font-semibold cursor-help border-b border-dotted border-primary-foreground/30">
+                      Eating period — You can eat now
+                      <span className="font-arabic text-primary-foreground/80 ml-1.5 text-sm">· وقت الأكل</span>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-xs bg-card border-border p-3">
+                    <p className="font-semibold text-sm">{GENERAL_TOOLTIPS.eatingPeriod.title}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{GENERAL_TOOLTIPS.eatingPeriod.body}</p>
+                    <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.eatingPeriod.bodyAr}</p>
+                  </TooltipContent>
+                </Tooltip>
               </>
             ) : (
               <>
                 <Moon className="w-5 h-5 text-secondary animate-pulse shrink-0" aria-hidden />
-                <span className="text-primary-foreground font-semibold">
-                  Fasting period — No eating or drinking
-                  <span className="font-arabic text-primary-foreground/80 ml-1.5 text-sm">· صائم</span>
-                </span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="text-primary-foreground font-semibold cursor-help border-b border-dotted border-primary-foreground/30">
+                      Fasting period — No eating or drinking
+                      <span className="font-arabic text-primary-foreground/80 ml-1.5 text-sm">· صائم</span>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-xs bg-card border-border p-3">
+                    <p className="font-semibold text-sm">{GENERAL_TOOLTIPS.fastingPeriod.title}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{GENERAL_TOOLTIPS.fastingPeriod.body}</p>
+                    <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.fastingPeriod.bodyAr}</p>
+                  </TooltipContent>
+                </Tooltip>
               </>
             )}
           </div>
-          <span className="text-sm text-primary-foreground/70">
-            {isEatingPeriod ? "Time left to eat until Suhoor end (cut-off)" : `Time until ${iftarLabel} (break fast)`}
-          </span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="text-sm text-primary-foreground/70 cursor-help border-b border-dotted border-primary-foreground/20">
+                {isEatingPeriod ? "Time left to eat until Suhoor end (cut-off)" : `Time until ${iftarLabel} (break fast)`}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-xs bg-card border-border p-3">
+              <p className="font-semibold text-sm">
+                {isEatingPeriod ? EATING_TIME_TOOLTIPS.untilSuhoor.title : EATING_TIME_TOOLTIPS.untilIftar.title}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {isEatingPeriod ? EATING_TIME_TOOLTIPS.untilSuhoor.body : EATING_TIME_TOOLTIPS.untilIftar.body}
+              </p>
+            </TooltipContent>
+          </Tooltip>
         </div>
 
         {/* Main timer display */}

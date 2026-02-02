@@ -12,6 +12,7 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { playAdhan } from "@/lib/adhanAudio";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
+import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -96,10 +97,19 @@ const DashboardPrayers = () => {
             animate={{ opacity: 1, y: 0 }}
             className="mb-8"
           >
-            <h1 className="text-2xl md:text-3xl font-display font-bold">
-              Prayer Times
-              <span className="block font-arabic text-lg text-secondary mt-1">أوقات الصلاة</span>
-            </h1>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <h1 className="text-2xl md:text-3xl font-display font-bold cursor-help border-b border-dotted border-transparent hover:border-muted-foreground/40 w-fit">
+                  Prayer Times
+                  <span className="block font-arabic text-lg text-secondary mt-1">أوقات الصلاة</span>
+                </h1>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs p-3">
+                <p className="font-semibold text-sm">{GENERAL_TOOLTIPS.prayerTimes.title}</p>
+                <p className="text-xs text-muted-foreground mt-1">{GENERAL_TOOLTIPS.prayerTimes.body}</p>
+                <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.prayerTimes.bodyAr}</p>
+              </TooltipContent>
+            </Tooltip>
             <p className="text-muted-foreground mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
               <PrayerLocationBadge />
             </p>
@@ -117,10 +127,19 @@ const DashboardPrayers = () => {
                 {currentTime.toLocaleDateString('en', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
               </p>
               {hijriDate && (
-                <p className="text-sm opacity-80 mb-3">
-                  {hijriDate.day} {hijriDate.month} {hijriDate.year} AH
-                  <span className="font-arabic ml-2">{hijriDate.monthAr}</span>
-                </p>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="text-sm opacity-80 mb-3 cursor-help border-b border-dotted border-primary-foreground/30 w-fit">
+                      {hijriDate.day} {hijriDate.month} {hijriDate.year} AH
+                      <span className="font-arabic ml-2">{hijriDate.monthAr}</span>
+                    </p>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs p-3">
+                    <p className="font-semibold text-sm">{GENERAL_TOOLTIPS.hijriDate.title}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{GENERAL_TOOLTIPS.hijriDate.body}</p>
+                    <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.hijriDate.bodyAr}</p>
+                  </TooltipContent>
+                </Tooltip>
               )}
               <p className="text-5xl font-bold font-display">
                 {currentTime.toLocaleTimeString('en', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
@@ -170,8 +189,30 @@ const DashboardPrayers = () => {
                     </div>
                     
                     <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold">{prayer.name}</span>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="font-bold cursor-help border-b border-dotted border-muted-foreground/40">{prayer.name}</span>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom" className="max-w-xs p-3">
+                            <p className="font-semibold text-sm">
+                              {prayer.name === "Fajr" && EATING_TIME_TOOLTIPS.fajr.title}
+                              {prayer.name === "Sunrise" && "Sunrise • الشروق"}
+                              {prayer.name === "Dhuhr" && EATING_TIME_TOOLTIPS.dhuhr.title}
+                              {prayer.name === "Asr" && EATING_TIME_TOOLTIPS.asr.title}
+                              {prayer.name === "Maghrib" && EATING_TIME_TOOLTIPS.maghrib.title}
+                              {prayer.name === "Isha" && EATING_TIME_TOOLTIPS.isha.title}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {prayer.name === "Fajr" && EATING_TIME_TOOLTIPS.fajr.body}
+                              {prayer.name === "Sunrise" && "Sun rises; fasting continues until Maghrib (sunset)."}
+                              {prayer.name === "Dhuhr" && EATING_TIME_TOOLTIPS.dhuhr.body}
+                              {prayer.name === "Asr" && EATING_TIME_TOOLTIPS.asr.body}
+                              {prayer.name === "Maghrib" && EATING_TIME_TOOLTIPS.maghrib.body}
+                              {prayer.name === "Isha" && EATING_TIME_TOOLTIPS.isha.body}
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
                         <span className="text-secondary font-arabic">{prayer.nameAr}</span>
                         {isNext && (
                           <span className="px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-xs">
@@ -179,7 +220,7 @@ const DashboardPrayers = () => {
                           </span>
                         )}
                       </div>
-                      {prayer.name === 'Fajr' || prayer.name === 'Maghrib' ? (
+                      {prayer.name === "Fajr" || prayer.name === "Maghrib" ? (
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <p className="text-sm text-muted-foreground cursor-help border-b border-dotted border-muted-foreground/40 w-fit">
@@ -188,10 +229,10 @@ const DashboardPrayers = () => {
                           </TooltipTrigger>
                           <TooltipContent side="bottom" className="max-w-xs p-3">
                             <p className="font-semibold text-sm">
-                              {prayer.name === 'Fajr' ? EATING_TIME_TOOLTIPS.fajr.title : EATING_TIME_TOOLTIPS.maghrib.title}
+                              {prayer.name === "Fajr" ? EATING_TIME_TOOLTIPS.fajr.title : EATING_TIME_TOOLTIPS.maghrib.title}
                             </p>
                             <p className="text-xs text-muted-foreground mt-1">
-                              {prayer.name === 'Fajr' ? EATING_TIME_TOOLTIPS.fajr.body : EATING_TIME_TOOLTIPS.maghrib.body}
+                              {prayer.name === "Fajr" ? EATING_TIME_TOOLTIPS.fajr.body : EATING_TIME_TOOLTIPS.maghrib.body}
                             </p>
                           </TooltipContent>
                         </Tooltip>
@@ -251,10 +292,19 @@ const DashboardPrayers = () => {
             transition={{ delay: 0.25 }}
             className="mt-6 p-4 rounded-2xl bg-card border border-border"
           >
-            <h3 className="font-display font-bold flex items-center gap-2 mb-3">
-              <Volume2 className="w-4 h-4 text-secondary" />
-              Adhan at prayer times
-            </h3>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <h3 className="font-display font-bold flex items-center gap-2 mb-3 cursor-help border-b border-dotted border-transparent hover:border-muted-foreground/40 w-fit">
+                  <Volume2 className="w-4 h-4 text-secondary" />
+                  Adhan at prayer times
+                </h3>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs p-3">
+                <p className="font-medium">{GENERAL_TOOLTIPS.adhan.title}</p>
+                <p className="text-xs mt-1 text-muted-foreground">{GENERAL_TOOLTIPS.adhan.body}</p>
+                <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.adhan.bodyAr}</p>
+              </TooltipContent>
+            </Tooltip>
             <p className="text-sm text-muted-foreground mb-4">
               Get a browser notification at each prayer time (Fajr, Dhuhr, Asr, Maghrib, Isha). Use the toggles above per prayer. Optionally play adhan sound when the notification fires.
             </p>

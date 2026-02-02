@@ -54,6 +54,7 @@ import { buildIcalContent, downloadIcal } from "@/lib/ical";
 import { fetchPrayerTimesForMonth } from "@/hooks/usePrayerTimes";
 import { getRecipes, getRecipe, parseNutrient, type MealType } from "@/lib/cultureRecipes";
 import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
+import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
 import { PageSEO } from "@/components/PageSEO";
 import { TodayScheduleTimeline } from "@/components/TodayScheduleTimeline";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -769,8 +770,9 @@ const DashboardSchedule = () => {
                 </div>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
-                <p className="font-medium">Ramadan days in this month</p>
-                <p className="text-xs mt-1">How many days in the calendar month you’re viewing fall within Ramadan (the blessed month of fasting). Fast from dawn (Fajr) to sunset (Maghrib) on these days.</p>
+                <p className="font-medium">{GENERAL_TOOLTIPS.ramadan.title}</p>
+                <p className="text-xs mt-1">{GENERAL_TOOLTIPS.ramadan.body}</p>
+                <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.ramadan.bodyAr}</p>
               </TooltipContent>
             </Tooltip>
             <Tooltip>
@@ -781,9 +783,9 @@ const DashboardSchedule = () => {
                 </div>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs p-3">
-                <p className="font-medium">Sunnah fasting days</p>
-                <p className="text-xs mt-1">Monday and Thursday are recommended for voluntary fasting outside Ramadan (Prophetic tradition).</p>
-                <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">أيام السنة • الاثنين والخميس</p>
+                <p className="font-medium">{GENERAL_TOOLTIPS.sunnah.title}</p>
+                <p className="text-xs mt-1">{GENERAL_TOOLTIPS.sunnah.body}</p>
+                <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.sunnah.bodyAr}</p>
               </TooltipContent>
             </Tooltip>
             <Tooltip>
@@ -1544,9 +1546,10 @@ const DashboardSchedule = () => {
                     <span>Laylat al-Qadr</span>
                   </div>
                 </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
-                  <p className="font-medium">Laylat al-Qadr</p>
-                  <p className="text-xs mt-1">Odd nights in the last ten days of Ramadan (21, 23, 25, 27, 29). Night of Power.</p>
+                <TooltipContent className="max-w-xs p-3">
+                  <p className="font-medium">{GENERAL_TOOLTIPS.laylatAlQadr.title}</p>
+                  <p className="text-xs mt-1">{GENERAL_TOOLTIPS.laylatAlQadr.body}</p>
+                  <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.laylatAlQadr.bodyAr}</p>
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
@@ -1556,9 +1559,10 @@ const DashboardSchedule = () => {
                     <span>Sunnah (Mon/Thu)</span>
                   </div>
                 </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
-                  <p className="font-medium">Sunnah fasting</p>
-                  <p className="text-xs mt-1">Monday and Thursday: voluntary fasting days outside Ramadan.</p>
+                <TooltipContent className="max-w-xs p-3">
+                  <p className="font-medium">{GENERAL_TOOLTIPS.sunnah.title}</p>
+                  <p className="text-xs mt-1">{GENERAL_TOOLTIPS.sunnah.body}</p>
+                  <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.sunnah.bodyAr}</p>
                 </TooltipContent>
               </Tooltip>
               <div className="flex items-center gap-2">

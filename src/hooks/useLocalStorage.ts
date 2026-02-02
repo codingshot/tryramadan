@@ -755,6 +755,30 @@ export function getFastingLogForDate(progress: FastingProgress, dateStr: string)
   return progress.fastingLog?.find((e) => e.date === dateStr);
 }
 
+/** Consecutive days of fasting ending today (same logic as Dashboard). */
+export function calculateStreak(progress: FastingProgress): number {
+  const today = new Date().toISOString().split('T')[0];
+  const completedDays = [...(progress.completedDays || [])].sort().reverse();
+  let streak = 0;
+  let currentDate = new Date();
+  for (const day of completedDays) {
+    const dayStr = new Date(currentDate).toISOString().split('T')[0];
+    if (day === dayStr) {
+      streak++;
+      currentDate.setDate(currentDate.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
+/** Total hours fasted from fastingLog (completed or broken entries with hoursFasted). */
+export function getTotalHoursFasted(progress: FastingProgress): number {
+  const log = progress.fastingLog || [];
+  return log.reduce((sum, e) => sum + (e.hoursFasted ?? (e.startedAt && e.completedAt ? hoursBetween(e.startedAt, e.completedAt) : 0)), 0);
+}
+
 // --- Daily missions (today's actionable tasks) ---
 
 export const SCHEDULE_NOTES_KEY = 'tryramadan-schedule-notes';

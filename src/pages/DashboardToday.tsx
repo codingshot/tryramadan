@@ -24,6 +24,7 @@ import { BreakFastReasonDialog } from "@/components/BreakFastReasonDialog";
 import { usePrayerTimes } from "@/hooks/usePrayerTimes";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
+import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
 import { PrayerLocationBadge } from "@/components/PrayerLocationBadge";
 import { PageSEO } from "@/components/PageSEO";
 import {
@@ -188,17 +189,41 @@ const DashboardToday = () => {
             transition={{ delay: 0.05 }}
             className="mb-6 p-4 rounded-2xl bg-card border border-border"
           >
-            <h3 className="font-display font-bold text-sm mb-3 text-muted-foreground">
-              Today&apos;s fast • صيام اليوم
-            </h3>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <h3 className="font-display font-bold text-sm mb-3 text-muted-foreground cursor-help border-b border-dotted border-muted-foreground/40 w-fit">
+                  Today&apos;s fast • صيام اليوم
+                </h3>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="font-medium">Today&apos;s fast</p>
+                <p className="text-xs mt-1 text-muted-foreground">Log whether you completed the full fast (dawn to sunset) or had to break it early. Use &quot;Mark complete&quot; when you fasted until Maghrib; use &quot;I broke my fast&quot; if you ended early.</p>
+              </TooltipContent>
+            </Tooltip>
             {todayCompleted ? (
               <div className="py-3 px-4 rounded-xl bg-secondary/20 border border-secondary/40 text-center">
-                <span className="font-medium text-secondary">You fasted today ✓</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="font-medium text-secondary cursor-help border-b border-dotted border-secondary/40">You fasted today ✓</span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="font-medium">{GENERAL_TOOLTIPS.markComplete.title}</p>
+                    <p className="text-xs mt-1 text-muted-foreground">You logged that you completed dawn-to-sunset fasting today.</p>
+                  </TooltipContent>
+                </Tooltip>
                 <span className="font-arabic text-secondary ml-2">صمت اليوم</span>
               </div>
             ) : todayBrokenEntry ? (
               <div className="py-3 px-4 rounded-xl border border-destructive/40 bg-destructive/10 text-center text-sm">
-                <span className="font-medium text-destructive">You broke your fast today</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="font-medium text-destructive cursor-help border-b border-dotted border-destructive/40">You broke your fast today</span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="font-medium">{GENERAL_TOOLTIPS.brokeFast.title}</p>
+                    <p className="text-xs mt-1 text-muted-foreground">{GENERAL_TOOLTIPS.brokeFast.body}</p>
+                  </TooltipContent>
+                </Tooltip>
                 {todayBrokenEntry.brokenReason && (
                   <span className="text-muted-foreground block mt-1">
                     {getBrokenReasonLabel(todayBrokenEntry.brokenReason)}
@@ -207,22 +232,38 @@ const DashboardToday = () => {
               </div>
             ) : (
               <div className={`flex flex-col sm:flex-row gap-2 ${fastingToday ? "" : "max-w-md"}`}>
-                <button
-                  onClick={() => completeFastingToday(progress, setProgress)}
-                  className="flex-1 py-3 px-4 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
-                >
-                  <Moon className="w-5 h-5" />
-                  I fasted today — mark complete
-                </button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => completeFastingToday(progress, setProgress)}
+                      className="flex-1 py-3 px-4 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                    >
+                      <Moon className="w-5 h-5" />
+                      I fasted today — mark complete
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="font-medium">{GENERAL_TOOLTIPS.markComplete.title}</p>
+                    <p className="text-xs mt-1 text-muted-foreground">{GENERAL_TOOLTIPS.markComplete.body}</p>
+                  </TooltipContent>
+                </Tooltip>
                 {fastingToday && (
-                  <button
-                    type="button"
-                    onClick={() => setShowBreakFastDialog(true)}
-                    className="flex-1 py-3 px-4 rounded-xl border border-destructive/40 bg-destructive/10 text-destructive font-medium hover:bg-destructive/20 transition-colors flex items-center justify-center gap-2"
-                  >
-                    <AlertTriangle className="w-5 h-5" />
-                    I broke my fast
-                  </button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={() => setShowBreakFastDialog(true)}
+                        className="flex-1 py-3 px-4 rounded-xl border border-destructive/40 bg-destructive/10 text-destructive font-medium hover:bg-destructive/20 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <AlertTriangle className="w-5 h-5" />
+                        I broke my fast
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="font-medium">{GENERAL_TOOLTIPS.breakMyFast.title}</p>
+                      <p className="text-xs mt-1 text-muted-foreground">{GENERAL_TOOLTIPS.breakMyFast.body}</p>
+                    </TooltipContent>
+                  </Tooltip>
                 )}
               </div>
             )}

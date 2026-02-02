@@ -14,7 +14,7 @@ import { ProgressTracker } from "@/components/ProgressTracker";
 import { CTASection } from "@/components/CTASection";
 import { Footer } from "@/components/Footer";
 import { ArabicTerm } from "@/components/ArabicTerm";
-import { useFastingProgress, useIftarLabelShort } from "@/hooks/useLocalStorage";
+import { useFastingProgress, useIftarLabelShort, useUserPreferences, calculateStreak, getTotalHoursFasted } from "@/hooks/useLocalStorage";
 import { PageSEO } from "@/components/PageSEO";
 import { getRamadanDayNumber } from "@/lib/ramadan";
 import { ChevronRight } from "lucide-react";
@@ -25,6 +25,7 @@ const Index = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [progress] = useFastingProgress();
+  const [preferences] = useUserPreferences();
   const iftarLabelShort = useIftarLabelShort();
   const today = new Date();
   const todayRamadanDay = getRamadanDayNumber(today);
@@ -32,7 +33,11 @@ const Index = () => {
   const completedDayNumbers = progress.completedDays
     .map((d) => getRamadanDayNumber(new Date(d + "T12:00:00")))
     .filter((n): n is number => n != null);
-  const hasRealProgress = completedDayNumbers.length > 0 || (todayRamadanDay != null && todayRamadanDay <= TOTAL_DAYS);
+  const streak = calculateStreak(progress);
+  const totalHoursFasted = getTotalHoursFasted(progress);
+  const onboardingComplete = preferences.onboardingComplete ?? false;
+  const useRealData = onboardingComplete;
+  const hasRealProgress = useRealData && (completedDayNumbers.length > 0 || (todayRamadanDay != null && todayRamadanDay <= TOTAL_DAYS));
 
   // Scroll to section when landing on home with hash or state (e.g. footer "Features" / "About")
   useEffect(() => {
@@ -115,19 +120,24 @@ const Index = () => {
                   Track Your Journey
                 </h3>
                 <p className="text-muted-foreground text-sm">
-                  {hasRealProgress
-                    ? "See your progress and log your fasts in the Dashboard"
+                  {useRealData
+                    ? hasRealProgress
+                      ? "See your progress and log your fasts in the Dashboard"
+                      : "Log your first fast on the dashboard — your progress will appear here"
                     : "Celebrate each day as you progress through the blessed month"}
                 </p>
               </div>
               <ProgressTracker
-                currentDay={hasRealProgress ? currentDay : 5}
+                currentDay={useRealData ? currentDay : 5}
                 totalDays={TOTAL_DAYS}
-                completedDays={hasRealProgress ? completedDayNumbers : [1, 2, 3, 4]}
+                completedDays={useRealData ? completedDayNumbers : [1, 2, 3, 4]}
+                streak={useRealData ? streak : undefined}
+                totalHoursFasted={useRealData ? totalHoursFasted : undefined}
+                isPlaceholder={!useRealData}
               />
               <div className="mt-6 flex items-center justify-center gap-2 text-secondary font-medium text-sm">
                 <span>
-                  {hasRealProgress ? "View your progress on dashboard" : "Go to dashboard (see today & progress)"}
+                  {useRealData ? "View your progress on dashboard" : "Go to dashboard (see today & progress)"}
                 </span>
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>

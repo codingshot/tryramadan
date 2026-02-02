@@ -38,12 +38,14 @@ import {
   useLocalStorage,
   useIftarLabel,
   useIftarLabelShort,
+  calculateStreak,
 } from "@/hooks/useLocalStorage";
 import { BreakFastReasonDialog } from "@/components/BreakFastReasonDialog";
 import { usePrayerTimes, usePrayerTimesForDate, getSunnahFastingInfo, checkAyyamAlBeed } from "@/hooks/usePrayerTimes";
 import { useAutoLocation } from "@/hooks/useLocation";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
+import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
 import { Footer } from "@/components/Footer";
 import { PageSEO } from "@/components/PageSEO";
 
@@ -149,27 +151,6 @@ const Dashboard = () => {
     }
   }, [prayerTimes]);
   
-  // Calculate streak
-  const calculateStreak = () => {
-    const today = new Date().toISOString().split('T')[0];
-    const completedDays = progress.completedDays.sort().reverse();
-    
-    let streak = 0;
-    let currentDate = new Date();
-    
-    for (const day of completedDays) {
-      const dayStr = new Date(currentDate).toISOString().split('T')[0];
-      if (day === dayStr) {
-        streak++;
-        currentDate.setDate(currentDate.getDate() - 1);
-      } else {
-        break;
-      }
-    }
-    
-    return streak;
-  };
-  
   // Toggle today's fast as complete (uses fasting log + console)
   const toggleTodayComplete = () => {
     const today = new Date().toISOString().split('T')[0];
@@ -186,7 +167,7 @@ const Dashboard = () => {
   const fastingToday = isFastingToday(progress);
   const todayLog = getTodayFastingLog(progress);
   const recentLog = (progress.fastingLog || []).slice(-7).reverse();
-  const streak = calculateStreak();
+  const streak = calculateStreak(progress);
   const totalDays = 30;
   const ramadanCompletionPct = Math.round((progress.completedDays.length / totalDays) * 100);
   const factDay = Math.min(30, Math.max(1, (new Date().getDate() % 30) || 30));
@@ -320,8 +301,22 @@ const Dashboard = () => {
                 {isFasting ? <Moon className="w-5 h-5 text-foreground" aria-hidden /> : <Sun className="w-5 h-5 text-muted-foreground" aria-hidden />}
               </div>
               <div>
-                <span className="font-semibold block">{isFasting ? "Currently fasting" : "Not fasting"}</span>
-                <span className="text-sm text-muted-foreground">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="font-semibold block cursor-help border-b border-dotted border-transparent hover:border-muted-foreground/40 w-fit">
+                      {isFasting ? "Currently fasting" : "Not fasting"}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs p-3">
+                    <p className="font-semibold text-sm">
+                      {isFasting ? GENERAL_TOOLTIPS.fastingPeriod.title : "Not fasting"}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {isFasting ? GENERAL_TOOLTIPS.fastingPeriod.body : "You're in the eating window—between sunset (Maghrib) and the next dawn (Fajr). You can eat and drink. The timer below shows time until Suhoor end (cut-off)."}
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+                <span className="text-sm text-muted-foreground block">
                   {isFasting ? `Countdown to ${iftarLabel} below` : "Next: Suhoor — see timer below"}
                 </span>
               </div>
@@ -569,9 +564,9 @@ const Dashboard = () => {
                   )
                   : (
                     <>
-                      <p className="font-semibold text-sm">Log that you completed today's fast • تم الصيام</p>
-                      <p className="text-xs text-muted-foreground mt-1">Tap after you break your fast at {iftarLabel} (Maghrib). This records that you fasted from dawn to sunset today.</p>
-                      <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">سجّل إكمال صيام اليوم بعد الإفطار</p>
+                      <p className="font-semibold text-sm">{GENERAL_TOOLTIPS.markComplete.title}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{GENERAL_TOOLTIPS.markComplete.body}</p>
+                      <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.markComplete.bodyAr}</p>
                     </>
                   )}
               </TooltipContent>

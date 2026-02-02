@@ -4,14 +4,25 @@ interface ProgressTrackerProps {
   currentDay: number;
   totalDays: number;
   completedDays: number[];
+  /** Consecutive days completed (from dashboard logic). When provided, streak display uses this. */
+  streak?: number;
+  /** Total hours fasted from fastingLog. Shown when provided and > 0. */
+  totalHoursFasted?: number;
+  /** When true, section is a sample preview (not yet tracking). */
+  isPlaceholder?: boolean;
 }
 
 export const ProgressTracker = ({ 
   currentDay = 5, 
   totalDays = 30,
-  completedDays = [1, 2, 3, 4]
+  completedDays = [1, 2, 3, 4],
+  streak,
+  totalHoursFasted = 0,
+  isPlaceholder = false,
 }: ProgressTrackerProps) => {
   const progressPercentage = (completedDays.length / totalDays) * 100;
+  const displayStreak = streak !== undefined ? streak : completedDays.length;
+  const showHoursFasted = totalHoursFasted !== undefined && totalHoursFasted > 0;
   
   // Show a window of days around current day
   const visibleDays = 7;
@@ -28,6 +39,9 @@ export const ProgressTracker = ({
           <span>Ramadan Calendar</span>
           <span className="font-arabic">تقويم رمضان</span>
         </div>
+        {isPlaceholder && (
+          <p className="text-xs text-muted-foreground mt-1">Sample preview — complete setup to track your own</p>
+        )}
       </div>
 
       {/* Overall progress bar */}
@@ -98,16 +112,24 @@ export const ProgressTracker = ({
       </div>
 
       {/* Streak counter */}
-      <div className="flex items-center justify-center gap-2 pt-4">
+      <div className="flex items-center justify-center gap-2 pt-4 flex-wrap">
         <motion.div 
           className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-gold text-foreground"
-          animate={{ scale: [1, 1.02, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
+          animate={displayStreak > 0 ? { scale: [1, 1.02, 1] } : {}}
+          transition={{ duration: 2, repeat: displayStreak > 0 ? Infinity : 0 }}
         >
           <span className="text-2xl">🔥</span>
-          <span className="font-bold">{completedDays.length} Day Streak!</span>
-          <span className="font-arabic text-sm">سلسلة أيام!</span>
+          <span className="font-bold">
+            {displayStreak > 0 ? `${displayStreak} Day Streak!` : "No streak yet"}
+          </span>
+          <span className="font-arabic text-sm">{displayStreak > 0 ? "سلسلة أيام!" : "ابدأ الصيام"}</span>
         </motion.div>
+        {showHoursFasted && (
+          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted text-foreground text-sm font-medium">
+            <span aria-hidden>⏱</span>
+            <span>{totalHoursFasted.toFixed(1)}h fasted</span>
+          </div>
+        )}
       </div>
     </div>
   );
