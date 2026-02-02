@@ -130,6 +130,7 @@ This document outlines the structure, features, and expected behavior of the Try
 | `fasting-programs.json` | Fasting program definitions. |
 | `personas.json` | User personas and journeys. |
 | `cities.json` | Cities for location search. |
+| `languages-and-countries.ts` | Languages and country/region options (e.g. for Settings). |
 
 ---
 

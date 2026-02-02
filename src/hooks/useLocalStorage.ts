@@ -760,7 +760,7 @@ export function calculateStreak(progress: FastingProgress): number {
   const today = new Date().toISOString().split('T')[0];
   const completedDays = [...(progress.completedDays || [])].sort().reverse();
   let streak = 0;
-  let currentDate = new Date();
+  const currentDate = new Date();
   for (const day of completedDays) {
     const dayStr = new Date(currentDate).toISOString().split('T')[0];
     if (day === dayStr) {

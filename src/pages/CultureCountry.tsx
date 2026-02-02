@@ -17,6 +17,27 @@ export default function CultureCountry() {
   const { countryId } = useParams<{ countryId: string }>();
   const iftarLabel = useIftarLabel();
   const country = countryId ? getCountryById(countryId) : undefined;
+  const keywords = country
+    ? [
+        `Ramadan ${country.name}`,
+        `${country.name} iftar`,
+        `${country.name} suhoor`,
+        "Ramadan traditions",
+        country.regionName,
+        ...country.foods.slice(0, 3),
+      ].join(", ")
+    : "";
+
+  useEffect(() => {
+    if (!keywords) return;
+    let el = document.querySelector('meta[name="keywords"]');
+    if (!el) {
+      el = document.createElement("meta");
+      el.setAttribute("name", "keywords");
+      document.head.appendChild(el);
+    }
+    el.setAttribute("content", keywords);
+  }, [keywords]);
 
   if (!country) {
     return (
@@ -41,14 +62,6 @@ export default function CultureCountry() {
     `Explore Ramadan traditions, foods, and customs in ${country.name}. ${country.traditions.length} traditions and ${country.foods.join(", ")}.`;
   const canonicalPath = `/culture/${country.id}`;
   const canonicalUrl = `${SITE_URL}${canonicalPath}`;
-  const keywords = [
-    `Ramadan ${country.name}`,
-    `${country.name} iftar`,
-    `${country.name} suhoor`,
-    "Ramadan traditions",
-    country.regionName,
-    ...country.foods.slice(0, 3),
-  ].join(", ");
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -76,16 +89,6 @@ export default function CultureCountry() {
       },
     ],
   };
-
-  useEffect(() => {
-    let el = document.querySelector('meta[name="keywords"]');
-    if (!el) {
-      el = document.createElement("meta");
-      el.setAttribute("name", "keywords");
-      document.head.appendChild(el);
-    }
-    el.setAttribute("content", keywords);
-  }, [keywords]);
 
   return (
     <div className="min-h-screen bg-background">

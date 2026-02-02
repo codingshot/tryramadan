@@ -71,8 +71,14 @@ export async function searchLocations(query: string): Promise<LocationResult[]> 
     if (!response.ok) throw new Error('Location search failed');
 
     const data = await response.json();
-    
-    return data.map((item: any) => ({
+    interface NominatimItem {
+      lat: string;
+      lon: string;
+      display_name: string;
+      name?: string;
+      address?: { city?: string; town?: string; village?: string; country?: string };
+    }
+    return (data as NominatimItem[]).map((item) => ({
       name: item.address?.city || item.address?.town || item.address?.village || item.name,
       displayName: item.display_name,
       lat: parseFloat(item.lat),

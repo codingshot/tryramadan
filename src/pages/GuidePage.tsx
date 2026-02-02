@@ -160,6 +160,22 @@ const GuidePage = () => {
     }
   }, [guide, stepIndex]);
 
+  useEffect(() => {
+    if (!guide) return;
+    const jsonLd = buildHowToJsonLd(guide);
+    let el = document.getElementById(HOWTO_SCRIPT_ID) as HTMLScriptElement | null;
+    if (!el) {
+      el = document.createElement("script");
+      el.id = HOWTO_SCRIPT_ID;
+      el.type = "application/ld+json";
+      document.head.appendChild(el);
+    }
+    el.textContent = JSON.stringify(jsonLd);
+    return () => {
+      el?.remove();
+    };
+  }, [guide?.slug]);
+
   if (!guide) {
     return (
       <div className="min-h-screen bg-background">
@@ -176,21 +192,6 @@ const GuidePage = () => {
   }
 
   const related = getRelatedGuides(guide);
-
-  useEffect(() => {
-    const jsonLd = buildHowToJsonLd(guide);
-    let el = document.getElementById(HOWTO_SCRIPT_ID) as HTMLScriptElement | null;
-    if (!el) {
-      el = document.createElement("script");
-      el.id = HOWTO_SCRIPT_ID;
-      el.type = "application/ld+json";
-      document.head.appendChild(el);
-    }
-    el.textContent = JSON.stringify(jsonLd);
-    return () => {
-      el?.remove();
-    };
-  }, [guide.slug]);
 
   return (
     <div className="min-h-screen bg-background">

@@ -81,8 +81,7 @@ const DashboardProgress = () => {
     const sortedDays = [...progress.completedDays].sort().reverse();
     
     let streak = 0;
-    let currentDate = new Date();
-    
+    const currentDate = new Date();
     for (const day of sortedDays) {
       const dayStr = currentDate.toISOString().split('T')[0];
       if (day === dayStr) {
