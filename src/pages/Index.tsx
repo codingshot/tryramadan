@@ -4,7 +4,6 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
 import { FeaturesSection } from "@/components/FeaturesSection";
-import { FastingPrograms } from "@/components/FastingPrograms";
 import { CulturalCarousel } from "@/components/CulturalCarousel";
 import { HealthBenefits } from "@/components/HealthBenefits";
 import { DailyHadith } from "@/components/DailyHadith";
@@ -69,36 +68,41 @@ const Index = () => {
       {/* Features Section */}
       <FeaturesSection />
 
-      {/* Fasting Programs Section */}
+      {/* Fasting path — single option, links to Settings */}
       <section id="programs" className="py-24">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center max-w-3xl mx-auto mb-16"
+            className="text-center max-w-xl mx-auto"
           >
             <Link
-              to="/programs"
+              to="/settings#settings-fasting-path"
               className="inline-block px-4 py-1.5 rounded-full bg-secondary/10 text-secondary text-sm font-medium mb-4 hover:bg-secondary/20 transition-colors"
             >
-              Programs
+              Fasting path
             </Link>
             <Link
-              to="/programs"
+              to="/settings#settings-fasting-path"
               className="block relative z-10 cursor-pointer py-2 -my-2 mb-4 mx-auto max-w-fit rounded focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               <h2 className="text-3xl md:text-4xl font-display font-bold mb-0 hover:opacity-90 transition-opacity">
                 Choose Your <span className="text-gradient-gold">Fasting Path</span>
               </h2>
             </Link>
-            <p className="text-muted-foreground">
-              Whether you're new to fasting or ready for the full experience, 
-              we have a program designed for your comfort level.
+            <p className="text-muted-foreground mb-6">
+              Set your mode (New/Muslim) and program in Settings.
             </p>
+            <Link
+              to="/settings#settings-fasting-path"
+              className="inline-flex items-center gap-2 min-h-[48px] px-6 py-3 rounded-2xl bg-secondary/20 border border-secondary/40 text-secondary font-medium hover:bg-secondary/30 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
+            >
+              <span>Full Ramadan Fast</span>
+              <span className="text-sm opacity-90">(dawn to sunset)</span>
+              <ChevronRight className="w-5 h-5 shrink-0" />
+            </Link>
           </motion.div>
-
-          <FastingPrograms onSelectProgram={() => navigate("/programs")} />
         </div>
       </section>
 

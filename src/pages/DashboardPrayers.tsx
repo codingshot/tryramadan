@@ -197,7 +197,7 @@ const DashboardPrayers = () => {
                           <TooltipContent side="bottom" className="max-w-xs p-3">
                             <p className="font-semibold text-sm">
                               {prayer.name === "Fajr" && EATING_TIME_TOOLTIPS.fajr.title}
-                              {prayer.name === "Sunrise" && "Sunrise • الشروق"}
+                              {prayer.name === "Sunrise" && EATING_TIME_TOOLTIPS.sunrise.title}
                               {prayer.name === "Dhuhr" && EATING_TIME_TOOLTIPS.dhuhr.title}
                               {prayer.name === "Asr" && EATING_TIME_TOOLTIPS.asr.title}
                               {prayer.name === "Maghrib" && EATING_TIME_TOOLTIPS.maghrib.title}
@@ -205,12 +205,20 @@ const DashboardPrayers = () => {
                             </p>
                             <p className="text-xs text-muted-foreground mt-1">
                               {prayer.name === "Fajr" && EATING_TIME_TOOLTIPS.fajr.body}
-                              {prayer.name === "Sunrise" && "Sun rises; fasting continues until Maghrib (sunset)."}
+                              {prayer.name === "Sunrise" && EATING_TIME_TOOLTIPS.sunrise.body}
                               {prayer.name === "Dhuhr" && EATING_TIME_TOOLTIPS.dhuhr.body}
                               {prayer.name === "Asr" && EATING_TIME_TOOLTIPS.asr.body}
                               {prayer.name === "Maghrib" && EATING_TIME_TOOLTIPS.maghrib.body}
                               {prayer.name === "Isha" && EATING_TIME_TOOLTIPS.isha.body}
                             </p>
+                            {(prayer.name === "Sunrise" || prayer.name === "Dhuhr" || prayer.name === "Asr" || prayer.name === "Isha") && (
+                              <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">
+                                {prayer.name === "Sunrise" && EATING_TIME_TOOLTIPS.sunrise.bodyAr}
+                                {prayer.name === "Dhuhr" && EATING_TIME_TOOLTIPS.dhuhr.bodyAr}
+                                {prayer.name === "Asr" && EATING_TIME_TOOLTIPS.asr.bodyAr}
+                                {prayer.name === "Isha" && EATING_TIME_TOOLTIPS.isha.bodyAr}
+                              </p>
+                            )}
                           </TooltipContent>
                         </Tooltip>
                         <span className="text-secondary font-arabic">{prayer.nameAr}</span>

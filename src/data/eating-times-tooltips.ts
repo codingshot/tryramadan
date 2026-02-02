@@ -55,6 +55,11 @@ export const EATING_TIME_TOOLTIPS = {
     body: "Dawn prayer. Fasting begins at Fajr—no food or drink until Maghrib. Suhoor should be finished before Fajr.",
     bodyAr: "صلاة الفجر؛ يبدأ الصوم من بعدها.",
   },
+  sunrise: {
+    title: "Sunrise • الشروق",
+    body: "When the sun rises (after Fajr). Fasting continues—no food or drink until Maghrib (sunset). Used in some prayer time calculations.",
+    bodyAr: "بعد الفجر؛ الصوم مستمر حتى المغرب.",
+  },
   maghrib: {
     title: "Maghrib • المغرب",
     body: "Sunset prayer. Time to break your fast (iftar). Many break fast with dates and water, pray Maghrib, then have the main meal.",

@@ -91,30 +91,8 @@ export default function OnboardingLocation() {
       </Link>
       <h2 className="font-display text-2xl font-bold mb-2">Location</h2>
       <p className="text-muted-foreground mb-6">
-        Location is required for accurate prayer and fasting times. Your data is stored only on this device.
+        We use your location for prayer and fasting times. It’s set from your IP automatically; type a city below to change it. Stored only on this device.
       </p>
-
-      {/* Auto-detect: visible button + loading state */}
-      <div className="mb-4">
-        <button
-          type="button"
-          onClick={runAutoDetect}
-          disabled={detecting}
-          className="w-full min-h-[44px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 border-secondary/50 bg-secondary/10 hover:bg-secondary/20 hover:border-secondary/70 text-secondary font-medium transition-all cursor-pointer touch-manipulation disabled:opacity-70 disabled:cursor-wait"
-        >
-          {detecting ? (
-            <>
-              <Loader2 className="w-5 h-5 animate-spin shrink-0" aria-hidden />
-              <span>Detecting your location...</span>
-            </>
-          ) : (
-            <>
-              <Navigation className="w-5 h-5 shrink-0" aria-hidden />
-              <span>Auto-detect my location</span>
-            </>
-          )}
-        </button>
-      </div>
 
       {hasLocation ? (
         <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/10 border border-secondary/30 mb-4">
@@ -125,29 +103,41 @@ export default function OnboardingLocation() {
           </div>
           <Check className="w-5 h-5 text-secondary flex-shrink-0" />
         </div>
+      ) : detecting ? (
+        <div className="flex items-center gap-2 p-4 rounded-xl bg-muted/50 border border-border mb-4">
+          <Loader2 className="w-5 h-5 animate-spin shrink-0 text-muted-foreground" aria-hidden />
+          <span className="text-sm text-muted-foreground">Detecting location from IP...</span>
+        </div>
       ) : (
         <p className="text-sm text-muted-foreground mb-4">
-          Or search for a city below if auto-detect doesn’t work or you prefer a different location.
+          Type a city name below to set your location, or use the button to detect from IP.
         </p>
       )}
 
       <LocationSearch
         value={state.location?.name ?? ""}
         onSelect={handleSelect}
-        placeholder="Search for a city..."
+        placeholder="Type a city name..."
       />
 
-      {!hasLocation && (
-        <p className="text-sm text-amber-600 dark:text-amber-500 mt-3" role="alert">
-          Please enter a city or use auto-detect to continue.
-        </p>
-      )}
+      <button
+        type="button"
+        onClick={runAutoDetect}
+        disabled={detecting}
+        className="w-full mt-3 min-h-[44px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-border bg-muted/30 hover:bg-muted/50 text-sm font-medium transition-colors disabled:opacity-70"
+      >
+        {detecting ? (
+          <Loader2 className="w-5 h-5 animate-spin shrink-0" aria-hidden />
+        ) : (
+          <Navigation className="w-5 h-5 shrink-0" aria-hidden />
+        )}
+        {detecting ? "Detecting..." : "Use my location (from IP)"}
+      </button>
 
       <button
         type="button"
         onClick={handleContinue}
-        disabled={!hasLocation}
-        className="w-full mt-6 min-h-[44px] py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full mt-6 min-h-[44px] py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2 cursor-pointer"
       >
         Continue <ArrowRight className="w-5 h-5" />
       </button>

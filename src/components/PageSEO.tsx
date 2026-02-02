@@ -13,6 +13,8 @@ export interface PageSEOProps {
   path?: string;
   /** Optional image URL for og:image (defaults to site og-image) */
   image?: string;
+  /** Optional alt text for og:image (accessibility and SEO) */
+  imageAlt?: string;
   /** Optional type for og:type (default "website") */
   type?: "website" | "article";
   /** Optional robots (e.g. "noindex, nofollow" for 404). Default: index, follow */
@@ -23,7 +25,9 @@ export interface PageSEOProps {
  * Sets document title and meta tags for SEO and AEO (accessibility + SEO).
  * Use on every recipe and country page for unique, indexable content.
  */
-export function PageSEO({ title, description, path = "", image, type = "website", robots }: PageSEOProps) {
+const DEFAULT_OG_IMAGE_ALT = "TryRamadan.app — Fast like a Muslim for the holy month of Ramadan. Prayer times, suhoor & iftar, cultural education.";
+
+export function PageSEO({ title, description, path = "", image, imageAlt = DEFAULT_OG_IMAGE_ALT, type = "website", robots }: PageSEOProps) {
   const url = path ? `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}` : SITE_URL;
   const imageUrl = image ? (image.startsWith("http") ? image : `${SITE_URL}${image}`) : `${SITE_URL}/og-image.jpg`;
   const metaDescription =
@@ -50,6 +54,7 @@ export function PageSEO({ title, description, path = "", image, type = "website"
     setMeta("property", "og:url", url);
     setMeta("property", "og:type", type);
     setMeta("property", "og:image", imageUrl);
+    setMeta("property", "og:image:alt", imageAlt);
     setMeta("name", "twitter:card", "summary_large_image");
     setMeta("name", "twitter:title", title);
     setMeta("name", "twitter:description", metaDescription);
@@ -70,7 +75,7 @@ export function PageSEO({ title, description, path = "", image, type = "website"
     return () => {
       // Optionally reset to default on unmount; for SPA we often leave as-is until next page
     };
-  }, [title, metaDescription, url, imageUrl, type, path, robots]);
+  }, [title, metaDescription, url, imageUrl, imageAlt, type, path, robots]);
 
   return null;
 }

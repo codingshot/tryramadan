@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 
 const QUIZ = [
@@ -24,17 +24,27 @@ const QUIZ = [
 ];
 
 export default function OnboardingKnowledge() {
-  const { state, setKnowledgeScore } = useOnboarding();
+  const { setKnowledgeScore } = useOnboarding();
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const navigate = useNavigate();
 
   const question = QUIZ[current];
   const isLast = current === QUIZ.length - 1;
+  const correctIndex = question.correct;
+  const isCorrect = selectedOption !== null && selectedOption === correctIndex;
 
   const handleAnswer = (optionIndex: number) => {
-    const newAnswers = [...answers, optionIndex];
+    if (selectedOption !== null) return;
+    setSelectedOption(optionIndex);
+  };
+
+  const handleNext = () => {
+    if (selectedOption === null) return;
+    const newAnswers = [...answers, selectedOption];
     setAnswers(newAnswers);
+    setSelectedOption(null);
     if (isLast) {
       const score = newAnswers.filter((a, i) => a === QUIZ[i].correct).length;
       setKnowledgeScore(score);
@@ -49,7 +59,7 @@ export default function OnboardingKnowledge() {
       <Link
         to={current === 0 ? "/onboarding/mode" : "#"}
         onClick={(e) => {
-          if (current > 0) {
+          if (current > 0 && selectedOption === null) {
             e.preventDefault();
             setCurrent(current - 1);
             setAnswers(answers.slice(0, -1));
@@ -75,17 +85,65 @@ export default function OnboardingKnowledge() {
         </div>
         <p className="text-sm font-medium mb-4">{question.q}</p>
         <div className="space-y-2">
-          {question.options.map((opt, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => handleAnswer(i)}
-              className="w-full min-h-[44px] p-4 rounded-xl border-2 border-border hover:border-secondary text-left transition-all cursor-pointer touch-manipulation"
-            >
-              {opt}
-            </button>
-          ))}
+          {question.options.map((opt, i) => {
+            const isSelected = selectedOption === i;
+            const showCorrect = selectedOption !== null && i === correctIndex;
+            const showIncorrect = selectedOption !== null && isSelected && i !== correctIndex;
+            return (
+              <button
+                key={i}
+                type="button"
+                onClick={() => handleAnswer(i)}
+                disabled={selectedOption !== null}
+                className={`w-full min-h-[44px] p-4 rounded-xl border-2 text-left transition-all touch-manipulation flex items-center justify-between gap-2 ${
+                  selectedOption !== null
+                    ? "cursor-default"
+                    : "cursor-pointer border-border hover:border-secondary"
+                } ${
+                  showCorrect
+                    ? "border-green-600 bg-green-500/10 text-green-700 dark:text-green-400"
+                    : showIncorrect
+                      ? "border-destructive/60 bg-destructive/10 text-destructive"
+                      : "border-border"
+                }`}
+              >
+                <span>{opt}</span>
+                {showCorrect && <Check className="w-5 h-5 shrink-0 text-green-600 dark:text-green-400" aria-hidden />}
+                {showIncorrect && <X className="w-5 h-5 shrink-0 text-destructive" aria-hidden />}
+              </button>
+            );
+          })}
         </div>
+
+        {selectedOption !== null && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-4 p-4 rounded-xl border-2 border-secondary/30 bg-secondary/5"
+          >
+            <p className={`font-medium flex items-center gap-2 ${isCorrect ? "text-green-700 dark:text-green-400" : "text-destructive"}`}>
+              {isCorrect ? (
+                <>
+                  <Check className="w-5 h-5 shrink-0" aria-hidden />
+                  Correct!
+                </>
+              ) : (
+                <>
+                  <X className="w-5 h-5 shrink-0" aria-hidden />
+                  Incorrect. The correct answer is: {question.options[correctIndex]}
+                </>
+              )}
+            </p>
+            <button
+              type="button"
+              onClick={handleNext}
+              className="w-full mt-3 min-h-[44px] py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2 cursor-pointer"
+            >
+              {isLast ? "Continue" : "Next question"}
+              <ArrowRight className="w-5 h-5" />
+            </button>
+          </motion.div>
+        )}
       </div>
     </motion.div>
   );

@@ -29,26 +29,31 @@ export default function OnboardingLayout() {
   const progress = stepIndex < 0 ? 0 : ((stepIndex + 1) / STEPS.length) * 100;
 
   const handleClose = () => {
-    const priorities = state.priorities;
-    setPreferences({
-      ...preferences,
-      userType: state.mode,
-      experience: state.experience,
-      location: state.location?.displayName ?? "",
-      locationCoords: state.location ? { lat: state.location.lat, lng: state.location.lng } : null,
-      timezone: state.location?.timezone ?? null,
-      fastingGoal: state.selectedProgram === "traditional" ? "full" : state.selectedProgram,
-      selectedProgram: state.selectedProgram,
-      onboardingComplete: true,
-      notificationsEnabled: state.notifications.suhoor || state.notifications.iftar,
-      learningPriority: priorities.learningPriority,
-      cultureRecipesPriority: priorities.cultureRecipesPriority,
-      quranPriority: priorities.quranPriority,
-      macroTrackingEnabled: priorities.macroTrackingEnabled,
-      simplifyByLocation: priorities.simplifyByLocation,
-    });
-    setQuickActionOrder(getQuickActionOrderFromPriorities(priorities));
-    navigate("/dashboard");
+    const hasBeenOnDashboard = preferences.onboardingComplete === true;
+    if (hasBeenOnDashboard) {
+      const priorities = state.priorities;
+      setPreferences({
+        ...preferences,
+        userType: state.mode,
+        experience: state.experience,
+        location: state.location?.displayName ?? "",
+        locationCoords: state.location ? { lat: state.location.lat, lng: state.location.lng } : null,
+        timezone: state.location?.timezone ?? null,
+        fastingGoal: state.selectedProgram === "traditional" ? "full" : state.selectedProgram,
+        selectedProgram: state.selectedProgram,
+        onboardingComplete: true,
+        notificationsEnabled: state.notifications.suhoor || state.notifications.iftar,
+        learningPriority: priorities.learningPriority,
+        cultureRecipesPriority: priorities.cultureRecipesPriority,
+        quranPriority: priorities.quranPriority,
+        macroTrackingEnabled: priorities.macroTrackingEnabled,
+        simplifyByLocation: priorities.simplifyByLocation,
+      });
+      setQuickActionOrder(getQuickActionOrderFromPriorities(priorities));
+      navigate("/dashboard");
+    } else {
+      navigate("/");
+    }
   };
 
   return (
@@ -59,8 +64,8 @@ export default function OnboardingLayout() {
           type="button"
           onClick={handleClose}
           className="p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
-          aria-label="Save and exit setup"
-          title="Save answers and go to dashboard"
+          aria-label={preferences.onboardingComplete ? "Save and go to dashboard" : "Exit to homepage"}
+          title={preferences.onboardingComplete ? "Save and go to dashboard" : "Exit to homepage"}
         >
           <X className="w-5 h-5" />
         </button>

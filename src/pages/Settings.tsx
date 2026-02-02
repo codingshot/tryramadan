@@ -20,6 +20,8 @@ import {
   defaultPreferences,
   defaultProgress,
   defaultNotificationSettings,
+  getTotalHoursFasted,
+  calculateStreak,
   type LearningPriority,
   type CultureRecipesPriority,
   type QuranPriority,
@@ -29,12 +31,21 @@ import {
 import { useNotifications } from "@/hooks/useNotifications";
 import { PageSEO } from "@/components/PageSEO";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { LANGUAGE_OPTIONS, COUNTRY_OPTIONS } from "@/data/languages-and-countries";
 import { getDefaultHydrationGoalMl, getHydrationUnit, ML_PER_US_CUP } from "@/lib/hydration";
 
@@ -49,6 +60,7 @@ const Settings = () => {
   const { permission, requestPermission, supported } = useNotifications();
   const [locationLoading, setLocationLoading] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showExportPreview, setShowExportPreview] = useState(false);
   const hydrationUnit = getHydrationUnit(preferences.country || "US");
   const effectiveGoalMl =
     preferences.hydrationGoalMl && preferences.hydrationGoalMl > 0
@@ -60,8 +72,9 @@ const Settings = () => {
   };
 
   useEffect(() => {
-    if (location.hash === "#settings-notifications") {
-      const el = document.getElementById("settings-notifications");
+    const id = location.hash.replace("#", "");
+    if (id === "settings-notifications" || id === "settings-fasting-path") {
+      const el = document.getElementById(id);
       el?.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [location.hash]);
@@ -114,14 +127,15 @@ const Settings = () => {
     setShowResetConfirm(false);
   };
   
+  const getExportData = () => ({
+    preferences,
+    progress,
+    notificationSettings: notifSettings,
+    exportedAt: new Date().toISOString(),
+  });
+
   const handleExportData = () => {
-    const data = {
-      preferences,
-      progress,
-      notificationSettings: notifSettings,
-      exportedAt: new Date().toISOString()
-    };
-    
+    const data = getExportData();
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -129,6 +143,12 @@ const Settings = () => {
     a.download = `tryramadan-data-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleOpenExportPreview = () => setShowExportPreview(true);
+  const handleDownloadFromPreview = () => {
+    handleExportData();
+    setShowExportPreview(false);
   };
 
   return (
@@ -158,6 +178,62 @@ const Settings = () => {
             <h1 className="text-2xl md:text-3xl font-display font-bold">
               <ArabicHover arabic="الإعدادات">Settings</ArabicHover>
             </h1>
+          </motion.div>
+
+          {/* Fasting path — mode (New/Muslim) & program */}
+          <motion.div
+            id="settings-fasting-path"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.02 }}
+            className="p-6 rounded-2xl bg-card border border-border mb-6"
+          >
+            <h2 className="font-display font-bold mb-1 flex items-center gap-2 flex-wrap">
+              <Moon className="w-5 h-5 text-secondary flex-shrink-0" />
+              <ArabicHover arabic="مسار الصيام">Fasting path</ArabicHover>
+            </h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Choose how you&apos;re using the app. This affects labels (e.g. &quot;Iftar&quot; vs &quot;Breaking Fast&quot;) and content tone.
+            </p>
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">Mode</label>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPreferences({ ...preferences, userType: "new" })}
+                    className={`min-h-[44px] flex-1 min-w-[120px] sm:min-w-0 px-4 py-3 rounded-xl border-2 text-left transition-all ${
+                      (preferences.userType ?? null) === "new"
+                        ? "border-secondary bg-secondary/10 text-secondary"
+                        : "border-border hover:border-secondary/50"
+                    }`}
+                  >
+                    <span className="font-semibold block">Non-Muslim</span>
+                    <span className="text-xs text-muted-foreground">Learning & trying fasting</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPreferences({ ...preferences, userType: "muslim" })}
+                    className={`min-h-[44px] flex-1 min-w-[120px] sm:min-w-0 px-4 py-3 rounded-xl border-2 text-left transition-all ${
+                      preferences.userType === "muslim"
+                        ? "border-secondary bg-secondary/10 text-secondary"
+                        : "border-border hover:border-secondary/50"
+                    }`}
+                  >
+                    <span className="font-semibold block">Muslim</span>
+                    <span className="text-xs text-muted-foreground">Full religious observance</span>
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground mb-2 block">Program</label>
+                <div className="p-3 rounded-xl bg-muted/50 border border-border">
+                  <span className="font-medium">Full Ramadan Fast</span>
+                  <span className="text-muted-foreground text-sm ml-2">(dawn to sunset)</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">This is the only program available right now.</p>
+              </div>
+            </div>
           </motion.div>
 
           {/* Your Priorities — personalize dashboard & features */}
@@ -291,8 +367,9 @@ const Settings = () => {
             <p className="text-sm text-muted-foreground mb-4">
               Your location is used to calculate accurate prayer and fasting times.
             </p>
-            
-            {preferences.location && (
+
+            <p className="text-xs font-semibold text-muted-foreground mb-2">Current location</p>
+            {preferences.location ? (
               <div className="p-3 rounded-xl bg-secondary/10 border border-secondary/30 mb-4 flex items-center gap-3">
                 <MapPin className="w-5 h-5 text-secondary flex-shrink-0" />
                 <div className="flex-1 min-w-0">
@@ -301,6 +378,10 @@ const Settings = () => {
                 </div>
                 <Check className="w-5 h-5 text-secondary flex-shrink-0" />
               </div>
+            ) : (
+              <p className="text-sm text-muted-foreground mb-4 py-3 px-3 rounded-xl bg-muted/50 border border-border">
+                No location set. Search below or use Auto-detect.
+              </p>
             )}
             
             <LocationSearch
@@ -603,7 +684,7 @@ const Settings = () => {
             
             <div className="space-y-3">
               <button
-                onClick={handleExportData}
+                onClick={handleOpenExportPreview}
                 className="w-full flex items-center justify-between p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
               >
                 <div className="flex items-center gap-3">
@@ -631,20 +712,44 @@ const Settings = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="mt-4 p-4 rounded-xl bg-destructive/10 border border-destructive/30"
               >
-                <p className="text-sm mb-3">Are you sure? This will delete all your fasting progress.</p>
-                <div className="flex gap-2">
+                <p className="text-sm font-medium mb-3">Are you sure? This will delete all your fasting progress.</p>
+                <div className="rounded-lg bg-background/80 border border-border p-3 mb-4 text-sm">
+                  <p className="font-semibold text-muted-foreground mb-2">Current progress (will be lost)</p>
+                  <ul className="space-y-1 text-muted-foreground">
+                    <li>Completed days: <span className="font-medium text-foreground">{progress.completedDays?.length ?? 0}</span></li>
+                    <li>Current day: <span className="font-medium text-foreground">{progress.currentDay ?? 1}</span> of {progress.totalDays ?? 30}</li>
+                    <li>Current streak: <span className="font-medium text-foreground">{progress.currentStreak ?? calculateStreak(progress)}</span> days</li>
+                    <li>Longest streak: <span className="font-medium text-foreground">{progress.longestStreak ?? 0}</span> days</li>
+                    <li>Total hours fasted: <span className="font-medium text-foreground">{getTotalHoursFasted(progress).toFixed(1)}</span>h</li>
+                    <li>Sunnah days completed: <span className="font-medium text-foreground">{progress.sunnahDaysCompleted ?? 0}</span></li>
+                    {(progress.fastingLog?.length ?? 0) > 0 && (
+                      <li>Fasting log entries: <span className="font-medium text-foreground">{progress.fastingLog?.length ?? 0}</span></li>
+                    )}
+                  </ul>
+                </div>
+                <div className="flex flex-col gap-2">
                   <button
-                    onClick={handleResetProgress}
-                    className="flex-1 py-2 rounded-lg bg-destructive text-destructive-foreground text-sm font-medium"
+                    type="button"
+                    onClick={() => setShowExportPreview(true)}
+                    className="w-full py-2 rounded-lg border-2 border-secondary/50 text-secondary hover:bg-secondary/10 text-sm font-medium flex items-center justify-center gap-2"
                   >
-                    Yes, reset everything
+                    <Download className="w-4 h-4" />
+                    Download progress (backup before reset)
                   </button>
-                  <button
-                    onClick={() => setShowResetConfirm(false)}
-                    className="flex-1 py-2 rounded-lg bg-muted text-sm font-medium"
-                  >
-                    Cancel
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleResetProgress}
+                      className="flex-1 py-2 rounded-lg bg-destructive text-destructive-foreground text-sm font-medium"
+                    >
+                      Yes, reset everything
+                    </button>
+                    <button
+                      onClick={() => setShowResetConfirm(false)}
+                      className="flex-1 py-2 rounded-lg bg-muted text-sm font-medium"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -653,6 +758,39 @@ const Settings = () => {
       </main>
       
       <Footer />
+
+      <Dialog open={showExportPreview} onOpenChange={setShowExportPreview}>
+        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col gap-4">
+          <DialogHeader>
+            <DialogTitle>Export preview</DialogTitle>
+            <DialogDescription>
+              Review the data below. Click Download to save as a JSON file.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 min-h-[200px] overflow-auto rounded-lg border border-border bg-muted/30 p-3">
+            <pre className="text-xs text-foreground whitespace-pre-wrap break-words font-mono">
+              {JSON.stringify(getExportData(), null, 2)}
+            </pre>
+          </div>
+          <DialogFooter className="flex-row gap-2 sm:gap-0">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowExportPreview(false)}
+            >
+              Close
+            </Button>
+            <Button
+              type="button"
+              onClick={handleDownloadFromPreview}
+              className="gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Download JSON
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

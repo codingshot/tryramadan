@@ -1525,7 +1525,11 @@ const DashboardSchedule = () => {
                     <span>Completed</span>
                   </div>
                 </TooltipTrigger>
-                <TooltipContent><p>Day marked as fast completed</p></TooltipContent>
+                <TooltipContent className="max-w-xs p-3">
+                  <p className="font-medium">{GENERAL_TOOLTIPS.markComplete.title}</p>
+                  <p className="text-xs mt-1">{GENERAL_TOOLTIPS.markComplete.body}</p>
+                  <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.markComplete.bodyAr}</p>
+                </TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -1534,9 +1538,10 @@ const DashboardSchedule = () => {
                     <span>Ramadan</span>
                   </div>
                 </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
-                  <p className="font-medium">{EATING_TIME_TOOLTIPS.suhoorEnds.title}</p>
-                  <p className="text-xs mt-1">Days of the blessed month. Fast from Fajr (dawn) to Maghrib (sunset).</p>
+                <TooltipContent className="max-w-xs p-3">
+                  <p className="font-medium">{GENERAL_TOOLTIPS.ramadan.title}</p>
+                  <p className="text-xs mt-1">{GENERAL_TOOLTIPS.ramadan.body}</p>
+                  <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.ramadan.bodyAr}</p>
                 </TooltipContent>
               </Tooltip>
               <Tooltip>

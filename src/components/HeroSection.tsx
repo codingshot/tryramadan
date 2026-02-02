@@ -1,18 +1,12 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { FastingTimer } from "./FastingTimer";
 import { ArabicHover } from "./ArabicHover";
-import { RamadanStartInfoDialog } from "./RamadanStartInfoDialog";
-import { getDaysUntilRamadan as getDaysUntilNextRamadan } from "@/lib/ramadan";
 import heroBg from "@/assets/hero-bg.jpg";
 import logo from "@/assets/logo.png";
 
 export const HeroSection = () => {
-  const daysUntil = Math.max(0, getDaysUntilNextRamadan());
-  const [ramadanInfoOpen, setRamadanInfoOpen] = useState(false);
-
   return (
     <>
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -43,33 +37,6 @@ export const HeroSection = () => {
 
         <div className="relative z-10 container mx-auto px-4 pb-20 sm:pb-24 md:pb-32 pt-[calc(4rem+env(safe-area-inset-top,0px))] md:pt-[calc(5rem+env(safe-area-inset-top,0px))]">
           <div className="max-w-5xl mx-auto">
-            {/* Days until Ramadan - prominent banner (double-click for info) */}
-            {daysUntil > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex justify-center mb-8"
-              >
-                <div
-                  role="button"
-                  tabIndex={0}
-                  onDoubleClick={() => setRamadanInfoOpen(true)}
-                  onKeyDown={(e) => e.key === "Enter" && setRamadanInfoOpen(true)}
-                  className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-secondary/20 backdrop-blur-sm border border-secondary/30 cursor-pointer select-none hover:bg-secondary/25 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
-                  title="Double-click for when Ramadan starts"
-                >
-                  <span className="text-2xl md:text-3xl" aria-hidden>📅</span>
-                  <div className="text-center">
-                    <span className="text-3xl md:text-4xl font-bold text-secondary">{daysUntil}</span>
-                    <ArabicHover arabic="يوم حتى رمضان" className="text-primary-foreground/80 ml-2 text-sm md:text-base border-0">
-                      days until Ramadan
-                    </ArabicHover>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-            <RamadanStartInfoDialog open={ramadanInfoOpen} onOpenChange={setRamadanInfoOpen} />
-
             {/* Logo and badge */}
             <motion.div 
               initial={{ opacity: 0, y: 20 }}

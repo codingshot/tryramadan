@@ -3,6 +3,7 @@ import { Clock, Sunrise, Sunset, Moon } from "lucide-react";
 import type { PrayerTimes } from "@/hooks/usePrayerTimes";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
+import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
 
 export interface TimelineItem {
   time: string;
@@ -135,20 +136,25 @@ export function TodayScheduleTimeline({
                 <TooltipTrigger asChild>
                   <span className="font-medium text-sm block truncate cursor-help">{item.label}</span>
                 </TooltipTrigger>
-                <TooltipContent>
-                  <p className="font-medium">{item.label}</p>
+                <TooltipContent className="max-w-xs p-3">
+                  <p className="font-medium">
+                    {item.label.includes("Suhoor") ? EATING_TIME_TOOLTIPS.suhoorEnds.title : item.label === "Fajr" ? EATING_TIME_TOOLTIPS.fajr.title : item.label === "Dhuhr" ? EATING_TIME_TOOLTIPS.dhuhr.title : item.label === "Asr" ? EATING_TIME_TOOLTIPS.asr.title : (item.label === iftarLabelShort || item.label.includes("Iftar")) ? EATING_TIME_TOOLTIPS.iftarTime.title : item.label === "Isha" ? EATING_TIME_TOOLTIPS.isha.title : item.label.includes("Taraweeh") ? GENERAL_TOOLTIPS.taraweeh.title : item.label}
+                  </p>
                   {item.sublabel && (
                     <p className="text-xs text-muted-foreground mt-1">{item.sublabel}</p>
                   )}
                   {item.label.includes("Suhoor") && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {(EATING_TIME_TOOLTIPS.suhoorEnds as { body?: string }).body}
-                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.suhoorEnds.body}</p>
                   )}
-                  {(item.label === iftarLabelShort || item.label.includes("Iftar")) && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {(EATING_TIME_TOOLTIPS.iftar as { body?: string }).body}
-                    </p>
+                  {item.label === "Fajr" && <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.fajr.body}</p>}
+                  {item.label === "Dhuhr" && <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.dhuhr.body}</p>}
+                  {item.label === "Asr" && <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.asr.body}</p>}
+                  {(item.label === iftarLabelShort || item.label.includes("Iftar")) && !item.label.includes("Taraweeh") && (
+                    <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.iftarTime.body}</p>
+                  )}
+                  {item.label === "Isha" && <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.isha.body}</p>}
+                  {item.label.includes("Taraweeh") && (
+                    <p className="text-xs text-muted-foreground mt-1">{GENERAL_TOOLTIPS.taraweeh.body}</p>
                   )}
                 </TooltipContent>
               </Tooltip>
