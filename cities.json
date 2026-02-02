@@ -17,57 +17,357 @@
         "rituals_and_traditions": [
           "string"
         ],
-        "notes": "string"
+        "notes": "string",
+        "population": "string (optional)",
+        "muslim_population": "string (optional)",
+        "muslim_percentage": "number (optional)",
+        "ramadan_traditions": "string (optional)",
+        "religious_cultural": "string (optional)",
+        "tags": [
+          "string (optional)"
+        ],
+        "slug": "string (optional)"
       }
     ]
   },
   "data": [
     {
-      "country": "Nigeria",
-      "region": "Africa",
+      "country": "Afghanistan",
+      "region": "South Asia",
       "cities": [
         {
-          "name": "Kano",
+          "name": "Kabul",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Local iftar and suhoor; Taraweeh in mosques; family and community gatherings; charity and feeding the needy; emphasis on Qur'an and Laylat al-Qadr.",
+          "population": "~40 million",
+          "muslim_population": "~40 million (99.7% of Afghanistan, Kabul metro ~6 million)",
+          "muslim_percentage": 99,
+          "ramadan_traditions": "Local iftar and suhoor; Taraweeh in mosques; family and community gatherings; charity and feeding the needy; emphasis on Qur'an and Laylat al-Qadr.",
+          "religious_cultural": "Ramadan observed with mosque and community programs; Laylat al-Qadr; zakat and sadaqah; strong emphasis on family, worship, and charity.",
+          "tags": [
+            "south-asia",
+            "capital-city",
+            "large-population",
+            "young-demographic",
+            "emerging-tech"
+          ],
+          "slug": "kabul"
+        }
+      ]
+    },
+    {
+      "country": "Algeria",
+      "region": "Maghreb",
+      "cities": [
+        {
+          "name": "Algiers",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Algerian iftar (chorba, bourek, dates); drummers for suhoor; Taraweeh in historic mosques; family and neighborhood iftars; Ramadan sweets.",
+          "population": "~44 million",
+          "muslim_population": "~43 million (99% of Algeria)",
+          "muslim_percentage": 99,
+          "ramadan_traditions": "Algerian iftar (chorba, bourek, dates); drummers for suhoor; Taraweeh in historic mosques; family and neighborhood iftars; Ramadan sweets.",
+          "religious_cultural": "Algerian Maliki and Islamic heritage; Laylat al-Qadr; mosque and community programs; charity; strong family and cultural observance.",
+          "tags": [
+            "maghreb",
+            "large-market",
+            "resource-wealth",
+            "francophone",
+            "untapped-potential"
+          ],
+          "slug": "algiers"
+        }
+      ]
+    },
+    {
+      "country": "Azerbaijan",
+      "region": "Middle East",
+      "cities": [
+        {
+          "name": "Baku",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Azerbaijani iftar; plov, dates, tea; Taraweeh in Baku and historic mosques; family and community; charity.",
+          "population": "~10.2 million",
+          "muslim_population": "~9.8 million (96% of Azerbaijan)",
+          "muslim_percentage": 96,
+          "ramadan_traditions": "Azerbaijani iftar; plov, dates, tea; Taraweeh in Baku and historic mosques; family and community; charity.",
+          "religious_cultural": "Caucasus Islamic heritage; Sunni majority; Laylat al-Qadr; mosque and cultural observance.",
+          "tags": [
+            "caucasus",
+            "europe-asia-bridge",
+            "oil-diversification",
+            "young-population",
+            "growing-ecosystem"
+          ],
+          "slug": "baku"
+        }
+      ]
+    },
+    {
+      "country": "Bahrain",
+      "region": "GCC",
+      "cities": [
+        {
+          "name": "Manama",
           "suhoor_meals": [
-            "kunu (millet-based drink/porridge)",
-            "light rice or tuwo dishes"
+            "bread, cheese, dates",
+            "light stews"
           ],
           "iftar_meals": [
             "dates and water",
-            "dambu (shredded spiced meat)",
-            "masa (rice pancakes)",
-            "jollof rice"
+            "rice with meat stews",
+            "fish dishes"
           ],
           "desserts_and_drinks": [
-            "kunu variations",
-            "local juices"
+            "luqaimat",
+            "regional sweets"
           ],
           "rituals_and_traditions": [
-            "Community iftar in mosques and family homes",
-            "Women preparing large communal spreads for extended family"
+            "Gargee'an celebrations around mid-Ramadan",
+            "Community iftars supported by charities and mosques"
           ],
-          "notes": "Hausa communities commonly serve dambu, kunu, and masa at iftar.[web:1][web:3]"
-        },
+          "notes": "Bahrain's mid-Ramadan children's celebrations mirror Gargee'an traditions seen elsewhere in the Gulf.[web:18]",
+          "population": "~1.5 million",
+          "muslim_population": "~1.1 million (73% of Bahrain)",
+          "muslim_percentage": 73,
+          "ramadan_traditions": "Bahraini iftar (dates, gahwa, main dishes); Taraweeh in mosques; charity and community; family majlis.",
+          "religious_cultural": "Gulf Ramadan; Sunni and Shia observance; Laylat al-Qadr; mosque and community programs.",
+          "tags": [
+            "arabian-peninsula",
+            "islamic-finance",
+            "business-friendly",
+            "gcc-access",
+            "early-adopter"
+          ],
+          "slug": "manama"
+        }
+      ]
+    },
+    {
+      "country": "Bangladesh",
+      "region": "South Asia",
+      "cities": [
         {
-          "name": "Lagos",
+          "name": "Dhaka",
           "suhoor_meals": [
-            "bread and tea",
-            "rice dishes",
-            "kunu where available"
+            "rice with curry",
+            "paratha and dal"
           ],
           "iftar_meals": [
-            "jollof rice with chicken or fish",
-            "fried plantains (dodo)"
+            "dates and water",
+            "biryani",
+            "panta ilish (fermented rice with hilsa fish) for some",
+            "piaju (lentil fritters)",
+            "beguni (battered fried eggplant)"
           ],
           "desserts_and_drinks": [
-            "local soft drinks",
-            "fruit juices"
+            "rooh afza drinks",
+            "mishti (sweets)"
           ],
           "rituals_and_traditions": [
-            "Urban mosques host iftar for travelers and the poor",
-            "Strong West African jollof culture at large family gatherings"
+            "Crowded iftar markets selling fritters and biryanis",
+            "Strong culture of giving food to the poor during Ramadan"
           ],
-          "notes": "Jollof rice is a core celebratory dish across Nigeria and is common at Ramadan gatherings.[web:3]"
+          "notes": "Bangladeshi iftars feature biryani, panta ilish, and various fried snacks, with a big emphasis on charity.[web:4][web:14]",
+          "population": "~170 million",
+          "muslim_population": "~155 million (90% of Bangladesh)",
+          "muslim_percentage": 90,
+          "ramadan_traditions": "Bengali Ramadan; iftar with piaju, chola, dates, sherbet; Taraweeh in mosques; Ramadan bazaars; charity and neighborhood iftars; family sehri and iftar.",
+          "religious_cultural": "Bangladeshi Sunni tradition; Laylat al-Qadr; Qur'an and hadith study; zakat and sadaqah; mosque and madrasa programs; strong community and family focus.",
+          "tags": [
+            "south-asia",
+            "competitive-costs",
+            "young-population",
+            "growing-sector",
+            "digital-payments"
+          ],
+          "slug": "dhaka"
+        },
+        {
+          "name": "Chittagong",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Piaju, chola, dates at iftar; Taraweeh; Ramadan bazaars; charity and neighborhood iftars; family sehri and iftar.",
+          "population": "~170 million",
+          "muslim_population": "~155 million (90% of Bangladesh); Chittagong is second largest city",
+          "muslim_percentage": 90,
+          "ramadan_traditions": "Piaju, chola, dates at iftar; Taraweeh; Ramadan bazaars; charity and neighborhood iftars; family sehri and iftar.",
+          "religious_cultural": "Sunni tradition; Laylat al-Qadr; Qur'an study; zakat; mosque and madrasa programs; strong community focus.",
+          "tags": [
+            "south-asia",
+            "port-city",
+            "competitive-costs",
+            "growing-sector",
+            "young-workforce"
+          ],
+          "slug": "chittagong"
+        }
+      ]
+    },
+    {
+      "country": "Belgium",
+      "region": "Europe",
+      "cities": [
+        {
+          "name": "Brussels",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Iftar at mosques and community centers; multicultural traditions; Taraweeh; charity; family and community.",
+          "population": "~1.2 million",
+          "muslim_population": "~250,000-300,000 (20-25% of Brussels)",
+          "muslim_percentage": 23,
+          "ramadan_traditions": "Iftar at mosques and community centers; multicultural traditions; Taraweeh; charity; family and community.",
+          "religious_cultural": "European Muslim community; Laylat al-Qadr; mosque and association programs; Moroccan and Turkish heritage.",
+          "tags": [
+            "europe",
+            "eu-capital",
+            "high-muslim-concentration",
+            "multilingual",
+            "growing-tech-hub"
+          ],
+          "slug": "brussels"
+        }
+      ]
+    },
+    {
+      "country": "Bosnia and Herzegovina",
+      "region": "Europe",
+      "cities": [
+        {
+          "name": "Sarajevo",
+          "suhoor_meals": [
+            "bread, cheese, local meats"
+          ],
+          "iftar_meals": [
+            "dates",
+            "soups and meat dishes"
+          ],
+          "desserts_and_drinks": [
+            "local sweets and coffee"
+          ],
+          "rituals_and_traditions": [
+            "Iftar cannon fired from Yellow Fortress to signal sunset",
+            "People gather around the fortress and mosques for iftar"
+          ],
+          "notes": "Sarajevo maintains the iftar cannon tradition with crowds gathering at the Yellow Fortress.[web:2]"
+        }
+      ]
+    },
+    {
+      "country": "Canada",
+      "region": "North America",
+      "cities": [
+        {
+          "name": "Toronto",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Iftar at mosques and community centers; multicultural traditions; Taraweeh; charity; family and community observance.",
+          "population": "~3 million (city), ~6.4 million (metro)",
+          "muslim_population": "~400,000-500,000 (15-18% of Toronto)",
+          "muslim_percentage": 16,
+          "ramadan_traditions": "Iftar at mosques and community centers; multicultural traditions; Taraweeh; charity; family and community observance.",
+          "religious_cultural": "Diverse Canadian Muslim community; Laylat al-Qadr; mosque and Islamic association programs; multicultural Ramadan.",
+          "tags": [
+            "north-america",
+            "major-tech-hub",
+            "ai-innovation",
+            "diverse-talent",
+            "quality-of-life",
+            "multicultural",
+            "large-muslim-population"
+          ],
+          "slug": "toronto"
+        },
+        {
+          "name": "Vancouver",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Iftar at mosques and community centers; multicultural traditions; Taraweeh; charity; family and community observance.",
+          "population": "~675,000 (city), ~2.8 million (metro)",
+          "muslim_population": "~80,000-100,000 (12-15% of Vancouver)",
+          "muslim_percentage": 13,
+          "ramadan_traditions": "Iftar at mosques and community centers; multicultural traditions; Taraweeh; charity; family and community observance.",
+          "religious_cultural": "Diverse Canadian Muslim community; Laylat al-Qadr; mosque and Islamic association programs; multicultural Ramadan.",
+          "tags": [
+            "north-america",
+            "growing-tech-hub",
+            "gaming-industry",
+            "quality-of-life",
+            "multicultural",
+            "asia-pacific-gateway"
+          ],
+          "slug": "vancouver"
+        }
+      ]
+    },
+    {
+      "country": "China",
+      "region": "East Asia",
+      "cities": [
+        {
+          "name": "Xi'an",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Chinese Muslim (Hui) Ramadan; iftar with halal local dishes; mosque and community iftars; Taraweeh; charity; family and neighborhood.",
+          "population": "~13 million (metro)",
+          "muslim_population": "~200,000-300,000 (2-3% of Xi'an metro)",
+          "muslim_percentage": 2,
+          "ramadan_traditions": "Chinese Muslim (Hui) Ramadan; iftar with halal local dishes; mosque and community iftars; Taraweeh; charity; family and neighborhood.",
+          "religious_cultural": "Hui and Uyghur traditions; Laylat al-Qadr; mosque and community; Silk Road Islamic heritage.",
+          "tags": [
+            "east-asia",
+            "hui-muslim-community",
+            "growing-tech-hub",
+            "manufacturing-tech",
+            "historic"
+          ],
+          "slug": "xian"
+        }
+      ]
+    },
+    {
+      "country": "Côte d'Ivoire",
+      "region": "Africa",
+      "cities": [
+        {
+          "name": "Abidjan",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Local iftar and suhoor; Taraweeh in mosques; family and community gatherings; charity and feeding the needy; emphasis on Qur'an and Laylat al-Qadr.",
+          "population": "~27 million",
+          "muslim_population": "~11 million (42% of Côte d'Ivoire); Abidjan has significant Muslim population",
+          "muslim_percentage": 42,
+          "ramadan_traditions": "Local iftar and suhoor; Taraweeh in mosques; family and community gatherings; charity and feeding the needy; emphasis on Qur'an and Laylat al-Qadr.",
+          "religious_cultural": "Ramadan observed with mosque and community programs; Laylat al-Qadr; zakat and sadaqah; strong emphasis on family, worship, and charity.",
+          "tags": [
+            "west-africa",
+            "francophone",
+            "economic-hub",
+            "resource-wealth",
+            "stable"
+          ],
+          "slug": "abidjan"
         }
       ]
     },
@@ -96,7 +396,20 @@
             "Lanterns carried by children while singing Ramadan songs",
             "Family iftars that often extend into late-night socializing"
           ],
-          "notes": "Colorful fanoos lanterns and ful with karkadeh are widely associated with Egyptian Ramadan.[web:1]"
+          "notes": "Colorful fanoos lanterns and ful with karkadeh are widely associated with Egyptian Ramadan.[web:1]",
+          "population": "~106 million",
+          "muslim_population": "~95 million (90% of Egypt)",
+          "muslim_percentage": 90,
+          "ramadan_traditions": "Fanous (Ramadan lanterns); meshaharati (drummer waking people for suhoor); cannon firing at Maghrib; street iftars; qatayef and kunafa; Taraweeh at Al-Azhar and historic mosques.",
+          "religious_cultural": "Al-Azhar and historic mosques lead Ramadan programs; Egyptian iftar tables (foul, tamr hindi, qamar al-din); Laylat al-Qadr vigils; charity and shared meals in neighborhoods.",
+          "tags": [
+            "north-africa",
+            "largest-arab-population",
+            "cost-effective",
+            "cultural-center",
+            "large-talent-pool"
+          ],
+          "slug": "cairo"
         },
         {
           "name": "Alexandria",
@@ -115,7 +428,644 @@
             "Coastal iftars with extended families",
             "Neighborhood lantern displays similar to Cairo"
           ],
-          "notes": "Coastal influence adds more fish/seafood to otherwise typical Egyptian Ramadan meals.[web:1]"
+          "notes": "Coastal influence adds more fish/seafood to otherwise typical Egyptian Ramadan meals.[web:1]",
+          "population": "~6.4 million",
+          "muslim_population": "~5.8 million (90% of Egypt, Alexandria metro)",
+          "muslim_percentage": 90,
+          "ramadan_traditions": "Coastal Egyptian Ramadan; fanous and meshaharati; iftar with seafood and Egyptian dishes; Taraweeh in historic mosques; street and family iftars.",
+          "religious_cultural": "Mediterranean and Egyptian blend; Al-Azhar presence; Laylat al-Qadr; charity and community; strong mosque and neighborhood culture.",
+          "tags": [
+            "middle-east",
+            "major-city",
+            "port-city",
+            "growing-tech-hub",
+            "large-population"
+          ],
+          "slug": "alexandria"
+        }
+      ]
+    },
+    {
+      "country": "France",
+      "region": "Europe",
+      "cities": [
+        {
+          "name": "Paris",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "French Muslim Ramadan; iftar at mosques and homes; Grand Mosque of Paris; Ramadan in the banlieues; charity and community; multicultural North African and sub-Saharan traditions.",
+          "population": "~12.3 million (Île-de-France)",
+          "muslim_population": "~1.7 million (8-10% of Île-de-France region)",
+          "muslim_percentage": 9,
+          "ramadan_traditions": "French Muslim Ramadan; iftar at mosques and homes; Grand Mosque of Paris; Ramadan in the banlieues; charity and community; multicultural North African and sub-Saharan traditions.",
+          "religious_cultural": "Major European Muslim community; Laylat al-Qadr; mosque and association-led programs; debate on Ramadan in secular France; solidarity and charity.",
+          "tags": [
+            "europe",
+            "major-tech-hub",
+            "large-muslim-population",
+            "diverse-talent",
+            "startup-ecosystem"
+          ],
+          "slug": "paris"
+        }
+      ]
+    },
+    {
+      "country": "India",
+      "region": "South Asia",
+      "cities": [
+        {
+          "name": "Hyderabad",
+          "suhoor_meals": [
+            "paratha with curry",
+            "tea"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "haleem",
+            "samosas",
+            "fruit chaat"
+          ],
+          "desserts_and_drinks": [
+            "falooda",
+            "rooh afza-based drinks"
+          ],
+          "rituals_and_traditions": [
+            "Haleem stalls all over the city during Ramadan",
+            "Night markets around Charminar packed after taraweeh"
+          ],
+          "notes": "Hyderabadi haleem is one of the most famous South Asian Ramadan dishes.[web:5][web:13]",
+          "population": "~10 million (metro)",
+          "muslim_population": "~1.8-2.2 million (30-35% of Hyderabad)",
+          "muslim_percentage": 32,
+          "ramadan_traditions": "Sehri and iftar with regional dishes; Taraweeh in mosques; Ramadan bazaars; dastarkhwan; family and neighborhood iftars.",
+          "religious_cultural": "Mughal and Indian Islamic heritage; Laylat al-Qadr; Sunni majority; charity; mosque and shrine visits; diverse regional customs.",
+          "tags": [
+            "south-asia",
+            "high-muslim-concentration",
+            "major-tech-hub",
+            "islamic-heritage",
+            "muslim-cultural-center"
+          ],
+          "slug": "hyderabad"
+        },
+        {
+          "name": "Delhi",
+          "suhoor_meals": [
+            "paratha, eggs, chai"
+          ],
+          "iftar_meals": [
+            "shami kebab",
+            "biryani",
+            "samosas"
+          ],
+          "desserts_and_drinks": [
+            "rooh afza sharbat"
+          ],
+          "rituals_and_traditions": [
+            "Old Delhi food streets like Jama Masjid area crowded for iftar and late-night snacks",
+            "Seheriwalas (drummers) waking people up for suhoor in some neighborhoods"
+          ],
+          "notes": "India shares many Ramadan foods with Pakistan and Bangladesh, including haleem, biryani, and rooh afza drinks.[web:5][web:13][web:16]",
+          "population": "~20 million (metro)",
+          "muslim_population": "~2.5-3 million (12-15% of Delhi metro)",
+          "muslim_percentage": 13,
+          "ramadan_traditions": "Indian Muslim Ramadan; Old Delhi iftar (kebabs, phirni, dates); Jama Masjid and neighborhood mosques; Taraweeh; Ramadan bazaars; sehri and iftar with family.",
+          "religious_cultural": "Mughal and Indian Islamic heritage; Laylat al-Qadr; Sunni majority; charity and dastarkhwan; mosque and shrine visits; blend of Urdu and regional customs.",
+          "tags": [
+            "south-asia",
+            "capital-city",
+            "islamic-heritage",
+            "major-tech-hub",
+            "large-muslim-population"
+          ],
+          "slug": "delhi"
+        },
+        {
+          "name": "Kolkata",
+          "suhoor_meals": [
+            "paratha and curry",
+            "chai"
+          ],
+          "iftar_meals": [
+            "biryani",
+            "chops and cutlets",
+            "samosas"
+          ],
+          "desserts_and_drinks": [
+            "sweet lassi",
+            "rooh afza"
+          ],
+          "rituals_and_traditions": [
+            "Ramadan food lanes around Zakaria Street and central mosques",
+            "Strong street-food culture after iftar"
+          ],
+          "notes": "Kolkata's Ramadan is known for dense street-food scenes centered on mosques and market lanes.[web:4]",
+          "population": "~15 million (metro)",
+          "muslim_population": "~2.5-3 million (18-22% of Kolkata metro)",
+          "muslim_percentage": 20,
+          "ramadan_traditions": "Sehri and iftar with regional dishes; Taraweeh in mosques; Ramadan bazaars; dastarkhwan; family and neighborhood iftars.",
+          "religious_cultural": "Mughal and Indian Islamic heritage; Laylat al-Qadr; Sunni majority; charity; mosque and shrine visits; diverse regional customs.",
+          "tags": [
+            "south-asia",
+            "large-muslim-population",
+            "growing-tech-hub",
+            "affordable",
+            "historic-significance"
+          ],
+          "slug": "kolkata"
+        },
+        {
+          "name": "Mumbai",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Mumbai Ramadan; Mohammed Ali Road and Bhendi Bazaar iftar; kebabs, haleem, dates; Taraweeh in historic mosques; Ramadan markets; community and family iftars.",
+          "population": "~26 million (metro)",
+          "muslim_population": "~3.5-4 million (12-15% of Mumbai metro)",
+          "muslim_percentage": 13,
+          "ramadan_traditions": "Mumbai Ramadan; Mohammed Ali Road and Bhendi Bazaar iftar; kebabs, haleem, dates; Taraweeh in historic mosques; Ramadan markets; community and family iftars.",
+          "religious_cultural": "Cosmopolitan Indian Muslim community; Laylat al-Qadr; Sunni and Bohra traditions; charity and feeding; strong mosque and community culture.",
+          "tags": [
+            "south-asia",
+            "major-tech-hub",
+            "large-muslim-population",
+            "diverse-talent",
+            "high-purchasing-power"
+          ],
+          "slug": "mumbai"
+        },
+        {
+          "name": "Lucknow",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Sehri and iftar with regional dishes; Taraweeh in mosques; Ramadan bazaars; dastarkhwan; family and neighborhood iftars.",
+          "population": "~5 million (metro)",
+          "muslim_population": "~1.2-1.5 million (25-30% of Lucknow)",
+          "muslim_percentage": 27,
+          "ramadan_traditions": "Sehri and iftar with regional dishes; Taraweeh in mosques; Ramadan bazaars; dastarkhwan; family and neighborhood iftars.",
+          "religious_cultural": "Mughal and Indian Islamic heritage; Laylat al-Qadr; Sunni majority; charity; mosque and shrine visits; diverse regional customs.",
+          "tags": [
+            "south-asia",
+            "indo-islamic-culture",
+            "shia-center",
+            "growing-tech-hub",
+            "affordable"
+          ],
+          "slug": "lucknow"
+        },
+        {
+          "name": "Bengaluru",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Sehri and iftar with regional dishes; Taraweeh in mosques; Ramadan bazaars; dastarkhwan; family and neighborhood iftars.",
+          "population": "~13 million (metro)",
+          "muslim_population": "~1.5-2 million (12-15% of Bengaluru metro)",
+          "muslim_percentage": 13,
+          "ramadan_traditions": "Sehri and iftar with regional dishes; Taraweeh in mosques; Ramadan bazaars; dastarkhwan; family and neighborhood iftars.",
+          "religious_cultural": "Mughal and Indian Islamic heritage; Laylat al-Qadr; Sunni majority; charity; mosque and shrine visits; diverse regional customs.",
+          "tags": [
+            "south-asia",
+            "major-tech-hub",
+            "silicon-valley-india",
+            "large-muslim-population",
+            "diverse-talent"
+          ],
+          "slug": "bengaluru"
+        },
+        {
+          "name": "Ahmedabad",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Sehri and iftar with regional dishes; Taraweeh in mosques; Ramadan bazaars; dastarkhwan; family and neighborhood iftars.",
+          "population": "~8.5 million (metro)",
+          "muslim_population": "~800,000-1 million (12-15% of Ahmedabad)",
+          "muslim_percentage": 13,
+          "ramadan_traditions": "Sehri and iftar with regional dishes; Taraweeh in mosques; Ramadan bazaars; dastarkhwan; family and neighborhood iftars.",
+          "religious_cultural": "Mughal and Indian Islamic heritage; Laylat al-Qadr; Sunni majority; charity; mosque and shrine visits; diverse regional customs.",
+          "tags": [
+            "south-asia",
+            "growing-tech-hub",
+            "affordable",
+            "manufacturing-tech",
+            "muslim-community"
+          ],
+          "slug": "ahmedabad"
+        },
+        {
+          "name": "Chennai",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Sehri and iftar with regional dishes; Taraweeh in mosques; Ramadan bazaars; dastarkhwan; family and neighborhood iftars.",
+          "population": "~11 million (metro)",
+          "muslim_population": "~800,000-1 million (10-12% of Chennai metro)",
+          "muslim_percentage": 11,
+          "ramadan_traditions": "Sehri and iftar with regional dishes; Taraweeh in mosques; Ramadan bazaars; dastarkhwan; family and neighborhood iftars.",
+          "religious_cultural": "Mughal and Indian Islamic heritage; Laylat al-Qadr; Sunni majority; charity; mosque and shrine visits; diverse regional customs.",
+          "tags": [
+            "south-asia",
+            "major-tech-hub",
+            "it-services",
+            "muslim-community",
+            "diverse-talent"
+          ],
+          "slug": "chennai"
+        },
+        {
+          "name": "Pune",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Sehri and iftar with regional dishes; Taraweeh in mosques; Ramadan bazaars; dastarkhwan; family and neighborhood iftars.",
+          "population": "~7 million (metro)",
+          "muslim_population": "~600,000-800,000 (10-12% of Pune metro)",
+          "muslim_percentage": 11,
+          "ramadan_traditions": "Sehri and iftar with regional dishes; Taraweeh in mosques; Ramadan bazaars; dastarkhwan; family and neighborhood iftars.",
+          "religious_cultural": "Mughal and Indian Islamic heritage; Laylat al-Qadr; Sunni majority; charity; mosque and shrine visits; diverse regional customs.",
+          "tags": [
+            "south-asia",
+            "major-tech-hub",
+            "it-services",
+            "affordable",
+            "muslim-community"
+          ],
+          "slug": "pune"
+        },
+        {
+          "name": "Jaipur",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Sehri and iftar with regional dishes; Taraweeh in mosques; Ramadan bazaars; dastarkhwan; family and neighborhood iftars.",
+          "population": "~5 million (metro)",
+          "muslim_population": "~400,000-500,000 (8-10% of Jaipur)",
+          "muslim_percentage": 9,
+          "ramadan_traditions": "Sehri and iftar with regional dishes; Taraweeh in mosques; Ramadan bazaars; dastarkhwan; family and neighborhood iftars.",
+          "religious_cultural": "Mughal and Indian Islamic heritage; Laylat al-Qadr; Sunni majority; charity; mosque and shrine visits; diverse regional customs.",
+          "tags": [
+            "south-asia",
+            "growing-tech-hub",
+            "affordable",
+            "tourism-tech",
+            "muslim-community"
+          ],
+          "slug": "jaipur"
+        }
+      ]
+    },
+    {
+      "country": "Indonesia",
+      "region": "Southeast Asia",
+      "cities": [
+        {
+          "name": "Jakarta",
+          "suhoor_meals": [
+            "rice with side dishes",
+            "soups"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "kolak (sweet banana, coconut, palm sugar dessert)",
+            "gorengan (fried snacks)"
+          ],
+          "desserts_and_drinks": [
+            "es buah (fruit drink)",
+            "sweet iced teas"
+          ],
+          "rituals_and_traditions": [
+            "Nyekar/nyadran style grave visits and prayers in some Javanese communities before Ramadan",
+            "Crowded street food markets (pasar Ramadan) each evening"
+          ],
+          "notes": "Indonesian Ramadan includes cemetery visits (nyekar/nyadran) and abundant sweet snacks at iftar.[web:2][web:4][web:9]",
+          "population": "~275 million",
+          "muslim_population": "~230 million (87% of Indonesia)",
+          "muslim_percentage": 87,
+          "ramadan_traditions": "Ngabuburit (pre-iftar activities); takjil (sweet snacks at iftar); kolak, es campur; mosque iftars; mudik (homecoming) before Eid; Ramadan markets and street food.",
+          "religious_cultural": "Indonesian Ramadan blend of tradition and community; tadarus (Qur'an reading) in groups; Laylat al-Qadr observances; bedug and call to prayer; charity and open houses.",
+          "tags": [
+            "southeast-asia",
+            "largest-muslim-population",
+            "unicorns",
+            "massive-market",
+            "young-population"
+          ],
+          "slug": "jakarta"
+        },
+        {
+          "name": "Yogyakarta",
+          "suhoor_meals": [
+            "rice with local dishes"
+          ],
+          "iftar_meals": [
+            "kolak",
+            "local snacks and rice dishes"
+          ],
+          "desserts_and_drinks": [
+            "iced teas and juices"
+          ],
+          "rituals_and_traditions": [
+            "Padusan ritual cleansing in springs or lakes before Ramadan",
+            "Javanese cultural elements woven into pre-Ramadan observances"
+          ],
+          "notes": "Padusan is a Javanese ritual cleansing used to welcome Ramadan.[web:2]"
+        },
+        {
+          "name": "Aceh",
+          "suhoor_meals": [
+            "rice and fish or meat dishes"
+          ],
+          "iftar_meals": [
+            "dates",
+            "meugang meat dishes (beef, goat, or buffalo) eaten around start of Ramadan"
+          ],
+          "desserts_and_drinks": [
+            "local sweets and drinks"
+          ],
+          "rituals_and_traditions": [
+            "Meugang, a communal meat feast with family just before Ramadan begins"
+          ],
+          "notes": "Meugang is a distinctive Acehnese pre-Ramadan meat feast.[web:2]"
+        },
+        {
+          "name": "Bandung",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Ngabuburit and takjil; kolak, es campur; mosque iftars; mudik before Eid; Ramadan markets; tadarus and Taraweeh.",
+          "population": "~275 million",
+          "muslim_population": "~230 million (87% of Indonesia); West Java region highly Muslim",
+          "muslim_percentage": 87,
+          "ramadan_traditions": "Ngabuburit and takjil; kolak, es campur; mosque iftars; mudik before Eid; Ramadan markets; tadarus and Taraweeh.",
+          "religious_cultural": "Indonesian blend of tradition and community; Laylat al-Qadr; bedug and mosque life; charity and open houses.",
+          "tags": [
+            "southeast-asia",
+            "creative-hub",
+            "university-ecosystem",
+            "lower-costs",
+            "islamic-lifestyle"
+          ],
+          "slug": "bandung"
+        },
+        {
+          "name": "Surabaya",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Ngabuburit and takjil; kolak, es campur; mosque iftars; mudik before Eid; Ramadan markets; tadarus and Taraweeh.",
+          "population": "~3.7 million",
+          "muslim_population": "~3.2 million (87% of Indonesia, Surabaya metro)",
+          "muslim_percentage": 87,
+          "ramadan_traditions": "Ngabuburit and takjil; kolak, es campur; mosque iftars; mudik before Eid; Ramadan markets; tadarus and Taraweeh.",
+          "religious_cultural": "Indonesian blend of tradition and community; Laylat al-Qadr; bedug and mosque life; charity and open houses.",
+          "tags": [
+            "southeast-asia",
+            "large-population",
+            "major-city",
+            "growing-tech-hub",
+            "port-city"
+          ],
+          "slug": "surabaya"
+        },
+        {
+          "name": "Semarang",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Ngabuburit and takjil; kolak, es campur; mosque iftars; mudik before Eid; Ramadan markets; tadarus and Taraweeh.",
+          "population": "~2.1 million",
+          "muslim_population": "~1.8 million (87% of Indonesia, Semarang metro)",
+          "muslim_percentage": 87,
+          "ramadan_traditions": "Ngabuburit and takjil; kolak, es campur; mosque iftars; mudik before Eid; Ramadan markets; tadarus and Taraweeh.",
+          "religious_cultural": "Indonesian blend of tradition and community; Laylat al-Qadr; bedug and mosque life; charity and open houses.",
+          "tags": [
+            "southeast-asia",
+            "major-city",
+            "growing-tech-hub",
+            "affordable",
+            "muslim-population"
+          ],
+          "slug": "semarang"
+        }
+      ]
+    },
+    {
+      "country": "Iran",
+      "region": "Middle East",
+      "cities": [
+        {
+          "name": "Tehran",
+          "suhoor_meals": [
+            "barbari bread with cheese and herbs",
+            "light stews and rice"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "ash-e reshteh (noodle and bean soup)",
+            "khoresht stews with rice"
+          ],
+          "desserts_and_drinks": [
+            "sholeh zard (saffron rice pudding)",
+            "tea"
+          ],
+          "rituals_and_traditions": [
+            "Late-night street life after iftar",
+            "Special religious gatherings and Quran recitation sessions"
+          ],
+          "notes": "Ash-e reshteh and sholeh zard are widely associated with Iranian Ramadan tables.[web:12][web:13]",
+          "population": "~89 million",
+          "muslim_population": "~88 million (99% of Iran, 90-95% Shia)",
+          "muslim_percentage": 99,
+          "ramadan_traditions": "Shia Ramadan customs; sohoor and iftar with Persian dishes (sholeh zard, zoolbia bamieh); mosque programs and Rawda; Qom seminaries hold special Ramadan lectures; emphasis on dua and night prayers.",
+          "religious_cultural": "Qom as center of Shia scholarship during Ramadan; commemoration of Imam Ali (AS); Laylat al-Qadr and Shab-e-Qadr observances; charity and feeding the needy.",
+          "tags": [
+            "middle-east",
+            "large-population",
+            "resilient-ecosystem",
+            "strong-engineering",
+            "domestic-platforms",
+            "sanctions-resilient"
+          ],
+          "slug": "tehran"
+        },
+        {
+          "name": "Mazandaran (province)",
+          "suhoor_meals": [
+            "local bread, cheese, herbs",
+            "rice dishes"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "regional stews with rice"
+          ],
+          "desserts_and_drinks": [
+            "tea and local sweets"
+          ],
+          "rituals_and_traditions": [
+            "Some communities begin fasting three days before Ramadan starts, effectively fasting 33 days"
+          ],
+          "notes": "In Mazandaran, some people traditionally start fasting at the end of Sha'ban, adding three extra days.[web:12]"
+        },
+        {
+          "name": "Mashhad",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Shia Ramadan at Imam Reza shrine; sohoor and iftar near the shrine; Rawda and dua; Persian dishes; emphasis on Imam Ali (AS) and Laylat al-Qadr.",
+          "population": "~3.5 million",
+          "muslim_population": "~3.5 million (99% Shia Muslim, Mashhad metro)",
+          "muslim_percentage": 99,
+          "ramadan_traditions": "Shia Ramadan at Imam Reza shrine; sohoor and iftar near the shrine; Rawda and dua; Persian dishes; emphasis on Imam Ali (AS) and Laylat al-Qadr.",
+          "religious_cultural": "Major Shia pilgrimage center; Shab-e-Qadr observances; shrine and seminary programs; charity and feeding pilgrims; Persian and Shia tradition.",
+          "tags": [
+            "middle-east",
+            "holy-city",
+            "shia-center",
+            "large-population",
+            "growing-tech-hub"
+          ],
+          "slug": "mashhad"
+        }
+      ]
+    },
+    {
+      "country": "Iraq",
+      "region": "Middle East",
+      "cities": [
+        {
+          "name": "Baghdad",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Iraqi iftar (tamr, qamar al-din, kleicha); meshaharati; Taraweeh in historic mosques; family and neighborhood iftars; emphasis on charity in difficult times.",
+          "population": "~42 million",
+          "muslim_population": "~40 million (95% of Iraq, Baghdad metro ~8 million)",
+          "muslim_percentage": 95,
+          "ramadan_traditions": "Iraqi iftar (tamr, qamar al-din, kleicha); meshaharati; Taraweeh in historic mosques; family and neighborhood iftars; emphasis on charity in difficult times.",
+          "religious_cultural": "Historic Abbasid and Islamic heritage; Laylat al-Qadr; Sunni and Shia observance; resilience and community during Ramadan; mosque and shrine visits.",
+          "tags": [
+            "middle-east",
+            "historic-capital",
+            "large-population",
+            "young-demographic",
+            "emerging-tech"
+          ],
+          "slug": "baghdad"
+        }
+      ]
+    },
+    {
+      "country": "Jordan",
+      "region": "Middle East",
+      "cities": [
+        {
+          "name": "Amman",
+          "suhoor_meals": [
+            "bread, cheese, hummus, foul"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "mansaf (lamb with rice and jameed yogurt)",
+            "various rice and meat dishes"
+          ],
+          "desserts_and_drinks": [
+            "qatayef",
+            "juices"
+          ],
+          "rituals_and_traditions": [
+            "Mansaf at large family gatherings and special Ramadan occasions"
+          ],
+          "notes": "Mansaf, Jordan’s national dish, is central to celebrations and gatherings, including Ramadan.[web:5]",
+          "population": "~11 million",
+          "muslim_population": "~10 million (95% of Jordan)",
+          "muslim_percentage": 95,
+          "ramadan_traditions": "Jordanian iftar (dates, soup, main dishes); Taraweeh in mosques; family and community iftars; charity; Ramadan lights and atmosphere.",
+          "religious_cultural": "Levantine Ramadan; Laylat al-Qadr; mosque and community programs; proximity to Jerusalem and holy sites.",
+          "tags": [
+            "levant",
+            "political-stability",
+            "educated-workforce",
+            "government-supported",
+            "regional-hub"
+          ],
+          "slug": "amman"
+        },
+        {
+          "name": "Irbid",
+          "suhoor_meals": [
+            "bread, cheese, hummus, foul"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "rice with meat stews",
+            "mansaf during special gatherings"
+          ],
+          "desserts_and_drinks": [
+            "qatayef",
+            "juices"
+          ],
+          "rituals_and_traditions": [
+            "Family and tribal gatherings on weekends of Ramadan",
+            "Community support for poorer families with food parcels"
+          ],
+          "notes": "Beyond Amman, mansaf and qatayef remain core parts of Jordanian Ramadan cuisine.[web:5]"
+        }
+      ]
+    },
+    {
+      "country": "Kazakhstan",
+      "region": "Central Asia",
+      "cities": [
+        {
+          "name": "Almaty",
+          "suhoor_meals": [
+            "bread, cheese, tea",
+            "light meat dishes"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "plov",
+            "beshbarmak (boiled meat with pasta)"
+          ],
+          "desserts_and_drinks": [
+            "tea",
+            "local sweets"
+          ],
+          "rituals_and_traditions": [
+            "Strong emphasis on family gatherings at iftar",
+            "Taraweeh prayers at neighborhood mosques"
+          ],
+          "notes": "Plov and beshbarmak appear in Kazakh Ramadan meals along with shared family iftars.[web:14]",
+          "population": "~19 million",
+          "muslim_population": "~13 million (70% of Kazakhstan)",
+          "muslim_percentage": 70,
+          "ramadan_traditions": "Central Asian iftar; plov and local dishes; Taraweeh in mosques; family and community; charity.",
+          "religious_cultural": "Hanafi tradition; Laylat al-Qadr; post-Soviet revival of Ramadan; mosque and community programs.",
+          "tags": [
+            "central-asia",
+            "silk-road",
+            "resource-wealth",
+            "educated-population",
+            "bilingual"
+          ],
+          "slug": "almaty"
         }
       ]
     },
@@ -164,488 +1114,20 @@
             "Street iftar gatherings hosted by mosques and community centers",
             "Strong Swahili coastal culture in food and dress"
           ],
-          "notes": "Zanzibar and Mombasa are known for public street iftars and Swahili dishes like kaimati.[web:1]"
-        }
-      ]
-    },
-    {
-      "country": "Tanzania",
-      "region": "East Africa",
-      "cities": [
-        {
-          "name": "Zanzibar City",
-          "suhoor_meals": [
-            "ugali",
-            "rice and beans",
-            "mandazi"
-          ],
-          "iftar_meals": [
-            "dates and water",
-            "grilled fish",
-            "kaimati",
-            "Swahili rice dishes"
-          ],
-          "desserts_and_drinks": [
-            "sugarcane juice",
-            "fresh tropical juices"
-          ],
-          "rituals_and_traditions": [
-            "Street iftar gatherings near mosques",
-            "Communal sharing of food along the seafront"
-          ],
-          "notes": "Swahili Coast Ramadan is marked by public iftar tables and seafood-rich meals.[web:1]"
-        }
-      ]
-    },
-    {
-      "country": "Morocco",
-      "region": "North Africa",
-      "cities": [
-        {
-          "name": "Casablanca",
-          "suhoor_meals": [
-            "bread with olive oil and cheese",
-            "tagines in lighter portions"
-          ],
-          "iftar_meals": [
-            "dates and water",
-            "harira (hearty soup)",
-            "chebakia (sesame honey pastry)",
-            "breads and tagines"
-          ],
-          "desserts_and_drinks": [
-            "mint tea",
-            "fresh juices"
-          ],
-          "rituals_and_traditions": [
-            "Family-centered iftar centered around harira",
-            "Traditional clothing like djellaba and kaftan for prayers and gatherings"
-          ],
-          "notes": "Harira, rfissa, and tangia are highlighted as signature Moroccan Ramadan dishes.[web:9]"
-        },
-        {
-          "name": "Marrakesh",
-          "suhoor_meals": [
-            "bread, olive oil, and local cheeses"
-          ],
-          "iftar_meals": [
-            "harira",
-            "tanjia marrakchia",
-            "rfissa (chicken and lentils over shredded bread)"
-          ],
-          "desserts_and_drinks": [
-            "mint tea",
-            "chebakia"
-          ],
-          "rituals_and_traditions": [
-            "Large family gatherings after Maghrib",
-            "Old city squares buzzing at night with food stalls"
-          ],
-          "notes": "Tanjia Marrakchia is particularly linked to Marrakesh Ramadan tables.[web:9]"
-        }
-      ]
-    },
-    {
-      "country": "Saudi Arabia",
-      "region": "Middle East",
-      "cities": [
-        {
-          "name": "Riyadh",
-          "suhoor_meals": [
-            "light rice dishes",
-            "bread with cheese and dates"
-          ],
-          "iftar_meals": [
-            "dates and water",
-            "thareed (bread soaked in lamb and vegetable stew)",
-            "kabsa (spiced rice with chicken or lamb)"
-          ],
-          "desserts_and_drinks": [
-            "qamar al-din (apricot drink)",
-            "Arabic coffee and dates"
-          ],
-          "rituals_and_traditions": [
-            "Large family and tribal gatherings",
-            "Night prayers (taraweeh) with packed mosques"
-          ],
-          "notes": "Thareed is a classic Saudi iftar stew, while kabsa is a national dish popular in Ramadan.[web:5][web:7]"
-        },
-        {
-          "name": "Jeddah",
-          "suhoor_meals": [
-            "similar to Riyadh with more seafood options"
-          ],
-          "iftar_meals": [
-            "thareed",
-            "kabsa",
-            "fried and grilled fish"
-          ],
-          "desserts_and_drinks": [
-            "regional desserts and juices"
-          ],
-          "rituals_and_traditions": [
-            "Coastal city gatherings with extended families",
-            "Charity iftars near major mosques"
-          ],
-          "notes": "Jeddah shares core Saudi Ramadan dishes with additional Red Sea seafood.[web:5][web:7]"
-        }
-      ]
-    },
-    {
-      "country": "Turkey",
-      "region": "Middle East/Europe",
-      "cities": [
-        {
-          "name": "Istanbul",
-          "suhoor_meals": [
-            "olives, cheese, bread, eggs",
-            "soups"
-          ],
-          "iftar_meals": [
-            "dates and water",
-            "soup",
-            "Ramazan pidesi (special Ramadan flatbread) with meat or vegetable dishes"
-          ],
-          "desserts_and_drinks": [
-            "güllaç (milk and pomegranate dessert)",
-            "tea"
-          ],
-          "rituals_and_traditions": [
-            "Mosques hang mahya (illuminated messages) between minarets",
-            "Public iftar tents by municipalities",
-            "Street drummers waking people for suhoor in some districts"
-          ],
-          "notes": "Ramazan pidesi is a special bread baked only in Ramadan and widely eaten for iftar and sahur.[web:2][web:7]"
-        },
-        {
-          "name": "Ankara",
-          "suhoor_meals": [
-            "bread, cheese, olives, eggs"
-          ],
-          "iftar_meals": [
-            "Ramazan pidesi with stews and kebabs"
-          ],
-          "desserts_and_drinks": [
-            "tea",
-            "regional sweets"
-          ],
-          "rituals_and_traditions": [
-            "Mahya lights on major mosques",
-            "Municipal iftar programs"
-          ],
-          "notes": "Patterns are similar nationwide with local variations in main dishes.[web:2]"
-        }
-      ]
-    },
-    {
-      "country": "Pakistan",
-      "region": "South Asia",
-      "cities": [
-        {
-          "name": "Karachi",
-          "suhoor_meals": [
-            "paratha with eggs or curry",
-            "tea"
-          ],
-          "iftar_meals": [
-            "dates and water",
-            "samosas",
-            "pakoras",
-            "fruit chaat",
-            "haleem"
-          ],
-          "desserts_and_drinks": [
-            "rooh afza or rose-flavored sharbat",
-            "falooda"
-          ],
-          "rituals_and_traditions": [
-            "Bustling iftar bazaars selling fried snacks",
-            "Charity iftar tables along main roads",
-            "Chaand raat shopping before Eid with henna and bangles"
-          ],
-          "notes": "Iftar in Pakistan commonly features fried snacks, rose-flavored drinks, and haleem; chaand raat is a key end-of-Ramadan celebration.[web:4][web:7]"
-        },
-        {
-          "name": "Lahore",
-          "suhoor_meals": [
-            "paratha and nihari or other meat stews"
-          ],
-          "iftar_meals": [
-            "samosas",
-            "pakoras",
-            "dahi bhalle",
-            "fruit chaat"
-          ],
-          "desserts_and_drinks": [
-            "sweet lassi",
-            "rooh afza drinks"
-          ],
-          "rituals_and_traditions": [
-            "Old-city food streets packed after iftar",
-            "Strong communal culture around late-night eating"
-          ],
-          "notes": "Lahore’s Ramadan is famous for its food streets and rich meaty dishes.[web:4][web:7]"
-        }
-      ]
-    },
-    {
-      "country": "Indonesia",
-      "region": "Southeast Asia",
-      "cities": [
-        {
-          "name": "Jakarta",
-          "suhoor_meals": [
-            "rice with side dishes",
-            "soups"
-          ],
-          "iftar_meals": [
-            "dates and water",
-            "kolak (sweet banana, coconut, palm sugar dessert)",
-            "gorengan (fried snacks)"
-          ],
-          "desserts_and_drinks": [
-            "es buah (fruit drink)",
-            "sweet iced teas"
-          ],
-          "rituals_and_traditions": [
-            "Nyekar/nyadran style grave visits and prayers in some Javanese communities before Ramadan",
-            "Crowded street food markets (pasar Ramadan) each evening"
-          ],
-          "notes": "Indonesian Ramadan includes cemetery visits (nyekar/nyadran) and abundant sweet snacks at iftar.[web:2][web:4][web:9]"
-        },
-        {
-          "name": "Yogyakarta",
-          "suhoor_meals": [
-            "rice with local dishes"
-          ],
-          "iftar_meals": [
-            "kolak",
-            "local snacks and rice dishes"
-          ],
-          "desserts_and_drinks": [
-            "iced teas and juices"
-          ],
-          "rituals_and_traditions": [
-            "Padusan ritual cleansing in springs or lakes before Ramadan",
-            "Javanese cultural elements woven into pre-Ramadan observances"
-          ],
-          "notes": "Padusan is a Javanese ritual cleansing used to welcome Ramadan.[web:2]"
-        },
-        {
-          "name": "Aceh",
-          "suhoor_meals": [
-            "rice and fish or meat dishes"
-          ],
-          "iftar_meals": [
-            "dates",
-            "meugang meat dishes (beef, goat, or buffalo) eaten around start of Ramadan"
-          ],
-          "desserts_and_drinks": [
-            "local sweets and drinks"
-          ],
-          "rituals_and_traditions": [
-            "Meugang, a communal meat feast with family just before Ramadan begins"
-          ],
-          "notes": "Meugang is a distinctive Acehnese pre-Ramadan meat feast.[web:2]"
-        }
-      ]
-    },
-    {
-      "country": "Lebanon",
-      "region": "Middle East",
-      "cities": [
-        {
-          "name": "Beirut",
-          "suhoor_meals": [
-            "man’oushe (flatbread with toppings)",
-            "foul (fava beans)"
-          ],
-          "iftar_meals": [
-            "dates and water",
-            "rice with stews and grilled meats"
-          ],
-          "desserts_and_drinks": [
-            "qatayef",
-            "jallab (date and grape drink)"
-          ],
-          "rituals_and_traditions": [
-            "Midfa al-iftar (iftar cannons) to signal sunset",
-            "Family and neighborhood gatherings"
-          ],
-          "notes": "Iftar cannons are a long-standing tradition used to mark the end of each fasting day.[web:4]"
-        }
-      ]
-    },
-    {
-      "country": "Bosnia and Herzegovina",
-      "region": "Europe",
-      "cities": [
-        {
-          "name": "Sarajevo",
-          "suhoor_meals": [
-            "bread, cheese, local meats"
-          ],
-          "iftar_meals": [
-            "dates",
-            "soups and meat dishes"
-          ],
-          "desserts_and_drinks": [
-            "local sweets and coffee"
-          ],
-          "rituals_and_traditions": [
-            "Iftar cannon fired from Yellow Fortress to signal sunset",
-            "People gather around the fortress and mosques for iftar"
-          ],
-          "notes": "Sarajevo maintains the iftar cannon tradition with crowds gathering at the Yellow Fortress.[web:2]"
-        }
-      ]
-    },
-    {
-      "country": "South Africa",
-      "region": "Africa",
-      "cities": [
-        {
-          "name": "Cape Town",
-          "suhoor_meals": [
-            "bread, tea, light stews"
-          ],
-          "iftar_meals": [
-            "dates and water",
-            "Cape Malay biryani",
-            "samosas"
-          ],
-          "desserts_and_drinks": [
-            "koeksisters (syrup-soaked dough twists)",
-            "boeber (sweet milk drink in some communities)"
-          ],
-          "rituals_and_traditions": [
-            "Cape Malay Muslim community hosting large family iftars",
-            "Mix of Asian and African influences in food and dress"
-          ],
-          "notes": "Cape Malay biryani and koeksisters are iconic Cape Town Ramadan foods.[web:1]"
-        }
-      ]
-    },
-    {
-      "country": "Jordan",
-      "region": "Middle East",
-      "cities": [
-        {
-          "name": "Amman",
-          "suhoor_meals": [
-            "bread, cheese, hummus, foul"
-          ],
-          "iftar_meals": [
-            "dates and water",
-            "mansaf (lamb with rice and jameed yogurt)",
-            "various rice and meat dishes"
-          ],
-          "desserts_and_drinks": [
-            "qatayef",
-            "juices"
-          ],
-          "rituals_and_traditions": [
-            "Mansaf at large family gatherings and special Ramadan occasions"
-          ],
-          "notes": "Mansaf, Jordan’s national dish, is central to celebrations and gatherings, including Ramadan.[web:5]"
-        },
-        {
-          "name": "Irbid",
-          "suhoor_meals": [
-            "bread, cheese, hummus, foul"
-          ],
-          "iftar_meals": [
-            "dates and water",
-            "rice with meat stews",
-            "mansaf during special gatherings"
-          ],
-          "desserts_and_drinks": [
-            "qatayef",
-            "juices"
-          ],
-          "rituals_and_traditions": [
-            "Family and tribal gatherings on weekends of Ramadan",
-            "Community support for poorer families with food parcels"
-          ],
-          "notes": "Beyond Amman, mansaf and qatayef remain core parts of Jordanian Ramadan cuisine.[web:5]"
-        }
-      ]
-    },
-    {
-      "country": "United Arab Emirates",
-      "region": "GCC",
-      "cities": [
-        {
-          "name": "Dubai",
-          "suhoor_meals": [
-            "khubz (Arabic bread) with cheese and dates",
-            "light rice and meat dishes"
-          ],
-          "iftar_meals": [
-            "dates and water",
-            "harees (cracked wheat with meat)",
-            "thareed (bread soaked in stew)",
-            "machboos (spiced rice with meat)"
-          ],
-          "desserts_and_drinks": [
-            "luqaimat (fried dough with date syrup)",
-            "vimto",
-            "Arabic coffee"
-          ],
-          "rituals_and_traditions": [
-            "Large Ramadan tents at hotels and along the creek",
-            "Corporate and community iftars for workers and travelers",
-            "Children's Haq Al Laila style traditions of going door to door for sweets in some emirates"
-          ],
-          "notes": "Ramadan tents and iftars with harees, thareed, machboos, and luqaimat are common throughout the UAE.[web:4][web:12][web:18]"
-        },
-        {
-          "name": "Abu Dhabi",
-          "suhoor_meals": [
-            "similar to Dubai with emphasis on bread, cheese, dates"
-          ],
-          "iftar_meals": [
-            "harees",
-            "thareed",
-            "machboos"
-          ],
-          "desserts_and_drinks": [
-            "luqaimat",
-            "vimto"
-          ],
-          "rituals_and_traditions": [
-            "Government-organized charity iftars",
-            "Family-focused evenings with taraweeh in major mosques"
-          ],
-          "notes": "Abu Dhabi follows broader Gulf food patterns with strong emphasis on hospitality and charity.[web:4][web:12]"
-        }
-      ]
-    },
-    {
-      "country": "Qatar",
-      "region": "GCC",
-      "cities": [
-        {
-          "name": "Doha",
-          "suhoor_meals": [
-            "bread, cheese, dates",
-            "light rice dishes"
-          ],
-          "iftar_meals": [
-            "dates and water",
-            "thareed",
-            "machboos",
-            "grilled meats"
-          ],
-          "desserts_and_drinks": [
-            "luqaimat",
-            "vimto"
-          ],
-          "rituals_and_traditions": [
-            "Gargee'an around mid-Ramadan where children dress up and collect sweets",
-            "Ramadan tents in hotels and majlis-style gatherings"
-          ],
-          "notes": "Gargee'an is celebrated mid-Ramadan in parts of the Gulf, including Qatar, with children collecting sweets.[web:18]"
+          "notes": "Zanzibar and Mombasa are known for public street iftars and Swahili dishes like kaimati.[web:1]",
+          "population": "~55 million",
+          "muslim_population": "~5.5 million (11% of Kenya; Mombasa region higher concentration)",
+          "muslim_percentage": 11,
+          "ramadan_traditions": "Swahili and East African iftar; dates, soup; Taraweeh in Mombasa and coastal mosques; charity and community.",
+          "religious_cultural": "Coastal and inland Islam; Laylat al-Qadr; mosque and community; Swahili culture.",
+          "tags": [
+            "east-africa",
+            "mobile-money",
+            "swahili-market",
+            "gateway",
+            "innovation-hub"
+          ],
+          "slug": "mombasa"
         }
       ]
     },
@@ -678,200 +1160,55 @@
       ]
     },
     {
-      "country": "Bahrain",
-      "region": "GCC",
+      "country": "Kyrgyzstan",
+      "region": "Central Asia",
       "cities": [
         {
-          "name": "Manama",
-          "suhoor_meals": [
-            "bread, cheese, dates",
-            "light stews"
+          "name": "Bishkek",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Central Asian iftar; plov and local dishes; Taraweeh in mosques; family and community; charity.",
+          "population": "~7 million",
+          "muslim_population": "~6 million (90% of Kyrgyzstan)",
+          "muslim_percentage": 90,
+          "ramadan_traditions": "Central Asian iftar; plov and local dishes; Taraweeh in mosques; family and community; charity.",
+          "religious_cultural": "Hanafi tradition; Laylat al-Qadr; mosque and community; blend of Soviet and Islamic revival.",
+          "tags": [
+            "central-asia",
+            "low-costs",
+            "entrepreneurial",
+            "outsourcing-hub",
+            "easy-business"
           ],
-          "iftar_meals": [
-            "dates and water",
-            "rice with meat stews",
-            "fish dishes"
-          ],
-          "desserts_and_drinks": [
-            "luqaimat",
-            "regional sweets"
-          ],
-          "rituals_and_traditions": [
-            "Gargee'an celebrations around mid-Ramadan",
-            "Community iftars supported by charities and mosques"
-          ],
-          "notes": "Bahrain's mid-Ramadan children's celebrations mirror Gargee'an traditions seen elsewhere in the Gulf.[web:18]"
+          "slug": "bishkek"
         }
       ]
     },
     {
-      "country": "Oman",
-      "region": "GCC",
-      "cities": [
-        {
-          "name": "Muscat",
-          "suhoor_meals": [
-            "bread with honey or cheese",
-            "rice and fish"
-          ],
-          "iftar_meals": [
-            "dates and water",
-            "harees",
-            "thareed",
-            "rice with fish or meat"
-          ],
-          "desserts_and_drinks": [
-            "luqaimat-style sweets",
-            "Omani halwa",
-            "tea"
-          ],
-          "rituals_and_traditions": [
-            "Strong emphasis on neighborhood sharing and charity",
-            "Families gathering with traditional Omani halwa after iftar"
-          ],
-          "notes": "Core Gulf dishes like harees and thareed appear alongside local Omani halwa in Ramadan.[web:5][web:7]"
-        }
-      ]
-    },
-    {
-      "country": "Iran",
+      "country": "Lebanon",
       "region": "Middle East",
       "cities": [
         {
-          "name": "Tehran",
+          "name": "Beirut",
           "suhoor_meals": [
-            "barbari bread with cheese and herbs",
-            "light stews and rice"
+            "man’oushe (flatbread with toppings)",
+            "foul (fava beans)"
           ],
           "iftar_meals": [
             "dates and water",
-            "ash-e reshteh (noodle and bean soup)",
-            "khoresht stews with rice"
+            "rice with stews and grilled meats"
           ],
           "desserts_and_drinks": [
-            "sholeh zard (saffron rice pudding)",
-            "tea"
+            "qatayef",
+            "jallab (date and grape drink)"
           ],
           "rituals_and_traditions": [
-            "Late-night street life after iftar",
-            "Special religious gatherings and Quran recitation sessions"
+            "Midfa al-iftar (iftar cannons) to signal sunset",
+            "Family and neighborhood gatherings"
           ],
-          "notes": "Ash-e reshteh and sholeh zard are widely associated with Iranian Ramadan tables.[web:12][web:13]"
-        },
-        {
-          "name": "Mazandaran (province)",
-          "suhoor_meals": [
-            "local bread, cheese, herbs",
-            "rice dishes"
-          ],
-          "iftar_meals": [
-            "dates and water",
-            "regional stews with rice"
-          ],
-          "desserts_and_drinks": [
-            "tea and local sweets"
-          ],
-          "rituals_and_traditions": [
-            "Some communities begin fasting three days before Ramadan starts, effectively fasting 33 days"
-          ],
-          "notes": "In Mazandaran, some people traditionally start fasting at the end of Sha'ban, adding three extra days.[web:12]"
-        }
-      ]
-    },
-    {
-      "country": "India",
-      "region": "South Asia",
-      "cities": [
-        {
-          "name": "Hyderabad",
-          "suhoor_meals": [
-            "paratha with curry",
-            "tea"
-          ],
-          "iftar_meals": [
-            "dates and water",
-            "haleem",
-            "samosas",
-            "fruit chaat"
-          ],
-          "desserts_and_drinks": [
-            "falooda",
-            "rooh afza-based drinks"
-          ],
-          "rituals_and_traditions": [
-            "Haleem stalls all over the city during Ramadan",
-            "Night markets around Charminar packed after taraweeh"
-          ],
-          "notes": "Hyderabadi haleem is one of the most famous South Asian Ramadan dishes.[web:5][web:13]"
-        },
-        {
-          "name": "Delhi",
-          "suhoor_meals": [
-            "paratha, eggs, chai"
-          ],
-          "iftar_meals": [
-            "shami kebab",
-            "biryani",
-            "samosas"
-          ],
-          "desserts_and_drinks": [
-            "rooh afza sharbat"
-          ],
-          "rituals_and_traditions": [
-            "Old Delhi food streets like Jama Masjid area crowded for iftar and late-night snacks",
-            "Seheriwalas (drummers) waking people up for suhoor in some neighborhoods"
-          ],
-          "notes": "India shares many Ramadan foods with Pakistan and Bangladesh, including haleem, biryani, and rooh afza drinks.[web:5][web:13][web:16]"
-        },
-        {
-          "name": "Kolkata",
-          "suhoor_meals": [
-            "paratha and curry",
-            "chai"
-          ],
-          "iftar_meals": [
-            "biryani",
-            "chops and cutlets",
-            "samosas"
-          ],
-          "desserts_and_drinks": [
-            "sweet lassi",
-            "rooh afza"
-          ],
-          "rituals_and_traditions": [
-            "Ramadan food lanes around Zakaria Street and central mosques",
-            "Strong street-food culture after iftar"
-          ],
-          "notes": "Kolkata's Ramadan is known for dense street-food scenes centered on mosques and market lanes.[web:4]"
-        }
-      ]
-    },
-    {
-      "country": "Bangladesh",
-      "region": "South Asia",
-      "cities": [
-        {
-          "name": "Dhaka",
-          "suhoor_meals": [
-            "rice with curry",
-            "paratha and dal"
-          ],
-          "iftar_meals": [
-            "dates and water",
-            "biryani",
-            "panta ilish (fermented rice with hilsa fish) for some",
-            "piaju (lentil fritters)",
-            "beguni (battered fried eggplant)"
-          ],
-          "desserts_and_drinks": [
-            "rooh afza drinks",
-            "mishti (sweets)"
-          ],
-          "rituals_and_traditions": [
-            "Crowded iftar markets selling fritters and biryanis",
-            "Strong culture of giving food to the poor during Ramadan"
-          ],
-          "notes": "Bangladeshi iftars feature biryani, panta ilish, and various fried snacks, with a big emphasis on charity.[web:4][web:14]"
+          "notes": "Iftar cannons are a long-standing tradition used to mark the end of each fasting day.[web:4]"
         }
       ]
     },
@@ -900,7 +1237,20 @@
             "Bazaar Ramadan markets selling a wide variety of take-away iftar foods",
             "Family-centric iftars that blend Malay, Chinese, and Indian culinary influences"
           ],
-          "notes": "Bazaar Ramadan is a defining Malaysian institution, with temporary markets dedicated to iftar food.[web:14]"
+          "notes": "Bazaar Ramadan is a defining Malaysian institution, with temporary markets dedicated to iftar food.[web:14]",
+          "population": "~33 million",
+          "muslim_population": "~20 million (60% of Malaysia)",
+          "muslim_percentage": 60,
+          "ramadan_traditions": "Bazaar Ramadan; bubur lambuk; iftar buffets; Taraweeh at National Mosque and state mosques; Raya preparations; open house culture; moreh (post-Taraweeh supper).",
+          "religious_cultural": "Malaysian multi-ethnic Ramadan; Islamic arts and lectures; Laylat al-Qadr programs; zakat and corporate iftar; strong emphasis on family and community.",
+          "tags": [
+            "southeast-asia",
+            "islamic-finance",
+            "english-speaking",
+            "tech-hub",
+            "stable-economy"
+          ],
+          "slug": "kuala-lumpur"
         },
         {
           "name": "Penang",
@@ -921,7 +1271,858 @@
             "Heritage streets lined with Ramadan food stalls",
             "Mix of Malay and Indian Muslim influences"
           ],
-          "notes": "Penang's Ramadan food reflects its reputation as a food capital with strong Indian Muslim presence.[web:14]"
+          "notes": "Penang's Ramadan food reflects its reputation as a food capital with strong Indian Muslim presence.[web:14]",
+          "population": "~33 million",
+          "muslim_population": "~60% Muslim; Penang ~40% Muslim but part of federal system",
+          "muslim_percentage": 40,
+          "ramadan_traditions": "Bazaar Ramadan; bubur lambuk; iftar buffets; Taraweeh at state mosques; Raya preparations; moreh; open house culture.",
+          "religious_cultural": "Multi-ethnic Ramadan; Islamic arts and lectures; Laylat al-Qadr; zakat and community; family and mosque focus.",
+          "tags": [
+            "southeast-asia",
+            "island-hub",
+            "quality-of-life",
+            "manufacturing-transition",
+            "multicultural"
+          ],
+          "slug": "penang"
+        }
+      ]
+    },
+    {
+      "country": "Maldives",
+      "region": "South Asia",
+      "cities": [
+        {
+          "name": "Malé",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Maldivian Ramadan; iftar with garudhiya, mas huni, dates; mosque and island community iftars; Taraweeh; charity; family and island gatherings.",
+          "population": "~250,000",
+          "muslim_population": "~250,000 (100% Muslim; Maldives)",
+          "muslim_percentage": 100,
+          "ramadan_traditions": "Maldivian Ramadan; iftar with garudhiya, mas huni, dates; mosque and island community iftars; Taraweeh; charity; family and island gatherings.",
+          "religious_cultural": "Sunni Muslim nation; Laylat al-Qadr; small island community observance; Qur'an and mosque life; strong national and religious identity.",
+          "tags": [
+            "south-asia",
+            "100-percent-muslim",
+            "capital-city",
+            "tourism-tech",
+            "island-nation"
+          ],
+          "slug": "male"
+        }
+      ]
+    },
+    {
+      "country": "Mali",
+      "region": "Sahel Region",
+      "cities": [
+        {
+          "name": "Bamako",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "West African iftar; dates, porridge, local dishes; mosque and community iftars; Taraweeh; charity.",
+          "population": "~21 million",
+          "muslim_population": "~19 million (95% of Mali)",
+          "muslim_percentage": 95,
+          "ramadan_traditions": "West African iftar; dates, porridge, local dishes; mosque and community iftars; Taraweeh; charity.",
+          "religious_cultural": "Maliki and Sufi traditions; Laylat al-Qadr; mosque and brotherhood; strong community observance.",
+          "tags": [
+            "sahel-region",
+            "large-youth",
+            "francophone",
+            "mobile-first",
+            "untapped"
+          ],
+          "slug": "bamako"
+        }
+      ]
+    },
+    {
+      "country": "Morocco",
+      "region": "North Africa",
+      "cities": [
+        {
+          "name": "Casablanca",
+          "suhoor_meals": [
+            "bread with olive oil and cheese",
+            "tagines in lighter portions"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "harira (hearty soup)",
+            "chebakia (sesame honey pastry)",
+            "breads and tagines"
+          ],
+          "desserts_and_drinks": [
+            "mint tea",
+            "fresh juices"
+          ],
+          "rituals_and_traditions": [
+            "Family-centered iftar centered around harira",
+            "Traditional clothing like djellaba and kaftan for prayers and gatherings"
+          ],
+          "notes": "Harira, rfissa, and tangia are highlighted as signature Moroccan Ramadan dishes.[web:9]",
+          "population": "~37 million",
+          "muslim_population": "~36 million (99% of Morocco); Casablanca is the largest city",
+          "muslim_percentage": 99,
+          "ramadan_traditions": "Moroccan iftar (harira, chebakya, dates); Taraweeh at Hassan II and neighborhood mosques; family and community iftars; Ramadan markets.",
+          "religious_cultural": "Moroccan Maliki tradition; Laylat al-Qadr; charity and hospitality; blend of Arab and Berber; mosque and Sufi brotherhood observances.",
+          "tags": [
+            "maghreb",
+            "bilingual",
+            "nearshore",
+            "competitive-costs",
+            "economic-capital"
+          ],
+          "slug": "casablanca"
+        },
+        {
+          "name": "Marrakesh",
+          "suhoor_meals": [
+            "bread, olive oil, and local cheeses"
+          ],
+          "iftar_meals": [
+            "harira",
+            "tanjia marrakchia",
+            "rfissa (chicken and lentils over shredded bread)"
+          ],
+          "desserts_and_drinks": [
+            "mint tea",
+            "chebakia"
+          ],
+          "rituals_and_traditions": [
+            "Large family gatherings after Maghrib",
+            "Old city squares buzzing at night with food stalls"
+          ],
+          "notes": "Tanjia Marrakchia is particularly linked to Marrakesh Ramadan tables.[web:9]"
+        },
+        {
+          "name": "Tangier",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Tangier Ramadan; harira and Moroccan sweets; mosque and medina iftars; family gatherings; Taraweeh; charity and community.",
+          "population": "~37 million",
+          "muslim_population": "~36 million (99% of Morocco)",
+          "muslim_percentage": 99,
+          "ramadan_traditions": "Tangier Ramadan; harira and Moroccan sweets; mosque and medina iftars; family gatherings; Taraweeh; charity and community.",
+          "religious_cultural": "Northern Moroccan and Mediterranean Ramadan; Laylat al-Qadr; Islamic and cultural heritage; strong community and family focus.",
+          "tags": [
+            "north-africa",
+            "europe-africa-connectivity",
+            "bilingual",
+            "nearshore",
+            "competitive-costs"
+          ],
+          "slug": "tangier"
+        }
+      ]
+    },
+    {
+      "country": "Netherlands",
+      "region": "Europe",
+      "cities": [
+        {
+          "name": "Amsterdam",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Iftar at mosques and community centers; multicultural traditions; Taraweeh; charity; Dutch Muslim community.",
+          "population": "~2.5 million (metro)",
+          "muslim_population": "~200,000-250,000 (10-12% of Amsterdam metro)",
+          "muslim_percentage": 11,
+          "ramadan_traditions": "Iftar at mosques and community centers; multicultural traditions; Taraweeh; charity; Dutch Muslim community.",
+          "religious_cultural": "European Muslim community; Laylat al-Qadr; mosque and association programs; diverse diaspora.",
+          "tags": [
+            "europe",
+            "major-tech-hub",
+            "business-friendly",
+            "quality-of-life",
+            "muslim-diaspora"
+          ],
+          "slug": "amsterdam"
+        }
+      ]
+    },
+    {
+      "country": "Nigeria",
+      "region": "Africa",
+      "cities": [
+        {
+          "name": "Kano",
+          "suhoor_meals": [
+            "kunu (millet-based drink/porridge)",
+            "light rice or tuwo dishes"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "dambu (shredded spiced meat)",
+            "masa (rice pancakes)",
+            "jollof rice"
+          ],
+          "desserts_and_drinks": [
+            "kunu variations",
+            "local juices"
+          ],
+          "rituals_and_traditions": [
+            "Community iftar in mosques and family homes",
+            "Women preparing large communal spreads for extended family"
+          ],
+          "notes": "Hausa communities commonly serve dambu, kunu, and masa at iftar.[web:1][web:3]",
+          "population": "~220 million",
+          "muslim_population": "~50% Muslim; Kano State ~97% Muslim (~13 million in state)",
+          "muslim_percentage": 97,
+          "ramadan_traditions": "Dates, pap, local dishes; Taraweeh in mosques; Ramadan markets; charity and community iftars.",
+          "religious_cultural": "Diverse Nigerian Muslim traditions; Laylat al-Qadr; mosque and Islamic council programs; charity and education.",
+          "tags": [
+            "west-africa",
+            "northern-nigeria",
+            "untapped-market",
+            "hausa-market",
+            "islamic-networks"
+          ],
+          "slug": "kano"
+        },
+        {
+          "name": "Lagos",
+          "suhoor_meals": [
+            "bread and tea",
+            "rice dishes",
+            "kunu where available"
+          ],
+          "iftar_meals": [
+            "jollof rice with chicken or fish",
+            "fried plantains (dodo)"
+          ],
+          "desserts_and_drinks": [
+            "local soft drinks",
+            "fruit juices"
+          ],
+          "rituals_and_traditions": [
+            "Urban mosques host iftar for travelers and the poor",
+            "Strong West African jollof culture at large family gatherings"
+          ],
+          "notes": "Jollof rice is a core celebratory dish across Nigeria and is common at Ramadan gatherings.[web:3]",
+          "population": "~220 million",
+          "muslim_population": "~100 million (50% of Nigeria; Lagos has significant Muslim population)",
+          "muslim_percentage": 50,
+          "ramadan_traditions": "Nigerian iftar (dates, pap, local dishes); Taraweeh in mosques; Ramadan markets; charity and community iftars; multicultural Muslim community observances.",
+          "religious_cultural": "Diverse Nigerian Muslim traditions; Laylat al-Qadr; mosque and Islamic council programs; blend of Yoruba and northern customs; charity and education.",
+          "tags": [
+            "west-africa",
+            "largest-african-economy",
+            "unicorns",
+            "fintech",
+            "massive-market"
+          ],
+          "slug": "lagos"
+        }
+      ]
+    },
+    {
+      "country": "Oman",
+      "region": "GCC",
+      "cities": [
+        {
+          "name": "Muscat",
+          "suhoor_meals": [
+            "bread with honey or cheese",
+            "rice and fish"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "harees",
+            "thareed",
+            "rice with fish or meat"
+          ],
+          "desserts_and_drinks": [
+            "luqaimat-style sweets",
+            "Omani halwa",
+            "tea"
+          ],
+          "rituals_and_traditions": [
+            "Strong emphasis on neighborhood sharing and charity",
+            "Families gathering with traditional Omani halwa after iftar"
+          ],
+          "notes": "Core Gulf dishes like harees and thareed appear alongside local Omani halwa in Ramadan.[web:5][web:7]",
+          "population": "~5.2 million",
+          "muslim_population": "~4.5 million (86% of Oman)",
+          "muslim_percentage": 86,
+          "ramadan_traditions": "Omani iftar (dates, laban, harees); Taraweeh in Sultan Qaboos and other mosques; family majlis; charity; traditional hospitality.",
+          "religious_cultural": "Ibadi and Sunni tradition; Laylat al-Qadr; mosque and community; Omani hospitality and culture.",
+          "tags": [
+            "persian-gulf",
+            "strategic-location",
+            "moderate-governance",
+            "trade-routes",
+            "growing-investment"
+          ],
+          "slug": "muscat"
+        }
+      ]
+    },
+    {
+      "country": "Pakistan",
+      "region": "South Asia",
+      "cities": [
+        {
+          "name": "Karachi",
+          "suhoor_meals": [
+            "paratha with eggs or curry",
+            "tea"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "samosas",
+            "pakoras",
+            "fruit chaat",
+            "haleem"
+          ],
+          "desserts_and_drinks": [
+            "rooh afza or rose-flavored sharbat",
+            "falooda"
+          ],
+          "rituals_and_traditions": [
+            "Bustling iftar bazaars selling fried snacks",
+            "Charity iftar tables along main roads",
+            "Chaand raat shopping before Eid with henna and bangles"
+          ],
+          "notes": "Iftar in Pakistan commonly features fried snacks, rose-flavored drinks, and haleem; chaand raat is a key end-of-Ramadan celebration.[web:4][web:7]",
+          "population": "~230 million",
+          "muslim_population": "~220 million (96% of Pakistan)",
+          "muslim_percentage": 96,
+          "ramadan_traditions": "Sehri and iftar with Pakistani dishes (pakoras, dates, sherbet); Taraweeh in mosques and homes; Ramadan bazaars; charity and dastarkhwan for neighbors; family gatherings.",
+          "religious_cultural": "Sunni majority with strong mosque culture; Laylat al-Qadr night vigils; zakat and sadaqah; Ramadan TV and radio programs; emphasis on Qur'an and hadith study.",
+          "tags": [
+            "south-asia",
+            "large-population",
+            "cost-effective",
+            "english-speaking",
+            "diaspora-network"
+          ],
+          "slug": "karachi"
+        },
+        {
+          "name": "Lahore",
+          "suhoor_meals": [
+            "paratha and nihari or other meat stews"
+          ],
+          "iftar_meals": [
+            "samosas",
+            "pakoras",
+            "dahi bhalle",
+            "fruit chaat"
+          ],
+          "desserts_and_drinks": [
+            "sweet lassi",
+            "rooh afza drinks"
+          ],
+          "rituals_and_traditions": [
+            "Old-city food streets packed after iftar",
+            "Strong communal culture around late-night eating"
+          ],
+          "notes": "Lahore’s Ramadan is famous for its food streets and rich meaty dishes.[web:4][web:7]",
+          "population": "~13.5 million",
+          "muslim_population": "~13 million (96% of Pakistan; Lahore metro area)",
+          "muslim_percentage": 96,
+          "ramadan_traditions": "Sehri and iftar with pakoras, dates, sherbet; Taraweeh in mosques; Ramadan bazaars; dastarkhwan and charity; family and neighborhood gatherings.",
+          "religious_cultural": "Sunni majority; Laylat al-Qadr; zakat and sadaqah; mosque and madrasa programs; strong community and family observance.",
+          "tags": [
+            "south-asia",
+            "large-population",
+            "cost-effective",
+            "english-speaking",
+            "diaspora-network",
+            "major-tech-hub"
+          ],
+          "slug": "lahore"
+        },
+        {
+          "name": "Islamabad",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Sehri and iftar with pakoras, dates, sherbet; Taraweeh in mosques; Ramadan bazaars; dastarkhwan and charity; family and neighborhood gatherings.",
+          "population": "~230 million",
+          "muslim_population": "~220 million (96% of Pakistan); Islamabad is the capital",
+          "muslim_percentage": 96,
+          "ramadan_traditions": "Sehri and iftar with pakoras, dates, sherbet; Taraweeh in mosques; Ramadan bazaars; dastarkhwan and charity; family and neighborhood gatherings.",
+          "religious_cultural": "Sunni majority; Laylat al-Qadr; zakat and sadaqah; mosque and madrasa programs; strong community and family observance.",
+          "tags": [
+            "south-asia",
+            "capital-city",
+            "diaspora-network",
+            "english-speaking",
+            "government-supported"
+          ],
+          "slug": "islamabad"
+        },
+        {
+          "name": "Faisalabad",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Sehri and iftar with pakoras, dates, sherbet; Taraweeh in mosques; Ramadan bazaars; dastarkhwan and charity; family and neighborhood gatherings.",
+          "population": "~3.7 million",
+          "muslim_population": "~3.5 million (96% of Pakistan; Faisalabad metro)",
+          "muslim_percentage": 96,
+          "ramadan_traditions": "Sehri and iftar with pakoras, dates, sherbet; Taraweeh in mosques; Ramadan bazaars; dastarkhwan and charity; family and neighborhood gatherings.",
+          "religious_cultural": "Sunni majority; Laylat al-Qadr; zakat and sadaqah; mosque and madrasa programs; strong community and family observance.",
+          "tags": [
+            "south-asia",
+            "large-population",
+            "cost-effective",
+            "industrial-tech",
+            "emerging-hub"
+          ],
+          "slug": "faisalabad"
+        },
+        {
+          "name": "Rawalpindi",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Sehri and iftar with pakoras, dates, sherbet; Taraweeh in mosques; Ramadan bazaars; dastarkhwan and charity; family and neighborhood gatherings.",
+          "population": "~2.3 million",
+          "muslim_population": "~2.2 million (96% of Pakistan; Rawalpindi-Islamabad twin cities)",
+          "muslim_percentage": 96,
+          "ramadan_traditions": "Sehri and iftar with pakoras, dates, sherbet; Taraweeh in mosques; Ramadan bazaars; dastarkhwan and charity; family and neighborhood gatherings.",
+          "religious_cultural": "Sunni majority; Laylat al-Qadr; zakat and sadaqah; mosque and madrasa programs; strong community and family observance.",
+          "tags": [
+            "south-asia",
+            "twin-cities",
+            "cost-effective",
+            "government-proximity",
+            "emerging-hub"
+          ],
+          "slug": "rawalpindi"
+        },
+        {
+          "name": "Multan",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Sehri and iftar with pakoras, dates, sherbet; Taraweeh in mosques; Ramadan bazaars; dastarkhwan and charity; family and neighborhood gatherings.",
+          "population": "~2.2 million",
+          "muslim_population": "~2.1 million (96% of Pakistan; Multan metro)",
+          "muslim_percentage": 96,
+          "ramadan_traditions": "Sehri and iftar with pakoras, dates, sherbet; Taraweeh in mosques; Ramadan bazaars; dastarkhwan and charity; family and neighborhood gatherings.",
+          "religious_cultural": "Sunni majority; Laylat al-Qadr; zakat and sadaqah; mosque and madrasa programs; strong community and family observance.",
+          "tags": [
+            "south-asia",
+            "large-population",
+            "cost-effective",
+            "agricultural-tech",
+            "emerging-hub"
+          ],
+          "slug": "multan"
+        }
+      ]
+    },
+    {
+      "country": "Palestine",
+      "region": "Middle East",
+      "cities": [
+        {
+          "name": "Jerusalem",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Iftar at Al-Aqsa and in the Old City; Taraweeh in the Haram; Palestinian iftar foods; Ramadan lights in the streets; Laylat al-Qadr at Al-Aqsa; community and solidarity.",
+          "population": "~950,000 (metro)",
+          "muslim_population": "~400,000-500,000 (60-65% of East Jerusalem)",
+          "muslim_percentage": 37,
+          "ramadan_traditions": "Iftar at Al-Aqsa and in the Old City; Taraweeh in the Haram; Palestinian iftar foods; Ramadan lights in the streets; Laylat al-Qadr at Al-Aqsa; community and solidarity.",
+          "religious_cultural": "Third holiest site; Ramadan under occupation; strong communal and religious significance; Qur'an and night prayers at Al-Aqsa; charity and Palestinian identity.",
+          "tags": [
+            "middle-east",
+            "holy-city",
+            "historic-significance",
+            "emerging-tech",
+            "educated-population"
+          ],
+          "slug": "jerusalem"
+        }
+      ]
+    },
+    {
+      "country": "Qatar",
+      "region": "GCC",
+      "cities": [
+        {
+          "name": "Doha",
+          "suhoor_meals": [
+            "bread, cheese, dates",
+            "light rice dishes"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "thareed",
+            "machboos",
+            "grilled meats"
+          ],
+          "desserts_and_drinks": [
+            "luqaimat",
+            "vimto"
+          ],
+          "rituals_and_traditions": [
+            "Gargee'an around mid-Ramadan where children dress up and collect sweets",
+            "Ramadan tents in hotels and majlis-style gatherings"
+          ],
+          "notes": "Gargee'an is celebrated mid-Ramadan in parts of the Gulf, including Qatar, with children collecting sweets.[web:18]",
+          "population": "~3 million",
+          "muslim_population": "~1.8 million (65% of Qatar)",
+          "muslim_percentage": 65,
+          "ramadan_traditions": "Qatari iftar (dates, thareed, machboos); Taraweeh at State Mosque and others; charity and iftar tents; family and community.",
+          "religious_cultural": "Gulf Ramadan; Laylat al-Qadr; zakat and community; Islamic culture and education.",
+          "tags": [
+            "persian-gulf",
+            "high-capital",
+            "world-class-infrastructure",
+            "knowledge-economy",
+            "high-purchasing-power"
+          ],
+          "slug": "doha"
+        }
+      ]
+    },
+    {
+      "country": "Saudi Arabia",
+      "region": "Middle East",
+      "cities": [
+        {
+          "name": "Riyadh",
+          "suhoor_meals": [
+            "light rice dishes",
+            "bread with cheese and dates"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "thareed (bread soaked in lamb and vegetable stew)",
+            "kabsa (spiced rice with chicken or lamb)"
+          ],
+          "desserts_and_drinks": [
+            "qamar al-din (apricot drink)",
+            "Arabic coffee and dates"
+          ],
+          "rituals_and_traditions": [
+            "Large family and tribal gatherings",
+            "Night prayers (taraweeh) with packed mosques"
+          ],
+          "notes": "Thareed is a classic Saudi iftar stew, while kabsa is a national dish popular in Ramadan.[web:5][web:7]",
+          "population": "~35 million",
+          "muslim_population": "~32 million (93% of Saudi Arabia)",
+          "muslim_percentage": 93,
+          "ramadan_traditions": "Saudi iftar (dates, laban, sambusa); Taraweeh and Qiyam; family majlis; charity and iftar tents; Vision 2030 cultural events; mosque programs and Qur'an competitions.",
+          "religious_cultural": "Heart of Najd; conservative Ramadan observance; emphasis on Qur'an and sunnah; Laylat al-Qadr; zakat and community feeding; Islamic lectures and exhibitions.",
+          "tags": [
+            "middle-east",
+            "vision-2030",
+            "high-investment",
+            "large-market",
+            "government-backed"
+          ],
+          "slug": "riyadh"
+        },
+        {
+          "name": "Jeddah",
+          "suhoor_meals": [
+            "similar to Riyadh with more seafood options"
+          ],
+          "iftar_meals": [
+            "thareed",
+            "kabsa",
+            "fried and grilled fish"
+          ],
+          "desserts_and_drinks": [
+            "regional desserts and juices"
+          ],
+          "rituals_and_traditions": [
+            "Coastal city gatherings with extended families",
+            "Charity iftars near major mosques"
+          ],
+          "notes": "Jeddah shares core Saudi Ramadan dishes with additional Red Sea seafood.[web:5][web:7]",
+          "population": "~5 million",
+          "muslim_population": "~4.7 million (95% of Jeddah)",
+          "muslim_percentage": 95,
+          "ramadan_traditions": "Coastal Saudi Ramadan; iftar by the Corniche; sambusa and dates; Taraweeh in historic and new mosques; charity and pilgrim hospitality; family and community iftars.",
+          "religious_cultural": "Gateway to Mecca; blend of Hijazi and Saudi customs; strong mosque culture; Laylat al-Qadr; zakat and sadaqah; preparation for Umrah and Hajj season.",
+          "tags": [
+            "middle-east",
+            "commercial-hub",
+            "port-city",
+            "vision-2030",
+            "gateway-to-holy-cities",
+            "growing-tech-hub"
+          ],
+          "slug": "jeddah"
+        },
+        {
+          "name": "Medina",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Taraweeh at the Prophet's Mosque; Rawdah visits; iftar in the haram area; community suhoor; Qiyam and Itikaf; strong emphasis on charity and feeding fasting people.",
+          "population": "~35 million",
+          "muslim_population": "~35 million (93% of Saudi Arabia)",
+          "muslim_percentage": 93,
+          "ramadan_traditions": "Taraweeh at the Prophet's Mosque; Rawdah visits; iftar in the haram area; community suhoor; Qiyam and Itikaf; strong emphasis on charity and feeding fasting people.",
+          "religious_cultural": "City of the Prophet (peace be upon him); Ramadan deeply tied to Prophetic tradition; ziyarah and du'a at the Rawdah; Islamic University and scholarly programs during Ramadan.",
+          "tags": [
+            "middle-east",
+            "vision-2030",
+            "islamic-tech",
+            "smart-city",
+            "pilgrim-market",
+            "knowledge-city"
+          ],
+          "slug": "medina"
+        },
+        {
+          "name": "Mecca",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Millions perform Umrah during Ramadan; Taraweeh at the Haram; iftar and suhoor in the precincts of the Kaaba; Qiyam and Itikaf in the Masjid al-Haram; cannon for iftar; zamzam and dates at iftar.",
+          "population": "~2.4 million",
+          "muslim_population": "~2.4 million (100% Muslim; permanent and seasonal)",
+          "muslim_percentage": 100,
+          "ramadan_traditions": "Millions perform Umrah during Ramadan; Taraweeh at the Haram; iftar and suhoor in the precincts of the Kaaba; Qiyam and Itikaf in the Masjid al-Haram; cannon for iftar; zamzam and dates at iftar.",
+          "religious_cultural": "Birthplace of Islam; revelation of the Qur'an began in Ramadan; Laylat al-Qadr observed with special devotion; global gathering of Muslims for worship and charity.",
+          "tags": [
+            "middle-east",
+            "holy-city",
+            "pilgrim-market",
+            "vision-2030",
+            "islamic-tech",
+            "global-muslim-center"
+          ],
+          "slug": "mecca"
+        }
+      ]
+    },
+    {
+      "country": "Senegal",
+      "region": "Africa",
+      "cities": [
+        {
+          "name": "Dakar",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "West African Ramadan; iftar with thiakry, dates, bissap; mosque and community iftars; Taraweeh; charity and feeding; family and neighborhood gatherings.",
+          "population": "~17 million",
+          "muslim_population": "~16 million (95% of Senegal)",
+          "muslim_percentage": 95,
+          "ramadan_traditions": "West African Ramadan; iftar with thiakry, dates, bissap; mosque and community iftars; Taraweeh; charity and feeding; family and neighborhood gatherings.",
+          "religious_cultural": "Senegalese Sufi and Sunni traditions; Laylat al-Qadr; zakat and sadaqah; strong brotherhood and mosque culture; Wolof and French in religious life.",
+          "tags": [
+            "west-africa",
+            "francophone",
+            "political-stability",
+            "sufi-tradition",
+            "gateway"
+          ],
+          "slug": "dakar"
+        }
+      ]
+    },
+    {
+      "country": "Singapore",
+      "region": "South Asia",
+      "cities": [
+        {
+          "name": "Singapore",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Singaporean Ramadan; Geylang and Kampong Glam bazaars; iftar buffets; Taraweeh at Sultan Mosque; multicultural observance; charity and open houses.",
+          "population": "~5.9 million",
+          "muslim_population": "~600,000-700,000 (14-15% of Singapore)",
+          "muslim_percentage": 15,
+          "ramadan_traditions": "Singaporean Ramadan; Geylang and Kampong Glam bazaars; iftar buffets; Taraweeh at Sultan Mosque; multicultural observance; charity and open houses.",
+          "religious_cultural": "Malay and diverse Muslim community; Laylat al-Qadr; Islamic Council and mosque programs; blend of Malay, South Asian, and Arab traditions; Raya preparations.",
+          "tags": [
+            "southeast-asia",
+            "major-tech-hub",
+            "business-friendly",
+            "high-purchasing-power",
+            "asean-gateway"
+          ],
+          "slug": "singapore"
+        }
+      ]
+    },
+    {
+      "country": "South Africa",
+      "region": "Africa",
+      "cities": [
+        {
+          "name": "Cape Town",
+          "suhoor_meals": [
+            "bread, tea, light stews"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "Cape Malay biryani",
+            "samosas"
+          ],
+          "desserts_and_drinks": [
+            "koeksisters (syrup-soaked dough twists)",
+            "boeber (sweet milk drink in some communities)"
+          ],
+          "rituals_and_traditions": [
+            "Cape Malay Muslim community hosting large family iftars",
+            "Mix of Asian and African influences in food and dress"
+          ],
+          "notes": "Cape Malay biryani and koeksisters are iconic Cape Town Ramadan foods.[web:1]"
+        }
+      ]
+    },
+    {
+      "country": "Sudan",
+      "region": "Africa",
+      "cities": [
+        {
+          "name": "Khartoum",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Sudanese iftar (dates, asida, ful); Taraweeh in mosques; family and community; charity; Ramadan markets.",
+          "population": "~43 million",
+          "muslim_population": "~42 million (97% of Sudan)",
+          "muslim_percentage": 97,
+          "ramadan_traditions": "Sudanese iftar (dates, asida, ful); Taraweeh in mosques; family and community; charity; Ramadan markets.",
+          "religious_cultural": "Sudanese Sunni tradition; Laylat al-Qadr; mosque and Sufi brotherhoods; strong community focus.",
+          "tags": [
+            "horn-of-africa",
+            "untapped-potential",
+            "youth-driven",
+            "arabic-market",
+            "emerging"
+          ],
+          "slug": "khartoum"
+        }
+      ]
+    },
+    {
+      "country": "Syria",
+      "region": "Middle East",
+      "cities": [
+        {
+          "name": "Damascus",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Syrian iftar (fatteh, qamar al-din, sweets); meshaharati; Taraweeh at Umayyad Mosque; street iftars; strong emphasis on charity and feeding the needy.",
+          "population": "~23 million",
+          "muslim_population": "~20 million (87% of Syria, Damascus metro ~5 million)",
+          "muslim_percentage": 87,
+          "ramadan_traditions": "Syrian iftar (fatteh, qamar al-din, sweets); meshaharati; Taraweeh at Umayyad Mosque; street iftars; strong emphasis on charity and feeding the needy.",
+          "religious_cultural": "Umayyad Mosque and ancient Ramadan traditions; Laylat al-Qadr; community solidarity; Islamic scholarship and mosque life; Syrian hospitality and sweets.",
+          "tags": [
+            "middle-east",
+            "historic-capital",
+            "historic-significance",
+            "large-population",
+            "diaspora-network"
+          ],
+          "slug": "damascus"
+        }
+      ]
+    },
+    {
+      "country": "Tanzania",
+      "region": "East Africa",
+      "cities": [
+        {
+          "name": "Zanzibar City",
+          "suhoor_meals": [
+            "ugali",
+            "rice and beans",
+            "mandazi"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "grilled fish",
+            "kaimati",
+            "Swahili rice dishes"
+          ],
+          "desserts_and_drinks": [
+            "sugarcane juice",
+            "fresh tropical juices"
+          ],
+          "rituals_and_traditions": [
+            "Street iftar gatherings near mosques",
+            "Communal sharing of food along the seafront"
+          ],
+          "notes": "Swahili Coast Ramadan is marked by public iftar tables and seafood-rich meals.[web:1]"
+        },
+        {
+          "name": "Dar es Salaam",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "East African iftar; dates, soup, local dishes; Taraweeh in mosques; charity and community iftars.",
+          "population": "~63 million",
+          "muslim_population": "~20 million (35% mainland; Zanzibar ~99% Muslim)",
+          "muslim_percentage": 35,
+          "ramadan_traditions": "East African iftar; dates, soup, local dishes; Taraweeh in mosques; charity and community iftars.",
+          "religious_cultural": "Swahili and East African Islam; Laylat al-Qadr; mosque and community; coastal and inland traditions.",
+          "tags": [
+            "east-africa",
+            "swahili-market",
+            "coastal-connectivity",
+            "islamic-heritage",
+            "eac-access"
+          ],
+          "slug": "dar-es-salaam"
+        }
+      ]
+    },
+    {
+      "country": "Thailand",
+      "region": "South Asia",
+      "cities": [
+        {
+          "name": "Bangkok",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Thai Muslim iftar (southern and Bangkok); dates and halal dishes; mosque and community; Taraweeh; charity.",
+          "population": "~11 million (metro)",
+          "muslim_population": "~1.2 million (5-6% of Bangkok metro)",
+          "muslim_percentage": 6,
+          "ramadan_traditions": "Thai Muslim iftar (southern and Bangkok); dates and halal dishes; mosque and community; Taraweeh; charity.",
+          "religious_cultural": "Thai Malay and diverse Muslim community; Laylat al-Qadr; mosque and community programs.",
+          "tags": [
+            "southeast-asia",
+            "growing-tech-hub",
+            "asean-gateway",
+            "affordable",
+            "muslim-community"
+          ],
+          "slug": "bangkok"
         }
       ]
     },
@@ -948,7 +2149,365 @@
             "Iftar cannon firing in some areas",
             "Family gatherings around hearty soups and pastries"
           ],
-          "notes": "Lablabi and brik are emblematic Tunisian Ramadan dishes.[web:14]"
+          "notes": "Lablabi and brik are emblematic Tunisian Ramadan dishes.[web:14]",
+          "population": "~12 million",
+          "muslim_population": "~12 million (99% of Tunisia)",
+          "muslim_percentage": 99,
+          "ramadan_traditions": "Tunisian iftar (chorba, brik, dates, assida); meshaharati; Taraweeh in Zitouna and other mosques; street and family iftars; sweets and tea.",
+          "religious_cultural": "Zitouna Mosque and Maliki tradition; Laylat al-Qadr; North African Ramadan; charity and community; blend of Arab and Berber culture.",
+          "tags": [
+            "maghreb",
+            "high-education",
+            "francophone",
+            "proximity-europe",
+            "progressive-policies"
+          ],
+          "slug": "tunis"
+        },
+        {
+          "name": "Kairouan",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Tunisian holy city Ramadan; iftar in the medina; Great Mosque of Kairouan; meshaharati; family and community; charity and religious programs.",
+          "population": "~12 million",
+          "muslim_population": "~190,000 (99% of Tunisia, Kairouan region)",
+          "muslim_percentage": 99,
+          "ramadan_traditions": "Tunisian holy city Ramadan; iftar in the medina; Great Mosque of Kairouan; meshaharati; family and community; charity and religious programs.",
+          "religious_cultural": "Fourth holiest city in Islam; historic mosque and scholarly tradition; Laylat al-Qadr; Maliki heritage; pilgrimage and Ramadan combined.",
+          "tags": [
+            "middle-east",
+            "holy-city",
+            "historic-significance",
+            "unesco-heritage",
+            "north-african-islam"
+          ],
+          "slug": "kairouan"
+        }
+      ]
+    },
+    {
+      "country": "Turkey",
+      "region": "Middle East/Europe",
+      "cities": [
+        {
+          "name": "Istanbul",
+          "suhoor_meals": [
+            "olives, cheese, bread, eggs",
+            "soups"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "soup",
+            "Ramazan pidesi (special Ramadan flatbread) with meat or vegetable dishes"
+          ],
+          "desserts_and_drinks": [
+            "güllaç (milk and pomegranate dessert)",
+            "tea"
+          ],
+          "rituals_and_traditions": [
+            "Mosques hang mahya (illuminated messages) between minarets",
+            "Public iftar tents by municipalities",
+            "Street drummers waking people for suhoor in some districts"
+          ],
+          "notes": "Ramazan pidesi is a special bread baked only in Ramadan and widely eaten for iftar and sahur.[web:2][web:7]",
+          "population": "~84 million",
+          "muslim_population": "~83 million (99% of Turkey)",
+          "muslim_percentage": 99,
+          "ramadan_traditions": "Iftar under minarets; davul (drum) for suhoor; street iftars and historic mosques; pide and güllaç; Ramadan bazaars; Taraweeh at Sultanahmet and Süleymaniye.",
+          "religious_cultural": "Ottoman Ramadan heritage; mahya (lights between minarets); Turkish hospitality and iftar invitations; Laylat al-Qadr programs; strong mosque and community culture.",
+          "tags": [
+            "middle-east",
+            "europe-asia-bridge",
+            "growing-ecosystem",
+            "cultural-influence",
+            "educated-workforce"
+          ],
+          "slug": "istanbul"
+        },
+        {
+          "name": "Ankara",
+          "suhoor_meals": [
+            "bread, cheese, olives, eggs"
+          ],
+          "iftar_meals": [
+            "Ramazan pidesi with stews and kebabs"
+          ],
+          "desserts_and_drinks": [
+            "tea",
+            "regional sweets"
+          ],
+          "rituals_and_traditions": [
+            "Mahya lights on major mosques",
+            "Municipal iftar programs"
+          ],
+          "notes": "Patterns are similar nationwide with local variations in main dishes.[web:2]"
+        }
+      ]
+    },
+    {
+      "country": "Uganda",
+      "region": "Africa",
+      "cities": [
+        {
+          "name": "Kampala",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "East African iftar; dates and local dishes; Taraweeh in mosques; charity and community; family gatherings.",
+          "population": "~47 million",
+          "muslim_population": "~6 million (14% of Uganda)",
+          "muslim_percentage": 14,
+          "ramadan_traditions": "East African iftar; dates and local dishes; Taraweeh in mosques; charity and community; family gatherings.",
+          "religious_cultural": "East African Muslim community; Laylat al-Qadr; mosque and Islamic council programs.",
+          "tags": [
+            "east-africa",
+            "youngest-population",
+            "entrepreneurial",
+            "english-speaking",
+            "startup-friendly"
+          ],
+          "slug": "kampala"
+        }
+      ]
+    },
+    {
+      "country": "United Arab Emirates",
+      "region": "GCC",
+      "cities": [
+        {
+          "name": "Dubai",
+          "suhoor_meals": [
+            "khubz (Arabic bread) with cheese and dates",
+            "light rice and meat dishes"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "harees (cracked wheat with meat)",
+            "thareed (bread soaked in stew)",
+            "machboos (spiced rice with meat)"
+          ],
+          "desserts_and_drinks": [
+            "luqaimat (fried dough with date syrup)",
+            "vimto",
+            "Arabic coffee"
+          ],
+          "rituals_and_traditions": [
+            "Large Ramadan tents at hotels and along the creek",
+            "Corporate and community iftars for workers and travelers",
+            "Children's Haq Al Laila style traditions of going door to door for sweets in some emirates"
+          ],
+          "notes": "Ramadan tents and iftars with harees, thareed, machboos, and luqaimat are common throughout the UAE.[web:4][web:12][web:18]",
+          "population": "~10 million",
+          "muslim_population": "~7.5 million (76% of UAE)",
+          "muslim_percentage": 76,
+          "ramadan_traditions": "Iftar tents and buffets; cannon firing; Ramadan souks and night markets; Taraweeh at Jumeirah and other mosques; multicultural iftar; charity and community events.",
+          "religious_cultural": "Cosmopolitan Ramadan; Islamic and cultural exhibitions; Laylat al-Qadr; zakat and corporate charity; blend of Emirati tradition and expat participation.",
+          "tags": [
+            "middle-east",
+            "business-friendly",
+            "international-hub",
+            "high-capital",
+            "ai-blockchain"
+          ],
+          "slug": "dubai"
+        },
+        {
+          "name": "Abu Dhabi",
+          "suhoor_meals": [
+            "similar to Dubai with emphasis on bread, cheese, dates"
+          ],
+          "iftar_meals": [
+            "harees",
+            "thareed",
+            "machboos"
+          ],
+          "desserts_and_drinks": [
+            "luqaimat",
+            "vimto"
+          ],
+          "rituals_and_traditions": [
+            "Government-organized charity iftars",
+            "Family-focused evenings with taraweeh in major mosques"
+          ],
+          "notes": "Abu Dhabi follows broader Gulf food patterns with strong emphasis on hospitality and charity.[web:4][web:12]",
+          "population": "~1.6 million",
+          "muslim_population": "~1.5 million (95% of Abu Dhabi emirate)",
+          "muslim_percentage": 95,
+          "ramadan_traditions": "Local iftar and suhoor; Taraweeh in mosques; family and community gatherings; charity and feeding the needy; emphasis on Qur'an and Laylat al-Qadr.",
+          "religious_cultural": "Ramadan observed with mosque and community programs; Laylat al-Qadr; zakat and sadaqah; strong emphasis on family, worship, and charity.",
+          "tags": [
+            "persian-gulf",
+            "capital-city",
+            "high-capital",
+            "ai-strategy",
+            "world-class-infrastructure",
+            "high-purchasing-power"
+          ],
+          "slug": "abu-dhabi"
+        },
+        {
+          "name": "Sharjah",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Local iftar and suhoor; Taraweeh in mosques; family and community gatherings; charity and feeding the needy; emphasis on Qur'an and Laylat al-Qadr.",
+          "population": "~1.9 million",
+          "muslim_population": "~1.8 million (95% of Sharjah emirate)",
+          "muslim_percentage": 95,
+          "ramadan_traditions": "Local iftar and suhoor; Taraweeh in mosques; family and community gatherings; charity and feeding the needy; emphasis on Qur'an and Laylat al-Qadr.",
+          "religious_cultural": "Ramadan observed with mosque and community programs; Laylat al-Qadr; zakat and sadaqah; strong emphasis on family, worship, and charity.",
+          "tags": [
+            "persian-gulf",
+            "strong-islamic-identity",
+            "growing-tech-hub",
+            "affordable",
+            "dubai-proximity"
+          ],
+          "slug": "sharjah"
+        }
+      ]
+    },
+    {
+      "country": "United Kingdom",
+      "region": "Europe",
+      "cities": [
+        {
+          "name": "London",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "British Muslim Ramadan; iftar at mosques and community centers; East London Mosque and others; Ramadan tents and street iftars; charity; family and multicultural iftars.",
+          "population": "~9.3 million (Greater London)",
+          "muslim_population": "~1.4 million (15-17% of Greater London)",
+          "muslim_percentage": 16,
+          "ramadan_traditions": "British Muslim Ramadan; iftar at mosques and community centers; East London Mosque and others; Ramadan tents and street iftars; charity; family and multicultural iftars.",
+          "religious_cultural": "Largest Muslim population in Europe; diverse ethnic Ramadan customs; Laylat al-Qadr programs; zakat and UK Islamic charities; mosque and youth programs.",
+          "tags": [
+            "europe",
+            "major-tech-hub",
+            "large-muslim-population",
+            "diverse-talent",
+            "high-purchasing-power"
+          ],
+          "slug": "london"
+        }
+      ]
+    },
+    {
+      "country": "United States",
+      "region": "North America",
+      "cities": [
+        {
+          "name": "New York City",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "American Muslim Ramadan; iftar at Islamic centers and homes; diverse immigrant traditions; Taraweeh in major mosques; charity; Ramadan awareness in the city.",
+          "population": "~8.8 million",
+          "muslim_population": "~800,000-1 million (9-10% of NYC population)",
+          "muslim_percentage": 9,
+          "ramadan_traditions": "American Muslim Ramadan; iftar at Islamic centers and homes; diverse immigrant traditions; Taraweeh in major mosques; charity; Ramadan awareness in the city.",
+          "religious_cultural": "Diverse Muslim diaspora; Laylat al-Qadr; Islamic Society and mosque networks; interfaith iftars; blend of South Asian, Arab, African American, and other traditions.",
+          "tags": [
+            "north-america",
+            "major-tech-hub",
+            "high-purchasing-power",
+            "diverse-talent",
+            "access-to-capital",
+            "large-muslim-population"
+          ],
+          "slug": "new-york-city"
+        },
+        {
+          "name": "Dearborn",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Arab American Ramadan; iftar and suhoor in community; Lebanese and Iraqi dishes; mosque programs; Taraweeh; strong family and community observance.",
+          "population": "~110,000",
+          "muslim_population": "~50,000 (40-50% of Dearborn population)",
+          "muslim_percentage": 45,
+          "ramadan_traditions": "Arab American Ramadan; iftar and suhoor in community; Lebanese and Iraqi dishes; mosque programs; Taraweeh; strong family and community observance.",
+          "religious_cultural": "Largest Arab American Muslim concentration; Laylat al-Qadr; mosque and cultural center programs; charity; Ramadan as identity and community bonding.",
+          "tags": [
+            "north-america",
+            "high-muslim-concentration",
+            "arab-american",
+            "automotive-tech",
+            "strong-community"
+          ],
+          "slug": "dearborn"
+        },
+        {
+          "name": "Minneapolis",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Iftar at Islamic centers and homes; diverse immigrant traditions; Taraweeh in major mosques; charity; Ramadan awareness and interfaith iftars.",
+          "population": "~3.7 million (metro)",
+          "muslim_population": "~100,000-150,000 (15-20% of Minneapolis-St. Paul metro)",
+          "muslim_percentage": 15,
+          "ramadan_traditions": "Iftar at Islamic centers and homes; diverse immigrant traditions; Taraweeh in major mosques; charity; Ramadan awareness and interfaith iftars.",
+          "religious_cultural": "Diverse Muslim diaspora; Laylat al-Qadr; mosque and Islamic society networks; blend of ethnic traditions.",
+          "tags": [
+            "north-america",
+            "east-african-community",
+            "growing-tech-hub",
+            "quality-of-life",
+            "affordable"
+          ],
+          "slug": "minneapolis"
+        },
+        {
+          "name": "Dallas",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Iftar at Islamic centers and homes; diverse immigrant traditions; Taraweeh in major mosques; charity; Ramadan awareness and interfaith iftars.",
+          "population": "~7.6 million (DFW metro)",
+          "muslim_population": "~150,000-200,000 (5-7% of DFW metro)",
+          "muslim_percentage": 6,
+          "ramadan_traditions": "Iftar at Islamic centers and homes; diverse immigrant traditions; Taraweeh in major mosques; charity; Ramadan awareness and interfaith iftars.",
+          "religious_cultural": "Diverse Muslim diaspora; Laylat al-Qadr; mosque and Islamic society networks; blend of ethnic traditions.",
+          "tags": [
+            "north-america",
+            "major-tech-hub",
+            "business-friendly",
+            "diverse-muslim-community",
+            "affordable"
+          ],
+          "slug": "dallas"
+        },
+        {
+          "name": "Washington D.C.",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Iftar at Islamic centers and homes; diverse immigrant traditions; Taraweeh in major mosques; charity; Ramadan awareness and interfaith iftars.",
+          "population": "~6.3 million (DC metro)",
+          "muslim_population": "~200,000-250,000 (8-10% of DC metro)",
+          "muslim_percentage": 9,
+          "ramadan_traditions": "Iftar at Islamic centers and homes; diverse immigrant traditions; Taraweeh in major mosques; charity; Ramadan awareness and interfaith iftars.",
+          "religious_cultural": "Diverse Muslim diaspora; Laylat al-Qadr; mosque and Islamic society networks; blend of ethnic traditions.",
+          "tags": [
+            "north-america",
+            "government-tech",
+            "cybersecurity-hub",
+            "high-education",
+            "policy-access",
+            "diverse-muslim-community"
+          ],
+          "slug": "washington-dc"
         }
       ]
     },
@@ -976,34 +2535,62 @@
             "Community iftars with extended family and neighbors",
             "Evening prayers followed by tea and sweets"
           ],
-          "notes": "Plov, shashlik, and samsa are common Uzbek dishes served during Ramadan.[web:14]"
-        }
-      ]
-    },
-    {
-      "country": "Kazakhstan",
-      "region": "Central Asia",
-      "cities": [
+          "notes": "Plov, shashlik, and samsa are common Uzbek dishes served during Ramadan.[web:14]",
+          "population": "~36 million",
+          "muslim_population": "~32 million (88% of Uzbekistan)",
+          "muslim_percentage": 88,
+          "ramadan_traditions": "Plov, dates, bread at iftar; Taraweeh in historic mosques and madrasas; family and community; charity.",
+          "religious_cultural": "Central Asian Hanafi tradition; Laylat al-Qadr; Silk Road Islamic heritage; shrine and mosque visits.",
+          "tags": [
+            "central-asia",
+            "largest-market",
+            "government-supported",
+            "silk-road",
+            "bilingual"
+          ],
+          "slug": "tashkent"
+        },
         {
-          "name": "Almaty",
-          "suhoor_meals": [
-            "bread, cheese, tea",
-            "light meat dishes"
+          "name": "Bukhara",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Central Asian Ramadan; iftar with plov, dates, bread; Taraweeh in historic madrasas and mosques; family and community; charity.",
+          "population": "~36 million",
+          "muslim_population": "~35 million (96% of Uzbekistan, Bukhara region)",
+          "muslim_percentage": 96,
+          "ramadan_traditions": "Central Asian Ramadan; iftar with plov, dates, bread; Taraweeh in historic madrasas and mosques; family and community; charity.",
+          "religious_cultural": "Silk Road Islamic heritage; Hanafi tradition; Laylat al-Qadr; shrine and mosque visits; Uzbek and Tajik customs.",
+          "tags": [
+            "central-asia",
+            "historic-city",
+            "silk-road",
+            "unesco-heritage",
+            "islamic-scholarship"
           ],
-          "iftar_meals": [
-            "dates and water",
-            "plov",
-            "beshbarmak (boiled meat with pasta)"
+          "slug": "bukhara"
+        },
+        {
+          "name": "Samarkand",
+          "suhoor_meals": [],
+          "iftar_meals": [],
+          "desserts_and_drinks": [],
+          "rituals_and_traditions": [],
+          "notes": "Samarkand Ramadan; iftar with plov and local dishes; Taraweeh at Registan and Bibi-Khanym; family and community; charity and hospitality.",
+          "population": "~36 million",
+          "muslim_population": "~650,000 (96% of Uzbekistan, Samarkand region)",
+          "muslim_percentage": 96,
+          "ramadan_traditions": "Samarkand Ramadan; iftar with plov and local dishes; Taraweeh at Registan and Bibi-Khanym; family and community; charity and hospitality.",
+          "religious_cultural": "Timurid and Islamic heritage; Hanafi tradition; Laylat al-Qadr; historic mosques and madrasas; Uzbek cultural and religious blend.",
+          "tags": [
+            "central-asia",
+            "historic-city",
+            "silk-road",
+            "unesco-heritage",
+            "islamic-scholarship"
           ],
-          "desserts_and_drinks": [
-            "tea",
-            "local sweets"
-          ],
-          "rituals_and_traditions": [
-            "Strong emphasis on family gatherings at iftar",
-            "Taraweeh prayers at neighborhood mosques"
-          ],
-          "notes": "Plov and beshbarmak appear in Kazakh Ramadan meals along with shared family iftars.[web:14]"
+          "slug": "samarkand"
         }
       ]
     },
@@ -1030,7 +2617,20 @@
             "Extended family meals with shared platters",
             "Coffee and qat sessions in some communities after taraweeh"
           ],
-          "notes": "Aseeda is a well-known Yemeni Ramadan dish, often eaten with broth by hand.[web:13]"
+          "notes": "Aseeda is a well-known Yemeni Ramadan dish, often eaten with broth by hand.[web:13]",
+          "population": "~30 million",
+          "muslim_population": "~30 million (99% of Yemen, Sana'a metro ~4 million)",
+          "muslim_percentage": 99,
+          "ramadan_traditions": "Yemeni iftar (saltah, dates, shafout); Taraweeh in historic Sana'a mosques; family and neighborhood iftars; charity; strong emphasis on Qur'an and night prayers.",
+          "religious_cultural": "Ancient Islamic city; Laylat al-Qadr; Yemeni Sunni (Shafi'i) tradition; resilience and community; mosque and scholarly heritage.",
+          "tags": [
+            "middle-east",
+            "historic-city",
+            "large-population",
+            "diaspora-network",
+            "historic-significance"
+          ],
+          "slug": "sanaa"
         }
       ]
     }

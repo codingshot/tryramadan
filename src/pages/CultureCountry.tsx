@@ -1,6 +1,7 @@
 import { useParams, Link } from "react-router-dom";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Coffee, Utensils, ChevronRight, Globe, MapPin, Users, Building2 } from "lucide-react";
+import { ArrowLeft, Coffee, Utensils, ChevronRight, Globe, MapPin, Users, Building2, ExternalLink } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { PageSEO } from "@/components/PageSEO";
@@ -8,9 +9,13 @@ import {
   getCountryById,
   getRecipes,
 } from "@/lib/cultureRecipes";
+import { useIftarLabel } from "@/hooks/useLocalStorage";
+
+const SITE_URL = "https://tryramadan.app";
 
 export default function CultureCountry() {
   const { countryId } = useParams<{ countryId: string }>();
+  const iftarLabel = useIftarLabel();
   const country = countryId ? getCountryById(countryId) : undefined;
 
   if (!country) {
@@ -30,18 +35,69 @@ export default function CultureCountry() {
   }
 
   const recipesFromCountry = getRecipes({ countryId: country.id });
-  const title = `Ramadan in ${country.name} | Traditions & Recipes | TryRamadan`;
+  const title = `Ramadan in ${country.name} | ${iftarLabel} Traditions, Foods & Mosques | TryRamadan`;
   const description =
     country.specialNote ||
     `Explore Ramadan traditions, foods, and customs in ${country.name}. ${country.traditions.length} traditions and ${country.foods.join(", ")}.`;
+  const canonicalPath = `/culture/${country.id}`;
+  const canonicalUrl = `${SITE_URL}${canonicalPath}`;
+  const keywords = [
+    `Ramadan ${country.name}`,
+    `${country.name} iftar`,
+    `${country.name} suhoor`,
+    "Ramadan traditions",
+    country.regionName,
+    ...country.foods.slice(0, 3),
+  ].join(", ");
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": `${canonicalUrl}#webpage`,
+        url: canonicalUrl,
+        name: title,
+        description: description.slice(0, 160),
+        isPartOf: { "@id": `${SITE_URL}#website` },
+        about: {
+          "@type": "Place",
+          name: country.name,
+          description: `Ramadan traditions and iftar customs in ${country.name}.`,
+        },
+      },
+      {
+        "@type": "Article",
+        "@id": `${canonicalUrl}#article`,
+        headline: `Ramadan in ${country.name}`,
+        description: description.slice(0, 160),
+        mainEntityOfPage: { "@id": `${canonicalUrl}#webpage` },
+        keywords,
+      },
+    ],
+  };
+
+  useEffect(() => {
+    let el = document.querySelector('meta[name="keywords"]');
+    if (!el) {
+      el = document.createElement("meta");
+      el.setAttribute("name", "keywords");
+      document.head.appendChild(el);
+    }
+    el.setAttribute("content", keywords);
+  }, [keywords]);
 
   return (
     <div className="min-h-screen bg-background">
       <PageSEO
         title={title}
         description={description.slice(0, 160)}
-        path={`/culture/${country.id}`}
+        path={canonicalPath}
         type="article"
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Navbar />
       <main className="main-content" role="main" aria-label={`Ramadan traditions in ${country.name}`}>
@@ -118,7 +174,39 @@ export default function CultureCountry() {
                     <li key={i} className="p-4 rounded-xl bg-card border border-border">
                       <span className="font-medium">{mosque.name}</span>
                       {mosque.city && <span className="text-sm text-muted-foreground ml-2">· {mosque.city}</span>}
+                      {mosque.address && (
+                        <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1.5">
+                          <MapPin className="w-4 h-4 flex-shrink-0 text-secondary" aria-hidden />
+                          {mosque.address}
+                        </p>
+                      )}
                       {mosque.note && <p className="text-sm text-muted-foreground mt-1">{mosque.note}</p>}
+                      {(mosque.googleMapsUrl || mosque.appleMapsUrl) && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {mosque.googleMapsUrl && (
+                            <a
+                              href={mosque.googleMapsUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-sm text-secondary hover:underline"
+                            >
+                              <ExternalLink className="w-4 h-4" aria-hidden />
+                              Open in Google Maps
+                            </a>
+                          )}
+                          {mosque.appleMapsUrl && (
+                            <a
+                              href={mosque.appleMapsUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-sm text-secondary hover:underline"
+                            >
+                              <ExternalLink className="w-4 h-4" aria-hidden />
+                              Open in Apple Maps
+                            </a>
+                          )}
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -147,7 +235,7 @@ export default function CultureCountry() {
                           <p className="mt-0.5">{city.suhoor_meals.join(", ")}</p>
                         </div>
                         <div>
-                          <span className="font-medium text-muted-foreground">Iftar</span>
+                          <span className="font-medium text-muted-foreground">{iftarLabel}</span>
                           <p className="mt-0.5">{city.iftar_meals.join(", ")}</p>
                         </div>
                         <div>
@@ -218,7 +306,7 @@ export default function CultureCountry() {
                           <div>
                             <span className="font-medium">{recipe.name}</span>
                             <span className="text-sm text-muted-foreground block">
-                              {mealType === "suhoor" ? "Suhoor" : "Iftar"} · {recipe.prepTime}
+                              {mealType === "suhoor" ? "Suhoor" : iftarLabel} · {recipe.prepTime}
                             </span>
                           </div>
                         </div>

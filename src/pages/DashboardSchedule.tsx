@@ -42,6 +42,8 @@ import {
   useDashboardQuickActions,
   DASHBOARD_QUICK_ACTIONS,
   DASHBOARD_QUICK_ACTION_IDS,
+  useIftarLabel,
+  useIftarLabelShort,
   type FoodLogEntry,
   type CalendarEvent,
   type CalendarEventType,
@@ -131,6 +133,8 @@ const QUICK_ADD_TEMPLATES: { type: CalendarEventType; title: string; timeKey: ke
 const DashboardSchedule = () => {
   const [preferences] = useUserPreferences();
   const [progress, setProgress] = useFastingProgress();
+  const iftarLabel = useIftarLabel();
+  const iftarLabelShort = useIftarLabelShort();
   const [scheduleNotes, setScheduleNotes] = useLocalStorage<Record<string, string>>(
     "tryramadan-schedule-notes",
     {}
@@ -460,7 +464,7 @@ const DashboardSchedule = () => {
     <div className="min-h-screen bg-background">
       <PageSEO
         title="Schedule | TryRamadan.app"
-        description="Ramadan fasting schedule: calendar, suhoor and iftar times, events, and iCal export. Plan your fasting days."
+        description={`Ramadan fasting schedule: calendar, suhoor and ${iftarLabelShort} times, events, and iCal export. Plan your fasting days.`}
         path="/dashboard/schedule"
       />
       <Navbar />
@@ -710,7 +714,7 @@ const DashboardSchedule = () => {
               Export to calendar
             </h3>
             <p className="text-sm text-muted-foreground mb-3">
-              Download an .ics file with Suhoor, Iftar, all prayers, optional Taraweeh, and any events you add. Import into Google Calendar, Apple Calendar, or Outlook.
+              Download an .ics file with Suhoor, {iftarLabel}, all prayers, optional Taraweeh, and any events you add. Import into Google Calendar, Apple Calendar, or Outlook.
             </p>
             <div className="flex flex-wrap gap-2">
               <Button
@@ -1059,7 +1063,7 @@ const DashboardSchedule = () => {
                         Add to calendar (export .ics above)
                       </Label>
                       <p className="text-xs text-muted-foreground mb-2">
-                        Quick-add Suhoor, Iftar, prayers, Taraweeh, get food. These plus your custom events are included when you export.
+                        Quick-add Suhoor, {iftarLabel}, prayers, Taraweeh, get food. These plus your custom events are included when you export.
                       </p>
                       <div className="flex flex-wrap gap-1.5 mb-2">
                         {QUICK_ADD_TEMPLATES.map((t) => (
@@ -1071,7 +1075,7 @@ const DashboardSchedule = () => {
                             className="text-xs h-8"
                             onClick={() => quickAddCalendarEvent(t.type, t)}
                           >
-                            {t.title}
+                            {t.type === "iftar" ? iftarLabel : t.title}
                           </Button>
                         ))}
                       </div>
@@ -1124,12 +1128,12 @@ const DashboardSchedule = () => {
                           <Label className="flex items-center gap-2 text-sm font-medium mb-2 cursor-help w-fit">
 <Sunrise className="w-4 h-4" aria-hidden />
                         <Sunset className="w-4 h-4" aria-hidden />
-                        Meal plan (Suhoor & Iftar)
+                        Meal plan (Suhoor & {iftarLabel})
                           </Label>
                         </TooltipTrigger>
                         <TooltipContent className="max-w-xs">
                           <p className="font-medium">What you plan to eat this day</p>
-                          <p className="text-xs mt-1">Short notes for your pre-dawn meal (Suhoor) and break-fast meal (Iftar). Use the Meals page to browse recipes and add them to your schedule.</p>
+                          <p className="text-xs mt-1">Short notes for your pre-dawn meal (Suhoor) and break-fast meal ({iftarLabel}). Use the Meals page to browse recipes and add them to your schedule.</p>
                         </TooltipContent>
                       </Tooltip>
                       <div className="grid gap-2">
@@ -1166,7 +1170,7 @@ const DashboardSchedule = () => {
                             <TooltipTrigger asChild>
                               <span className="flex items-center gap-1 text-muted-foreground shrink-0">
                                 <Sunset className="w-4 h-4" aria-hidden />
-                                <span className="text-xs">Iftar (evening)</span>
+                                <span className="text-xs">{iftarLabel} (evening)</span>
                               </span>
                             </TooltipTrigger>
                             <TooltipContent className="max-w-xs">
@@ -1244,7 +1248,7 @@ const DashboardSchedule = () => {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <span className="text-xs font-medium text-muted-foreground flex items-center gap-1 mb-1">
-                              <Sunset className="w-3 h-3" aria-hidden /> Iftar
+                              <Sunset className="w-3 h-3" aria-hidden /> {iftarLabel}
                             </span>
                           </TooltipTrigger>
                           <TooltipContent className="max-w-xs">
@@ -1292,13 +1296,13 @@ const DashboardSchedule = () => {
                               <Plus className="w-3 h-3" /> Log a Suhoor item
                             </Button>
                             <Button type="button" variant="outline" size="sm" onClick={() => setAddFoodMeal("iftar")} className="gap-1">
-                              <Plus className="w-3 h-3" /> Log an Iftar item
+                              <Plus className="w-3 h-3" /> Log a {iftarLabel} item
                             </Button>
                           </div>
                         ) : (
                           <div className="p-3 rounded-xl border border-border bg-background space-y-3">
                             <p className="text-xs font-medium">
-                              Add to {addFoodMeal === "suhoor" ? "Suhoor" : "Iftar"}
+                              Add to {addFoodMeal === "suhoor" ? "Suhoor" : iftarLabel}
                             </p>
                             <div className="flex flex-wrap gap-2 items-end">
                               <div className="min-w-[160px]">

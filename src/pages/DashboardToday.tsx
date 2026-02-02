@@ -17,6 +17,8 @@ import {
   getTodayFastingLog,
   getBrokenReasonLabel,
   useTodayData,
+  useIftarLabel,
+  useIftarLabelShort,
 } from "@/hooks/useLocalStorage";
 import { BreakFastReasonDialog } from "@/components/BreakFastReasonDialog";
 import { usePrayerTimes } from "@/hooks/usePrayerTimes";
@@ -34,6 +36,8 @@ import {
 
 const DashboardToday = () => {
   const [preferences] = useUserPreferences();
+  const iftarLabel = useIftarLabel();
+  const iftarLabelShort = useIftarLabelShort();
   const [progress, setProgress] = useFastingProgress();
   const {
     intention,
@@ -275,7 +279,7 @@ const DashboardToday = () => {
                 <TooltipTrigger asChild>
                   <div className="p-3 sm:p-4 rounded-2xl bg-card border border-border text-center cursor-help min-w-0">
                     <span className="text-xs text-muted-foreground block truncate">
-                      {iftarPassed ? "Iftar passed" : "Until Iftar"}
+                      {iftarPassed ? `${iftarLabel} passed` : `Until ${iftarLabel}`}
                     </span>
                     {iftarPassed ? (
                       <span className="text-base sm:text-lg font-bold text-muted-foreground tabular-nums">
@@ -400,7 +404,7 @@ const DashboardToday = () => {
             <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
               <EnergyIcon className="w-5 h-5 text-secondary" />
               <span className="text-sm">
-                {energyLevel <= 2 && "Take it easy. Rest if needed and stay hydrated after iftar."}
+                {energyLevel <= 2 && `Take it easy. Rest if needed and stay hydrated after ${iftarLabelShort}.`}
                 {energyLevel === 3 && "You're doing well! Keep a steady pace today."}
                 {energyLevel >= 4 && "Great energy! You're handling the fast beautifully."}
               </span>
@@ -430,7 +434,7 @@ const DashboardToday = () => {
               Hydration • ترطيب
             </h3>
             <p className="text-sm text-muted-foreground mb-3">
-              Goal: {formatHydrationGoal(hydrationGoalMl, hydrationUnit)} (based on your region). Log water during iftar and before Fajr only.
+              Goal: {formatHydrationGoal(hydrationGoalMl, hydrationUnit)} (based on your region). Log water during {iftarLabelShort} and before Fajr only.
             </p>
             <div className="flex flex-wrap items-baseline gap-2 mb-3">
               <span className="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400">
@@ -450,7 +454,7 @@ const DashboardToday = () => {
             </div>
             {isFastingWindow ? (
               <p className="text-sm text-muted-foreground py-2 rounded-lg bg-muted/50 border border-border">
-                You can log water after iftar and before Fajr. Quick-add is available during eating hours.
+                You can log water after {iftarLabelShort} and before Fajr. Quick-add is available during eating hours.
               </p>
             ) : (
               <>

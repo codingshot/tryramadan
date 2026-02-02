@@ -33,8 +33,8 @@
           "muslimPopulation": "~100%",
           "muslimPopulationNote": "Birthplace of Islam; home to the Two Holy Mosques.",
           "majorMosques": [
-            { "name": "Masjid al-Haram (Great Mosque of Mecca)", "city": "Mecca", "note": "Islam's holiest mosque; encloses the Kaaba; accommodates over a million worshippers." },
-            { "name": "Masjid al-Nabawi (Prophet's Mosque)", "city": "Medina", "note": "Second holiest mosque in Islam; founded by Prophet Muhammad." }
+            { "name": "Masjid al-Haram (Great Mosque of Mecca)", "city": "Mecca", "address": "Al Haram, Mecca, Saudi Arabia", "note": "Islam's holiest mosque; encloses the Kaaba; accommodates over a million worshippers.", "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Masjid+al-Haram+Mecca+Saudi+Arabia", "appleMapsUrl": "https://maps.apple.com/?q=Masjid+al-Haram+Mecca+Saudi+Arabia" },
+            { "name": "Masjid al-Nabawi (Prophet's Mosque)", "city": "Medina", "address": "Al Haram, Medina, Saudi Arabia", "note": "Second holiest mosque in Islam; founded by Prophet Muhammad.", "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Masjid+al-Nabawi+Medina+Saudi+Arabia", "appleMapsUrl": "https://maps.apple.com/?q=Masjid+al-Nabawi+Medina+Saudi+Arabia" }
           ],
           "cities": [
             { "name": "Riyadh", "suhoor_meals": ["light rice dishes", "bread with cheese and dates"], "iftar_meals": ["dates and water", "thareed (bread soaked in lamb and vegetable stew)", "kabsa (spiced rice with chicken or lamb)"], "desserts_and_drinks": ["qamar al-din (apricot drink)", "Arabic coffee and dates"], "rituals_and_traditions": ["Large family and tribal gatherings", "Night prayers (taraweeh) with packed mosques"], "notes": "Thareed is a classic Saudi iftar stew, while kabsa is a national dish popular in Ramadan." },
@@ -76,9 +76,9 @@
           "muslimPopulation": "~95%",
           "muslimPopulationNote": "Largest Arab population; Al-Azhar is a leading center of Sunni Islamic learning.",
           "majorMosques": [
-            { "name": "Al-Azhar Mosque", "city": "Cairo", "note": "Foremost center of Sunni Islamic learning; Al-Azhar University." },
-            { "name": "Mosque of Muhammad Ali", "city": "Cairo", "note": "Iconic mosque at the Citadel; Ottoman-style." },
-            { "name": "Mosque of Ibn Tulun", "city": "Cairo", "note": "One of the oldest mosques in Egypt; 9th century." }
+            { "name": "Al-Azhar Mosque", "city": "Cairo", "address": "Al-Azhar, El-Darb El-Ahmar, Cairo, Egypt", "note": "Foremost center of Sunni Islamic learning; Al-Azhar University.", "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Al-Azhar+Mosque+Cairo+Egypt", "appleMapsUrl": "https://maps.apple.com/?q=Al-Azhar+Mosque+Cairo+Egypt" },
+            { "name": "Mosque of Muhammad Ali", "city": "Cairo", "address": "Citadel of Cairo, Cairo, Egypt", "note": "Iconic mosque at the Citadel; Ottoman-style.", "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Mosque+of+Muhammad+Ali+Citadel+Cairo", "appleMapsUrl": "https://maps.apple.com/?q=Mosque+of+Muhammad+Ali+Cairo+Egypt" },
+            { "name": "Mosque of Ibn Tulun", "city": "Cairo", "address": "Ahmad Ibn Tulun Sq., Cairo, Egypt", "note": "One of the oldest mosques in Egypt; 9th century.", "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Ibn+Tulun+Mosque+Cairo+Egypt", "appleMapsUrl": "https://maps.apple.com/?q=Ibn+Tulun+Mosque+Cairo+Egypt" }
           ],
           "cities": [
             { "name": "Cairo", "suhoor_meals": ["fava beans (ful medames)", "baladi bread", "cheese and eggs"], "iftar_meals": ["dates and water", "ful medames with bread", "various stews and rice"], "desserts_and_drinks": ["karkadeh (hibiscus drink)", "kunafa and basbousa"], "rituals_and_traditions": ["Fanoos (Ramadan lanterns) decorating streets and homes", "Lanterns carried by children while singing Ramadan songs", "Family iftars that often extend into late-night socializing"], "notes": "Colorful fanoos lanterns and ful with karkadeh are widely associated with Egyptian Ramadan." },
@@ -108,8 +108,8 @@
           "muslimPopulation": "~99%",
           "muslimPopulationNote": "Muslim-majority kingdom; blend of Arab, Berber, and Andalusian heritage.",
           "majorMosques": [
-            { "name": "Hassan II Mosque", "city": "Casablanca", "note": "One of the world's largest; 210m minaret; accommodates 105,000 worshippers; open to non-Muslim visitors." },
-            { "name": "Koutoubia Mosque", "city": "Marrakesh", "note": "12th-century landmark; symbol of the city." }
+            { "name": "Hassan II Mosque", "city": "Casablanca", "address": "Boulevard de la Corniche, Casablanca, Morocco", "note": "One of the world's largest; 210m minaret; accommodates 105,000 worshippers; open to non-Muslim visitors.", "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Hassan+II+Mosque+Casablanca+Morocco", "appleMapsUrl": "https://maps.apple.com/?q=Hassan+II+Mosque+Casablanca+Morocco" },
+            { "name": "Koutoubia Mosque", "city": "Marrakesh", "address": "Avenue Mohammed V, Marrakesh, Morocco", "note": "12th-century landmark; symbol of the city.", "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Koutoubia+Mosque+Marrakesh+Morocco", "appleMapsUrl": "https://maps.apple.com/?q=Koutoubia+Mosque+Marrakesh+Morocco" }
           ],
           "cities": [
             { "name": "Casablanca", "suhoor_meals": ["bread with olive oil and cheese", "tagines in lighter portions"], "iftar_meals": ["dates and water", "harira (hearty soup)", "chebakia (sesame honey pastry)", "breads and tagines"], "desserts_and_drinks": ["mint tea", "fresh juices"], "rituals_and_traditions": ["Family-centered iftar centered around harira", "Traditional clothing like djellaba and kaftan for prayers and gatherings"], "notes": "Harira, rfissa, and tangia are highlighted as signature Moroccan Ramadan dishes." },
@@ -139,9 +139,9 @@
           "muslimPopulation": "~99%",
           "muslimPopulationNote": "Historically the seat of the Ottoman Caliphate; secular state with a Muslim-majority population.",
           "majorMosques": [
-            { "name": "Sultan Ahmed Mosque (Blue Mosque)", "city": "Istanbul", "note": "Iconic Ottoman mosque; six minarets; blue Iznik tiles." },
-            { "name": "Süleymaniye Mosque", "city": "Istanbul", "note": "Designed by Mimar Sinan; one of Istanbul's grandest mosques." },
-            { "name": "Hagia Sophia", "city": "Istanbul", "note": "Historic Byzantine then Ottoman mosque; UNESCO World Heritage." }
+            { "name": "Sultan Ahmed Mosque (Blue Mosque)", "city": "Istanbul", "address": "Sultan Ahmet Mah., Istanbul, Turkey", "note": "Iconic Ottoman mosque; six minarets; blue Iznik tiles.", "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Blue+Mosque+Istanbul+Turkey", "appleMapsUrl": "https://maps.apple.com/?q=Blue+Mosque+Istanbul+Turkey" },
+            { "name": "Süleymaniye Mosque", "city": "Istanbul", "address": "Süleymaniye Mah., Istanbul, Turkey", "note": "Designed by Mimar Sinan; one of Istanbul's grandest mosques.", "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Suleymaniye+Mosque+Istanbul+Turkey", "appleMapsUrl": "https://maps.apple.com/?q=Suleymaniye+Mosque+Istanbul+Turkey" },
+            { "name": "Hagia Sophia", "city": "Istanbul", "address": "Sultan Ahmet Mah., Istanbul, Turkey", "note": "Historic Byzantine then Ottoman mosque; UNESCO World Heritage.", "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Hagia+Sophia+Istanbul+Turkey", "appleMapsUrl": "https://maps.apple.com/?q=Hagia+Sophia+Istanbul+Turkey" }
           ],
           "cities": [
             { "name": "Istanbul", "suhoor_meals": ["olives, cheese, bread, eggs", "soups"], "iftar_meals": ["dates and water", "soup", "Ramazan pidesi (special Ramadan flatbread) with meat or vegetable dishes"], "desserts_and_drinks": ["güllaç (milk and pomegranate dessert)", "tea"], "rituals_and_traditions": ["Mosques hang mahya (illuminated messages) between minarets", "Public iftar tents by municipalities", "Street drummers waking people for suhoor in some districts"], "notes": "Ramazan pidesi is a special bread baked only in Ramadan and widely eaten for iftar and sahur." },
@@ -160,8 +160,8 @@
           "muslimPopulation": "~54%",
           "muslimPopulationNote": "Diverse religious makeup; Sunni and Shia communities; coexistence with Christians.",
           "majorMosques": [
-            { "name": "Mohammad Al-Amin Mosque", "city": "Beirut", "note": "Landmark blue-domed mosque in downtown Beirut." },
-            { "name": "Al-Omari Grand Mosque", "city": "Beirut", "note": "Historic mosque; originally a Crusader church." }
+            { "name": "Mohammad Al-Amin Mosque", "city": "Beirut", "address": "Downtown Beirut, Lebanon", "note": "Landmark blue-domed mosque in downtown Beirut.", "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Mohammad+Al-Amin+Mosque+Beirut+Lebanon", "appleMapsUrl": "https://maps.apple.com/?q=Mohammad+Al-Amin+Mosque+Beirut+Lebanon" },
+            { "name": "Al-Omari Grand Mosque", "city": "Beirut", "address": "Downtown Beirut, Lebanon", "note": "Historic mosque; originally a Crusader church.", "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Al-Omari+Grand+Mosque+Beirut+Lebanon", "appleMapsUrl": "https://maps.apple.com/?q=Al-Omari+Grand+Mosque+Beirut+Lebanon" }
           ],
           "cities": [
             { "name": "Beirut", "suhoor_meals": ["man'oushe (flatbread with toppings)", "foul (fava beans)"], "iftar_meals": ["dates and water", "rice with stews and grilled meats"], "desserts_and_drinks": ["qatayef", "jallab (date and grape drink)"], "rituals_and_traditions": ["Midfa al-iftar (iftar cannons) to signal sunset", "Family and neighborhood gatherings"], "notes": "Iftar cannons are a long-standing tradition used to mark the end of each fasting day." }
@@ -179,8 +179,8 @@
           "muslimPopulation": "~97%",
           "muslimPopulationNote": "Predominantly Sunni; strong Hashemite custodianship of holy sites.",
           "majorMosques": [
-            { "name": "King Abdullah I Mosque", "city": "Amman", "note": "Distinctive blue dome; open to non-Muslim visitors." },
-            { "name": "Abu Darwish Mosque", "city": "Amman", "note": "Black and white checkerboard minaret; hilltop landmark." }
+            { "name": "King Abdullah I Mosque", "city": "Amman", "address": "Abdoun, Amman, Jordan", "note": "Distinctive blue dome; open to non-Muslim visitors.", "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=King+Abdullah+I+Mosque+Amman+Jordan", "appleMapsUrl": "https://maps.apple.com/?q=King+Abdullah+I+Mosque+Amman+Jordan" },
+            { "name": "Abu Darwish Mosque", "city": "Amman", "address": "Jabal al-Ashrafiyya, Amman, Jordan", "note": "Black and white checkerboard minaret; hilltop landmark.", "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Abu+Darwish+Mosque+Amman+Jordan", "appleMapsUrl": "https://maps.apple.com/?q=Abu+Darwish+Mosque+Amman+Jordan" }
           ],
           "cities": [
             { "name": "Amman", "suhoor_meals": ["bread, cheese, hummus, foul"], "iftar_meals": ["dates and water", "mansaf (lamb with rice and jameed yogurt)", "various rice and meat dishes"], "desserts_and_drinks": ["qatayef", "juices"], "rituals_and_traditions": ["Mansaf at large family gatherings and special Ramadan occasions"], "notes": "Mansaf, Jordan's national dish, is central to celebrations and gatherings, including Ramadan." },
@@ -303,6 +303,113 @@
           "cities": [
             { "name": "Tunis", "suhoor_meals": ["bread, olive oil, cheese", "light stews"], "iftar_meals": ["dates and water", "lablabi (chickpea soup)", "brik (fried pastry with egg)"], "desserts_and_drinks": ["baklava", "mint tea"], "rituals_and_traditions": ["Iftar cannon firing in some areas", "Family gatherings around hearty soups and pastries"], "notes": "Lablabi and brik are emblematic Tunisian Ramadan dishes." }
           ]
+        },
+        {
+          "id": "algeria",
+          "name": "Algeria",
+          "flag": "🇩🇿",
+          "traditions": [
+            { "name": "Iftar Cannon", "arabicName": "مدفع الإفطار", "transliteration": "Midfa al-Iftar", "description": "Iftar cannon fired in major cities to signal sunset" },
+            { "name": "Mesaharati", "arabicName": "المسحراتي", "transliteration": "Al-Mesaharati", "description": "Drummers and singers wake neighborhoods for suhoor" },
+            { "name": "Charity Tables", "arabicName": "مائدة الرحمن", "transliteration": "Ma'edet al-Rahman", "description": "Free iftar tables for the needy in streets and mosques" }
+          ],
+          "foods": ["Chorba", "Bourek", "Zviti", "Lahm Lahlou", "Tbessi", "Mint tea"],
+          "specialNote": "Chorba (soup) and bourek (savory pastries) are central to Algerian iftar; families gather for large evening meals.",
+          "muslimPopulation": "~99%",
+          "muslimPopulationNote": "Predominantly Sunni; blend of Arab, Berber, and Ottoman heritage.",
+          "cities": [
+            { "name": "Algiers", "suhoor_meals": ["bread, olive oil, cheese", "light stews and eggs"], "iftar_meals": ["dates and water", "chorba (soup)", "bourek (savory pastries)", "zviti (meat and vegetable stew)"], "desserts_and_drinks": ["mint tea", "halwa", "fresh juices"], "rituals_and_traditions": ["Iftar cannon and mesaharati in neighborhoods", "Charity iftar tables and family gatherings"], "notes": "Chorba and bourek are emblematic Algerian Ramadan dishes." },
+            { "name": "Oran", "suhoor_meals": ["bread, cheese, olives", "light rice or couscous"], "iftar_meals": ["dates and water", "chorba", "bourek", "seafood dishes in coastal areas"], "desserts_and_drinks": ["mint tea", "local sweets"], "rituals_and_traditions": ["Family and neighborhood iftars", "Late-night street life after taraweeh"], "notes": "Oran shares core Algerian iftar traditions with coastal influences." }
+          ]
+        },
+        {
+          "id": "sudan",
+          "name": "Sudan",
+          "flag": "🇸🇩",
+          "traditions": [
+            { "name": "Communal Iftar", "arabicName": "إفطار جماعي", "transliteration": "Iftar jama'i", "description": "Large communal iftars with extended family and neighbors" },
+            { "name": "Abrey", "arabicName": "أبري", "transliteration": "Abrey", "description": "Traditional drink made from sorghum or corn, often served at iftar" }
+          ],
+          "foods": ["Ful", "Kisra", "Aseeda", "Shai", "Gorrassa", "Mulah"],
+          "specialNote": "Ful (fava beans) and kisra (sorghum flatbread) are staples; Ramadan is marked by charity and communal meals.",
+          "muslimPopulation": "~97%",
+          "muslimPopulationNote": "Predominantly Sunni; blend of Arab and African traditions.",
+          "cities": [
+            { "name": "Khartoum", "suhoor_meals": ["ful", "kisra", "tea"], "iftar_meals": ["dates and water", "ful with bread", "gorrassa (flatbread) with mulah (stew)", "aseeda"], "desserts_and_drinks": ["abrey", "shai (tea)", "fresh juices"], "rituals_and_traditions": ["Communal iftars with extended family", "Charity meals and mosque iftars"], "notes": "Ful and kisra are central to Sudanese iftar; abrey is a traditional Ramadan drink." },
+            { "name": "Omdurman", "suhoor_meals": ["ful", "kisra", "cheese"], "iftar_meals": ["dates and water", "ful", "meat stews with gorrassa"], "desserts_and_drinks": ["tea", "local sweets"], "rituals_and_traditions": ["Large family gatherings", "Souq markets busy before iftar"], "notes": "Omdurman shares Khartoum's ful and kisra traditions with strong family focus." }
+          ]
+        },
+        {
+          "id": "syria",
+          "name": "Syria",
+          "flag": "🇸🇾",
+          "traditions": [
+            { "name": "Iftar Cannon", "arabicName": "مدفع الإفطار", "transliteration": "Midfa al-Iftar", "description": "Iftar cannon fired to signal sunset; families gather for iftar" },
+            { "name": "Mesaharati", "arabicName": "المسحراتي", "transliteration": "Al-Mesaharati", "description": "Drummers wake neighborhoods for suhoor" },
+            { "name": "Hajj al-Masjid", "arabicName": "حج المسجد", "transliteration": "", "description": "Nightly visits to mosques for taraweeh and community" }
+          ],
+          "foods": ["Fattoush", "Kibbeh", "Muhammara", "Qatayef", "Jallab", "Ful", "Mahashi"],
+          "specialNote": "Syrian iftar features mezze, soups, and stuffed dishes; qatayef and jallab are Ramadan staples.",
+          "muslimPopulation": "~87%",
+          "muslimPopulationNote": "Predominantly Sunni; Levantine and Arab heritage.",
+          "cities": [
+            { "name": "Damascus", "suhoor_meals": ["bread, cheese, labneh", "ful", "eggs"], "iftar_meals": ["dates and water", "soup", "fattoush", "kibbeh", "mahashi (stuffed vegetables)"], "desserts_and_drinks": ["qatayef", "jallab", "qamar al-din"], "rituals_and_traditions": ["Iftar cannon and mesaharati", "Family iftars with elaborate mezze"], "notes": "Damascus is known for kibbeh, fattoush, and qatayef at Ramadan." },
+            { "name": "Aleppo", "suhoor_meals": ["bread, cheese", "ful", "olives"], "iftar_meals": ["dates and water", "soups", "kibbeh (including raw kibbeh in some households)", "muhammara"], "desserts_and_drinks": ["qatayef", "jallab", "local sweets"], "rituals_and_traditions": ["Communal and family iftars", "Famous Aleppine cuisine at Ramadan tables"], "notes": "Aleppo is renowned for its kibbeh and nut-based dishes at iftar." }
+          ]
+        },
+        {
+          "id": "iraq",
+          "name": "Iraq",
+          "flag": "🇮🇶",
+          "traditions": [
+            { "name": "Iftar Cannon", "arabicName": "مدفع الإفطار", "transliteration": "Midfa al-Iftar", "description": "Iftar cannon fired in Baghdad and other cities to signal sunset" },
+            { "name": "Mesaharati", "arabicName": "المسحراتي", "transliteration": "Al-Mesaharati", "description": "Drummers and singers wake people for suhoor" },
+            { "name": "Gargee'an", "arabicName": "قرقيعان", "transliteration": "Gargee'an", "description": "Mid-Ramadan celebration where children receive sweets and gifts" }
+          ],
+          "foods": ["Samoon", "Dolma", "Tashreeb", "Kleicha", "Qamar al-Din", "Bamia", "Pacha"],
+          "specialNote": "Iraqi iftar includes tashreeb (bread in broth), dolma, and kleicha (date-filled cookies); Gargee'an is celebrated mid-Ramadan.",
+          "muslimPopulation": "~95%",
+          "muslimPopulationNote": "Majority Shia with significant Sunni minority; Mesopotamian and Arab heritage.",
+          "cities": [
+            { "name": "Baghdad", "suhoor_meals": ["samoon (bread) with cheese and eggs", "ful", "tea"], "iftar_meals": ["dates and water", "soup", "tashreeb (bread in broth)", "dolma", "bamia (okra stew)"], "desserts_and_drinks": ["kleicha", "qamar al-din (apricot drink)", "sharbat"], "rituals_and_traditions": ["Iftar cannon and mesaharati", "Gargee'an for children mid-Ramadan", "Family and neighborhood iftars"], "notes": "Tashreeb and kleicha are iconic Baghdad Ramadan foods." },
+            { "name": "Basra", "suhoor_meals": ["bread", "fish dishes", "ful"], "iftar_meals": ["dates and water", "fish-based dishes", "tashreeb", "rice with fish"], "desserts_and_drinks": ["kleicha", "local juices"], "rituals_and_traditions": ["Coastal and river fish at iftar", "Gargee'an and communal meals"], "notes": "Basra's iftar features fish and river cuisine alongside Iraqi staples." }
+          ]
+        },
+        {
+          "id": "palestine",
+          "name": "Palestine",
+          "flag": "🇵🇸",
+          "traditions": [
+            { "name": "Iftar Cannon", "arabicName": "مدفع الإفطار", "transliteration": "Midfa al-Iftar", "description": "Iftar cannon fired in some cities to signal sunset" },
+            { "name": "Mesaharati", "arabicName": "المسحراتي", "transliteration": "Al-Mesaharati", "description": "Drummers wake neighborhoods for suhoor" },
+            { "name": "Charity Iftars", "arabicName": "مائدة الرحمن", "transliteration": "Ma'edet al-Rahman", "description": "Community and mosque iftar tables for the needy" }
+          ],
+          "foods": ["Musakhan", "Maqluba", "Fattoush", "Qatayef", "Kunafa", "Ful", "Hummus"],
+          "specialNote": "Palestinian iftar features maqluba, musakhan, and kunafa; family and community solidarity are central.",
+          "muslimPopulation": "~93% (West Bank & Gaza)",
+          "muslimPopulationNote": "Predominantly Sunni; Levantine and Arab heritage.",
+          "cities": [
+            { "name": "Jerusalem", "suhoor_meals": ["bread, cheese, labneh", "ful", "eggs"], "iftar_meals": ["dates and water", "soup", "maqluba (upside-down rice with chicken)", "fattoush", "hummus"], "desserts_and_drinks": ["qatayef", "kunafa", "qamar al-din"], "rituals_and_traditions": ["Iftar cannon at Al-Aqsa area", "Family and community iftars", "Taraweeh at Al-Aqsa Mosque"], "notes": "Maqluba and kunafa are iconic Palestinian Ramadan dishes." },
+            { "name": "Gaza", "suhoor_meals": ["bread", "ful", "cheese", "tea"], "iftar_meals": ["dates and water", "fish and seafood", "maqluba", "ful and hummus"], "desserts_and_drinks": ["qatayef", "kunafa", "fresh juices"], "rituals_and_traditions": ["Community iftar tables", "Strong family and neighborhood solidarity"], "notes": "Gaza's iftar often includes fish and coastal dishes with Palestinian staples." }
+          ]
+        },
+        {
+          "id": "libya",
+          "name": "Libya",
+          "flag": "🇱🇾",
+          "traditions": [
+            { "name": "Iftar Cannon", "arabicName": "مدفع الإفطار", "transliteration": "Midfa al-Iftar", "description": "Iftar cannon fired in Tripoli and other cities to signal sunset" },
+            { "name": "Mesaharati", "arabicName": "المسحراتي", "transliteration": "Al-Mesaharati", "description": "Drummers wake neighborhoods for suhoor" },
+            { "name": "Charity Iftars", "arabicName": "مائدة الرحمن", "transliteration": "Ma'edet al-Rahman", "description": "Mosques and communities set up free iftar tables" }
+          ],
+          "foods": ["Shorba", "Bazeen", "Asida", "Harira", "Baklava", "Mint tea"],
+          "specialNote": "Bazeen (barley dough with meat) and shorba are central to Libyan iftar; family and tribal gatherings are important.",
+          "muslimPopulation": "~97%",
+          "muslimPopulationNote": "Predominantly Sunni; Arab and Berber heritage.",
+          "cities": [
+            { "name": "Tripoli", "suhoor_meals": ["bread, olive oil, cheese", "light stews", "eggs"], "iftar_meals": ["dates and water", "shorba (soup)", "bazeen (barley dough with lamb)", "harira"], "desserts_and_drinks": ["mint tea", "baklava", "fresh juices"], "rituals_and_traditions": ["Iftar cannon and mesaharati", "Family and neighborhood iftars", "Charity tables at mosques"], "notes": "Bazeen and shorba are iconic Libyan Ramadan dishes." },
+            { "name": "Benghazi", "suhoor_meals": ["bread", "cheese", "ful", "tea"], "iftar_meals": ["dates and water", "shorba", "bazeen", "rice with meat"], "desserts_and_drinks": ["mint tea", "local sweets"], "rituals_and_traditions": ["Communal iftars", "Taraweeh at major mosques"], "notes": "Benghazi shares Libyan iftar traditions with eastern regional variations." }
+          ]
         }
       ]
     },
@@ -339,8 +446,8 @@
           "muslimPopulation": "~87% (~243 million)",
           "muslimPopulationNote": "World's largest Muslim-majority country by population.",
           "majorMosques": [
-            { "name": "Istiqlal Mosque", "city": "Jakarta", "note": "Largest mosque in Southeast Asia; national mosque of Indonesia." },
-            { "name": "Baiturrahman Grand Mosque", "city": "Banda Aceh", "note": "Iconic mosque; survived 2004 tsunami; symbol of Aceh." }
+            { "name": "Istiqlal Mosque", "city": "Jakarta", "address": "Jl. Taman Wijaya Kusuma, Jakarta, Indonesia", "note": "Largest mosque in Southeast Asia; national mosque of Indonesia.", "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Istiqlal+Mosque+Jakarta+Indonesia", "appleMapsUrl": "https://maps.apple.com/?q=Istiqlal+Mosque+Jakarta+Indonesia" },
+            { "name": "Baiturrahman Grand Mosque", "city": "Banda Aceh", "address": "Banda Aceh, Aceh, Indonesia", "note": "Iconic mosque; survived 2004 tsunami; symbol of Aceh.", "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Baiturrahman+Grand+Mosque+Banda+Aceh+Indonesia", "appleMapsUrl": "https://maps.apple.com/?q=Baiturrahman+Grand+Mosque+Banda+Aceh+Indonesia" }
           ],
           "cities": [
             { "name": "Jakarta", "suhoor_meals": ["rice with side dishes", "soups"], "iftar_meals": ["dates and water", "kolak (sweet banana, coconut, palm sugar dessert)", "gorengan (fried snacks)"], "desserts_and_drinks": ["es buah (fruit drink)", "sweet iced teas"], "rituals_and_traditions": ["Nyekar/nyadran style grave visits and prayers in some Javanese communities before Ramadan", "Crowded street food markets (pasar Ramadan) each evening"], "notes": "Indonesian Ramadan includes cemetery visits (nyekar/nyadran) and abundant sweet snacks at iftar." },
@@ -377,8 +484,8 @@
           "muslimPopulation": "~97% (~241 million)",
           "muslimPopulationNote": "Second-largest Muslim population in the world.",
           "majorMosques": [
-            { "name": "Faisal Mosque", "city": "Islamabad", "note": "National mosque; modern design; one of the largest in the world." },
-            { "name": "Badshahi Mosque", "city": "Lahore", "note": "Mughal-era mosque; UNESCO World Heritage; accommodates tens of thousands." }
+            { "name": "Faisal Mosque", "city": "Islamabad", "address": "Shah Faisal Ave, Islamabad, Pakistan", "note": "National mosque; modern design; one of the largest in the world.", "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Faisal+Mosque+Islamabad+Pakistan", "appleMapsUrl": "https://maps.apple.com/?q=Faisal+Mosque+Islamabad+Pakistan" },
+            { "name": "Badshahi Mosque", "city": "Lahore", "address": "Fort Rd, Lahore, Pakistan", "note": "Mughal-era mosque; UNESCO World Heritage; accommodates tens of thousands.", "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Badshahi+Mosque+Lahore+Pakistan", "appleMapsUrl": "https://maps.apple.com/?q=Badshahi+Mosque+Lahore+Pakistan" }
           ],
           "cities": [
             { "name": "Karachi", "suhoor_meals": ["paratha with eggs or curry", "tea"], "iftar_meals": ["dates and water", "samosas", "pakoras", "fruit chaat", "haleem"], "desserts_and_drinks": ["rooh afza or rose-flavored sharbat", "falooda"], "rituals_and_traditions": ["Bustling iftar bazaars selling fried snacks", "Charity iftar tables along main roads", "Chaand raat shopping before Eid with henna and bangles"], "notes": "Iftar in Pakistan commonly features fried snacks, rose-flavored drinks, and haleem; chaand raat is a key end-of-Ramadan celebration." },
@@ -427,6 +534,27 @@
           ]
         },
         {
+          "id": "afghanistan",
+          "name": "Afghanistan",
+          "flag": "🇦🇫",
+          "traditions": [
+            { "name": "Iftar Cannon", "arabicName": "مدفع الإفطار", "transliteration": "Midfa al-Iftar", "description": "Iftar cannon fired in Kabul and other cities to signal sunset" },
+            { "name": "Taraweeh", "arabicName": "تراويح", "transliteration": "Taraweeh", "description": "Congregational night prayers; communities gather at mosques" },
+            { "name": "Charity Iftars", "arabicName": "إفطار للفقراء", "transliteration": "", "description": "Mosques and families provide free iftar for the needy" }
+          ],
+          "foods": ["Biryani", "Mantu", "Ashak", "Bolani", "Qabuli Palaw", "Shorba", "Firni"],
+          "specialNote": "Afghan iftar features pilaw, mantu (dumplings), and shorba (soup); family and mosque iftars are central.",
+          "muslimPopulation": "~99%",
+          "muslimPopulationNote": "Predominantly Sunni; blend of Persian, Central Asian, and South Asian influences.",
+          "majorMosques": [
+            { "name": "Abdul Rahman Mosque", "city": "Kabul", "note": "One of the largest mosques in Afghanistan; rebuilt in the 21st century." }
+          ],
+          "cities": [
+            { "name": "Kabul", "suhoor_meals": ["naan with cheese and tea", "light pilaw", "eggs"], "iftar_meals": ["dates and water", "shorba (soup)", "qabuli palaw (rice with lamb)", "mantu (dumplings)", "bolani (stuffed flatbread)"], "desserts_and_drinks": ["firni (rice pudding)", "green tea", "sharbat"], "rituals_and_traditions": ["Iftar cannon and mosque iftars", "Family gatherings with elaborate rice and meat dishes"], "notes": "Qabuli palaw and mantu are iconic Afghan Ramadan dishes." },
+            { "name": "Herat", "suhoor_meals": ["naan", "cheese", "tea", "light stews"], "iftar_meals": ["dates and water", "shorba", "pilaw", "ashak (dumplings with yogurt)"], "desserts_and_drinks": ["firni", "tea", "local sweets"], "rituals_and_traditions": ["Persian-influenced iftar tables", "Family and community iftars"], "notes": "Herat shares Afghan staples with Persian culinary influences." }
+          ]
+        },
+        {
           "id": "malaysia",
           "name": "Malaysia",
           "flag": "🇲🇾",
@@ -440,6 +568,46 @@
           "cities": [
             { "name": "Kuala Lumpur", "suhoor_meals": ["rice with curries", "roti canai with dhal", "teh tarik"], "iftar_meals": ["dates and water", "nasi lemak", "satay", "various curries"], "desserts_and_drinks": ["cendol", "sirap bandung (rose syrup with milk)"], "rituals_and_traditions": ["Bazaar Ramadan markets selling a wide variety of take-away iftar foods", "Family-centric iftars that blend Malay, Chinese, and Indian culinary influences"], "notes": "Bazaar Ramadan is a defining Malaysian institution." },
             { "name": "Penang", "suhoor_meals": ["rice and curry", "bread with tea"], "iftar_meals": ["nasi kandar", "satay", "laksa in some areas"], "desserts_and_drinks": ["cendol", "iced drinks"], "rituals_and_traditions": ["Heritage streets lined with Ramadan food stalls", "Mix of Malay and Indian Muslim influences"], "notes": "Penang's Ramadan food reflects its reputation as a food capital." }
+          ]
+        },
+        {
+          "id": "brunei",
+          "name": "Brunei",
+          "flag": "🇧🇳",
+          "traditions": [
+            { "name": "Ramadan Bazaars", "arabicName": "بازار رمضان", "transliteration": "Bazaar Ramadan", "description": "Evening bazaars selling traditional iftar foods; sultanate-sponsored events" },
+            { "name": "Royal Iftar", "arabicName": "", "transliteration": "", "description": "Sultan and royal family host and attend communal iftars; strong emphasis on charity" }
+          ],
+          "foods": ["Ambuyat", "Nasi Katok", "Kelupis", "Pulut panggang", "Bubur lambuk", "Sirap bandung"],
+          "specialNote": "Ambuyat (sago starch) and bubur lambuk (charity rice porridge) are Ramadan staples; Brunei observes strict Ramadan customs.",
+          "muslimPopulation": "~81%",
+          "muslimPopulationNote": "Official religion is Islam; Malay sultanate with Sharia influence.",
+          "majorMosques": [
+            { "name": "Sultan Omar Ali Saifuddin Mosque", "city": "Bandar Seri Begawan", "note": "Landmark mosque on the water; symbol of Brunei." },
+            { "name": "Jame' Asr Hassanil Bolkiah Mosque", "city": "Bandar Seri Begawan", "note": "One of the largest mosques in Brunei; 29 golden domes." }
+          ],
+          "cities": [
+            { "name": "Bandar Seri Begawan", "suhoor_meals": ["rice with side dishes", "bread and tea"], "iftar_meals": ["dates and water", "bubur lambuk (charity rice porridge)", "ambuyat (sago with dipping sauces)", "nasi katok"], "desserts_and_drinks": ["sirap bandung", "kelupis (glutinous rice)", "local sweets"], "rituals_and_traditions": ["Ramadan bazaars and royal charity iftars", "Mosque iftars and taraweeh"], "notes": "Bubur lambuk and ambuyat are central to Bruneian Ramadan." }
+          ]
+        },
+        {
+          "id": "maldives",
+          "name": "Maldives",
+          "flag": "🇲🇻",
+          "traditions": [
+            { "name": "Baiyru", "arabicName": "", "transliteration": "Baiyru", "description": "Communal iftar gatherings; families and neighbors share large platters" },
+            { "name": "Ramadan Drums", "arabicName": "", "transliteration": "", "description": "Traditional drumming to signal iftar and suhoor on some islands" }
+          ],
+          "foods": ["Garudhiya", "Mas huni", "Bis keemiya", "Hedhikaa", "Bondi", "Sai"],
+          "specialNote": "Garudhiya (fish soup) and mas huni (tuna with coconut) are iftar staples; Maldivian Ramadan is deeply communal and fish-centered.",
+          "muslimPopulation": "~100%",
+          "muslimPopulationNote": "Virtually all Maldivians are Sunni Muslim; Islam is the state religion.",
+          "majorMosques": [
+            { "name": "Grand Friday Mosque (Masjid-al-Sultan Muhammad Thakurufaanu)", "city": "Malé", "note": "Largest mosque in Maldives; golden dome; accommodates thousands." }
+          ],
+          "cities": [
+            { "name": "Malé", "suhoor_meals": ["mas huni (tuna with coconut) with roshi (flatbread)", "tea"], "iftar_meals": ["dates and water", "garudhiya (fish soup)", "rice with fish curry", "bis keemiya (samosas)"], "desserts_and_drinks": ["bondi (coconut candy)", "sai (tea)", "fresh juices"], "rituals_and_traditions": ["Baiyru communal iftars", "Mosque iftars and taraweeh", "Island-wide charity"], "notes": "Garudhiya and mas huni are iconic Maldivian Ramadan foods." },
+            { "name": "Addu City", "suhoor_meals": ["roshi with mas huni", "tea"], "iftar_meals": ["dates and water", "garudhiya", "fish curries", "hedhikaa (short eats)"], "desserts_and_drinks": ["bondi", "sai"], "rituals_and_traditions": ["Family and neighborhood iftars", "Strong emphasis on seafood"], "notes": "Addu shares Maldivian iftar traditions with southern island variations." }
           ]
         }
       ]
@@ -561,6 +729,110 @@
             { "name": "Dakar", "suhoor_meals": ["bread and tea", "thiakry (millet or couscous with yogurt and fruit)", "light rice dishes"], "iftar_meals": ["dates and water", "thieboudienne (rice with fish and vegetables)", "yassa (onion-marinated chicken or fish)", "soup kandja"], "desserts_and_drinks": ["café Touba (spiced coffee)", "bissap (hibiscus drink)", "fresh juices"], "rituals_and_traditions": ["Ndogou: moment of breaking fast shared communally from large bowls", "Korité preparations and charity before Eid", "Sufi brotherhoods (Tariqas) play a major role in religious and social life"], "notes": "Thieboudienne and café Touba are widely associated with Senegalese Ramadan; ndogou marks the communal iftar moment." },
             { "name": "Touba", "suhoor_meals": ["bread, dates, café Touba", "light rice or millet"], "iftar_meals": ["dates and water", "thieboudienne", "communal dishes shared at mosques and homes"], "desserts_and_drinks": ["café Touba", "bissap"], "rituals_and_traditions": ["Spiritual center of the Mouride brotherhood; pilgrimage site", "Grand Magal pilgrimage draws millions; Ramadan observance is central"], "notes": "Touba is the holy city of the Mouride order; Ramadan and café Touba are central to daily life." }
           ]
+        },
+        {
+          "id": "somalia",
+          "name": "Somalia",
+          "flag": "🇸🇴",
+          "traditions": [
+            { "name": "Communal Iftar", "arabicName": "إفطار جماعي", "transliteration": "", "description": "Families and neighbors break fast together; large shared platters" },
+            { "name": "Taraweeh", "arabicName": "تراويح", "transliteration": "Taraweeh", "description": "Night prayers at mosques; strong community attendance" }
+          ],
+          "foods": ["Canjeero", "Suqaar", "Bariis", "Maraq", "Sambusa", "Xalwo"],
+          "specialNote": "Canjeero (sourdough flatbread) and bariis (spiced rice) are iftar staples; xalwo (halwa) is a Ramadan sweet.",
+          "muslimPopulation": "~99%",
+          "muslimPopulationNote": "Predominantly Sunni; Somali and Islamic heritage.",
+          "cities": [
+            { "name": "Mogadishu", "suhoor_meals": ["canjeero with tea", "light stews", "eggs"], "iftar_meals": ["dates and water", "maraq (soup)", "bariis (spiced rice with meat)", "sambusa", "suqaar (sautéed meat)"], "desserts_and_drinks": ["xalwo (halwa)", "tea", "fresh juices"], "rituals_and_traditions": ["Communal iftars with extended family", "Mosque iftars and taraweeh"], "notes": "Canjeero, bariis, and xalwo are central to Somali Ramadan." },
+            { "name": "Hargeisa", "suhoor_meals": ["canjeero", "tea", "cheese"], "iftar_meals": ["dates and water", "maraq", "bariis", "sambusa"], "desserts_and_drinks": ["xalwo", "tea"], "rituals_and_traditions": ["Family and neighborhood iftars", "Strong tradition of charity during Ramadan"], "notes": "Hargeisa shares Somali iftar traditions with canjeero and bariis." }
+          ]
+        },
+        {
+          "id": "mali",
+          "name": "Mali",
+          "flag": "🇲🇱",
+          "traditions": [
+            { "name": "Communal Iftar", "arabicName": "إفطار جماعي", "transliteration": "", "description": "Village and family iftars with shared bowls" },
+            { "name": "Taraweeh", "arabicName": "تراويح", "transliteration": "Taraweeh", "description": "Night prayers; Quran recitation in communities" }
+          ],
+          "foods": ["Tô", "Riz au gras", "Fattaya", "Dibi", "Bissap", "Dégé"],
+          "specialNote": "Tô (millet or sorghum porridge) and rice dishes are iftar staples; charity and communal meals are central.",
+          "muslimPopulation": "~95%",
+          "muslimPopulationNote": "Predominantly Sunni; West African and Sufi traditions.",
+          "cities": [
+            { "name": "Bamako", "suhoor_meals": ["bread and tea", "light rice or tô"], "iftar_meals": ["dates and water", "riz au gras (rice with sauce)", "fattaya (fried pastries)", "tô with sauce"], "desserts_and_drinks": ["bissap (hibiscus)", "dégé (sweetened millet)", "tea"], "rituals_and_traditions": ["Communal and family iftars", "Mosque iftars and charity"], "notes": "Riz au gras and tô are central to Malian iftar; bissap is a common Ramadan drink." },
+            { "name": "Timbuktu", "suhoor_meals": ["bread", "dates", "tea"], "iftar_meals": ["dates and water", "rice dishes", "tô", "local stews"], "desserts_and_drinks": ["bissap", "tea"], "rituals_and_traditions": ["Historic center of Islamic learning", "Family and community iftars"], "notes": "Timbuktu maintains strong Ramadan traditions with communal iftars." }
+          ]
+        },
+        {
+          "id": "mauritania",
+          "name": "Mauritania",
+          "flag": "🇲🇷",
+          "traditions": [
+            { "name": "Communal Iftar", "arabicName": "إفطار جماعي", "transliteration": "", "description": "Large shared platters; families and neighbors break fast together" },
+            { "name": "Thieb Tradition", "arabicName": "تيب", "transliteration": "Thieb", "description": "National rice-and-fish dish central to iftar; prepared in large communal pots" }
+          ],
+          "foods": ["Thieboudienne", "Méchoui", "Lakh", "Chèche", "Bissap", "Zrig"],
+          "specialNote": "Thieboudienne (thieb) and méchoui are iftar staples; Mauritanian hospitality emphasizes feeding guests generously.",
+          "muslimPopulation": "~100%",
+          "muslimPopulationNote": "Virtually all Mauritanians are Sunni Muslim; blend of Arab, Berber, and West African heritage.",
+          "majorMosques": [
+            { "name": "Saudi Mosque", "city": "Nouakchott", "note": "One of the largest mosques in Mauritania; Saudi-funded." }
+          ],
+          "cities": [
+            { "name": "Nouakchott", "suhoor_meals": ["bread and tea", "lakh (curdled milk with millet)", "light rice"], "iftar_meals": ["dates and water", "thieboudienne (rice with fish and vegetables)", "méchoui (roast lamb)", "chèche (meat and vegetable stew)"], "desserts_and_drinks": ["bissap (hibiscus)", "zrig (sour milk)", "tea"], "rituals_and_traditions": ["Communal iftars with large shared platters", "Mosque iftars and taraweeh"], "notes": "Thieboudienne is the defining Mauritanian iftar dish." },
+            { "name": "Nouadhibou", "suhoor_meals": ["bread", "fish", "tea"], "iftar_meals": ["dates and water", "fish-based thieb", "grilled fish", "rice dishes"], "desserts_and_drinks": ["bissap", "tea"], "rituals_and_traditions": ["Coastal iftars with emphasis on fish", "Family and community gatherings"], "notes": "Nouadhibou's iftar features abundant seafood alongside thieb." }
+          ]
+        },
+        {
+          "id": "niger",
+          "name": "Niger",
+          "flag": "🇳🇪",
+          "traditions": [
+            { "name": "Communal Iftar", "arabicName": "إفطار جماعي", "transliteration": "", "description": "Village and family iftars with shared bowls; strong emphasis on charity" },
+            { "name": "Taraweeh", "arabicName": "تراويح", "transliteration": "Taraweeh", "description": "Night prayers at mosques; Quran recitation" }
+          ],
+          "foods": ["Tô", "Riz au gras", "Dambu", "Fari masa", "Hura", "Bissap"],
+          "specialNote": "Tô (millet/sorghum paste) and rice dishes are iftar staples; Niger has one of the world's largest Muslim populations by share.",
+          "muslimPopulation": "~99%",
+          "muslimPopulationNote": "Predominantly Sunni; West African and Hausa traditions.",
+          "cities": [
+            { "name": "Niamey", "suhoor_meals": ["bread and tea", "fari masa (rice cakes)", "light stews"], "iftar_meals": ["dates and water", "tô with sauce", "riz au gras (rice with sauce)", "dambu (shredded meat)"], "desserts_and_drinks": ["bissap", "hura (sweet drink)", "tea"], "rituals_and_traditions": ["Communal and mosque iftars", "Charity meals for the needy"], "notes": "Tô and riz au gras are central to Nigerien Ramadan." },
+            { "name": "Zinder", "suhoor_meals": ["bread", "tea", "millet dishes"], "iftar_meals": ["dates and water", "tô", "rice with meat sauce", "local stews"], "desserts_and_drinks": ["bissap", "tea"], "rituals_and_traditions": ["Family and neighborhood iftars", "Strong Hausa cultural elements"], "notes": "Zinder shares Nigerien iftar traditions with Hausa influences." }
+          ]
+        },
+        {
+          "id": "djibouti",
+          "name": "Djibouti",
+          "flag": "🇩🇯",
+          "traditions": [
+            { "name": "Communal Iftar", "arabicName": "إفطار جماعي", "transliteration": "", "description": "Families and neighbors break fast together; Somali and Afar influences" },
+            { "name": "Taraweeh", "arabicName": "تراويح", "transliteration": "Taraweeh", "description": "Night prayers at mosques; strong community attendance" }
+          ],
+          "foods": ["Skudahkharis", "Fah-fah", "Cambaabur", "Lahoh", "Xalwo", "Shah"],
+          "specialNote": "Skudahkharis (spiced rice with meat) and fah-fah (soup) are iftar staples; blend of Somali, Afar, and Yemeni traditions.",
+          "muslimPopulation": "~97%",
+          "muslimPopulationNote": "Predominantly Sunni; Somali, Afar, and Arab heritage.",
+          "cities": [
+            { "name": "Djibouti City", "suhoor_meals": ["lahoh (flatbread) with tea", "light rice or stews"], "iftar_meals": ["dates and water", "fah-fah (soup)", "skudahkharis (spiced rice with meat)", "cambaabur (pancake)"], "desserts_and_drinks": ["xalwo (halwa)", "shah (tea)", "fresh juices"], "rituals_and_traditions": ["Communal iftars with extended family", "Mosque iftars and taraweeh"], "notes": "Skudahkharis and fah-fah are central to Djiboutian Ramadan." }
+          ]
+        },
+        {
+          "id": "gambia",
+          "name": "The Gambia",
+          "flag": "🇬🇲",
+          "traditions": [
+            { "name": "Communal Iftar", "arabicName": "إفطار جماعي", "transliteration": "", "description": "Family and neighborhood iftars; large shared bowls" },
+            { "name": "Benachin", "arabicName": "", "transliteration": "Benachin", "description": "One-pot rice dish prepared for iftar; national staple" }
+          ],
+          "foods": ["Benachin", "Domoda", "Superkanja", "Chura gerte", "Wonjo", "Tapalapa"],
+          "specialNote": "Benachin (jollof-style rice) and domoda (peanut stew) are iftar staples; The Gambia has a very high Muslim majority.",
+          "muslimPopulation": "~96%",
+          "muslimPopulationNote": "Predominantly Sunni; West African Mandinka, Fula, and Wolof traditions.",
+          "cities": [
+            { "name": "Banjul", "suhoor_meals": ["tapalapa (bread) with tea", "light rice or porridge"], "iftar_meals": ["dates and water", "benachin (one-pot rice)", "domoda (peanut stew with meat)", "superkanja (okra stew)"], "desserts_and_drinks": ["wonjo (hibiscus)", "chura gerte (rice pudding)", "tea"], "rituals_and_traditions": ["Communal iftars with family and neighbors", "Mosque iftars and charity"], "notes": "Benachin and domoda are central to Gambian iftar." },
+            { "name": "Serekunda", "suhoor_meals": ["bread", "tea", "leftover rice"], "iftar_meals": ["dates and water", "benachin", "grilled fish", "domoda"], "desserts_and_drinks": ["wonjo", "tea"], "rituals_and_traditions": ["Large family gatherings", "Street food and market activity before iftar"], "notes": "Serekunda shares Gambian iftar traditions with busy market culture." }
+          ]
         }
       ]
     },
@@ -606,6 +878,43 @@
           "cities": [
             { "name": "Almaty", "suhoor_meals": ["bread, cheese, tea", "light meat dishes"], "iftar_meals": ["dates and water", "plov", "beshbarmak (boiled meat with pasta)"], "desserts_and_drinks": ["tea", "local sweets"], "rituals_and_traditions": ["Strong emphasis on family gatherings at iftar", "Taraweeh prayers at neighborhood mosques"], "notes": "Plov and beshbarmak appear in Kazakh Ramadan meals along with shared family iftars." }
           ]
+        },
+        {
+          "id": "tajikistan",
+          "name": "Tajikistan",
+          "flag": "🇹🇯",
+          "traditions": [
+            { "name": "Oshi Palav", "arabicName": "أوشي بالاڤ", "transliteration": "Oshi Palav", "description": "Communal rice pilaf prepared for iftar; national dish" },
+            { "name": "Family Iftars", "arabicName": "", "transliteration": "", "description": "Extended family gatherings at iftar" }
+          ],
+          "foods": ["Oshi Palav", "Qurutob", "Sambusa", "Shashlik", "Non", "Green tea"],
+          "specialNote": "Oshi palav (plov) is the centerpiece of Tajik iftar; qurutob and sambusa are common.",
+          "muslimPopulation": "~98%",
+          "muslimPopulationNote": "Predominantly Sunni; Persian and Central Asian heritage.",
+          "cities": [
+            { "name": "Dushanbe", "suhoor_meals": ["non (flatbread) with cheese and tea", "light pilaf"], "iftar_meals": ["dates and water", "oshi palav (rice pilaf with meat)", "sambusa", "shashlik"], "desserts_and_drinks": ["green tea", "dried fruits", "halwa"], "rituals_and_traditions": ["Family and community iftars centered on oshi palav", "Taraweeh at mosques"], "notes": "Oshi palav is the defining Tajik Ramadan dish; sambusa are popular at iftar." },
+            { "name": "Khujand", "suhoor_meals": ["non", "tea", "cheese"], "iftar_meals": ["dates and water", "oshi palav", "qurutob (bread with yogurt and vegetables)", "sambusa"], "desserts_and_drinks": ["tea", "local sweets"], "rituals_and_traditions": ["Communal iftars", "Strong family focus"], "notes": "Khujand shares Tajik iftar traditions with qurutob as a regional specialty." }
+          ]
+        },
+        {
+          "id": "kyrgyzstan",
+          "name": "Kyrgyzstan",
+          "flag": "🇰🇬",
+          "traditions": [
+            { "name": "Oromo", "arabicName": "", "transliteration": "Oromo", "description": "Layered dough and meat dish prepared for special occasions and iftar" },
+            { "name": "Family Iftars", "arabicName": "", "transliteration": "", "description": "Extended family gatherings; plov and meat dishes central" }
+          ],
+          "foods": ["Plov", "Beshbarmak", "Oromo", "Samsa", "Lagman", "Non", "Green tea"],
+          "specialNote": "Plov and beshbarmak are iftar staples; Kyrgyz Ramadan blends Central Asian and nomadic traditions.",
+          "muslimPopulation": "~90%",
+          "muslimPopulationNote": "Predominantly Sunni; Central Asian and nomadic heritage.",
+          "majorMosques": [
+            { "name": "Central Mosque", "city": "Bishkek", "note": "Largest mosque in Kyrgyzstan; accommodates thousands." }
+          ],
+          "cities": [
+            { "name": "Bishkek", "suhoor_meals": ["non (flatbread) with cheese and tea", "light pilaf"], "iftar_meals": ["dates and water", "plov (rice with meat)", "beshbarmak (boiled meat with noodles)", "samsa"], "desserts_and_drinks": ["green tea", "dried fruits", "halwa"], "rituals_and_traditions": ["Family and community iftars centered on plov", "Taraweeh at mosques"], "notes": "Plov and beshbarmak are central to Kyrgyz Ramadan." },
+            { "name": "Osh", "suhoor_meals": ["non", "tea", "cheese"], "iftar_meals": ["dates and water", "plov", "lagman (noodle soup)", "samsa"], "desserts_and_drinks": ["tea", "local sweets"], "rituals_and_traditions": ["Communal iftars", "Silk Road city with Uzbek influences"], "notes": "Osh shares Kyrgyz iftar traditions with Uzbek-style plov and lagman." }
+          ]
         }
       ]
     },
@@ -625,11 +934,52 @@
           "muslimPopulation": "~51%",
           "muslimPopulationNote": "Bosniaks are predominantly Muslim; European Muslim heritage; coexistence with Orthodox and Catholic communities.",
           "majorMosques": [
-            { "name": "Gazi Husrev-beg Mosque", "city": "Sarajevo", "note": "16th-century Ottoman mosque; heart of Sarajevo's old town." },
-            { "name": "Emperor's Mosque", "city": "Sarajevo", "note": "First mosque built in Bosnia after Ottoman conquest; 15th century." }
+            { "name": "Gazi Husrev-beg Mosque", "city": "Sarajevo", "address": "Sarači 8, Sarajevo, Bosnia and Herzegovina", "note": "16th-century Ottoman mosque; heart of Sarajevo's old town.", "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Gazi+Husrev-beg+Mosque+Sarajevo+Bosnia", "appleMapsUrl": "https://maps.apple.com/?q=Gazi+Husrev-beg+Mosque+Sarajevo+Bosnia" },
+            { "name": "Emperor's Mosque", "city": "Sarajevo", "address": "Obala Kulina bana, Sarajevo, Bosnia and Herzegovina", "note": "First mosque built in Bosnia after Ottoman conquest; 15th century.", "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Emperors+Mosque+Sarajevo+Bosnia", "appleMapsUrl": "https://maps.apple.com/?q=Emperors+Mosque+Sarajevo+Bosnia" }
           ],
           "cities": [
             { "name": "Sarajevo", "suhoor_meals": ["bread, cheese, local meats"], "iftar_meals": ["dates", "soups and meat dishes"], "desserts_and_drinks": ["local sweets and coffee"], "rituals_and_traditions": ["Iftar cannon fired from Yellow Fortress to signal sunset", "People gather around the fortress and mosques for iftar"], "notes": "Sarajevo maintains the iftar cannon tradition with crowds gathering at the Yellow Fortress." }
+          ]
+        },
+        {
+          "id": "albania",
+          "name": "Albania",
+          "flag": "🇦🇱",
+          "traditions": [
+            { "name": "Iftar Cannon", "arabicName": "مدفع الإفطار", "transliteration": "Midfa al-Iftar", "description": "Iftar cannon fired in some cities to signal sunset" },
+            { "name": "Family Iftars", "arabicName": "", "transliteration": "", "description": "Large family gatherings for iftar; hospitality central" }
+          ],
+          "foods": ["Baklava", "Byrek", "Tavë kosi", "Sufllaqe", "Trilece", "Turkish coffee"],
+          "specialNote": "Albanian iftar blends Ottoman and Balkan dishes; byrek and baklava are Ramadan staples.",
+          "muslimPopulation": "~56%",
+          "muslimPopulationNote": "Plurality Muslim; historically Ottoman; coexistence with Christian communities.",
+          "majorMosques": [
+            { "name": "Et'hem Bey Mosque", "city": "Tirana", "note": "Historic mosque in central Tirana; 18th century." }
+          ],
+          "cities": [
+            { "name": "Tirana", "suhoor_meals": ["bread, cheese, eggs", "byrek"], "iftar_meals": ["dates and water", "soup", "byrek (savory pastry)", "tavë kosi (baked lamb with yogurt)", "grilled meats"], "desserts_and_drinks": ["baklava", "trilece", "Turkish coffee"], "rituals_and_traditions": ["Family iftars with Ottoman-influenced dishes", "Mosque iftars and taraweeh"], "notes": "Byrek and baklava are central to Albanian Ramadan; tavë kosi is a festive main." },
+            { "name": "Shkodër", "suhoor_meals": ["bread", "cheese", "tea"], "iftar_meals": ["dates and water", "byrek", "sufllaqe", "local stews"], "desserts_and_drinks": ["baklava", "coffee"], "rituals_and_traditions": ["Family and neighborhood iftars", "Strong tradition of hospitality"], "notes": "Shkodër shares Albanian iftar traditions with regional variations." }
+          ]
+        },
+        {
+          "id": "kosovo",
+          "name": "Kosovo",
+          "flag": "🇽🇰",
+          "traditions": [
+            { "name": "Iftar Cannon", "arabicName": "مدفع الإفطار", "transliteration": "Midfa al-Iftar", "description": "Iftar cannon fired in Pristina and other cities to signal sunset" },
+            { "name": "Family Iftars", "arabicName": "", "transliteration": "", "description": "Large family gatherings; Ottoman and Balkan dishes" }
+          ],
+          "foods": ["Baklava", "Byrek", "Tavë kosi", "Flija", "Pite", "Turkish coffee"],
+          "specialNote": "Kosovo's iftar blends Ottoman and Albanian traditions; byrek and baklava are Ramadan staples; Muslim-majority population.",
+          "muslimPopulation": "~95%",
+          "muslimPopulationNote": "Predominantly Sunni; Albanian and Balkan Muslim heritage.",
+          "majorMosques": [
+            { "name": "Imperial Mosque", "city": "Pristina", "note": "15th-century Ottoman mosque; historic landmark." },
+            { "name": "Hadum Mosque", "city": "Gjakova", "note": "16th-century Ottoman mosque; cultural heritage site." }
+          ],
+          "cities": [
+            { "name": "Pristina", "suhoor_meals": ["bread, cheese, eggs", "byrek"], "iftar_meals": ["dates and water", "soup", "byrek (savory pastry)", "tavë kosi (baked lamb with yogurt)", "grilled meats"], "desserts_and_drinks": ["baklava", "flija (layered pastry)", "Turkish coffee"], "rituals_and_traditions": ["Iftar cannon and family iftars", "Mosque iftars and taraweeh"], "notes": "Byrek and baklava are central to Kosovar Ramadan." },
+            { "name": "Prizren", "suhoor_meals": ["bread", "cheese", "tea"], "iftar_meals": ["dates and water", "byrek", "pite (savory pies)", "local stews"], "desserts_and_drinks": ["baklava", "coffee"], "rituals_and_traditions": ["Family and neighborhood iftars", "Historic Ottoman old town atmosphere"], "notes": "Prizren shares Kosovar iftar traditions with strong Ottoman heritage." }
           ]
         },
         {

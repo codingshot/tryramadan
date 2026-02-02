@@ -14,7 +14,7 @@ import { ProgressTracker } from "@/components/ProgressTracker";
 import { CTASection } from "@/components/CTASection";
 import { Footer } from "@/components/Footer";
 import { ArabicTerm } from "@/components/ArabicTerm";
-import { useFastingProgress } from "@/hooks/useLocalStorage";
+import { useFastingProgress, useIftarLabelShort } from "@/hooks/useLocalStorage";
 import { PageSEO } from "@/components/PageSEO";
 import { getRamadanDayNumber } from "@/lib/ramadan";
 import { ChevronRight } from "lucide-react";
@@ -25,6 +25,7 @@ const Index = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [progress] = useFastingProgress();
+  const iftarLabelShort = useIftarLabelShort();
   const today = new Date();
   const todayRamadanDay = getRamadanDayNumber(today);
   const currentDay = todayRamadanDay ?? progress.currentDay ?? 1;
@@ -52,7 +53,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <PageSEO
         title="TryRamadan.app | Fast Like a Muslim for the Holy Month of Ramadan"
-        description="Fast like a Muslim for the holy month of Ramadan. Free app: prayer times, suhoor & iftar, cultural education, and progressive fasting. For everyone."
+        description={`Fast like a Muslim for the holy month of Ramadan. Free app: prayer times, suhoor & ${iftarLabelShort}, cultural education, and progressive fasting. For everyone.`}
         path="/"
       />
       <Navbar />

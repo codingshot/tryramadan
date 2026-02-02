@@ -42,6 +42,12 @@ export interface MajorMosque {
   name: string;
   city?: string;
   note?: string;
+  /** Street address or area (e.g. "Al Haram, Mecca") for display and maps */
+  address?: string;
+  /** Google Maps link: open in Google Maps */
+  googleMapsUrl?: string;
+  /** Apple Maps link: open in Apple Maps */
+  appleMapsUrl?: string;
 }
 
 export interface Country {

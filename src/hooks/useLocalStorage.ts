@@ -100,6 +100,34 @@ export function useUserPreferences() {
   return [preferences, setStored] as const;
 }
 
+/** User type from preferences (matches onboarding mode). */
+export type UserTypeForLabel = UserPreferences['userType'];
+
+/**
+ * Returns the user-facing label for "Iftar" based on onboarding: Muslims see "Iftar";
+ * non-Muslim / new / curious users see "Breaking Fast (Iftar)" so they understand how fasting works.
+ */
+export function getIftarLabel(userType: UserTypeForLabel): string {
+  return userType === 'muslim' ? 'Iftar' : 'Breaking Fast (Iftar)';
+}
+
+/** Lowercase/short form for use in prose (e.g. "after iftar" / "after breaking fast"). */
+export function getIftarLabelShort(userType: UserTypeForLabel): string {
+  return userType === 'muslim' ? 'iftar' : 'breaking fast';
+}
+
+/** Hook: user-facing Iftar label based on preferences (for non-Muslims: "Breaking Fast (Iftar)"). */
+export function useIftarLabel(): string {
+  const [preferences] = useUserPreferences();
+  return getIftarLabel(preferences.userType);
+}
+
+/** Hook: short form for prose (e.g. "after breaking fast"). */
+export function useIftarLabelShort(): string {
+  const [preferences] = useUserPreferences();
+  return getIftarLabelShort(preferences.userType);
+}
+
 /** Predetermined reasons for breaking a fast (stored by id). */
 export const BROKEN_FAST_REASONS = [
   { id: 'mistake', label: 'Ate or drank by mistake' },

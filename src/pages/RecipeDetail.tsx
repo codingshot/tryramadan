@@ -9,9 +9,11 @@ import {
   getCountryForRecipe,
   type MealType,
 } from "@/lib/cultureRecipes";
+import { useIftarLabel } from "@/hooks/useLocalStorage";
 
 export default function RecipeDetail() {
   const { mealType, id } = useParams<{ mealType: string; id: string }>();
+  const iftarLabel = useIftarLabel();
   const meal = mealType as MealType | undefined;
   const recipeId = id ? parseInt(id, 10) : NaN;
 
@@ -36,7 +38,7 @@ export default function RecipeDetail() {
   }
 
   const { mealType: type } = result;
-  const title = `${recipe.name} | ${type === "suhoor" ? "Suhoor" : "Iftar"} Recipe | TryRamadan`;
+  const title = `${recipe.name} | ${type === "suhoor" ? "Suhoor" : iftarLabel} Recipe | TryRamadan`;
   const description =
     recipe.significance || recipe.description;
 
@@ -72,7 +74,7 @@ export default function RecipeDetail() {
                   }`}
                 >
                   {type === "suhoor" ? <Coffee className="w-4 h-4" /> : <Utensils className="w-4 h-4" />}
-                  {type === "suhoor" ? "Suhoor" : "Iftar"}
+                  {type === "suhoor" ? "Suhoor" : iftarLabel}
                 </span>
                 {recipe.region && (
                   <span className="text-sm text-muted-foreground">{recipe.region}</span>

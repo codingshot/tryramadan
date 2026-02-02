@@ -34,6 +34,8 @@ import {
   useDashboardQuickActions,
   DASHBOARD_QUICK_ACTIONS,
   useLocalStorage,
+  useIftarLabel,
+  useIftarLabelShort,
 } from "@/hooks/useLocalStorage";
 import { BreakFastReasonDialog } from "@/components/BreakFastReasonDialog";
 import { usePrayerTimes, usePrayerTimesForDate, getSunnahFastingInfo, checkAyyamAlBeed } from "@/hooks/usePrayerTimes";
@@ -86,6 +88,8 @@ const Dashboard = () => {
   const [dailyGoals] = useDailyGoals();
   const [quickActionOrder] = useDashboardQuickActions();
   const [journalEntries] = useLocalStorage<{ date: string; prompt?: string; content: string; gratitude?: string }[]>("tryramadan-journal", []);
+  const iftarLabel = useIftarLabel();
+  const iftarLabelShort = useIftarLabelShort();
   
   const sunnahInfo = getSunnahFastingInfo();
   
@@ -200,10 +204,9 @@ const Dashboard = () => {
     if (hour < 6) return { icon: Coffee, text: "Time for Suhoor! Eat protein-rich foods.", textAr: "وقت السحور! تناول أطعمة غنية بالبروتين" };
     if (hour < 12) return { icon: Droplets, text: "Remember to make morning duas.", textAr: "لا تنسى أذكار الصباح" };
     if (hour < 15) return { icon: TrendingUp, text: "Stay productive, you're halfway there!", textAr: "ابق منتجاً، أنت في المنتصف!" };
-    if (hour < 18) return { icon: Sun, text: "Almost Iftar time, prepare your meal.", textAr: "اقترب وقت الإفطار، حضّر وجبتك" };
-    return { icon: Utensils, text: "Don't overeat at Iftar. Start with dates.", textAr: "لا تفرط في الإفطار. ابدأ بالتمر" };
+    if (hour < 18) return { icon: Sun, text: `Almost ${iftarLabel} time, prepare your meal.`, textAr: "اقترب وقت الإفطار، حضّر وجبتك" };
+    return { icon: Utensils, text: `Don't overeat at ${iftarLabel}. Start with dates.`, textAr: "لا تفرط في الإفطار. ابدأ بالتمر" };
   };
-  
   const tip = getQuickTip();
 
   if (!preferences.onboardingComplete) {
@@ -214,7 +217,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <PageSEO
         title="Dashboard | TryRamadan.app"
-        description="Your Ramadan fasting dashboard: timer, prayer times, daily goals, and progress. Track suhoor and iftar, log fasting days, and stay on track."
+        description={`Your Ramadan fasting dashboard: timer, prayer times, daily goals, and progress. Track suhoor and ${iftarLabelShort}, log fasting days, and stay on track.`}
         path="/dashboard"
       />
       <Navbar />
@@ -317,7 +320,7 @@ const Dashboard = () => {
               <div>
                 <span className="font-semibold block">{isFasting ? "Currently fasting" : "Not fasting"}</span>
                 <span className="text-sm text-muted-foreground">
-                  {isFasting ? "Countdown to Iftar below" : "Next: Suhoor — see timer below"}
+                  {isFasting ? `Countdown to ${iftarLabel} below` : "Next: Suhoor — see timer below"}
                 </span>
               </div>
             </div>
@@ -335,7 +338,7 @@ const Dashboard = () => {
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <span className="cursor-help border-b border-dotted border-muted-foreground/40">Iftar: {prayerTimes.maghrib}</span>
+                    <span className="cursor-help border-b border-dotted border-muted-foreground/40">{iftarLabel}: {prayerTimes.maghrib}</span>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs p-3">
                     <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.iftar.title}</p>
@@ -377,7 +380,7 @@ const Dashboard = () => {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="cursor-help">
-                      <span className="text-xs text-muted-foreground block">Iftar<span className="sm:hidden"> (Maghrib)</span></span>
+                      <span className="text-xs text-muted-foreground block">{iftarLabel}<span className="sm:hidden"> (Maghrib)</span></span>
                       <span className="font-bold text-secondary">{prayerTimes.maghrib}</span>
                     </div>
                   </TooltipTrigger>
@@ -477,11 +480,11 @@ const Dashboard = () => {
                       >
                         <Sunset className="w-5 h-5 shrink-0" aria-hidden />
                         <span className="text-sm font-medium text-center">Break my fast</span>
-                        <span className="text-xs opacity-80 hidden sm:inline">At iftar</span>
+                        <span className="text-xs opacity-80 hidden sm:inline">At {iftarLabelShort}</span>
                       </button>
                     </TooltipTrigger>
                     <TooltipContent side="top" className="max-w-xs p-3">
-                      <p className="font-semibold text-sm">Break my fast (at iftar) • أفطر عند المغرب</p>
+                      <p className="font-semibold text-sm">Break my fast (at {iftarLabelShort}) • أفطر عند المغرب</p>
                       <p className="text-xs text-muted-foreground mt-1">Tap when you're breaking your fast at Maghrib (or early). Choose a reason to log. {EATING_TIME_TOOLTIPS.iftar.body}</p>
                       <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{(EATING_TIME_TOOLTIPS.iftar as { bodyAr?: string }).bodyAr}</p>
                     </TooltipContent>
@@ -553,7 +556,7 @@ const Dashboard = () => {
                   : (
                     <>
                       <p className="font-semibold text-sm">Mark today's fast complete • تم الصيام</p>
-                      <p className="text-xs text-muted-foreground mt-1">Do this after you break your fast at Iftar (Maghrib). {EATING_TIME_TOOLTIPS.iftar.body}</p>
+                      <p className="text-xs text-muted-foreground mt-1">Do this after you break your fast at {iftarLabel} (Maghrib). {EATING_TIME_TOOLTIPS.iftar.body}</p>
                       <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">سجّل إكمال صيام اليوم بعد الإفطار</p>
                     </>
                   )}
@@ -633,7 +636,7 @@ const Dashboard = () => {
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs">
                   <p className="font-medium">Meal plan and optional nutrition for this calendar day</p>
-                  <p className="text-xs mt-1">Plan what you’ll eat for Suhoor and Iftar, and optionally log calories and macros. Use the Schedule page for the full calendar and food log.</p>
+                  <p className="text-xs mt-1">Plan what you’ll eat for Suhoor and {iftarLabel}, and optionally log calories and macros. Use the Schedule page for the full calendar and food log.</p>
                   <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">وجبات السحور والإفطار • السحور والإفطار</p>
                 </TooltipContent>
               </Tooltip>
@@ -646,7 +649,7 @@ const Dashboard = () => {
                     <span className="font-bold text-secondary">{selectedDayPrayerTimes.fajr}</span>
                   </div>
                   <div>
-                    <span className="text-xs text-muted-foreground block">Iftar (Maghrib)</span>
+                    <span className="text-xs text-muted-foreground block">{iftarLabel} (Maghrib)</span>
                     <span className="font-bold text-secondary">{selectedDayPrayerTimes.maghrib}</span>
                   </div>
                 </div>
@@ -683,7 +686,7 @@ const Dashboard = () => {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <label className="text-xs font-medium text-muted-foreground block mb-1 cursor-help border-b border-dotted border-transparent hover:border-muted-foreground/40 w-fit">
-                        Iftar
+                        {iftarLabel}
                       </label>
                     </TooltipTrigger>
                     <TooltipContent className="max-w-xs">

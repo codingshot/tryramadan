@@ -23,6 +23,8 @@ import {
   type LearningPriority,
   type CultureRecipesPriority,
   type QuranPriority,
+  useIftarLabel,
+  useIftarLabelShort,
 } from "@/hooks/useLocalStorage";
 import { useNotifications } from "@/hooks/useNotifications";
 import { PageSEO } from "@/components/PageSEO";
@@ -41,6 +43,8 @@ const Settings = () => {
   const [preferences, setPreferences] = useUserPreferences();
   const [progress, setProgress] = useFastingProgress();
   const [notifSettings, setNotifSettings] = useNotificationSettings();
+  const iftarLabel = useIftarLabel();
+  const iftarLabelShort = useIftarLabelShort();
   const [, setQuickActionOrder] = useDashboardQuickActions();
   const { permission, requestPermission, supported } = useNotifications();
   const [locationLoading, setLocationLoading] = useState(false);
@@ -131,7 +135,7 @@ const Settings = () => {
     <div className="min-h-screen bg-background">
       <PageSEO
         title="Settings | TryRamadan.app"
-        description="TryRamadan.app settings: location for prayer times, notifications for suhoor and iftar, theme, and data export."
+        description={`TryRamadan.app settings: location for prayer times, notifications for suhoor and ${iftarLabelShort}, theme, and data export.`}
         path="/settings"
       />
       <Navbar />
@@ -436,7 +440,7 @@ const Settings = () => {
                   <label className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-muted/50">
                     <span className="text-sm flex items-center gap-2">
                       <Sunset className="w-4 h-4 text-secondary" aria-hidden />
-                      Iftar reminder (evening meal)
+                      {iftarLabel} reminder (evening meal)
                     </span>
                     <div className="flex items-center gap-2">
                       <input
@@ -456,7 +460,7 @@ const Settings = () => {
                       />
                     </div>
                   </label>
-                  <p className="text-xs text-muted-foreground px-1">Notify before Maghrib (iftar). Plus one at iftar time. Uses today&apos;s prayer times.</p>
+                  <p className="text-xs text-muted-foreground px-1">Notify before Maghrib ({iftarLabelShort}). Plus one at {iftarLabelShort} time. Uses today&apos;s prayer times.</p>
                 </div>
               </>
             ) : (
@@ -543,7 +547,7 @@ const Settings = () => {
                       />
                     ))}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">Notifications fire at these times (when app is open). Set times during iftar/suhoor window.</p>
+                  <p className="text-xs text-muted-foreground mt-1">Notifications fire at these times (when app is open). Set times during {iftarLabelShort}/suhoor window.</p>
                 </div>
               )}
             </div>

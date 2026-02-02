@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Moon, Sun, Clock, Calendar, MapPin, Loader2, Sunrise, Sunset, Bell } from "lucide-react";
 import { usePrayerTimes, getSunnahFastingInfo } from "@/hooks/usePrayerTimes";
-import { useUserPreferences, useNotificationSettings, usePrayerNotificationPrefs } from "@/hooks/useLocalStorage";
+import { useUserPreferences, useNotificationSettings, usePrayerNotificationPrefs, useIftarLabel } from "@/hooks/useLocalStorage";
 import { useAutoLocation } from "@/hooks/useLocation";
 import { Link } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -29,6 +29,7 @@ export const FastingTimer = ({
   const [isRamadan, setIsRamadan] = useState(false);
   const [notifSettings] = useNotificationSettings();
   const [prayerPrefs] = usePrayerNotificationPrefs();
+  const iftarLabel = useIftarLabel();
 
   useEffect(() => {
     setDaysUntilRamadan(getDaysUntilRamadan());
@@ -261,7 +262,7 @@ export const FastingTimer = ({
             <Tooltip>
               <TooltipTrigger asChild>
                 <span className="text-secondary font-semibold cursor-help border-b border-dotted border-primary-foreground/30">
-                  {nextLabel === "Suhoor end" ? "Suhoor end • نهاية السحور" : "Iftar • إفطار"}
+                  {nextLabel === "Suhoor end" ? "Suhoor end • نهاية السحور" : `${iftarLabel} • إفطار`}
                 </span>
               </TooltipTrigger>
               <TooltipContent side="top" className="max-w-xs bg-card border-border p-3">
@@ -282,7 +283,7 @@ export const FastingTimer = ({
             const totalAlarms = suhoorAlarm + iftarAlarm + dailyAlarm + prayerAlarms;
             const parts: string[] = [];
             if (notifSettings.suhoorEnabled) parts.push(`Suhoor: ${notifSettings.suhoorMinutesBefore} min before`);
-            if (notifSettings.iftarEnabled) parts.push(`Iftar: ${notifSettings.iftarMinutesBefore} min before`);
+            if (notifSettings.iftarEnabled) parts.push(`${iftarLabel}: ${notifSettings.iftarMinutesBefore} min before`);
             if (notifSettings.dailyReminderEnabled) parts.push(`Daily: ${notifSettings.dailyReminderTime}`);
             const enabledPrayers = Object.entries(prayerPrefs).filter(([, on]) => on).map(([p]) => p);
             if (enabledPrayers.length) parts.push(`Prayers: ${enabledPrayers.join(", ")}`);
@@ -335,7 +336,7 @@ export const FastingTimer = ({
               <div className="text-center p-3 rounded-lg bg-primary-foreground/5 cursor-help border border-transparent hover:border-primary-foreground/20 transition-colors min-w-0">
                 <span className="text-primary-foreground/50 block text-xs mb-1 flex items-center justify-center gap-1">
                   <Sunset className="w-3.5 h-3.5 shrink-0" aria-hidden />
-                  <span className="sm:hidden">Iftar</span><span className="hidden sm:inline">Iftar Time • وقت الإفطار</span>
+                  <span className="sm:hidden">{iftarLabel}</span><span className="hidden sm:inline">{iftarLabel} Time • وقت الإفطار</span>
                 </span>
                 <span className="text-secondary font-bold text-base sm:text-lg">{iftarTime}</span>
                 <span className="block text-xs text-primary-foreground/40 mt-1 hidden sm:block">Break Fast • الفطور</span>

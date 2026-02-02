@@ -40,9 +40,9 @@ function renderNotFound() {
 
 /** User flow checks: critical paths render and key links exist. */
 describe("User flow checks", () => {
-  it("home page has Start Journey and links to programs", () => {
+  it("home page has Start your journey link and links to programs", () => {
     renderAt("/", <Index />);
-    const startLink = screen.queryByRole("link", { name: /start journey/i });
+    const startLink = screen.queryByRole("link", { name: /start your journey/i });
     expect(startLink).toBeInTheDocument();
     expect(startLink).toHaveAttribute("href", "/onboarding/welcome");
     expect(screen.getByText(/choose your/i)).toBeInTheDocument();
@@ -96,8 +96,12 @@ describe("User flow checks", () => {
     };
     localStorage.setItem("tryramadan-preferences", JSON.stringify(prefs));
     renderAt("/dashboard", <Dashboard />);
-    expect(screen.getByRole("link", { name: /today/i })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /schedule/i })).toBeInTheDocument();
+    const todayLink = screen.getByRole("link", { name: /^today$/i });
+    expect(todayLink).toBeInTheDocument();
+    expect(todayLink).toHaveAttribute("href", "/dashboard/today");
+    const scheduleLink = screen.getByRole("link", { name: /^schedule$/i });
+    expect(scheduleLink).toBeInTheDocument();
+    expect(scheduleLink).toHaveAttribute("href", "/dashboard/schedule");
   });
 
   it("recipes page renders and has link back to home", () => {

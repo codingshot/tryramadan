@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useUserPreferences } from "@/hooks/useLocalStorage";
+import { useUserPreferences, useIftarLabel, useIftarLabelShort } from "@/hooks/useLocalStorage";
 import { useNotificationSettings } from "@/hooks/useLocalStorage";
 import { usePrayerTimes, getSunnahFastingInfo } from "@/hooks/usePrayerTimes";
 import { isRamadanDay } from "@/lib/ramadan";
@@ -45,6 +45,8 @@ function timeToMinutes(timeStr: string): number {
 export function ReminderScheduler() {
   const [preferences] = useUserPreferences();
   const [notifSettings] = useNotificationSettings();
+  const iftarLabel = useIftarLabel();
+  const iftarLabelShort = useIftarLabelShort();
   const { prayerTimes } = usePrayerTimes(
     preferences.locationCoords?.lat ?? null,
     preferences.locationCoords?.lng ?? null
@@ -106,8 +108,8 @@ export function ReminderScheduler() {
         const diff = Math.abs(nowMinutes - reminderMin);
         if (diff <= 2 && !sent.includes("iftar")) {
           addSent("iftar");
-          new Notification("Iftar Reminder • إفطار", {
-            body: `${notifSettings.iftarMinutesBefore} minutes until iftar. Prepare to break your fast!`,
+          new Notification(`${iftarLabel} Reminder • إفطار`, {
+            body: `${notifSettings.iftarMinutesBefore} minutes until ${iftarLabelShort}. Prepare to break your fast!`,
             icon: "/favicon.png",
             tag: `iftar-reminder-${todayStr}`,
           });
@@ -116,7 +118,7 @@ export function ReminderScheduler() {
         const atIftarDiff = Math.abs(nowMinutes - maghribMin);
         if (atIftarDiff <= 2 && !sent.includes("iftar-time")) {
           addSent("iftar-time");
-          new Notification("Iftar Time! • وقت الإفطار", {
+          new Notification(`${iftarLabel} Time! • وقت الإفطار`, {
             body: "It's time to break your fast. Bismillah! 🌙",
             icon: "/favicon.png",
             tag: `iftar-time-${todayStr}`,
@@ -148,7 +150,7 @@ export function ReminderScheduler() {
     checkAndNotify();
     const interval = setInterval(checkAndNotify, 60 * 1000);
     return () => clearInterval(interval);
-  }, [prayerTimes, notifSettings.suhoorEnabled, notifSettings.iftarEnabled, notifSettings.suhoorMinutesBefore, notifSettings.iftarMinutesBefore, preferences.hydrationReminderEnabled, preferences.hydrationReminderTimes]);
+  }, [prayerTimes, notifSettings.suhoorEnabled, notifSettings.iftarEnabled, notifSettings.suhoorMinutesBefore, notifSettings.iftarMinutesBefore, preferences.hydrationReminderEnabled, preferences.hydrationReminderTimes, iftarLabel, iftarLabelShort]);
 
   return null;
 }
