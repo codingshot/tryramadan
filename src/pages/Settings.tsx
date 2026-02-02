@@ -22,6 +22,9 @@ import {
   defaultNotificationSettings,
   getTotalHoursFasted,
   calculateStreak,
+  getLongestStreak,
+  getSuggestedCalories,
+  useDailyGoals,
   type LearningPriority,
   type CultureRecipesPriority,
   type QuranPriority,
@@ -48,6 +51,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { LANGUAGE_OPTIONS, COUNTRY_OPTIONS } from "@/data/languages-and-countries";
 import { getDefaultHydrationGoalMl, getHydrationUnit, ML_PER_US_CUP } from "@/lib/hydration";
+import { getRamadanDayNumber, isRamadanDay } from "@/lib/ramadan";
 
 const Settings = () => {
   const location = useLocation();
@@ -57,6 +61,7 @@ const Settings = () => {
   const iftarLabel = useIftarLabel();
   const iftarLabelShort = useIftarLabelShort();
   const [, setQuickActionOrder] = useDashboardQuickActions();
+  const [, setDailyGoals] = useDailyGoals();
   const { permission, requestPermission, supported } = useNotifications();
   const [locationLoading, setLocationLoading] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -329,6 +334,36 @@ const Settings = () => {
                   {preferences.macroTrackingEnabled ? "On" : "Off"}
                 </button>
               </div>
+
+              {preferences.macroTrackingEnabled && (
+                <div className="pt-3 space-y-2">
+                  <p className="text-xs font-semibold text-muted-foreground">Biological sex (for calorie estimate)</p>
+                  <p className="text-xs text-muted-foreground">Used to suggest daily calorie goals. Optional.</p>
+                  <div className="flex flex-wrap gap-2">
+                    {(['male', 'female', null] as const).map((value) => {
+                      const label = value === null ? "Prefer not to say" : value === "male" ? "Male" : "Female";
+                      const isSelected = (preferences.sexForCalories ?? null) === value;
+                      return (
+                        <button
+                          key={value ?? "none"}
+                          type="button"
+                          onClick={() => {
+                            setPreferences({ ...preferences, sexForCalories: value });
+                            if (value !== null) {
+                              setDailyGoals((g) => ({ ...g, calories: getSuggestedCalories(value) }));
+                            }
+                          }}
+                          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                            isSelected ? "bg-secondary text-secondary-foreground" : "bg-muted/70 hover:bg-muted"
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               <div className="flex flex-wrap items-center gap-4">
                 <span className="text-sm">Simplify by location</span>
@@ -717,9 +752,9 @@ const Settings = () => {
                   <p className="font-semibold text-muted-foreground mb-2">Current progress (will be lost)</p>
                   <ul className="space-y-1 text-muted-foreground">
                     <li>Completed days: <span className="font-medium text-foreground">{progress.completedDays?.length ?? 0}</span></li>
-                    <li>Current day: <span className="font-medium text-foreground">{progress.currentDay ?? 1}</span> of {progress.totalDays ?? 30}</li>
-                    <li>Current streak: <span className="font-medium text-foreground">{progress.currentStreak ?? calculateStreak(progress)}</span> days</li>
-                    <li>Longest streak: <span className="font-medium text-foreground">{progress.longestStreak ?? 0}</span> days</li>
+                    <li>Current day: <span className="font-medium text-foreground">{isRamadanDay(new Date()) ? getRamadanDayNumber(new Date()) ?? progress.currentDay ?? 1 : progress.currentDay ?? 1}</span> of {progress.totalDays ?? 30}</li>
+                    <li>Current streak: <span className="font-medium text-foreground">{calculateStreak(progress)}</span> days</li>
+                    <li>Longest streak: <span className="font-medium text-foreground">{getLongestStreak(progress)}</span> days</li>
                     <li>Total hours fasted: <span className="font-medium text-foreground">{getTotalHoursFasted(progress).toFixed(1)}</span>h</li>
                     <li>Sunnah days completed: <span className="font-medium text-foreground">{progress.sunnahDaysCompleted ?? 0}</span></li>
                     {(progress.fastingLog?.length ?? 0) > 0 && (

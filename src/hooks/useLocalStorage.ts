@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { toLocalDateString } from '@/lib/utils';
 
 export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((prev: T) => T)) => void] {
   // Get stored value or use initial
@@ -58,6 +59,8 @@ export interface UserPreferences {
   quranPriority: QuranPriority;
   /** Show macro tracking (Meals/Macros). */
   macroTrackingEnabled: boolean;
+  /** Biological sex for calorie estimate when macro tracking is on (optional). */
+  sexForCalories: 'male' | 'female' | null;
   /** Simplify features based on location (e.g. local times, fewer options). */
   simplifyByLocation: boolean;
   /** Daily water goal in ml; 0 = use region default from country. */
@@ -87,6 +90,7 @@ export const defaultPreferences: UserPreferences = {
   cultureRecipesPriority: 'some',
   quranPriority: 'some',
   macroTrackingEnabled: false,
+  sexForCalories: null,
   simplifyByLocation: true,
   hydrationGoalMl: 0,
   hydrationReminderEnabled: false,
@@ -193,8 +197,13 @@ export function useFastingProgress() {
 
 const LOG_PREFIX = '[TryRamadan]';
 
+/** Today's date as YYYY-MM-DD in the user's local timezone (for consistent calendar/tracking). */
+export function getTodayDateString(): string {
+  return toLocalDateString(new Date());
+}
+
 export function getTodayFastingLog(progress: FastingProgress): FastingLogEntry | undefined {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getTodayDateString();
   return progress.fastingLog?.find((e) => e.date === today);
 }
 
@@ -208,7 +217,7 @@ export function startFastingToday(
   progress: FastingProgress,
   setProgress: (value: FastingProgress | ((prev: FastingProgress) => FastingProgress)) => void
 ): void {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getTodayDateString();
   const now = new Date().toISOString();
   const existing = progress.fastingLog?.find((e) => e.date === today);
 
@@ -247,7 +256,7 @@ export function completeFastingToday(
   progress: FastingProgress,
   setProgress: (value: FastingProgress | ((prev: FastingProgress) => FastingProgress)) => void
 ): void {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getTodayDateString();
   const now = new Date().toISOString();
   const entry = progress.fastingLog?.find((e) => e.date === today);
   const startedAt = entry?.startedAt || now;
@@ -278,7 +287,7 @@ export function breakFastingToday(
   setProgress: (value: FastingProgress | ((prev: FastingProgress) => FastingProgress)) => void,
   reason?: string
 ): void {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getTodayDateString();
   const now = new Date().toISOString();
   const entry = progress.fastingLog?.find((e) => e.date === today);
   const startedAt = entry?.startedAt || now;
@@ -306,7 +315,7 @@ export function uncompleteFastingToday(
   progress: FastingProgress,
   setProgress: (value: FastingProgress | ((prev: FastingProgress) => FastingProgress)) => void
 ): void {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getTodayDateString();
 
   const updatedLog = (progress.fastingLog || []).map((e) =>
     e.date === today ? { ...e, completedAt: undefined, status: 'in_progress' as const } : e
@@ -416,7 +425,7 @@ const defaultTodayData: TodayData = {
 
 export function useTodayData() {
   const [store, setStore] = useLocalStorage<Record<string, Omit<TodayData, "date">>>('tryramadan-today', {});
-  const today = new Date().toISOString().split('T')[0];
+  const today = getTodayDateString();
   const todayData = store[today] || {
     intention: "",
     hydrationGlasses: 0,
@@ -555,8 +564,30 @@ export const defaultDailyGoals: DailyGoals = {
   fat: 65,
 };
 
+/** Suggested daily calories by sex (rough estimate for BMR-based goal). */
+export function getSuggestedCalories(sex: 'male' | 'female' | null): number {
+  if (sex === 'male') return 2200;
+  if (sex === 'female') return 1800;
+  return 2000;
+}
+
 export function useDailyGoals() {
   return useLocalStorage<DailyGoals>('tryramadan-daily-goals', defaultDailyGoals);
+}
+
+/** Recently used recipe keys (e.g. "suhoor-1", "iftar-2") from meal plan/food log; max 20. */
+const RECENT_RECIPES_KEY = 'tryramadan-recent-recipes';
+const RECENT_RECIPES_MAX = 20;
+
+export function useRecentRecipes() {
+  const [recent, setRecent] = useLocalStorage<string[]>(RECENT_RECIPES_KEY, []);
+  const addRecent = useCallback((recipeKey: string) => {
+    setRecent((prev) => {
+      const next = [recipeKey, ...prev.filter((k) => k !== recipeKey)].slice(0, RECENT_RECIPES_MAX);
+      return next;
+    });
+  }, [setRecent]);
+  return [recent, addRecent] as const;
 }
 
 // --- Dashboard quick access (configurable from Fasting Schedule) ---
@@ -757,12 +788,12 @@ export function getFastingLogForDate(progress: FastingProgress, dateStr: string)
 
 /** Consecutive days of fasting ending today (same logic as Dashboard). */
 export function calculateStreak(progress: FastingProgress): number {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getTodayDateString();
   const completedDays = [...(progress.completedDays || [])].sort().reverse();
   let streak = 0;
   const currentDate = new Date();
   for (const day of completedDays) {
-    const dayStr = new Date(currentDate).toISOString().split('T')[0];
+    const dayStr = toLocalDateString(currentDate);
     if (day === dayStr) {
       streak++;
       currentDate.setDate(currentDate.getDate() - 1);
@@ -771,6 +802,26 @@ export function calculateStreak(progress: FastingProgress): number {
     }
   }
   return streak;
+}
+
+/** Longest consecutive streak in completedDays (computed from stored dates). */
+export function getLongestStreak(progress: FastingProgress): number {
+  const sorted = [...(progress.completedDays || [])].sort();
+  if (sorted.length === 0) return 0;
+  let longest = 1;
+  let current = 1;
+  for (let i = 1; i < sorted.length; i++) {
+    const prev = new Date(sorted[i - 1] + 'T12:00:00').getTime();
+    const curr = new Date(sorted[i] + 'T12:00:00').getTime();
+    const diffDays = Math.round((curr - prev) / (1000 * 60 * 60 * 24));
+    if (diffDays === 1) {
+      current++;
+      longest = Math.max(longest, current);
+    } else {
+      current = 1;
+    }
+  }
+  return longest;
 }
 
 /** Total hours fasted from fastingLog (completed or broken entries with hoursFasted). */
@@ -797,7 +848,7 @@ export function markHadithViewedToday(): void {
   try {
     const raw = window.localStorage.getItem(HADITH_VIEWED_DATES_KEY);
     const dates: string[] = raw ? JSON.parse(raw) : [];
-    const today = new Date().toISOString().split('T')[0];
+    const today = getTodayDateString();
     if (dates.includes(today)) return;
     const next = [...dates, today].slice(-HADITH_VIEWED_MAX_DAYS);
     window.localStorage.setItem(HADITH_VIEWED_DATES_KEY, JSON.stringify(next));
@@ -809,7 +860,7 @@ export function markHadithViewedToday(): void {
 export function useHadithViewedDates(): [string[], () => void] {
   const [dates, setDates] = useLocalStorage<string[]>(HADITH_VIEWED_DATES_KEY, []);
   const markToday = useCallback(() => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getTodayDateString();
     if (dates.includes(today)) return;
     setDates((prev) => [...prev, today].slice(-HADITH_VIEWED_MAX_DAYS));
   }, [dates, setDates]);
@@ -856,7 +907,7 @@ export function useDailyMissions(): { missions: DailyMission[]; completedCount: 
   const [scheduleNotes] = useLocalStorage<Record<string, string>>(SCHEDULE_NOTES_KEY, {});
   const [hadithViewedDates] = useHadithViewedDates();
   const iftarLabelShort = useIftarLabelShort();
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getTodayDateString();
   const missions = getDailyMissions({
     todayStr,
     progress,

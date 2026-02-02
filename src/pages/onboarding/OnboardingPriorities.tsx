@@ -4,21 +4,21 @@ import { ArrowLeft, ArrowRight, BookOpen, Utensils, BookMarked, Scale, MapPin } 
 import { useOnboarding } from "@/contexts/OnboardingContext";
 
 const LEARNING_OPTIONS = [
-  { value: "minimal" as const, label: "Minimal", desc: "Just fasting basics" },
-  { value: "moderate" as const, label: "Moderate", desc: "Some learning & hadith" },
-  { value: "deep" as const, label: "Deep", desc: "Religion, guides, glossary" },
+  { value: "minimal" as const, label: "Minimal", desc: "Just fasting basics", emoji: "📖" },
+  { value: "moderate" as const, label: "Moderate", desc: "Some learning & hadith", emoji: "📚" },
+  { value: "deep" as const, label: "Deep", desc: "Religion, guides, glossary", emoji: "📕" },
 ];
 
 const CULTURE_OPTIONS = [
-  { value: "none" as const, label: "None", desc: "Skip culture & recipes" },
-  { value: "some" as const, label: "Some", desc: "Occasional recipes" },
-  { value: "lots" as const, label: "Lots", desc: "Culture & food focus" },
+  { value: "none" as const, label: "None", desc: "Skip culture & recipes", emoji: "🚫" },
+  { value: "some" as const, label: "Some", desc: "Occasional recipes", emoji: "🍽️" },
+  { value: "lots" as const, label: "Lots", desc: "Culture & food focus", emoji: "🎉" },
 ];
 
 const QURAN_OPTIONS = [
-  { value: "none" as const, label: "None", desc: "Skip Quran section" },
-  { value: "some" as const, label: "Some", desc: "Glossary & occasional reading" },
-  { value: "daily" as const, label: "Daily", desc: "Quran & glossary every day" },
+  { value: "none" as const, label: "None", desc: "Skip Quran section", emoji: "📖" },
+  { value: "some" as const, label: "Some", desc: "Glossary & occasional reading", emoji: "📜" },
+  { value: "daily" as const, label: "Daily", desc: "Quran & glossary every day", emoji: "📿" },
 ];
 
 export default function OnboardingPriorities() {
@@ -58,11 +58,12 @@ export default function OnboardingPriorities() {
               key={opt.value}
               type="button"
               onClick={() => setPriorities({ learningPriority: opt.value })}
-              className={`w-full min-h-[44px] p-3 rounded-xl border-2 text-left transition-all flex items-center justify-between cursor-pointer touch-manipulation ${
+              className={`w-full min-h-[44px] p-3 rounded-xl border-2 text-left transition-all flex items-center gap-3 cursor-pointer touch-manipulation ${
                 p.learningPriority === opt.value ? "border-secondary bg-secondary/10" : "border-border hover:border-secondary/50"
               }`}
             >
-              <span className="font-medium">{opt.label}</span>
+              <span className="text-xl shrink-0" aria-hidden>{opt.emoji}</span>
+              <span className="font-medium flex-1">{opt.label}</span>
               <span className="text-xs text-muted-foreground">{opt.desc}</span>
             </button>
           ))}
@@ -81,11 +82,12 @@ export default function OnboardingPriorities() {
               key={opt.value}
               type="button"
               onClick={() => setPriorities({ cultureRecipesPriority: opt.value })}
-              className={`w-full min-h-[44px] p-3 rounded-xl border-2 text-left transition-all flex items-center justify-between cursor-pointer touch-manipulation ${
+              className={`w-full min-h-[44px] p-3 rounded-xl border-2 text-left transition-all flex items-center gap-3 cursor-pointer touch-manipulation ${
                 p.cultureRecipesPriority === opt.value ? "border-secondary bg-secondary/10" : "border-border hover:border-secondary/50"
               }`}
             >
-              <span className="font-medium">{opt.label}</span>
+              <span className="text-xl shrink-0" aria-hidden>{opt.emoji}</span>
+              <span className="font-medium flex-1">{opt.label}</span>
               <span className="text-xs text-muted-foreground">{opt.desc}</span>
             </button>
           ))}
@@ -104,11 +106,12 @@ export default function OnboardingPriorities() {
               key={opt.value}
               type="button"
               onClick={() => setPriorities({ quranPriority: opt.value })}
-              className={`w-full min-h-[44px] p-3 rounded-xl border-2 text-left transition-all flex items-center justify-between cursor-pointer touch-manipulation ${
+              className={`w-full min-h-[44px] p-3 rounded-xl border-2 text-left transition-all flex items-center gap-3 cursor-pointer touch-manipulation ${
                 p.quranPriority === opt.value ? "border-secondary bg-secondary/10" : "border-border hover:border-secondary/50"
               }`}
             >
-              <span className="font-medium">{opt.label}</span>
+              <span className="text-xl shrink-0" aria-hidden>{opt.emoji}</span>
+              <span className="font-medium flex-1">{opt.label}</span>
               <span className="text-xs text-muted-foreground">{opt.desc}</span>
             </button>
           ))}
@@ -125,22 +128,24 @@ export default function OnboardingPriorities() {
           <button
             type="button"
             onClick={() => setPriorities({ macroTrackingEnabled: false })}
-            className={`flex-1 min-h-[44px] p-3 rounded-xl border-2 transition-all cursor-pointer touch-manipulation ${
+            className={`flex-1 min-h-[44px] p-3 rounded-xl border-2 transition-all cursor-pointer touch-manipulation flex flex-col items-center justify-center gap-0.5 ${
               !p.macroTrackingEnabled ? "border-secondary bg-secondary/10" : "border-border hover:border-secondary/50"
             }`}
           >
+            <span className="text-xl" aria-hidden>❌</span>
             <span className="font-medium">No</span>
-            <span className="block text-xs text-muted-foreground">Keep it simple</span>
+            <span className="text-xs text-muted-foreground">Keep it simple</span>
           </button>
           <button
             type="button"
             onClick={() => setPriorities({ macroTrackingEnabled: true })}
-            className={`flex-1 min-h-[44px] p-3 rounded-xl border-2 transition-all cursor-pointer touch-manipulation ${
+            className={`flex-1 min-h-[44px] p-3 rounded-xl border-2 transition-all cursor-pointer touch-manipulation flex flex-col items-center justify-center gap-0.5 ${
               p.macroTrackingEnabled ? "border-secondary bg-secondary/10" : "border-border hover:border-secondary/50"
             }`}
           >
+            <span className="text-xl" aria-hidden>✅</span>
             <span className="font-medium">Yes</span>
-            <span className="block text-xs text-muted-foreground">Track macros</span>
+            <span className="text-xs text-muted-foreground">Track macros</span>
           </button>
         </div>
       </div>
@@ -158,19 +163,21 @@ export default function OnboardingPriorities() {
           <button
             type="button"
             onClick={() => setPriorities({ simplifyByLocation: true })}
-            className={`flex-1 min-h-[44px] p-3 rounded-xl border-2 transition-all cursor-pointer touch-manipulation ${
+            className={`flex-1 min-h-[44px] p-3 rounded-xl border-2 transition-all cursor-pointer touch-manipulation flex items-center justify-center gap-2 ${
               p.simplifyByLocation ? "border-secondary bg-secondary/10" : "border-border hover:border-secondary/50"
             }`}
           >
+            <span className="text-xl" aria-hidden>📍</span>
             <span className="font-medium">Yes</span>
           </button>
           <button
             type="button"
             onClick={() => setPriorities({ simplifyByLocation: false })}
-            className={`flex-1 min-h-[44px] p-3 rounded-xl border-2 transition-all cursor-pointer touch-manipulation ${
+            className={`flex-1 min-h-[44px] p-3 rounded-xl border-2 transition-all cursor-pointer touch-manipulation flex items-center justify-center gap-2 ${
               !p.simplifyByLocation ? "border-secondary bg-secondary/10" : "border-border hover:border-secondary/50"
             }`}
           >
+            <span className="text-xl" aria-hidden>🌐</span>
             <span className="font-medium">No</span>
           </button>
         </div>

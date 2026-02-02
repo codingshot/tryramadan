@@ -40,6 +40,7 @@ import {
   useIftarLabelShort,
   calculateStreak,
 } from "@/hooks/useLocalStorage";
+import { toLocalDateString } from "@/lib/utils";
 import { BreakFastReasonDialog } from "@/components/BreakFastReasonDialog";
 import { usePrayerTimes, usePrayerTimesForDate, getSunnahFastingInfo, checkAyyamAlBeed } from "@/hooks/usePrayerTimes";
 import { useAutoLocation } from "@/hooks/useLocation";
@@ -65,7 +66,7 @@ const Dashboard = () => {
   const [ayyamAlBeed, setAyyamAlBeed] = useState<{ isAyyamAlBeed: boolean; hijriDay: number } | null>(null);
   const [locationEditorOpen, setLocationEditorOpen] = useState(false);
   const [showBreakFastDialog, setShowBreakFastDialog] = useState(false);
-  const todayStr = new Date().toISOString().split("T")[0];
+  const todayStr = toLocalDateString(new Date());
   const [selectedDate, setSelectedDate] = useState(todayStr);
   
   // Auto-detect location if not set
@@ -107,12 +108,12 @@ const Dashboard = () => {
   const goPrevDay = () => {
     const d = new Date(selectedDate + "T12:00:00");
     d.setDate(d.getDate() - 1);
-    setSelectedDate(d.toISOString().split("T")[0]);
+    setSelectedDate(toLocalDateString(d));
   };
   const goNextDay = () => {
     const d = new Date(selectedDate + "T12:00:00");
     d.setDate(d.getDate() + 1);
-    setSelectedDate(d.toISOString().split("T")[0]);
+    setSelectedDate(toLocalDateString(d));
   };
   const goToToday = () => setSelectedDate(todayStr);
   
@@ -153,7 +154,7 @@ const Dashboard = () => {
   
   // Toggle today's fast as complete (uses fasting log + console)
   const toggleTodayComplete = () => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = toLocalDateString(new Date());
     const isComplete = progress.completedDays.includes(today);
 
     if (isComplete) {
@@ -163,7 +164,7 @@ const Dashboard = () => {
     }
   };
 
-  const todayComplete = progress.completedDays.includes(new Date().toISOString().split('T')[0]);
+  const todayComplete = progress.completedDays.includes(toLocalDateString(new Date()));
   const fastingToday = isFastingToday(progress);
   const todayLog = getTodayFastingLog(progress);
   const recentLog = (progress.fastingLog || []).slice(-7).reverse();
@@ -301,6 +302,9 @@ const Dashboard = () => {
                 {isFasting ? <Moon className="w-5 h-5 text-foreground" aria-hidden /> : <Sun className="w-5 h-5 text-muted-foreground" aria-hidden />}
               </div>
               <div>
+                <span className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold mb-1.5 bg-background/80" aria-live="polite">
+                  {isFasting ? "Right now: Fasting (no food or drink)" : "Right now: Eating window (you can eat)"}
+                </span>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span className="font-semibold block cursor-help border-b border-dotted border-transparent hover:border-muted-foreground/40 w-fit">
@@ -649,6 +653,9 @@ const Dashboard = () => {
                   <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">وجبات السحور والإفطار • السحور والإفطار</p>
                 </TooltipContent>
               </Tooltip>
+              <Link to="/dashboard/schedule" className="text-sm text-secondary hover:underline font-medium mb-4 inline-block">
+                View past logs & meal plans (Schedule) →
+              </Link>
 
               {/* Prayer times for this day */}
               {selectedDayPrayerTimes && (
@@ -1163,7 +1170,7 @@ const Dashboard = () => {
               {Array.from({ length: 7 }).map((_, i) => {
                 const date = new Date();
                 date.setDate(date.getDate() - 6 + i);
-                const dateStr = date.toISOString().split('T')[0];
+                const dateStr = toLocalDateString(date);
                 const isComplete = progress.completedDays.includes(dateStr);
                 const isToday = i === 6;
                 const dayName = date.toLocaleDateString('en', { weekday: 'short' });

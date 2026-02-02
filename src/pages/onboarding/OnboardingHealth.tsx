@@ -5,12 +5,12 @@ import { ArrowLeft, ArrowRight, AlertTriangle } from "lucide-react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 
 const HEALTH_OPTIONS = [
-  { id: "none", label: "None of these", safe: true },
-  { id: "diabetes", label: "Diabetes or blood sugar issues", safe: false },
-  { id: "pregnancy", label: "Pregnancy or breastfeeding", safe: false },
-  { id: "heart", label: "Heart or blood pressure conditions", safe: false },
-  { id: "chronic", label: "Chronic illness or on regular medication", safe: false },
-  { id: "other", label: "Other health concern", safe: false },
+  { id: "none", label: "None of these", emoji: "✅", safe: true },
+  { id: "diabetes", label: "Diabetes or blood sugar issues", emoji: "🩸", safe: false },
+  { id: "pregnancy", label: "Pregnancy or breastfeeding", emoji: "🤰", safe: false },
+  { id: "heart", label: "Heart or blood pressure conditions", emoji: "❤️", safe: false },
+  { id: "chronic", label: "Chronic illness or on regular medication", emoji: "💊", safe: false },
+  { id: "other", label: "Other health concern", emoji: "📋", safe: false },
 ];
 
 export default function OnboardingHealth() {
@@ -54,13 +54,14 @@ export default function OnboardingHealth() {
             key={opt.id}
             type="button"
             onClick={() => toggle(opt.id)}
-            className={`w-full min-h-[44px] p-4 rounded-xl border-2 text-left transition-all cursor-pointer touch-manipulation ${
+            className={`w-full min-h-[44px] p-4 rounded-xl border-2 text-left transition-all cursor-pointer touch-manipulation flex items-center gap-3 ${
               selected.includes(opt.id)
                 ? "border-secondary bg-secondary/5"
                 : "border-border hover:border-secondary/50"
             }`}
           >
-            {opt.label}
+            <span className="text-2xl shrink-0" aria-hidden>{opt.emoji}</span>
+            <span>{opt.label}</span>
           </button>
         ))}
       </div>

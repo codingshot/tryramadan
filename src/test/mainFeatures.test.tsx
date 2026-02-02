@@ -10,6 +10,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { OnboardingProvider } from "@/contexts/OnboardingContext";
 import OnboardingWelcome from "@/pages/onboarding/OnboardingWelcome";
 import OnboardingMode from "@/pages/onboarding/OnboardingMode";
+import OnboardingLocation from "@/pages/onboarding/OnboardingLocation";
 import OnboardingGoals from "@/pages/onboarding/OnboardingGoals";
 import Dashboard from "@/pages/Dashboard";
 import DashboardToday from "@/pages/DashboardToday";
@@ -61,6 +62,13 @@ describe("Onboarding flow", () => {
   it("mode step renders mode options", () => {
     renderAt("/onboarding/mode", <OnboardingMode />, { withOnboarding: true });
     expect(screen.getAllByText(/muslim|non-muslim|curious/i).length).toBeGreaterThan(0);
+  });
+
+  it("location step shows Continue disabled until location selected", () => {
+    renderAt("/onboarding/location", <OnboardingLocation />, { withOnboarding: true });
+    expect(screen.getByRole("heading", { name: /location/i })).toBeInTheDocument();
+    const continueBtn = screen.getByRole("button", { name: /continue/i });
+    expect(continueBtn).toBeDisabled();
   });
 
   it("goals step renders and has complete/skip", () => {

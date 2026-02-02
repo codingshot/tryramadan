@@ -49,6 +49,7 @@ import {
   type CalendarEventType,
 } from "@/hooks/useLocalStorage";
 import { isRamadanDay, getRamadanDayNumber, getCurrentRamadanStart, getRamadanEndForYear } from "@/lib/ramadan";
+import { toLocalDateString } from "@/lib/utils";
 import { usePrayerTimesForDate } from "@/hooks/usePrayerTimes";
 import { buildIcalContent, downloadIcal } from "@/lib/ical";
 import { fetchPrayerTimesForMonth } from "@/hooks/usePrayerTimes";
@@ -168,7 +169,7 @@ const DashboardSchedule = () => {
   const { prayerTimes: selectedDayPrayerTimes } = usePrayerTimesForDate(lat, lng, selectedDate);
 
   const today = new Date();
-  const todayStr = today.toISOString().split("T")[0];
+  const todayStr = toLocalDateString(today);
 
   const getDaysInMonth = (date: Date) =>
     new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -191,7 +192,7 @@ const DashboardSchedule = () => {
     return "🌑";
   };
   const isCompleted = (date: Date) => {
-    const dateStr = date.toISOString().split("T")[0];
+    const dateStr = toLocalDateString(date);
     return progress.completedDays.includes(dateStr);
   };
   const toggleCompleted = (dateStr: string) => {
@@ -221,8 +222,9 @@ const DashboardSchedule = () => {
   const goToRamadan = useCallback(() => {
     const start = getCurrentRamadanStart();
     setCurrentMonth(new Date(start.getFullYear(), start.getMonth(), 1));
-    setSelectedDate(start.toISOString().split("T")[0]);
-    setNoteInput(scheduleNotes[start.toISOString().split("T")[0]] || "");
+    const startStr = toLocalDateString(start);
+    setSelectedDate(startStr);
+    setNoteInput(scheduleNotes[startStr] || "");
   }, [scheduleNotes]);
 
   const selectDay = useCallback(
@@ -276,6 +278,9 @@ const DashboardSchedule = () => {
   const selectedRamadanDay = selectedDateObj ? getRamadanDayNumber(selectedDateObj) : null;
   const selectedIsSunnah = selectedDateObj ? isSunnahDay(selectedDateObj) : false;
   const selectedCompleted = selectedDate ? progress.completedDays.includes(selectedDate) : false;
+  /** Meal planning is for today and future days only; past days show what was planned (read-only). */
+  const isSelectedPastDay = selectedDate ? selectedDate < todayStr : false;
+  const canEditMealPlan = selectedDate ? selectedDate >= todayStr : false;
 
   const addFoodFromRecipe = (mealType: MealType, recipeKey: string) => {
     if (!selectedDate) return;
@@ -435,8 +440,8 @@ const DashboardSchedule = () => {
         start = new Date(ramadanStart.getFullYear(), ramadanStart.getMonth(), ramadanStart.getDate());
         end = new Date(ramadanEnd.getFullYear(), ramadanEnd.getMonth(), ramadanEnd.getDate());
       }
-      const startStr = start.toISOString().split("T")[0];
-      const endStr = end.toISOString().split("T")[0];
+      const startStr = toLocalDateString(start);
+      const endStr = toLocalDateString(end);
       const prayerTimesMap: Record<string, import("@/hooks/usePrayerTimes").PrayerTimes> = {};
       const startYear = start.getFullYear();
       const endYear = end.getFullYear();
@@ -851,6 +856,9 @@ const DashboardSchedule = () => {
                 </Button>
               </div>
             </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Click any day to view meal plan, food log, and fasting log for that day. Past days are read-only.
+            </p>
 
             <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-2">
               {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
@@ -870,7 +878,7 @@ const DashboardSchedule = () => {
                   currentMonth.getMonth(),
                   i + 1
                 );
-                const dateStr = date.toISOString().split("T")[0];
+                const dateStr = toLocalDateString(date);
                 const isRamadan = isRamadanDay(date);
                 const ramadanDay = getRamadanDayNumber(date);
                 const completed = isCompleted(date);
@@ -1098,15 +1106,16 @@ const DashboardSchedule = () => {
                           placeholder="Custom event title"
                           value={customEventTitle}
                           onChange={(e) => setCustomEventTitle(e.target.value)}
-                          className="flex-1 min-w-[120px] h-9 text-sm"
+                          className="flex-1 min-w-[120px] min-h-[44px] h-9 sm:h-9 text-sm"
                         />
                         <input
                           type="time"
                           value={customEventTime}
                           onChange={(e) => setCustomEventTime(e.target.value)}
-                          className="h-9 px-2 rounded-md border border-border bg-background text-sm"
+                          className="min-h-[44px] h-9 px-2 rounded-md border border-border bg-background text-sm"
+                          aria-label="Event time"
                         />
-                        <Button type="button" size="sm" onClick={addCustomCalendarEvent} className="h-9">
+                        <Button type="button" size="sm" onClick={addCustomCalendarEvent} className="min-h-[44px] h-9">
                           Add
                         </Button>
                       </div>
@@ -1135,21 +1144,34 @@ const DashboardSchedule = () => {
                       )}
                     </div>
 
-                    {/* Meal plan: quick notes for Suhoor & Iftar */}
+                    {/* Meal plan: for today and future days only; past days show read-only */}
                     <div>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Label className="flex items-center gap-2 text-sm font-medium mb-2 cursor-help w-fit">
-<Sunrise className="w-4 h-4" aria-hidden />
-                        <Sunset className="w-4 h-4" aria-hidden />
-                        Meal plan (Suhoor & {iftarLabel})
+                            <Sunrise className="w-4 h-4" aria-hidden />
+                            <Sunset className="w-4 h-4" aria-hidden />
+                            {canEditMealPlan ? `Meal plan (Suhoor & ${iftarLabel})` : `Meal plan — ${isSelectedPastDay ? "past day (read-only)" : "this day"}`}
                           </Label>
                         </TooltipTrigger>
                         <TooltipContent className="max-w-xs">
-                          <p className="font-medium">What you plan to eat this day</p>
-                          <p className="text-xs mt-1">Short notes for your pre-dawn meal (Suhoor) and break-fast meal ({iftarLabel}). Use the Meals page to browse recipes and add them to your schedule.</p>
+                          <p className="font-medium">
+                            {canEditMealPlan
+                              ? "Plan your Suhoor and break-fast for this day"
+                              : "Past days are read-only. Meal planning is for today and future days."}
+                          </p>
+                          <p className="text-xs mt-1">
+                            {canEditMealPlan
+                              ? `Short notes for your pre-dawn meal (Suhoor) and break-fast meal (${iftarLabel}). Use the Meals page to browse recipes.`
+                              : "What you had is in the food log below."}
+                          </p>
                         </TooltipContent>
                       </Tooltip>
+                      {isSelectedPastDay && (
+                        <p className="text-xs text-muted-foreground mb-2">
+                          Meal planning is for today and future days. Below shows what you had planned or logged for this past day.
+                        </p>
+                      )}
                       <div className="grid gap-2">
                         <div className="flex items-center gap-2">
                           <Tooltip>
@@ -1165,18 +1187,21 @@ const DashboardSchedule = () => {
                             </TooltipContent>
                           </Tooltip>
                           <Input
-                            placeholder="e.g. Oats & dates"
+                            placeholder={canEditMealPlan ? "e.g. Oats & dates" : "Nothing planned"}
                             value={selectedDayMeals?.suhoor ?? ""}
                             onChange={(e) =>
+                              canEditMealPlan &&
                               setMealPlans((prev) => ({
                                 ...prev,
-                                [selectedDate]: {
-                                  ...prev[selectedDate],
+                                [selectedDate!]: {
+                                  ...prev[selectedDate!],
                                   suhoor: e.target.value.trim() || undefined,
                                 },
                               }))
                             }
+                            readOnly={!canEditMealPlan}
                             className="bg-background"
+                            aria-label={canEditMealPlan ? "Suhoor meal plan" : "Suhoor (past day, read-only)"}
                           />
                         </div>
                         <div className="flex items-center gap-2">
@@ -1193,18 +1218,21 @@ const DashboardSchedule = () => {
                             </TooltipContent>
                           </Tooltip>
                           <Input
-                            placeholder="e.g. Harira & dates"
+                            placeholder={canEditMealPlan ? "e.g. Harira & dates" : "Nothing planned"}
                             value={selectedDayMeals?.iftar ?? ""}
                             onChange={(e) =>
+                              canEditMealPlan &&
                               setMealPlans((prev) => ({
                                 ...prev,
-                                [selectedDate]: {
-                                  ...prev[selectedDate],
+                                [selectedDate!]: {
+                                  ...prev[selectedDate!],
                                   iftar: e.target.value.trim() || undefined,
                                 },
                               }))
                             }
+                            readOnly={!canEditMealPlan}
                             className="bg-background"
+                            aria-label={canEditMealPlan ? `${iftarLabel} meal plan` : `${iftarLabel} (past day, read-only)`}
                           />
                         </div>
                       </div>

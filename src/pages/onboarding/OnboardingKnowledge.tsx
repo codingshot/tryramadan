@@ -5,10 +5,10 @@ import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 
 const QUIZ = [
-  { q: "What is Ramadan?", options: ["A festival", "A month of fasting", "A prayer"], correct: 1 },
-  { q: "When do Muslims break their daily fast?", options: ["At noon", "At sunset (Maghrib)", "At midnight"], correct: 1 },
-  { q: "What is Suhoor?", options: ["Evening meal", "Pre-dawn meal", "Midday snack"], correct: 1 },
-  { q: "How long does Ramadan last?", options: ["One week", "One lunar month", "One year"], correct: 1 },
+  { q: "What is Ramadan?", options: ["A festival", "A month of fasting", "A prayer"], emojis: ["🎉", "🌙", "🤲"], correct: 1 },
+  { q: "When do Muslims break their daily fast?", options: ["At noon", "At sunset (Maghrib)", "At midnight"], emojis: ["☀️", "🌅", "🌙"], correct: 1 },
+  { q: "What is Suhoor?", options: ["Evening meal", "Pre-dawn meal", "Midday snack"], emojis: ["🍽️", "🌄", "☀️"], correct: 1 },
+  { q: "How long does Ramadan last?", options: ["One week", "One lunar month", "One year"], emojis: ["📅", "🌙", "📆"], correct: 1 },
   {
     q: "Which one is NOT one of the Five Pillars of Islam?",
     options: [
@@ -19,6 +19,7 @@ const QUIZ = [
       "Pilgrimage to Mecca (Hajj)",
       "Jihad (striving or struggle)",
     ],
+    emojis: ["📜", "🕌", "💝", "🌙", "🕋", "⚔️"],
     correct: 5, // Jihad is not a pillar; the five pillars are Shahada, Salat, Zakat, Sawm, Hajj
   },
 ];
@@ -89,13 +90,14 @@ export default function OnboardingKnowledge() {
             const isSelected = selectedOption === i;
             const showCorrect = selectedOption !== null && i === correctIndex;
             const showIncorrect = selectedOption !== null && isSelected && i !== correctIndex;
+            const emoji = question.emojis?.[i] ?? "•";
             return (
               <button
                 key={i}
                 type="button"
                 onClick={() => handleAnswer(i)}
                 disabled={selectedOption !== null}
-                className={`w-full min-h-[44px] p-4 rounded-xl border-2 text-left transition-all touch-manipulation flex items-center justify-between gap-2 ${
+                className={`w-full min-h-[44px] p-4 rounded-xl border-2 text-left transition-all touch-manipulation flex items-center gap-3 ${
                   selectedOption !== null
                     ? "cursor-default"
                     : "cursor-pointer border-border hover:border-secondary"
@@ -107,7 +109,8 @@ export default function OnboardingKnowledge() {
                       : "border-border"
                 }`}
               >
-                <span>{opt}</span>
+                <span className="text-xl shrink-0" aria-hidden>{emoji}</span>
+                <span className="flex-1">{opt}</span>
                 {showCorrect && <Check className="w-5 h-5 shrink-0 text-green-600 dark:text-green-400" aria-hidden />}
                 {showIncorrect && <X className="w-5 h-5 shrink-0 text-destructive" aria-hidden />}
               </button>

@@ -24,10 +24,12 @@ function getYearKey(date: Date): number {
 /** Get Ramadan start date for a given Gregorian year (approximate). */
 export function getRamadanStartForYear(year: number): Date {
   const iso = RAMADAN_START_BY_YEAR[year];
-  if (iso) return new Date(iso + "T00:00:00");
+  if (iso) return new Date(iso + "T12:00:00"); // noon to avoid UTC date shift in western tz
   // Approximate: assume ~11 days earlier each year from 2025
   const refYear = 2025;
-  const refDate = new Date(RAMADAN_START_BY_YEAR[refYear] + "T00:00:00");
+  const refIso = RAMADAN_START_BY_YEAR[refYear];
+  if (!refIso) return new Date(year, 2, 1);
+  const refDate = new Date(refIso + "T12:00:00");
   const yearsDiff = year - refYear;
   const d = new Date(refDate);
   d.setDate(d.getDate() + yearsDiff * -11);
@@ -68,24 +70,45 @@ export function getCurrentRamadanStart(): Date {
   return getRamadanStartForYear(today.getFullYear() + 1);
 }
 
-/** Check if a date falls within Ramadan (approximate). */
+/** Check if a date falls within Ramadan (approximate). Handles Ramadan spanning two Gregorian years (e.g. Dec 2030 – Jan 2031). */
 export function isRamadanDay(date: Date): boolean {
-  const start = getRamadanStartForYear(date.getFullYear());
-  const end = getRamadanEndForYear(date.getFullYear());
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);
-  return d >= start && d <= end;
+  const year = d.getFullYear();
+  // Check this year's Ramadan window (e.g. Jan–Mar 2030)
+  const startThis = getRamadanStartForYear(year);
+  const endThis = getRamadanEndForYear(year);
+  startThis.setHours(0, 0, 0, 0);
+  endThis.setHours(0, 0, 0, 0);
+  if (d >= startThis && d <= endThis) return true;
+  // Ramadan can start in Dec of this Gregorian year (e.g. 2031 AH starts Dec 2030)
+  const startNext = getRamadanStartForYear(year + 1);
+  const endNext = getRamadanEndForYear(year + 1);
+  startNext.setHours(0, 0, 0, 0);
+  endNext.setHours(0, 0, 0, 0);
+  return d >= startNext && d <= endNext;
 }
 
 /** Get Ramadan day number (1–30) or null if not in Ramadan. */
 export function getRamadanDayNumber(date: Date): number | null {
   if (!isRamadanDay(date)) return null;
-  const start = getRamadanStartForYear(date.getFullYear());
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);
-  start.setHours(0, 0, 0, 0);
+  const year = d.getFullYear();
+  const startThis = getRamadanStartForYear(year);
+  const endThis = getRamadanEndForYear(year);
+  startThis.setHours(0, 0, 0, 0);
+  endThis.setHours(0, 0, 0, 0);
+  let start: Date;
+  if (d >= startThis && d <= endThis) {
+    start = startThis;
+  } else {
+    start = getRamadanStartForYear(year + 1);
+    start.setHours(0, 0, 0, 0);
+  }
   const diffTime = d.getTime() - start.getTime();
-  return Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+  const dayNum = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+  return Math.max(1, Math.min(30, dayNum));
 }
 
 /** Days until next Ramadan start (0 if already in Ramadan). */

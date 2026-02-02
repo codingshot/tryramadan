@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { useFastingProgress, getTodayFastingLog, getBrokenReasonLabel, isFastingToday, useLocalStorage } from "@/hooks/useLocalStorage";
+import { useFastingProgress, getTodayFastingLog, getBrokenReasonLabel, isFastingToday, useLocalStorage, calculateStreak, getLongestStreak } from "@/hooks/useLocalStorage";
 import type { EnergyEntry } from "@/hooks/useLocalStorage";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
@@ -32,7 +32,7 @@ const DashboardProgress = () => {
       ["Total days", String(totalDays)],
       ["Completion rate (%)", String(completionRate)],
       ["Current streak", String(progress.currentStreak)],
-      ["Longest streak", String(progress.longestStreak)],
+      ["Longest streak", String(getLongestStreak(progress))],
       ["", ""],
       ["Fasting log", ""],
       ["Date", "Started", "Completed", "Status"],
@@ -75,27 +75,8 @@ const DashboardProgress = () => {
   const completedDays = progress.completedDays.length;
   const completionRate = Math.round((completedDays / totalDays) * 100);
   
-  // Calculate streak
-  const calculateStreak = () => {
-    const today = new Date();
-    const sortedDays = [...progress.completedDays].sort().reverse();
-    
-    let streak = 0;
-    const currentDate = new Date();
-    for (const day of sortedDays) {
-      const dayStr = currentDate.toISOString().split('T')[0];
-      if (day === dayStr) {
-        streak++;
-        currentDate.setDate(currentDate.getDate() - 1);
-      } else {
-        break;
-      }
-    }
-    
-    return streak;
-  };
-  
-  const currentStreak = calculateStreak();
+  const currentStreak = calculateStreak(progress);
+  const longestStreak = getLongestStreak(progress);
   
   // Learn-read count for Eager Learner badge
   const [learnRead] = useLocalStorage<string[]>("tryramadan-learn-read", []);

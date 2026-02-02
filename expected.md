@@ -225,3 +225,19 @@ TryRamadan is a React + TypeScript PWA that supports:
 8. **Culture, recipes, guides, emergency, health, legal** — As per routes and data above.
 
 This file serves as the single expected outline for structure, routes, components, data, behavior, and testing.
+
+---
+
+## 10. Verification checklist
+
+Use this to verify the app against expected.md (e.g. after changes):
+
+| Check | How to verify |
+|-------|----------------|
+| **Routes** | All paths in §2 exist in `src/App.tsx` and render the listed page component. |
+| **Onboarding order** | welcome → mode → knowledge → health → location → schedule → notifications → priorities → goals (see `App.tsx` and each step’s Back/Continue targets). |
+| **Data files** | All files in §4 exist: `src/data/*` for tooltips, JSON, guides; `cities.json` at project root (used for location/culture). |
+| **Daily missions** | Six missions: Start fasting, Complete/break at Iftar, Log Suhoor, Log Iftar, Add note, Read one hadith (`getDailyMissions` in `useLocalStorage.ts`). |
+| **Location required** | Onboarding location step: Continue disabled until a location is selected or detected (`OnboardingLocation.tsx`). |
+| **Tests** | `npm test -- --run` — all tests pass. |
+| **Build** | `npm run build` — succeeds. |

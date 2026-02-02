@@ -35,8 +35,8 @@
 - **Mode Selection (/onboarding/mode):** Choose between "Non-Muslim Mode" (learning focus) or "Muslim Mode" (full religious observance support)
 - **Knowledge Assessment (/onboarding/knowledge):** Quick quiz to gauge existing knowledge about Islam and Ramadan for personalized content
 - **Health Screening (/onboarding/health):** Medical questionnaire to identify contraindications and provide safety warnings
-- **Location Setup (/onboarding/location):** Set location for accurate prayer/fasting times with address lookup and dropdown selection
-- **Schedule Builder (/onboarding/schedule):** Customize fasting schedule and progression plan (12-hour, 16-hour, 18-hour, or full fasting)
+- **Location Setup (/onboarding/location):** Set location for accurate prayer/fasting times (required); address search and IP auto-detect
+- **Schedule (/onboarding/schedule):** Full Ramadan fast (dawn to sunset); voluntary Sunnah fasting (Mon/Thu, Ayyam al-Beed) available in the app
 - **Notification Preferences (/onboarding/notifications):** Set up suhoor, iftar, and hydration reminders
 - **Priorities (/onboarding/priorities):** Choose how much to learn, culture & recipes, Quran & glossary, macro tracking, and simplify by location
 - **Goals & Intentions (/onboarding/goals):** Set personal goals and intentions for the fasting journey
@@ -81,7 +81,7 @@
 
 ### User Experience
 - **🎯 Onboarding** - Multi-step flow (welcome, mode, knowledge, health, location, schedule, notifications, **priorities**, goals); **works locally** with defensive merge for preferences/notifications
-- **🔄 Progressive Programs** - Three fasting tracks: Beginner (12h), Intermediate (16h), Full Ramadan
+- **🔄 Fasting path** - Onboarding: Full Ramadan only. Voluntary Sunnah fasting (Mon/Thu, Ayyam al-Beed) and settings in app; choose Muslim/Non-Muslim mode in Settings.
 - **💾 Local Storage** - All preferences, progress, calendar events, journal, and notification settings saved locally
 - **🌐 Bilingual** - English and Arabic (hover for translations). **Tooltips** on Suhoor, Iftar, Fajr, Maghrib, etc. (see `data/eating-times-tooltips.ts`) for learning.
 - **🎨 Design** - Islamic-inspired aesthetics with emerald, gold, and burgundy palette; mobile-first with safe areas and touch targets
@@ -96,7 +96,7 @@
 **To get the most out of TryRamadan:**
 
 1. **Set your location** (Settings → Location) so prayer times, Suhoor/Iftar times, and **calendar export** use your timezone and coordinates.
-2. **Complete onboarding** (mode, knowledge, health, location, schedule, notifications, goals) for a personalized dashboard and reminders.
+2. **Complete onboarding** (mode, knowledge, health, **location required**, schedule, notifications, priorities, goals) for a personalized dashboard and reminders.
 3. **Notifications** – Enable browser notifications, then in **Settings** turn on Suhoor and Iftar reminders and set "minutes before" (e.g. 30 min before suhoor end, 15 min before iftar). Reminders use today's prayer times and fire when the app is open.
 4. **Export your calendar** – On Schedule, use “Export to calendar” → choose **This month**, **Next 30 days**, or **Ramadan** to download an .ics file. Import it into Google Calendar, Apple Calendar, or Outlook to see Suhoor, Iftar, all prayers, optional Taraweeh, and any events you added.
 5. **Quick-add events** – On Schedule, click a day and use “Add to calendar” to add Suhoor, Iftar, prayers, Taraweeh, “Get food,” or custom events. They’re included when you export .ics.
@@ -105,7 +105,13 @@
 8. **User Guides** – Visit `/guides` for step-by-step guides to every flow; use quick links to jump into the app.
 9. **Tooltips** – Hover over Suhoor, Iftar, Fajr, Maghrib, and related labels on Dashboard and Today for short explanations in English and Arabic.
 10. **Personas** – Visit `/personas` to see user personas and journeys; each has a detail page with onboarding flow and related resources.
-11. **Your priorities** – In Settings, adjust learning, culture, Quran, macro tracking, and “simplify by location”; use “Apply to dashboard quick access” to reorder links.
+11. **Your priorities** – In Settings, adjust learning, culture, Quran, macro tracking, and “simplify by location”; use “Apply to dashboard quick access” (or configure from Schedule) to reorder dashboard links.
+
+**Developer to-do (from README):**
+
+- [ ] **Guide screenshots** – Add screenshots/GIFs to `public/guide-assets/` (see `public/guide-assets/README.md` for naming: e.g. `onboarding-welcome.png`, `dashboard-overview.png`, `schedule-calendar.png`). Guides fall back to placeholder if missing.
+- [ ] **expected.md** – Run verification checklist (§10) after changes: routes, onboarding order, data files, daily missions, location required, `npm test -- --run`, `npm run build`.
+- [ ] **Location/cities** – Optionally add or align cities in `cities.json` (project root) for location search and culture country backfill.
 
 ---
 

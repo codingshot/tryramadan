@@ -9,7 +9,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import recipesData from "@/data/recipes.json";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useRecipeFavorites, useDayMealPlans, useDayFoodLog } from "@/hooks/useLocalStorage";
+import { useRecipeFavorites, useRecentRecipes, useDayMealPlans, useDayFoodLog } from "@/hooks/useLocalStorage";
 import { parseNutrient } from "@/lib/cultureRecipes";
 import { toast } from "sonner";
 import {
@@ -49,6 +49,7 @@ const DashboardMeals = () => {
   const [activeTab, setActiveTab] = useState<MealType>("suhoor");
   const [selectedRecipes, setSelectedRecipes] = useState<number[]>([]);
   const [favorites, setFavorites] = useRecipeFavorites();
+  const [recentRecipes, addRecentRecipe] = useRecentRecipes();
   const [mealPlans, setMealPlans] = useDayMealPlans();
   const [foodLogs, setFoodLogs] = useDayFoodLog();
   const [regionFilter, setRegionFilter] = useState<string>("all");
@@ -70,8 +71,21 @@ const DashboardMeals = () => {
     let list = baseRecipes;
     if (regionFilter !== "all") list = list.filter(r => r.region === regionFilter);
     if (dietaryFilter !== "all") list = list.filter(r => r.dietary?.includes(dietaryFilter));
+    const keyFor = (r: Recipe) => `${activeTab}-${r.id}`;
+    list = [...list].sort((a, b) => {
+      const aFav = favorites.includes(keyFor(a));
+      const bFav = favorites.includes(keyFor(b));
+      if (aFav && !bFav) return -1;
+      if (!aFav && bFav) return 1;
+      const aRecent = recentRecipes.indexOf(keyFor(a));
+      const bRecent = recentRecipes.indexOf(keyFor(b));
+      if (aRecent >= 0 && bRecent < 0) return -1;
+      if (aRecent < 0 && bRecent >= 0) return 1;
+      if (aRecent >= 0 && bRecent >= 0) return aRecent - bRecent;
+      return 0;
+    });
     return list;
-  }, [baseRecipes, regionFilter, dietaryFilter]);
+  }, [baseRecipes, regionFilter, dietaryFilter, activeTab, favorites, recentRecipes]);
 
   const favoriteKey = (type: MealType, id: number) => `${type}-${id}`;
   const isFavorite = (type: MealType, id: number) => favorites.includes(favoriteKey(type, id));
@@ -124,6 +138,7 @@ const DashboardMeals = () => {
         },
       };
     });
+    selectedRecipes.forEach((id) => addRecentRecipe(`${activeTab}-${id}`));
     toast.success(`Added ${selectedRecipes.length} recipe(s) to today's ${activeTab}.`);
   };
 
@@ -158,6 +173,7 @@ const DashboardMeals = () => {
         return { ...prev, [today]: { ...current, [mealType]: merged } };
       });
     }
+    addRecentRecipe(`${mealType}-${recipe.id}`);
     toast.success(`Added ${recipe.name} to today's food log and meal plan.`);
   };
 

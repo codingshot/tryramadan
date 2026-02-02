@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { toLocalDateString } from '@/lib/utils';
 
 export interface PrayerTimes {
   fajr: string;
@@ -35,12 +36,12 @@ interface AladhanResponse {
   };
 }
 
-/** Today's date as YYYY-MM-DD (updates at midnight). */
+/** Today's date as YYYY-MM-DD in local timezone (updates at midnight local). */
 function useTodayStr() {
-  const [todayStr, setTodayStr] = useState(() => new Date().toISOString().split('T')[0]);
+  const [todayStr, setTodayStr] = useState(() => toLocalDateString(new Date()));
   useEffect(() => {
     const tick = () => {
-      const next = new Date().toISOString().split('T')[0];
+      const next = toLocalDateString(new Date());
       setTodayStr((prev) => (prev !== next ? next : prev));
     };
     const t = setInterval(tick, 60 * 1000); // check every minute for date change

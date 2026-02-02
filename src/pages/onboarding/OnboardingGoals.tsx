@@ -6,13 +6,13 @@ import { useOnboarding } from "@/contexts/OnboardingContext";
 import { useUserPreferences, getQuickActionOrderFromPriorities } from "@/hooks/useLocalStorage";
 import { useDashboardQuickActions } from "@/hooks/useLocalStorage";
 
-const GOAL_OPTIONS = [
-  "Learn about Ramadan culture",
-  "Try intermittent fasting safely",
-  "Support Muslim friends and family",
-  "Spiritual reflection",
-  "Health and wellness",
-  "Build discipline",
+const GOAL_OPTIONS: { emoji: string; label: string }[] = [
+  { emoji: "📚", label: "Learn about Ramadan culture" },
+  { emoji: "⏱️", label: "Try intermittent fasting safely" },
+  { emoji: "🤝", label: "Support Muslim friends and family" },
+  { emoji: "🧘", label: "Spiritual reflection" },
+  { emoji: "💪", label: "Health and wellness" },
+  { emoji: "📐", label: "Build discipline" },
 ];
 
 export default function OnboardingGoals() {
@@ -23,9 +23,9 @@ export default function OnboardingGoals() {
   const [intention, setIntentionLocal] = useState(state.intention);
   const navigate = useNavigate();
 
-  const toggleGoal = (g: string) => {
+  const toggleGoal = (label: string) => {
     setSelectedGoals((prev) =>
-      prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g]
+      prev.includes(label) ? prev.filter((x) => x !== label) : [...prev, label]
     );
   };
 
@@ -75,15 +75,16 @@ export default function OnboardingGoals() {
       <div className="space-y-2 mb-6">
         {GOAL_OPTIONS.map((g) => (
           <button
-            key={g}
+            key={g.label}
             type="button"
-            onClick={() => toggleGoal(g)}
+            onClick={() => toggleGoal(g.label)}
             className={`w-full min-h-[44px] p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3 cursor-pointer touch-manipulation ${
-              selectedGoals.includes(g) ? "border-secondary bg-secondary/5" : "border-border hover:border-secondary/50"
+              selectedGoals.includes(g.label) ? "border-secondary bg-secondary/5" : "border-border hover:border-secondary/50"
             }`}
           >
-            <span className="flex-1">{g}</span>
-            {selectedGoals.includes(g) && <Check className="w-5 h-5 text-secondary flex-shrink-0" />}
+            <span className="text-2xl shrink-0" aria-hidden>{g.emoji}</span>
+            <span className="flex-1">{g.label}</span>
+            {selectedGoals.includes(g.label) && <Check className="w-5 h-5 text-secondary flex-shrink-0" />}
           </button>
         ))}
       </div>

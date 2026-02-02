@@ -5,6 +5,7 @@
 
 import type { PrayerTimes } from "@/hooks/usePrayerTimes";
 import type { CalendarEvent } from "@/hooks/useLocalStorage";
+import { toLocalDateString } from "@/lib/utils";
 
 const ICS_HEADER = [
   "BEGIN:VCALENDAR",
@@ -99,7 +100,7 @@ export function buildIcalContent(options: ExportOptions): string {
   const events: string[] = [];
 
   for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-    const dateStr = d.toISOString().split("T")[0];
+    const dateStr = toLocalDateString(d);
     const pt = prayerTimesMap[dateStr];
     if (includePrayers && pt) {
       prayerTimesToEvents(dateStr, pt, includeTaraweeh).forEach((e) => {

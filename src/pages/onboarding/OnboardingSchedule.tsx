@@ -5,7 +5,7 @@ import { useOnboarding } from "@/contexts/OnboardingContext";
 
 /** Only Ramadan-based option; other fasting plans hidden for now. */
 const PROGRAMS = [
-  { id: "traditional", name: "Full Ramadan", desc: "Dawn to sunset (Fajr to Maghrib)", hours: "Full" },
+  { id: "traditional", name: "Full Ramadan", desc: "Dawn to sunset (Fajr to Maghrib)", hours: "Full", emoji: "🌙" },
 ];
 
 export default function OnboardingSchedule() {
@@ -39,6 +39,7 @@ export default function OnboardingSchedule() {
               state.selectedProgram === prog.id ? "border-secondary bg-secondary/5" : "border-border hover:border-secondary/50"
             }`}
           >
+            <span className="text-2xl shrink-0" aria-hidden>{prog.emoji}</span>
             <Clock className="w-5 h-5 text-secondary flex-shrink-0" />
             <div className="flex-1">
               <span className="font-medium">{prog.name}</span>

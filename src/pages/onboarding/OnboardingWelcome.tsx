@@ -18,18 +18,18 @@ export default function OnboardingWelcome() {
         Fast like a Muslim for the holy month of Ramadan. We'll personalize your journey with a few quick steps.
       </p>
       <ul className="text-left text-sm text-muted-foreground space-y-2 mb-8 max-w-sm mx-auto">
-        <li>• Choose your mode (learning or full observance)</li>
-        <li>• Quick knowledge check for tailored content</li>
-        <li>• Health screening for your safety</li>
-        <li>• Location for accurate prayer & fasting times</li>
-        <li>• Schedule and reminders</li>
-        <li>• Set your goals and intentions</li>
+        <li><span aria-hidden>🌱</span> Choose your mode (learning or full observance)</li>
+        <li><span aria-hidden>📝</span> Quick knowledge check for tailored content</li>
+        <li><span aria-hidden>❤️</span> Health screening for your safety</li>
+        <li><span aria-hidden>📍</span> Location for accurate prayer & fasting times</li>
+        <li><span aria-hidden>⏰</span> Schedule and reminders</li>
+        <li><span aria-hidden>🎯</span> Set your goals and intentions</li>
       </ul>
       <Link
         to="/onboarding/mode"
         className="inline-flex items-center justify-center gap-2 w-full py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
       >
-        Get Started <ArrowRight className="w-5 h-5" />
+        <span aria-hidden>🚀</span> Get Started <ArrowRight className="w-5 h-5" />
       </Link>
     </motion.div>
   );

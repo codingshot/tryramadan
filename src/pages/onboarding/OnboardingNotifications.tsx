@@ -53,8 +53,9 @@ export default function OnboardingNotifications() {
             type="button"
             onClick={handleEnable}
             disabled={loading}
-            className="w-full min-h-[44px] py-3 px-6 rounded-xl bg-secondary text-secondary-foreground font-medium hover:bg-secondary/90 mb-6 disabled:opacity-50 cursor-pointer touch-manipulation"
+            className="w-full min-h-[44px] py-3 px-6 rounded-xl bg-secondary text-secondary-foreground font-medium hover:bg-secondary/90 mb-6 disabled:opacity-50 cursor-pointer touch-manipulation flex items-center justify-center gap-2"
           >
+            <span aria-hidden>🔔</span>
             {loading ? "Requesting..." : "Enable reminders"}
           </button>
         )

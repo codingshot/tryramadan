@@ -30,7 +30,7 @@ export function BreakFastReasonDialog({
         <p className="text-sm text-muted-foreground -mt-2">
           Choose a reason so you can track it. No judgment — your intention matters.
         </p>
-        <ul className="space-y-1 mt-2">
+        <ul className="space-y-2 mt-2">
           {BROKEN_FAST_REASONS.map(({ id, label }) => (
             <li key={id}>
               <button
@@ -40,10 +40,11 @@ export function BreakFastReasonDialog({
                   onOpenChange(false);
                 }}
                 className={cn(
-                  "w-full text-left py-3 px-4 rounded-xl border border-border",
-                  "hover:bg-secondary/10 hover:border-secondary/40 transition-colors",
-                  "font-medium text-sm"
+                  "w-full min-h-[44px] text-left py-3 px-4 rounded-xl border border-border",
+                  "hover:bg-secondary/10 hover:border-secondary/40 active:bg-secondary/20 transition-colors",
+                  "font-medium text-sm touch-manipulation"
                 )}
+                aria-label={`Reason: ${label}`}
               >
                 {label}
               </button>
