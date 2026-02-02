@@ -1,0 +1,2248 @@
+[
+  {
+    "city": "Tehran",
+    "country": "Iran",
+    "region": "Middle East",
+    "slug": "tehran",
+    "muslimPopulation": "~88 million (99% of Iran, 90-95% Shia)",
+    "totalPopulation": "~89 million",
+    "muslimPercentage": 99,
+    "youthPopulation": "~30% under 25 years old",
+    "madrasasIslamicEducation": "Qom seminary system (world's leading Shia Islamic center), numerous Islamic universities, extensive Islamic education network",
+    "tags": [
+      "middle-east",
+      "large-population",
+      "resilient-ecosystem",
+      "strong-engineering",
+      "domestic-platforms",
+      "sanctions-resilient"
+    ],
+    "sunnishia": {
+      "sunni": 5,
+      "shia": 92
+    },
+    "ramadanTraditions": "Shia Ramadan customs; sohoor and iftar with Persian dishes (sholeh zard, zoolbia bamieh); mosque programs and Rawda; Qom seminaries hold special Ramadan lectures; emphasis on dua and night prayers.",
+    "religiousCultural": "Qom as center of Shia scholarship during Ramadan; commemoration of Imam Ali (AS); Laylat al-Qadr and Shab-e-Qadr observances; charity and feeding the needy."
+  },
+  {
+    "city": "Medina",
+    "country": "Saudi Arabia",
+    "region": "Middle East",
+    "slug": "medina",
+    "muslimPopulation": "~35 million (93% of Saudi Arabia)",
+    "totalPopulation": "~35 million",
+    "muslimPercentage": 93,
+    "youthPopulation": "~32% under 25 years old",
+    "madrasasIslamicEducation": "Islamic University of Madinah (world's leading Islamic university), extensive Islamic education network, Islamic Civilization Studies centers",
+    "tags": [
+      "middle-east",
+      "vision-2030",
+      "islamic-tech",
+      "smart-city",
+      "pilgrim-market",
+      "knowledge-city"
+    ],
+    "sunnishia": {
+      "sunni": 85,
+      "shia": 8
+    },
+    "ramadanTraditions": "Taraweeh at the Prophet's Mosque; Rawdah visits; iftar in the haram area; community suhoor; Qiyam and Itikaf; strong emphasis on charity and feeding fasting people.",
+    "religiousCultural": "City of the Prophet (peace be upon him); Ramadan deeply tied to Prophetic tradition; ziyarah and du'a at the Rawdah; Islamic University and scholarly programs during Ramadan."
+  },
+  {
+    "city": "Karachi",
+    "country": "Pakistan",
+    "region": "South Asia",
+    "slug": "karachi",
+    "muslimPopulation": "~220 million (96% of Pakistan)",
+    "totalPopulation": "~230 million",
+    "muslimPercentage": 96,
+    "youthPopulation": "~35% under 25 years old, median age 23",
+    "madrasasIslamicEducation": "International Islamic University Islamabad, Jamia Binoria, thousands of madrasas nationwide",
+    "tags": [
+      "south-asia",
+      "large-population",
+      "cost-effective",
+      "english-speaking",
+      "diaspora-network"
+    ],
+    "sunnishia": {
+      "sunni": 85,
+      "shia": 15
+    },
+    "ramadanTraditions": "Sehri and iftar with Pakistani dishes (pakoras, dates, sherbet); Taraweeh in mosques and homes; Ramadan bazaars; charity and dastarkhwan for neighbors; family gatherings.",
+    "religiousCultural": "Sunni majority with strong mosque culture; Laylat al-Qadr night vigils; zakat and sadaqah; Ramadan TV and radio programs; emphasis on Qur'an and hadith study."
+  },
+  {
+    "city": "Islamabad",
+    "country": "Pakistan",
+    "region": "South Asia",
+    "slug": "islamabad",
+    "muslimPopulation": "~220 million (96% of Pakistan); Islamabad is the capital",
+    "totalPopulation": "~230 million",
+    "muslimPercentage": 96,
+    "youthPopulation": "~35% under 25 years old, median age 23",
+    "madrasasIslamicEducation": "International Islamic University Islamabad, Jamia Binoria, thousands of madrasas nationwide",
+    "tags": [
+      "south-asia",
+      "capital-city",
+      "diaspora-network",
+      "english-speaking",
+      "government-supported"
+    ],
+    "sunnishia": {
+      "sunni": 85,
+      "shia": 15
+    },
+    "ramadanTraditions": "Sehri and iftar with pakoras, dates, sherbet; Taraweeh in mosques; Ramadan bazaars; dastarkhwan and charity; family and neighborhood gatherings.",
+    "religiousCultural": "Sunni majority; Laylat al-Qadr; zakat and sadaqah; mosque and madrasa programs; strong community and family observance."
+  },
+  {
+    "city": "Tashkent",
+    "country": "Uzbekistan",
+    "region": "Central Asia",
+    "slug": "tashkent",
+    "muslimPopulation": "~32 million (88% of Uzbekistan)",
+    "totalPopulation": "~36 million",
+    "muslimPercentage": 88,
+    "youthPopulation": "~30% under 25 years old",
+    "madrasasIslamicEducation": "International Islamic Academy of Uzbekistan, Mir-i Arab Madrasah (historic), growing Islamic education sector",
+    "tags": [
+      "central-asia",
+      "largest-market",
+      "government-supported",
+      "silk-road",
+      "bilingual"
+    ],
+    "sunnishia": {
+      "sunni": null,
+      "shia": null
+    },
+    "ramadanTraditions": "Plov, dates, bread at iftar; Taraweeh in historic mosques and madrasas; family and community; charity.",
+    "religiousCultural": "Central Asian Hanafi tradition; Laylat al-Qadr; Silk Road Islamic heritage; shrine and mosque visits."
+  },
+  {
+    "city": "Riyadh",
+    "country": "Saudi Arabia",
+    "region": "Middle East",
+    "slug": "riyadh",
+    "muslimPopulation": "~32 million (93% of Saudi Arabia)",
+    "totalPopulation": "~35 million",
+    "muslimPercentage": 93,
+    "youthPopulation": "~32% under 25 years old",
+    "madrasasIslamicEducation": "Imam Muhammad ibn Saud Islamic University, extensive Islamic university system",
+    "tags": [
+      "middle-east",
+      "vision-2030",
+      "high-investment",
+      "large-market",
+      "government-backed"
+    ],
+    "sunnishia": {
+      "sunni": 85,
+      "shia": 8
+    },
+    "ramadanTraditions": "Saudi iftar (dates, laban, sambusa); Taraweeh and Qiyam; family majlis; charity and iftar tents; Vision 2030 cultural events; mosque programs and Qur'an competitions.",
+    "religiousCultural": "Heart of Najd; conservative Ramadan observance; emphasis on Qur'an and sunnah; Laylat al-Qadr; zakat and community feeding; Islamic lectures and exhibitions."
+  },
+  {
+    "city": "Jakarta",
+    "country": "Indonesia",
+    "region": "Southeast Asia",
+    "slug": "jakarta",
+    "muslimPopulation": "~230 million (87% of Indonesia)",
+    "totalPopulation": "~275 million",
+    "muslimPercentage": 87,
+    "youthPopulation": "~27% under 25 years old",
+    "madrasasIslamicEducation": "UIN Jakarta, extensive pesantren network, largest Islamic education system globally",
+    "tags": [
+      "southeast-asia",
+      "largest-muslim-population",
+      "unicorns",
+      "massive-market",
+      "young-population"
+    ],
+    "sunnishia": {
+      "sunni": 99,
+      "shia": 1
+    },
+    "totalPopulationSource": {
+      "text": "~275 million",
+      "source": "Worldometers 2025",
+      "url": "https://www.worldometers.info/demographics/indonesia-demographics/"
+    },
+    "ramadanTraditions": "Ngabuburit (pre-iftar activities); takjil (sweet snacks at iftar); kolak, es campur; mosque iftars; mudik (homecoming) before Eid; Ramadan markets and street food.",
+    "religiousCultural": "Indonesian Ramadan blend of tradition and community; tadarus (Qur'an reading) in groups; Laylat al-Qadr observances; bedug and call to prayer; charity and open houses."
+  },
+  {
+    "city": "Istanbul",
+    "country": "Turkey",
+    "region": "Middle East",
+    "slug": "istanbul",
+    "muslimPopulation": "~83 million (99% of Turkey)",
+    "totalPopulation": "~84 million",
+    "muslimPercentage": 99,
+    "youthPopulation": "~26% under 25 years old",
+    "madrasasIslamicEducation": "Istanbul University Faculty of Theology, extensive imam-hatip schools",
+    "tags": [
+      "middle-east",
+      "europe-asia-bridge",
+      "growing-ecosystem",
+      "cultural-influence",
+      "educated-workforce"
+    ],
+    "sunnishia": {
+      "sunni": 80,
+      "shia": 19
+    },
+    "ramadanTraditions": "Iftar under minarets; davul (drum) for suhoor; street iftars and historic mosques; pide and güllaç; Ramadan bazaars; Taraweeh at Sultanahmet and Süleymaniye.",
+    "religiousCultural": "Ottoman Ramadan heritage; mahya (lights between minarets); Turkish hospitality and iftar invitations; Laylat al-Qadr programs; strong mosque and community culture."
+  },
+  {
+    "city": "Tangier",
+    "country": "Morocco",
+    "region": "North Africa",
+    "slug": "tangier",
+    "muslimPopulation": "~36 million (99% of Morocco)",
+    "totalPopulation": "~37 million",
+    "muslimPercentage": 99,
+    "youthPopulation": "~30% under 25 years old",
+    "madrasasIslamicEducation": "Qarawiyyin University system, Al Akhawayn University blending modern and Islamic education",
+    "tags": [
+      "north-africa",
+      "europe-africa-connectivity",
+      "bilingual",
+      "nearshore",
+      "competitive-costs"
+    ],
+    "sunnishia": {
+      "sunni": null,
+      "shia": null
+    },
+    "ramadanTraditions": "Tangier Ramadan; harira and Moroccan sweets; mosque and medina iftars; family gatherings; Taraweeh; charity and community.",
+    "religiousCultural": "Northern Moroccan and Mediterranean Ramadan; Laylat al-Qadr; Islamic and cultural heritage; strong community and family focus."
+  },
+  {
+    "city": "Casablanca",
+    "country": "Morocco",
+    "region": "Maghreb",
+    "slug": "casablanca",
+    "muslimPopulation": "~36 million (99% of Morocco); Casablanca is the largest city",
+    "totalPopulation": "~37 million",
+    "muslimPercentage": 99,
+    "youthPopulation": "~30% under 25 years old",
+    "madrasasIslamicEducation": "Qarawiyyin University system, Al Akhawayn University blending modern and Islamic education",
+    "tags": [
+      "maghreb",
+      "bilingual",
+      "nearshore",
+      "competitive-costs",
+      "economic-capital"
+    ],
+    "sunnishia": {
+      "sunni": null,
+      "shia": null
+    },
+    "ramadanTraditions": "Moroccan iftar (harira, chebakya, dates); Taraweeh at Hassan II and neighborhood mosques; family and community iftars; Ramadan markets.",
+    "religiousCultural": "Moroccan Maliki tradition; Laylat al-Qadr; charity and hospitality; blend of Arab and Berber; mosque and Sufi brotherhood observances."
+  },
+  {
+    "city": "Algiers",
+    "country": "Algeria",
+    "region": "Maghreb",
+    "slug": "algiers",
+    "muslimPopulation": "~43 million (99% of Algeria)",
+    "totalPopulation": "~44 million",
+    "muslimPercentage": 99,
+    "youthPopulation": "~27% under 25 years old, median age 28",
+    "madrasasIslamicEducation": "University of Algiers Islamic studies, network of traditional Islamic schools",
+    "tags": [
+      "maghreb",
+      "large-market",
+      "resource-wealth",
+      "francophone",
+      "untapped-potential"
+    ],
+    "sunnishia": {
+      "sunni": null,
+      "shia": null
+    },
+    "ramadanTraditions": "Algerian iftar (chorba, bourek, dates); drummers for suhoor; Taraweeh in historic mosques; family and neighborhood iftars; Ramadan sweets.",
+    "religiousCultural": "Algerian Maliki and Islamic heritage; Laylat al-Qadr; mosque and community programs; charity; strong family and cultural observance."
+  },
+  {
+    "city": "Khartoum",
+    "country": "Sudan",
+    "region": "Horn of Africa",
+    "slug": "khartoum",
+    "muslimPopulation": "~42 million (97% of Sudan)",
+    "totalPopulation": "~43 million",
+    "muslimPercentage": 97,
+    "youthPopulation": "~45% under 25 years old",
+    "madrasasIslamicEducation": "University of Khartoum Islamic studies, extensive Islamic education tradition",
+    "tags": [
+      "horn-of-africa",
+      "untapped-potential",
+      "youth-driven",
+      "arabic-market",
+      "emerging"
+    ],
+    "sunnishia": {
+      "sunni": null,
+      "shia": null
+    },
+    "ramadanTraditions": "Sudanese iftar (dates, asida, ful); Taraweeh in mosques; family and community; charity; Ramadan markets.",
+    "religiousCultural": "Sudanese Sunni tradition; Laylat al-Qadr; mosque and Sufi brotherhoods; strong community focus."
+  },
+  {
+    "city": "Cairo",
+    "country": "Egypt",
+    "region": "North Africa",
+    "slug": "cairo",
+    "muslimPopulation": "~95 million (90% of Egypt)",
+    "totalPopulation": "~106 million",
+    "muslimPercentage": 90,
+    "youthPopulation": "~32% under 25 years old",
+    "madrasasIslamicEducation": "Al-Azhar University (preeminent Islamic university), extensive Islamic education system",
+    "tags": [
+      "north-africa",
+      "largest-arab-population",
+      "cost-effective",
+      "cultural-center",
+      "large-talent-pool"
+    ],
+    "sunnishia": {
+      "sunni": 90,
+      "shia": 10
+    },
+    "ramadanTraditions": "Fanous (Ramadan lanterns); meshaharati (drummer waking people for suhoor); cannon firing at Maghrib; street iftars; qatayef and kunafa; Taraweeh at Al-Azhar and historic mosques.",
+    "religiousCultural": "Al-Azhar and historic mosques lead Ramadan programs; Egyptian iftar tables (foul, tamr hindi, qamar al-din); Laylat al-Qadr vigils; charity and shared meals in neighborhoods."
+  },
+  {
+    "city": "Dhaka",
+    "country": "Bangladesh",
+    "region": "South Asia",
+    "slug": "dhaka",
+    "muslimPopulation": "~155 million (90% of Bangladesh)",
+    "totalPopulation": "~170 million",
+    "muslimPercentage": 90,
+    "youthPopulation": "~30% under 25 years old",
+    "madrasasIslamicEducation": "Al-Jamiatul Ahlia Darul Ulum Moinul Islam, extensive Islamic education network",
+    "tags": [
+      "south-asia",
+      "competitive-costs",
+      "young-population",
+      "growing-sector",
+      "digital-payments"
+    ],
+    "sunnishia": {
+      "sunni": null,
+      "shia": null
+    },
+    "ramadanTraditions": "Bengali Ramadan; iftar with piaju, chola, dates, sherbet; Taraweeh in mosques; Ramadan bazaars; charity and neighborhood iftars; family sehri and iftar.",
+    "religiousCultural": "Bangladeshi Sunni tradition; Laylat al-Qadr; Qur'an and hadith study; zakat and sadaqah; mosque and madrasa programs; strong community and family focus."
+  },
+  {
+    "city": "Chittagong",
+    "country": "Bangladesh",
+    "region": "South Asia",
+    "slug": "chittagong",
+    "muslimPopulation": "~155 million (90% of Bangladesh); Chittagong is second largest city",
+    "totalPopulation": "~170 million",
+    "muslimPercentage": 90,
+    "youthPopulation": "~30% under 25 years old",
+    "madrasasIslamicEducation": "Al-Jamiatul Ahlia Darul Ulum Moinul Islam (major madrasa), extensive Islamic education network",
+    "tags": [
+      "south-asia",
+      "port-city",
+      "competitive-costs",
+      "growing-sector",
+      "young-workforce"
+    ],
+    "sunnishia": {
+      "sunni": null,
+      "shia": null
+    },
+    "ramadanTraditions": "Piaju, chola, dates at iftar; Taraweeh; Ramadan bazaars; charity and neighborhood iftars; family sehri and iftar.",
+    "religiousCultural": "Sunni tradition; Laylat al-Qadr; Qur'an study; zakat; mosque and madrasa programs; strong community focus."
+  },
+  {
+    "city": "Kuala Lumpur",
+    "country": "Malaysia",
+    "region": "Southeast Asia",
+    "slug": "kuala-lumpur",
+    "muslimPopulation": "~20 million (60% of Malaysia)",
+    "totalPopulation": "~33 million",
+    "muslimPercentage": 60,
+    "youthPopulation": "~28% under 25 years old",
+    "madrasasIslamicEducation": "International Islamic University Malaysia, extensive Islamic education network",
+    "tags": [
+      "southeast-asia",
+      "islamic-finance",
+      "english-speaking",
+      "tech-hub",
+      "stable-economy"
+    ],
+    "sunnishia": {
+      "sunni": 95,
+      "shia": 5
+    },
+    "ramadanTraditions": "Bazaar Ramadan; bubur lambuk; iftar buffets; Taraweeh at National Mosque and state mosques; Raya preparations; open house culture; moreh (post-Taraweeh supper).",
+    "religiousCultural": "Malaysian multi-ethnic Ramadan; Islamic arts and lectures; Laylat al-Qadr programs; zakat and corporate iftar; strong emphasis on family and community."
+  },
+  {
+    "city": "Bamako",
+    "country": "Mali",
+    "region": "Sahel Region",
+    "slug": "bamako",
+    "muslimPopulation": "~19 million (95% of Mali)",
+    "totalPopulation": "~21 million",
+    "muslimPercentage": 95,
+    "youthPopulation": "~47% under 25 years old",
+    "madrasasIslamicEducation": "Strong Islamic education tradition, numerous madrasas, Islamic universities",
+    "tags": [
+      "sahel-region",
+      "large-youth",
+      "francophone",
+      "mobile-first",
+      "untapped"
+    ],
+    "sunnishia": {
+      "sunni": null,
+      "shia": null
+    },
+    "ramadanTraditions": "West African iftar; dates, porridge, local dishes; mosque and community iftars; Taraweeh; charity.",
+    "religiousCultural": "Maliki and Sufi traditions; Laylat al-Qadr; mosque and brotherhood; strong community observance."
+  },
+  {
+    "city": "Lagos",
+    "country": "Nigeria",
+    "region": "West Africa",
+    "slug": "lagos",
+    "muslimPopulation": "~100 million (50% of Nigeria; Lagos has significant Muslim population)",
+    "totalPopulation": "~220 million",
+    "muslimPercentage": 50,
+    "youthPopulation": "~43% under 25 years old",
+    "madrasasIslamicEducation": "Bayero University Kano, extensive Islamic education network, Northern Nigeria Islamic institutions",
+    "tags": [
+      "west-africa",
+      "largest-african-economy",
+      "unicorns",
+      "fintech",
+      "massive-market"
+    ],
+    "sunnishia": {
+      "sunni": null,
+      "shia": null
+    },
+    "ramadanTraditions": "Nigerian iftar (dates, pap, local dishes); Taraweeh in mosques; Ramadan markets; charity and community iftars; multicultural Muslim community observances.",
+    "religiousCultural": "Diverse Nigerian Muslim traditions; Laylat al-Qadr; mosque and Islamic council programs; blend of Yoruba and northern customs; charity and education."
+  },
+  {
+    "city": "Amman",
+    "country": "Jordan",
+    "region": "Levant",
+    "slug": "amman",
+    "muslimPopulation": "~10 million (95% of Jordan)",
+    "totalPopulation": "~11 million",
+    "muslimPercentage": 95,
+    "youthPopulation": "~32% under 25 years old",
+    "madrasasIslamicEducation": "University of Jordan Islamic studies, extensive Islamic education",
+    "tags": [
+      "levant",
+      "political-stability",
+      "educated-workforce",
+      "government-supported",
+      "regional-hub"
+    ],
+    "sunnishia": {
+      "sunni": null,
+      "shia": null
+    },
+    "ramadanTraditions": "Jordanian iftar (dates, soup, main dishes); Taraweeh in mosques; family and community iftars; charity; Ramadan lights and atmosphere.",
+    "religiousCultural": "Levantine Ramadan; Laylat al-Qadr; mosque and community programs; proximity to Jerusalem and holy sites."
+  },
+  {
+    "city": "Bandung",
+    "country": "Indonesia",
+    "region": "Southeast Asia",
+    "slug": "bandung",
+    "muslimPopulation": "~230 million (87% of Indonesia); West Java region highly Muslim",
+    "totalPopulation": "~275 million",
+    "muslimPercentage": 87,
+    "youthPopulation": "~27% under 25 years old",
+    "madrasasIslamicEducation": "UIN Sunan Gunung Djati (Islamic State University), extensive pesantren (Islamic boarding school) network",
+    "tags": [
+      "southeast-asia",
+      "creative-hub",
+      "university-ecosystem",
+      "lower-costs",
+      "islamic-lifestyle"
+    ],
+    "sunnishia": {
+      "sunni": 99,
+      "shia": 1
+    },
+    "ramadanTraditions": "Ngabuburit and takjil; kolak, es campur; mosque iftars; mudik before Eid; Ramadan markets; tadarus and Taraweeh.",
+    "religiousCultural": "Indonesian blend of tradition and community; Laylat al-Qadr; bedug and mosque life; charity and open houses."
+  },
+  {
+    "city": "Dakar",
+    "country": "Senegal",
+    "region": "West Africa",
+    "slug": "dakar",
+    "muslimPopulation": "~16 million (95% of Senegal)",
+    "totalPopulation": "~17 million",
+    "muslimPercentage": 95,
+    "youthPopulation": "~45% under 25 years old",
+    "madrasasIslamicEducation": "Strong Sufi Islamic tradition, numerous Islamic schools, Université Cheikh Anta Diop Islamic studies",
+    "tags": [
+      "west-africa",
+      "francophone",
+      "political-stability",
+      "sufi-tradition",
+      "gateway"
+    ],
+    "sunnishia": {
+      "sunni": null,
+      "shia": null
+    },
+    "ramadanTraditions": "West African Ramadan; iftar with thiakry, dates, bissap; mosque and community iftars; Taraweeh; charity and feeding; family and neighborhood gatherings.",
+    "religiousCultural": "Senegalese Sufi and Sunni traditions; Laylat al-Qadr; zakat and sadaqah; strong brotherhood and mosque culture; Wolof and French in religious life."
+  },
+  {
+    "city": "Dar es Salaam",
+    "country": "Tanzania",
+    "region": "East Africa",
+    "slug": "dar-es-salaam",
+    "muslimPopulation": "~20 million (35% mainland; Zanzibar ~99% Muslim)",
+    "totalPopulation": "~63 million",
+    "muslimPercentage": 35,
+    "youthPopulation": "~44% under 25 years old",
+    "madrasasIslamicEducation": "Zanzibar Islamic colleges, strong Swahili-Islamic tradition, numerous madrasas especially in coastal regions",
+    "tags": [
+      "east-africa",
+      "swahili-market",
+      "coastal-connectivity",
+      "islamic-heritage",
+      "eac-access"
+    ],
+    "sunnishia": {
+      "sunni": null,
+      "shia": null
+    },
+    "ramadanTraditions": "East African iftar; dates, soup, local dishes; Taraweeh in mosques; charity and community iftars.",
+    "religiousCultural": "Swahili and East African Islam; Laylat al-Qadr; mosque and community; coastal and inland traditions."
+  },
+  {
+    "city": "Kano",
+    "country": "Nigeria",
+    "region": "West Africa",
+    "slug": "kano",
+    "muslimPopulation": "~50% Muslim; Kano State ~97% Muslim (~13 million in state)",
+    "totalPopulation": "~220 million",
+    "muslimPercentage": 97,
+    "youthPopulation": "~45% under 25 years old (very young population)",
+    "madrasasIslamicEducation": "Strong Islamic education tradition, numerous madrasas, Islamic universities, historic scholarly heritage",
+    "tags": [
+      "west-africa",
+      "northern-nigeria",
+      "untapped-market",
+      "hausa-market",
+      "islamic-networks"
+    ],
+    "sunnishia": {
+      "sunni": null,
+      "shia": null
+    },
+    "ramadanTraditions": "Dates, pap, local dishes; Taraweeh in mosques; Ramadan markets; charity and community iftars.",
+    "religiousCultural": "Diverse Nigerian Muslim traditions; Laylat al-Qadr; mosque and Islamic council programs; charity and education."
+  },
+  {
+    "city": "Almaty",
+    "country": "Kazakhstan",
+    "region": "Central Asia",
+    "slug": "almaty",
+    "muslimPopulation": "~13 million (70% of Kazakhstan)",
+    "totalPopulation": "~19 million",
+    "muslimPercentage": 70,
+    "youthPopulation": "~28% under 25 years old",
+    "madrasasIslamicEducation": "Kazakh Islamic University, growing Islamic education sector",
+    "tags": [
+      "central-asia",
+      "silk-road",
+      "resource-wealth",
+      "educated-population",
+      "bilingual"
+    ],
+    "sunnishia": {
+      "sunni": null,
+      "shia": null
+    },
+    "ramadanTraditions": "Central Asian iftar; plov and local dishes; Taraweeh in mosques; family and community; charity.",
+    "religiousCultural": "Hanafi tradition; Laylat al-Qadr; post-Soviet revival of Ramadan; mosque and community programs."
+  },
+  {
+    "city": "Baku",
+    "country": "Azerbaijan",
+    "region": "Caucasus",
+    "slug": "baku",
+    "muslimPopulation": "~9.8 million (96% of Azerbaijan)",
+    "totalPopulation": "~10.2 million",
+    "muslimPercentage": 96,
+    "youthPopulation": "~26% under 25 years old",
+    "madrasasIslamicEducation": "Baku Islamic University, growing Islamic education sector",
+    "tags": [
+      "caucasus",
+      "europe-asia-bridge",
+      "oil-diversification",
+      "young-population",
+      "growing-ecosystem"
+    ],
+    "sunnishia": {
+      "sunni": null,
+      "shia": null
+    },
+    "ramadanTraditions": "Azerbaijani iftar; plov, dates, tea; Taraweeh in Baku and historic mosques; family and community; charity.",
+    "religiousCultural": "Caucasus Islamic heritage; Sunni majority; Laylat al-Qadr; mosque and cultural observance."
+  },
+  {
+    "city": "Tunis",
+    "country": "Tunisia",
+    "region": "Maghreb",
+    "slug": "tunis",
+    "muslimPopulation": "~12 million (99% of Tunisia)",
+    "totalPopulation": "~12 million",
+    "muslimPercentage": 99,
+    "youthPopulation": "~25% under 25 years old",
+    "madrasasIslamicEducation": "Zitouna University (historic Islamic learning center), modern universities with Islamic studies programs",
+    "tags": [
+      "maghreb",
+      "high-education",
+      "francophone",
+      "proximity-europe",
+      "progressive-policies"
+    ],
+    "sunnishia": {
+      "sunni": null,
+      "shia": null
+    },
+    "ramadanTraditions": "Tunisian iftar (chorba, brik, dates, assida); meshaharati; Taraweeh in Zitouna and other mosques; street and family iftars; sweets and tea.",
+    "religiousCultural": "Zitouna Mosque and Maliki tradition; Laylat al-Qadr; North African Ramadan; charity and community; blend of Arab and Berber culture."
+  },
+  {
+    "city": "Abidjan",
+    "country": "Côte d'Ivoire",
+    "region": "West Africa",
+    "slug": "abidjan",
+    "muslimPopulation": "~11 million (42% of Côte d'Ivoire); Abidjan has significant Muslim population",
+    "totalPopulation": "~27 million",
+    "muslimPercentage": 42,
+    "youthPopulation": "~40% under 25 years old",
+    "madrasasIslamicEducation": "Islamic University of Côte d'Ivoire, numerous Arabic schools and madrasas",
+    "tags": [
+      "west-africa",
+      "francophone",
+      "economic-hub",
+      "resource-wealth",
+      "stable"
+    ],
+    "sunnishia": {
+      "sunni": null,
+      "shia": null
+    },
+    "ramadanTraditions": "Local iftar and suhoor; Taraweeh in mosques; family and community gatherings; charity and feeding the needy; emphasis on Qur'an and Laylat al-Qadr.",
+    "religiousCultural": "Ramadan observed with mosque and community programs; Laylat al-Qadr; zakat and sadaqah; strong emphasis on family, worship, and charity."
+  },
+  {
+    "city": "Bishkek",
+    "country": "Kyrgyzstan",
+    "region": "Central Asia",
+    "slug": "bishkek",
+    "muslimPopulation": "~6 million (90% of Kyrgyzstan)",
+    "totalPopulation": "~7 million",
+    "muslimPercentage": 90,
+    "youthPopulation": "~32% under 25 years old",
+    "madrasasIslamicEducation": "Islamic University of Kyrgyzstan, network of madrasas, growing Islamic education sector",
+    "tags": [
+      "central-asia",
+      "low-costs",
+      "entrepreneurial",
+      "outsourcing-hub",
+      "easy-business"
+    ],
+    "sunnishia": {
+      "sunni": null,
+      "shia": null
+    },
+    "ramadanTraditions": "Central Asian iftar; plov and local dishes; Taraweeh in mosques; family and community; charity.",
+    "religiousCultural": "Hanafi tradition; Laylat al-Qadr; mosque and community; blend of Soviet and Islamic revival."
+  },
+  {
+    "city": "Muscat",
+    "country": "Oman",
+    "region": "Persian Gulf",
+    "slug": "muscat",
+    "muslimPopulation": "~4.5 million (86% of Oman)",
+    "totalPopulation": "~5.2 million",
+    "muslimPercentage": 86,
+    "youthPopulation": "~25% under 25 years old",
+    "madrasasIslamicEducation": "Oman's moderate Islamic education system, Islamic studies integrated",
+    "tags": [
+      "persian-gulf",
+      "strategic-location",
+      "moderate-governance",
+      "trade-routes",
+      "growing-investment"
+    ],
+    "sunnishia": {
+      "sunni": null,
+      "shia": null
+    },
+    "ramadanTraditions": "Omani iftar (dates, laban, harees); Taraweeh in Sultan Qaboos and other mosques; family majlis; charity; traditional hospitality.",
+    "religiousCultural": "Ibadi and Sunni tradition; Laylat al-Qadr; mosque and community; Omani hospitality and culture."
+  },
+  {
+    "city": "Dubai",
+    "country": "UAE",
+    "region": "Middle East",
+    "slug": "dubai",
+    "muslimPopulation": "~7.5 million (76% of UAE)",
+    "totalPopulation": "~10 million",
+    "muslimPercentage": 76,
+    "youthPopulation": "~20% under 25 years old",
+    "madrasasIslamicEducation": "Al Qasimia University, Islamic Affairs Department schools",
+    "tags": [
+      "middle-east",
+      "business-friendly",
+      "international-hub",
+      "high-capital",
+      "ai-blockchain"
+    ],
+    "sunnishia": {
+      "sunni": 85,
+      "shia": 10
+    },
+    "ramadanTraditions": "Iftar tents and buffets; cannon firing; Ramadan souks and night markets; Taraweeh at Jumeirah and other mosques; multicultural iftar; charity and community events.",
+    "religiousCultural": "Cosmopolitan Ramadan; Islamic and cultural exhibitions; Laylat al-Qadr; zakat and corporate charity; blend of Emirati tradition and expat participation."
+  },
+  {
+    "city": "Kampala",
+    "country": "Uganda",
+    "region": "East Africa",
+    "slug": "kampala",
+    "muslimPopulation": "~6 million (14% of Uganda)",
+    "totalPopulation": "~47 million",
+    "muslimPercentage": 14,
+    "youthPopulation": "~48% under 25 years old (youngest population in East Africa)",
+    "madrasasIslamicEducation": "Islamic University in Uganda, numerous madrasas, growing Islamic education sector",
+    "tags": [
+      "east-africa",
+      "youngest-population",
+      "entrepreneurial",
+      "english-speaking",
+      "startup-friendly"
+    ],
+    "sunnishia": {
+      "sunni": null,
+      "shia": null
+    },
+    "ramadanTraditions": "East African iftar; dates and local dishes; Taraweeh in mosques; charity and community; family gatherings.",
+    "religiousCultural": "East African Muslim community; Laylat al-Qadr; mosque and Islamic council programs."
+  },
+  {
+    "city": "Manama",
+    "country": "Bahrain",
+    "region": "Arabian Peninsula",
+    "slug": "manama",
+    "muslimPopulation": "~1.1 million (73% of Bahrain)",
+    "totalPopulation": "~1.5 million",
+    "muslimPercentage": 73,
+    "youthPopulation": "~20% under 25 years old",
+    "madrasasIslamicEducation": "Al-Hidayah Islamic School, University of Bahrain Islamic Studies",
+    "tags": [
+      "arabian-peninsula",
+      "islamic-finance",
+      "business-friendly",
+      "gcc-access",
+      "early-adopter"
+    ],
+    "sunnishia": {
+      "sunni": 38,
+      "shia": 60
+    },
+    "ramadanTraditions": "Bahraini iftar (dates, gahwa, main dishes); Taraweeh in mosques; charity and community; family majlis.",
+    "religiousCultural": "Gulf Ramadan; Sunni and Shia observance; Laylat al-Qadr; mosque and community programs."
+  },
+  {
+    "city": "Doha",
+    "country": "Qatar",
+    "region": "Persian Gulf",
+    "slug": "doha",
+    "muslimPopulation": "~1.8 million (65% of Qatar)",
+    "totalPopulation": "~3 million",
+    "muslimPercentage": 65,
+    "youthPopulation": "~18% under 25 years old",
+    "madrasasIslamicEducation": "Qatar Foundation Islamic studies, Islamic education integrated in system",
+    "tags": [
+      "persian-gulf",
+      "high-capital",
+      "world-class-infrastructure",
+      "knowledge-economy",
+      "high-purchasing-power"
+    ],
+    "sunnishia": {
+      "sunni": null,
+      "shia": null
+    },
+    "ramadanTraditions": "Qatari iftar (dates, thareed, machboos); Taraweeh at State Mosque and others; charity and iftar tents; family and community.",
+    "religiousCultural": "Gulf Ramadan; Laylat al-Qadr; zakat and community; Islamic culture and education."
+  },
+  {
+    "city": "Mombasa",
+    "country": "Kenya",
+    "region": "East Africa",
+    "slug": "mombasa",
+    "muslimPopulation": "~5.5 million (11% of Kenya; Mombasa region higher concentration)",
+    "totalPopulation": "~55 million",
+    "muslimPercentage": 11,
+    "youthPopulation": "~40% under 25 years old",
+    "madrasasIslamicEducation": "Coastal Islamic schools, Swahili-Islamic education tradition",
+    "tags": [
+      "east-africa",
+      "mobile-money",
+      "swahili-market",
+      "gateway",
+      "innovation-hub"
+    ],
+    "sunnishia": {
+      "sunni": null,
+      "shia": null
+    },
+    "ramadanTraditions": "Swahili and East African iftar; dates, soup; Taraweeh in Mombasa and coastal mosques; charity and community.",
+    "religiousCultural": "Coastal and inland Islam; Laylat al-Qadr; mosque and community; Swahili culture."
+  },
+  {
+    "city": "Penang",
+    "country": "Malaysia",
+    "region": "Southeast Asia",
+    "slug": "penang",
+    "muslimPopulation": "~60% Muslim; Penang ~40% Muslim but part of federal system",
+    "totalPopulation": "~33 million",
+    "muslimPercentage": 40,
+    "youthPopulation": "~25% under 25 years old",
+    "madrasasIslamicEducation": "Penang Islamic schools, connection to federal Islamic education system",
+    "tags": [
+      "southeast-asia",
+      "island-hub",
+      "quality-of-life",
+      "manufacturing-transition",
+      "multicultural"
+    ],
+    "sunnishia": {
+      "sunni": null,
+      "shia": null
+    },
+    "ramadanTraditions": "Bazaar Ramadan; bubur lambuk; iftar buffets; Taraweeh at state mosques; Raya preparations; moreh; open house culture.",
+    "religiousCultural": "Multi-ethnic Ramadan; Islamic arts and lectures; Laylat al-Qadr; zakat and community; family and mosque focus."
+  },
+  {
+    "city": "Abu Dhabi",
+    "country": "UAE",
+    "region": "Persian Gulf",
+    "slug": "abu-dhabi",
+    "muslimPopulation": "~1.5 million (95% of Abu Dhabi emirate)",
+    "totalPopulation": "~1.6 million",
+    "muslimPercentage": 95,
+    "youthPopulation": "~25% under 25 years old",
+    "madrasasIslamicEducation": "Zayed University Islamic studies, extensive Islamic education network, Al Ain Islamic centers",
+    "tags": [
+      "persian-gulf",
+      "capital-city",
+      "high-capital",
+      "ai-strategy",
+      "world-class-infrastructure",
+      "high-purchasing-power"
+    ],
+    "sunnishia": {
+      "sunni": 85,
+      "shia": 15
+    },
+    "ramadanTraditions": "Local iftar and suhoor; Taraweeh in mosques; family and community gatherings; charity and feeding the needy; emphasis on Qur'an and Laylat al-Qadr.",
+    "religiousCultural": "Ramadan observed with mosque and community programs; Laylat al-Qadr; zakat and sadaqah; strong emphasis on family, worship, and charity."
+  },
+  {
+    "city": "Lahore",
+    "country": "Pakistan",
+    "region": "South Asia",
+    "slug": "lahore",
+    "muslimPopulation": "~13 million (96% of Pakistan; Lahore metro area)",
+    "totalPopulation": "~13.5 million",
+    "muslimPercentage": 96,
+    "youthPopulation": "~35% under 25 years old, median age 23",
+    "madrasasIslamicEducation": "Jamia Naeemia, Jamia Ashrafia, extensive network of Islamic schools and madrasas",
+    "tags": [
+      "south-asia",
+      "large-population",
+      "cost-effective",
+      "english-speaking",
+      "diaspora-network",
+      "major-tech-hub"
+    ],
+    "sunnishia": {
+      "sunni": 85,
+      "shia": 15
+    },
+    "ramadanTraditions": "Sehri and iftar with pakoras, dates, sherbet; Taraweeh in mosques; Ramadan bazaars; dastarkhwan and charity; family and neighborhood gatherings.",
+    "religiousCultural": "Sunni majority; Laylat al-Qadr; zakat and sadaqah; mosque and madrasa programs; strong community and family observance."
+  },
+  {
+    "city": "Faisalabad",
+    "country": "Pakistan",
+    "region": "South Asia",
+    "slug": "faisalabad",
+    "muslimPopulation": "~3.5 million (96% of Pakistan; Faisalabad metro)",
+    "totalPopulation": "~3.7 million",
+    "muslimPercentage": 96,
+    "youthPopulation": "~38% under 25 years old",
+    "madrasasIslamicEducation": "Extensive network of Islamic schools and madrasas, Jamia Islamia",
+    "tags": [
+      "south-asia",
+      "large-population",
+      "cost-effective",
+      "industrial-tech",
+      "emerging-hub"
+    ],
+    "sunnishia": {
+      "sunni": 85,
+      "shia": 15
+    },
+    "ramadanTraditions": "Sehri and iftar with pakoras, dates, sherbet; Taraweeh in mosques; Ramadan bazaars; dastarkhwan and charity; family and neighborhood gatherings.",
+    "religiousCultural": "Sunni majority; Laylat al-Qadr; zakat and sadaqah; mosque and madrasa programs; strong community and family observance."
+  },
+  {
+    "city": "Rawalpindi",
+    "country": "Pakistan",
+    "region": "South Asia",
+    "slug": "rawalpindi",
+    "muslimPopulation": "~2.2 million (96% of Pakistan; Rawalpindi-Islamabad twin cities)",
+    "totalPopulation": "~2.3 million",
+    "muslimPercentage": 96,
+    "youthPopulation": "~35% under 25 years old",
+    "madrasasIslamicEducation": "Extensive network of Islamic schools and madrasas",
+    "tags": [
+      "south-asia",
+      "twin-cities",
+      "cost-effective",
+      "government-proximity",
+      "emerging-hub"
+    ],
+    "sunnishia": {
+      "sunni": 85,
+      "shia": 15
+    },
+    "ramadanTraditions": "Sehri and iftar with pakoras, dates, sherbet; Taraweeh in mosques; Ramadan bazaars; dastarkhwan and charity; family and neighborhood gatherings.",
+    "religiousCultural": "Sunni majority; Laylat al-Qadr; zakat and sadaqah; mosque and madrasa programs; strong community and family observance."
+  },
+  {
+    "city": "Multan",
+    "country": "Pakistan",
+    "region": "South Asia",
+    "slug": "multan",
+    "muslimPopulation": "~2.1 million (96% of Pakistan; Multan metro)",
+    "totalPopulation": "~2.2 million",
+    "muslimPercentage": 96,
+    "youthPopulation": "~40% under 25 years old",
+    "madrasasIslamicEducation": "Extensive network of Islamic schools and madrasas, strong Islamic education tradition",
+    "tags": [
+      "south-asia",
+      "large-population",
+      "cost-effective",
+      "agricultural-tech",
+      "emerging-hub"
+    ],
+    "sunnishia": {
+      "sunni": 85,
+      "shia": 15
+    },
+    "ramadanTraditions": "Sehri and iftar with pakoras, dates, sherbet; Taraweeh in mosques; Ramadan bazaars; dastarkhwan and charity; family and neighborhood gatherings.",
+    "religiousCultural": "Sunni majority; Laylat al-Qadr; zakat and sadaqah; mosque and madrasa programs; strong community and family observance."
+  },
+  {
+    "city": "New York City",
+    "country": "United States",
+    "region": "North America",
+    "slug": "new-york-city",
+    "muslimPopulation": "~800,000-1 million (9-10% of NYC population)",
+    "totalPopulation": "~8.8 million",
+    "muslimPercentage": 9,
+    "youthPopulation": "~22% under 25 years old",
+    "madrasasIslamicEducation": "Islamic schools in Brooklyn, Queens, extensive community Islamic education",
+    "tags": [
+      "north-america",
+      "major-tech-hub",
+      "high-purchasing-power",
+      "diverse-talent",
+      "access-to-capital",
+      "large-muslim-population"
+    ],
+    "sunnishia": {
+      "sunni": 70,
+      "shia": 20
+    },
+    "ramadanTraditions": "American Muslim Ramadan; iftar at Islamic centers and homes; diverse immigrant traditions; Taraweeh in major mosques; charity; Ramadan awareness in the city.",
+    "religiousCultural": "Diverse Muslim diaspora; Laylat al-Qadr; Islamic Society and mosque networks; interfaith iftars; blend of South Asian, Arab, African American, and other traditions."
+  },
+  {
+    "city": "Dearborn",
+    "country": "United States",
+    "region": "North America",
+    "slug": "dearborn",
+    "muslimPopulation": "~50,000 (40-50% of Dearborn population)",
+    "totalPopulation": "~110,000",
+    "muslimPercentage": 45,
+    "youthPopulation": "~28% under 25 years old",
+    "madrasasIslamicEducation": "Extensive Islamic schools, Arab American National Museum, strong Islamic education network",
+    "tags": [
+      "north-america",
+      "high-muslim-concentration",
+      "arab-american",
+      "automotive-tech",
+      "strong-community"
+    ],
+    "sunnishia": {
+      "sunni": 75,
+      "shia": 20
+    },
+    "ramadanTraditions": "Arab American Ramadan; iftar and suhoor in community; Lebanese and Iraqi dishes; mosque programs; Taraweeh; strong family and community observance.",
+    "religiousCultural": "Largest Arab American Muslim concentration; Laylat al-Qadr; mosque and cultural center programs; charity; Ramadan as identity and community bonding."
+  },
+  {
+    "city": "Minneapolis",
+    "country": "United States",
+    "region": "North America",
+    "slug": "minneapolis",
+    "muslimPopulation": "~100,000-150,000 (15-20% of Minneapolis-St. Paul metro)",
+    "totalPopulation": "~3.7 million (metro)",
+    "muslimPercentage": 15,
+    "youthPopulation": "~25% under 25 years old",
+    "madrasasIslamicEducation": "Tawfiq Islamic Center, extensive Islamic schools, strong community Islamic education",
+    "tags": [
+      "north-america",
+      "east-african-community",
+      "growing-tech-hub",
+      "quality-of-life",
+      "affordable"
+    ],
+    "sunnishia": {
+      "sunni": 90,
+      "shia": 5
+    },
+    "ramadanTraditions": "Iftar at Islamic centers and homes; diverse immigrant traditions; Taraweeh in major mosques; charity; Ramadan awareness and interfaith iftars.",
+    "religiousCultural": "Diverse Muslim diaspora; Laylat al-Qadr; mosque and Islamic society networks; blend of ethnic traditions."
+  },
+  {
+    "city": "Dallas",
+    "country": "United States",
+    "region": "North America",
+    "slug": "dallas",
+    "muslimPopulation": "~150,000-200,000 (5-7% of DFW metro)",
+    "totalPopulation": "~7.6 million (DFW metro)",
+    "muslimPercentage": 6,
+    "youthPopulation": "~26% under 25 years old",
+    "madrasasIslamicEducation": "Dallas Islamic Foundation, Qalam Institute, extensive Islamic schools and centers",
+    "tags": [
+      "north-america",
+      "major-tech-hub",
+      "business-friendly",
+      "diverse-muslim-community",
+      "affordable"
+    ],
+    "sunnishia": {
+      "sunni": 75,
+      "shia": 15
+    },
+    "ramadanTraditions": "Iftar at Islamic centers and homes; diverse immigrant traditions; Taraweeh in major mosques; charity; Ramadan awareness and interfaith iftars.",
+    "religiousCultural": "Diverse Muslim diaspora; Laylat al-Qadr; mosque and Islamic society networks; blend of ethnic traditions."
+  },
+  {
+    "city": "Washington D.C.",
+    "country": "United States",
+    "region": "North America",
+    "slug": "washington-dc",
+    "muslimPopulation": "~200,000-250,000 (8-10% of DC metro)",
+    "totalPopulation": "~6.3 million (DC metro)",
+    "muslimPercentage": 9,
+    "youthPopulation": "~23% under 25 years old",
+    "madrasasIslamicEducation": "ADAMS Center, Islamic Center of Washington, extensive Islamic schools and community centers",
+    "tags": [
+      "north-america",
+      "government-tech",
+      "cybersecurity-hub",
+      "high-education",
+      "policy-access",
+      "diverse-muslim-community"
+    ],
+    "sunnishia": {
+      "sunni": 70,
+      "shia": 20
+    },
+    "ramadanTraditions": "Iftar at Islamic centers and homes; diverse immigrant traditions; Taraweeh in major mosques; charity; Ramadan awareness and interfaith iftars.",
+    "religiousCultural": "Diverse Muslim diaspora; Laylat al-Qadr; mosque and Islamic society networks; blend of ethnic traditions."
+  },
+  {
+    "city": "Toronto",
+    "country": "Canada",
+    "region": "North America",
+    "slug": "toronto",
+    "muslimPopulation": "~400,000-500,000 (15-18% of Toronto)",
+    "totalPopulation": "~3 million (city), ~6.4 million (metro)",
+    "muslimPercentage": 16,
+    "youthPopulation": "~24% under 25 years old",
+    "madrasasIslamicEducation": "TARIC, Islamic Foundation of Toronto, extensive Islamic schools and community centers",
+    "tags": [
+      "north-america",
+      "major-tech-hub",
+      "ai-innovation",
+      "diverse-talent",
+      "quality-of-life",
+      "multicultural",
+      "large-muslim-population"
+    ],
+    "sunnishia": {
+      "sunni": 70,
+      "shia": 20
+    },
+    "ramadanTraditions": "Iftar at mosques and community centers; multicultural traditions; Taraweeh; charity; family and community observance.",
+    "religiousCultural": "Diverse Canadian Muslim community; Laylat al-Qadr; mosque and Islamic association programs; multicultural Ramadan."
+  },
+  {
+    "city": "Vancouver",
+    "country": "Canada",
+    "region": "North America",
+    "slug": "vancouver",
+    "muslimPopulation": "~80,000-100,000 (12-15% of Vancouver)",
+    "totalPopulation": "~675,000 (city), ~2.8 million (metro)",
+    "muslimPercentage": 13,
+    "youthPopulation": "~22% under 25 years old",
+    "madrasasIslamicEducation": "Ismaili Centre Vancouver, extensive Islamic schools and community centers",
+    "tags": [
+      "north-america",
+      "growing-tech-hub",
+      "gaming-industry",
+      "quality-of-life",
+      "multicultural",
+      "asia-pacific-gateway"
+    ],
+    "sunnishia": {
+      "sunni": 65,
+      "shia": 25
+    },
+    "ramadanTraditions": "Iftar at mosques and community centers; multicultural traditions; Taraweeh; charity; family and community observance.",
+    "religiousCultural": "Diverse Canadian Muslim community; Laylat al-Qadr; mosque and Islamic association programs; multicultural Ramadan."
+  },
+  {
+    "city": "Mecca",
+    "country": "Saudi Arabia",
+    "region": "Middle East",
+    "slug": "mecca",
+    "muslimPopulation": "~2.4 million (100% Muslim; permanent and seasonal)",
+    "totalPopulation": "~2.4 million",
+    "muslimPercentage": 100,
+    "youthPopulation": "~30% under 25 years old",
+    "madrasasIslamicEducation": "Umm Al-Qura University (world's leading Islamic university), extensive Islamic education, global Islamic scholarship center",
+    "tags": [
+      "middle-east",
+      "holy-city",
+      "pilgrim-market",
+      "vision-2030",
+      "islamic-tech",
+      "global-muslim-center"
+    ],
+    "sunnishia": {
+      "sunni": 100,
+      "shia": 0
+    },
+    "stability": {
+      "level": "very-high",
+      "description": "Very stable with strong government support, Vision 2030 investment, and protected status as holy city",
+      "factors": [
+        "Protected holy city status",
+        "Strong government investment",
+        "Vision 2030 support",
+        "Stable infrastructure"
+      ]
+    },
+    "ramadanTraditions": "Millions perform Umrah during Ramadan; Taraweeh at the Haram; iftar and suhoor in the precincts of the Kaaba; Qiyam and Itikaf in the Masjid al-Haram; cannon for iftar; zamzam and dates at iftar.",
+    "religiousCultural": "Birthplace of Islam; revelation of the Qur'an began in Ramadan; Laylat al-Qadr observed with special devotion; global gathering of Muslims for worship and charity."
+  },
+  {
+    "city": "Jeddah",
+    "country": "Saudi Arabia",
+    "region": "Middle East",
+    "slug": "jeddah",
+    "muslimPopulation": "~4.7 million (95% of Jeddah)",
+    "totalPopulation": "~5 million",
+    "muslimPercentage": 95,
+    "youthPopulation": "~32% under 25 years old",
+    "madrasasIslamicEducation": "King Abdulaziz University Islamic studies, extensive Islamic education network",
+    "tags": [
+      "middle-east",
+      "commercial-hub",
+      "port-city",
+      "vision-2030",
+      "gateway-to-holy-cities",
+      "growing-tech-hub"
+    ],
+    "sunnishia": {
+      "sunni": 90,
+      "shia": 5
+    },
+    "stability": {
+      "level": "very-high",
+      "description": "Very stable with Vision 2030 investment, strong infrastructure, and strategic economic importance",
+      "factors": [
+        "Vision 2030 investment",
+        "Strong infrastructure",
+        "Strategic economic position",
+        "Government support"
+      ]
+    },
+    "ramadanTraditions": "Coastal Saudi Ramadan; iftar by the Corniche; sambusa and dates; Taraweeh in historic and new mosques; charity and pilgrim hospitality; family and community iftars.",
+    "religiousCultural": "Gateway to Mecca; blend of Hijazi and Saudi customs; strong mosque culture; Laylat al-Qadr; zakat and sadaqah; preparation for Umrah and Hajj season."
+  },
+  {
+    "city": "London",
+    "country": "United Kingdom",
+    "region": "Europe",
+    "slug": "london",
+    "muslimPopulation": "~1.4 million (15-17% of Greater London)",
+    "totalPopulation": "~9.3 million (Greater London)",
+    "muslimPercentage": 16,
+    "youthPopulation": "~23% under 25 years old",
+    "madrasasIslamicEducation": "East London Mosque, London Central Mosque, extensive Islamic schools and community centers",
+    "tags": [
+      "europe",
+      "major-tech-hub",
+      "large-muslim-population",
+      "diverse-talent",
+      "high-purchasing-power"
+    ],
+    "sunnishia": {
+      "sunni": 70,
+      "shia": 20
+    },
+    "stability": {
+      "level": "very-high",
+      "description": "Very stable with strong rule of law, established infrastructure, and business-friendly environment",
+      "factors": [
+        "Strong rule of law",
+        "Stable democracy",
+        "Established infrastructure",
+        "Business-friendly"
+      ]
+    },
+    "ramadanTraditions": "British Muslim Ramadan; iftar at mosques and community centers; East London Mosque and others; Ramadan tents and street iftars; charity; family and multicultural iftars.",
+    "religiousCultural": "Largest Muslim population in Europe; diverse ethnic Ramadan customs; Laylat al-Qadr programs; zakat and UK Islamic charities; mosque and youth programs."
+  },
+  {
+    "city": "Paris",
+    "country": "France",
+    "region": "Europe",
+    "slug": "paris",
+    "muslimPopulation": "~1.7 million (8-10% of Île-de-France region)",
+    "totalPopulation": "~12.3 million (Île-de-France)",
+    "muslimPercentage": 9,
+    "youthPopulation": "~22% under 25 years old",
+    "madrasasIslamicEducation": "Paris Grand Mosque, extensive Islamic schools and community centers",
+    "tags": [
+      "europe",
+      "major-tech-hub",
+      "large-muslim-population",
+      "diverse-talent",
+      "startup-ecosystem"
+    ],
+    "sunnishia": {
+      "sunni": 75,
+      "shia": 15
+    },
+    "stability": {
+      "level": "high",
+      "description": "High stability with strong infrastructure, though occasional social tensions",
+      "factors": [
+        "Stable democracy",
+        "Strong infrastructure",
+        "Business-friendly",
+        "Occasional social tensions"
+      ]
+    },
+    "ramadanTraditions": "French Muslim Ramadan; iftar at mosques and homes; Grand Mosque of Paris; Ramadan in the banlieues; charity and community; multicultural North African and sub-Saharan traditions.",
+    "religiousCultural": "Major European Muslim community; Laylat al-Qadr; mosque and association-led programs; debate on Ramadan in secular France; solidarity and charity."
+  },
+  {
+    "city": "Brussels",
+    "country": "Belgium",
+    "region": "Europe",
+    "slug": "brussels",
+    "muslimPopulation": "~250,000-300,000 (20-25% of Brussels)",
+    "totalPopulation": "~1.2 million",
+    "muslimPercentage": 23,
+    "youthPopulation": "~24% under 25 years old",
+    "madrasasIslamicEducation": "Brussels Grand Mosque, extensive Islamic schools and community centers",
+    "tags": [
+      "europe",
+      "eu-capital",
+      "high-muslim-concentration",
+      "multilingual",
+      "growing-tech-hub"
+    ],
+    "sunnishia": {
+      "sunni": 80,
+      "shia": 10
+    },
+    "stability": {
+      "level": "high",
+      "description": "High stability as EU capital, though occasional social tensions",
+      "factors": [
+        "EU capital",
+        "Stable democracy",
+        "Multilingual environment"
+      ]
+    },
+    "ramadanTraditions": "Iftar at mosques and community centers; multicultural traditions; Taraweeh; charity; family and community.",
+    "religiousCultural": "European Muslim community; Laylat al-Qadr; mosque and association programs; Moroccan and Turkish heritage."
+  },
+  {
+    "city": "Amsterdam",
+    "country": "Netherlands",
+    "region": "Europe",
+    "slug": "amsterdam",
+    "muslimPopulation": "~200,000-250,000 (10-12% of Amsterdam metro)",
+    "totalPopulation": "~2.5 million (metro)",
+    "muslimPercentage": 11,
+    "youthPopulation": "~21% under 25 years old",
+    "madrasasIslamicEducation": "Amsterdam mosques, extensive Islamic schools and community centers",
+    "tags": [
+      "europe",
+      "major-tech-hub",
+      "business-friendly",
+      "quality-of-life",
+      "muslim-diaspora"
+    ],
+    "sunnishia": {
+      "sunni": 80,
+      "shia": 10
+    },
+    "stability": {
+      "level": "very-high",
+      "description": "Very stable with strong rule of law and business-friendly environment",
+      "factors": [
+        "Stable democracy",
+        "Strong rule of law",
+        "Business-friendly",
+        "High quality of life"
+      ]
+    },
+    "ramadanTraditions": "Iftar at mosques and community centers; multicultural traditions; Taraweeh; charity; Dutch Muslim community.",
+    "religiousCultural": "European Muslim community; Laylat al-Qadr; mosque and association programs; diverse diaspora."
+  },
+  {
+    "city": "Singapore",
+    "country": "Singapore",
+    "region": "Southeast Asia",
+    "slug": "singapore",
+    "muslimPopulation": "~600,000-700,000 (14-15% of Singapore)",
+    "totalPopulation": "~5.9 million",
+    "muslimPercentage": 15,
+    "youthPopulation": "~20% under 25 years old",
+    "madrasasIslamicEducation": "Singapore Islamic schools (madrasahs), extensive Islamic education network",
+    "tags": [
+      "southeast-asia",
+      "major-tech-hub",
+      "business-friendly",
+      "high-purchasing-power",
+      "asean-gateway"
+    ],
+    "sunnishia": {
+      "sunni": 95,
+      "shia": 3
+    },
+    "stability": {
+      "level": "very-high",
+      "description": "Very high stability with strong rule of law, excellent infrastructure, and business-friendly policies",
+      "factors": [
+        "Strong rule of law",
+        "Excellent infrastructure",
+        "Business-friendly",
+        "Political stability",
+        "Low corruption"
+      ]
+    },
+    "ramadanTraditions": "Singaporean Ramadan; Geylang and Kampong Glam bazaars; iftar buffets; Taraweeh at Sultan Mosque; multicultural observance; charity and open houses.",
+    "religiousCultural": "Malay and diverse Muslim community; Laylat al-Qadr; Islamic Council and mosque programs; blend of Malay, South Asian, and Arab traditions; Raya preparations."
+  },
+  {
+    "city": "Kabul",
+    "country": "Afghanistan",
+    "region": "South Asia",
+    "slug": "kabul",
+    "muslimPopulation": "~40 million (99.7% of Afghanistan, Kabul metro ~6 million)",
+    "totalPopulation": "~40 million",
+    "muslimPercentage": 99,
+    "youthPopulation": "~45% under 25 years old",
+    "madrasasIslamicEducation": "Extensive Islamic education network, thousands of madrasas nationwide",
+    "tags": [
+      "south-asia",
+      "capital-city",
+      "large-population",
+      "young-demographic",
+      "emerging-tech"
+    ],
+    "sunnishia": {
+      "sunni": 90,
+      "shia": 8
+    },
+    "stability": {
+      "level": "low",
+      "description": "Low stability due to ongoing conflict and political instability",
+      "factors": [
+        "Ongoing conflict",
+        "Political instability",
+        "Economic challenges",
+        "Security concerns"
+      ]
+    },
+    "ramadanTraditions": "Local iftar and suhoor; Taraweeh in mosques; family and community gatherings; charity and feeding the needy; emphasis on Qur'an and Laylat al-Qadr.",
+    "religiousCultural": "Ramadan observed with mosque and community programs; Laylat al-Qadr; zakat and sadaqah; strong emphasis on family, worship, and charity."
+  },
+  {
+    "city": "Xi'an",
+    "country": "China",
+    "region": "East Asia",
+    "slug": "xian",
+    "muslimPopulation": "~200,000-300,000 (2-3% of Xi'an metro)",
+    "totalPopulation": "~13 million (metro)",
+    "muslimPercentage": 2,
+    "youthPopulation": "~20% under 25 years old",
+    "madrasasIslamicEducation": "Xi'an Grand Mosque, Hui Muslim community Islamic education",
+    "tags": [
+      "east-asia",
+      "hui-muslim-community",
+      "growing-tech-hub",
+      "manufacturing-tech",
+      "historic"
+    ],
+    "sunnishia": {
+      "sunni": 95,
+      "shia": 2
+    },
+    "stability": {
+      "level": "high",
+      "description": "High stability with strong government infrastructure investment",
+      "factors": [
+        "Strong government",
+        "Infrastructure investment",
+        "Political stability"
+      ]
+    },
+    "ramadanTraditions": "Chinese Muslim (Hui) Ramadan; iftar with halal local dishes; mosque and community iftars; Taraweeh; charity; family and neighborhood.",
+    "religiousCultural": "Hui and Uyghur traditions; Laylat al-Qadr; mosque and community; Silk Road Islamic heritage."
+  },
+  {
+    "city": "Bangkok",
+    "country": "Thailand",
+    "region": "Southeast Asia",
+    "slug": "bangkok",
+    "muslimPopulation": "~1.2 million (5-6% of Bangkok metro)",
+    "totalPopulation": "~11 million (metro)",
+    "muslimPercentage": 6,
+    "youthPopulation": "~21% under 25 years old",
+    "madrasasIslamicEducation": "Bangkok Islamic schools (Pondok), extensive Islamic education network",
+    "tags": [
+      "southeast-asia",
+      "growing-tech-hub",
+      "asean-gateway",
+      "affordable",
+      "muslim-community"
+    ],
+    "sunnishia": {
+      "sunni": 98,
+      "shia": 1
+    },
+    "stability": {
+      "level": "high",
+      "description": "High stability with occasional political transitions",
+      "factors": [
+        "Political stability",
+        "Occasional transitions",
+        "Strong tourism economy"
+      ]
+    },
+    "ramadanTraditions": "Thai Muslim iftar (southern and Bangkok); dates and halal dishes; mosque and community; Taraweeh; charity.",
+    "religiousCultural": "Thai Malay and diverse Muslim community; Laylat al-Qadr; mosque and community programs."
+  },
+  {
+    "city": "Malé",
+    "country": "Maldives",
+    "region": "South Asia",
+    "slug": "male",
+    "muslimPopulation": "~250,000 (100% Muslim; Maldives)",
+    "totalPopulation": "~250,000",
+    "muslimPercentage": 100,
+    "youthPopulation": "~35% under 25 years old",
+    "madrasasIslamicEducation": "Islamic education system, extensive Islamic studies",
+    "tags": [
+      "south-asia",
+      "100-percent-muslim",
+      "capital-city",
+      "tourism-tech",
+      "island-nation"
+    ],
+    "sunnishia": {
+      "sunni": 100,
+      "shia": 0
+    },
+    "stability": {
+      "level": "moderate",
+      "description": "Moderate stability with climate change vulnerability and economic dependence on tourism",
+      "factors": [
+        "Climate change vulnerability",
+        "Tourism dependence",
+        "Political stability"
+      ]
+    },
+    "ramadanTraditions": "Maldivian Ramadan; iftar with garudhiya, mas huni, dates; mosque and island community iftars; Taraweeh; charity; family and island gatherings.",
+    "religiousCultural": "Sunni Muslim nation; Laylat al-Qadr; small island community observance; Qur'an and mosque life; strong national and religious identity."
+  },
+  {
+    "city": "Jerusalem",
+    "country": "Palestine",
+    "region": "Middle East",
+    "slug": "jerusalem",
+    "muslimPopulation": "~400,000-500,000 (60-65% of East Jerusalem)",
+    "totalPopulation": "~950,000 (metro)",
+    "muslimPercentage": 37,
+    "youthPopulation": "~35% under 25 years old",
+    "madrasasIslamicEducation": "Al-Aqsa Mosque complex, extensive Islamic education, historic Islamic scholarship center",
+    "tags": [
+      "middle-east",
+      "holy-city",
+      "historic-significance",
+      "emerging-tech",
+      "educated-population"
+    ],
+    "sunnishia": {
+      "sunni": 98,
+      "shia": 1
+    },
+    "stability": {
+      "level": "very-low",
+      "description": "Very low stability due to ongoing conflict and occupation",
+      "factors": [
+        "Ongoing conflict",
+        "Occupation",
+        "Political restrictions",
+        "Economic challenges"
+      ]
+    },
+    "ramadanTraditions": "Iftar at Al-Aqsa and in the Old City; Taraweeh in the Haram; Palestinian iftar foods; Ramadan lights in the streets; Laylat al-Qadr at Al-Aqsa; community and solidarity.",
+    "religiousCultural": "Third holiest site; Ramadan under occupation; strong communal and religious significance; Qur'an and night prayers at Al-Aqsa; charity and Palestinian identity."
+  },
+  {
+    "city": "Damascus",
+    "country": "Syria",
+    "region": "Middle East",
+    "slug": "damascus",
+    "muslimPopulation": "~20 million (87% of Syria, Damascus metro ~5 million)",
+    "totalPopulation": "~23 million",
+    "muslimPercentage": 87,
+    "youthPopulation": "~38% under 25 years old",
+    "madrasasIslamicEducation": "Umayyad Mosque, extensive historic Islamic education, Islamic scholarship tradition",
+    "tags": [
+      "middle-east",
+      "historic-capital",
+      "historic-significance",
+      "large-population",
+      "diaspora-network"
+    ],
+    "sunnishia": {
+      "sunni": 74,
+      "shia": 13
+    },
+    "stability": {
+      "level": "very-low",
+      "description": "Very low stability due to ongoing conflict and displacement",
+      "factors": [
+        "Ongoing conflict",
+        "Displacement",
+        "Economic collapse",
+        "Security concerns"
+      ]
+    },
+    "ramadanTraditions": "Syrian iftar (fatteh, qamar al-din, sweets); meshaharati; Taraweeh at Umayyad Mosque; street iftars; strong emphasis on charity and feeding the needy.",
+    "religiousCultural": "Umayyad Mosque and ancient Ramadan traditions; Laylat al-Qadr; community solidarity; Islamic scholarship and mosque life; Syrian hospitality and sweets."
+  },
+  {
+    "city": "Baghdad",
+    "country": "Iraq",
+    "region": "Middle East",
+    "slug": "baghdad",
+    "muslimPopulation": "~40 million (95% of Iraq, Baghdad metro ~8 million)",
+    "totalPopulation": "~42 million",
+    "muslimPercentage": 95,
+    "youthPopulation": "~40% under 25 years old",
+    "madrasasIslamicEducation": "Historic Islamic scholarship center, extensive Islamic education network",
+    "tags": [
+      "middle-east",
+      "historic-capital",
+      "large-population",
+      "young-demographic",
+      "emerging-tech"
+    ],
+    "sunnishia": {
+      "sunni": 60,
+      "shia": 35
+    },
+    "stability": {
+      "level": "low",
+      "description": "Low stability due to ongoing security concerns and political instability",
+      "factors": [
+        "Security concerns",
+        "Political instability",
+        "Infrastructure challenges",
+        "Economic challenges"
+      ]
+    },
+    "ramadanTraditions": "Iraqi iftar (tamr, qamar al-din, kleicha); meshaharati; Taraweeh in historic mosques; family and neighborhood iftars; emphasis on charity in difficult times.",
+    "religiousCultural": "Historic Abbasid and Islamic heritage; Laylat al-Qadr; Sunni and Shia observance; resilience and community during Ramadan; mosque and shrine visits."
+  },
+  {
+    "city": "Surabaya",
+    "country": "Indonesia",
+    "region": "Southeast Asia",
+    "slug": "surabaya",
+    "muslimPopulation": "~3.2 million (87% of Indonesia, Surabaya metro)",
+    "totalPopulation": "~3.7 million",
+    "muslimPercentage": 87,
+    "youthPopulation": "~30% under 25 years old",
+    "madrasasIslamicEducation": "Extensive Islamic education network, pesantren system",
+    "tags": [
+      "southeast-asia",
+      "large-population",
+      "major-city",
+      "growing-tech-hub",
+      "port-city"
+    ],
+    "sunnishia": {
+      "sunni": 98,
+      "shia": 1
+    },
+    "stability": {
+      "level": "high",
+      "description": "High stability with strong democracy and growing economy",
+      "factors": [
+        "Stable democracy",
+        "Growing economy",
+        "Political stability"
+      ]
+    },
+    "ramadanTraditions": "Ngabuburit and takjil; kolak, es campur; mosque iftars; mudik before Eid; Ramadan markets; tadarus and Taraweeh.",
+    "religiousCultural": "Indonesian blend of tradition and community; Laylat al-Qadr; bedug and mosque life; charity and open houses."
+  },
+  {
+    "city": "Semarang",
+    "country": "Indonesia",
+    "region": "Southeast Asia",
+    "slug": "semarang",
+    "muslimPopulation": "~1.8 million (87% of Indonesia, Semarang metro)",
+    "totalPopulation": "~2.1 million",
+    "muslimPercentage": 87,
+    "youthPopulation": "~32% under 25 years old",
+    "madrasasIslamicEducation": "Extensive Islamic education network, pesantren system",
+    "tags": [
+      "southeast-asia",
+      "major-city",
+      "growing-tech-hub",
+      "affordable",
+      "muslim-population"
+    ],
+    "sunnishia": {
+      "sunni": 98,
+      "shia": 1
+    },
+    "stability": {
+      "level": "high",
+      "description": "High stability with strong democracy and growing economy",
+      "factors": [
+        "Stable democracy",
+        "Growing economy",
+        "Political stability"
+      ]
+    },
+    "ramadanTraditions": "Ngabuburit and takjil; kolak, es campur; mosque iftars; mudik before Eid; Ramadan markets; tadarus and Taraweeh.",
+    "religiousCultural": "Indonesian blend of tradition and community; Laylat al-Qadr; bedug and mosque life; charity and open houses."
+  },
+  {
+    "city": "Alexandria",
+    "country": "Egypt",
+    "region": "Middle East",
+    "slug": "alexandria",
+    "muslimPopulation": "~5.8 million (90% of Egypt, Alexandria metro)",
+    "totalPopulation": "~6.4 million",
+    "muslimPercentage": 90,
+    "youthPopulation": "~35% under 25 years old",
+    "madrasasIslamicEducation": "Extensive Islamic education network, Al-Azhar University connections",
+    "tags": [
+      "middle-east",
+      "major-city",
+      "port-city",
+      "growing-tech-hub",
+      "large-population"
+    ],
+    "sunnishia": {
+      "sunni": 95,
+      "shia": 3
+    },
+    "stability": {
+      "level": "moderate",
+      "description": "Moderate stability with economic challenges",
+      "factors": [
+        "Economic challenges",
+        "Political stability",
+        "Infrastructure needs"
+      ]
+    },
+    "ramadanTraditions": "Coastal Egyptian Ramadan; fanous and meshaharati; iftar with seafood and Egyptian dishes; Taraweeh in historic mosques; street and family iftars.",
+    "religiousCultural": "Mediterranean and Egyptian blend; Al-Azhar presence; Laylat al-Qadr; charity and community; strong mosque and neighborhood culture."
+  },
+  {
+    "city": "Mashhad",
+    "country": "Iran",
+    "region": "Middle East",
+    "slug": "mashhad",
+    "muslimPopulation": "~3.5 million (99% Shia Muslim, Mashhad metro)",
+    "totalPopulation": "~3.5 million",
+    "muslimPercentage": 99,
+    "youthPopulation": "~32% under 25 years old",
+    "madrasasIslamicEducation": "Imam Reza Shrine, extensive Shia Islamic education, major Shia scholarship center",
+    "tags": [
+      "middle-east",
+      "holy-city",
+      "shia-center",
+      "large-population",
+      "growing-tech-hub"
+    ],
+    "sunnishia": {
+      "sunni": 1,
+      "shia": 99
+    },
+    "stability": {
+      "level": "moderate",
+      "description": "Moderate stability with sanctions impact but strong internal stability",
+      "factors": [
+        "Sanctions impact",
+        "Internal stability",
+        "Economic challenges"
+      ]
+    },
+    "ramadanTraditions": "Shia Ramadan at Imam Reza shrine; sohoor and iftar near the shrine; Rawda and dua; Persian dishes; emphasis on Imam Ali (AS) and Laylat al-Qadr.",
+    "religiousCultural": "Major Shia pilgrimage center; Shab-e-Qadr observances; shrine and seminary programs; charity and feeding pilgrims; Persian and Shia tradition."
+  },
+  {
+    "city": "Sharjah",
+    "country": "UAE",
+    "region": "Persian Gulf",
+    "slug": "sharjah",
+    "muslimPopulation": "~1.8 million (95% of Sharjah emirate)",
+    "totalPopulation": "~1.9 million",
+    "muslimPercentage": 95,
+    "youthPopulation": "~26% under 25 years old",
+    "madrasasIslamicEducation": "Strong Islamic education system, Islamic Cultural Centre, extensive Islamic education",
+    "tags": [
+      "persian-gulf",
+      "strong-islamic-identity",
+      "growing-tech-hub",
+      "affordable",
+      "dubai-proximity"
+    ],
+    "sunnishia": {
+      "sunni": 88,
+      "shia": 7
+    },
+    "stability": {
+      "level": "very-high",
+      "description": "Very stable with strong government support and infrastructure investment",
+      "factors": [
+        "Strong government support",
+        "Infrastructure investment",
+        "Political stability",
+        "Strategic location"
+      ]
+    },
+    "ramadanTraditions": "Local iftar and suhoor; Taraweeh in mosques; family and community gatherings; charity and feeding the needy; emphasis on Qur'an and Laylat al-Qadr.",
+    "religiousCultural": "Ramadan observed with mosque and community programs; Laylat al-Qadr; zakat and sadaqah; strong emphasis on family, worship, and charity."
+  },
+  {
+    "city": "Sana'a",
+    "country": "Yemen",
+    "region": "Middle East",
+    "slug": "sanaa",
+    "muslimPopulation": "~30 million (99% of Yemen, Sana'a metro ~4 million)",
+    "totalPopulation": "~30 million",
+    "muslimPercentage": 99,
+    "youthPopulation": "~45% under 25 years old",
+    "madrasasIslamicEducation": "Historic Islamic education center, extensive Islamic scholarship tradition",
+    "tags": [
+      "middle-east",
+      "historic-city",
+      "large-population",
+      "diaspora-network",
+      "historic-significance"
+    ],
+    "sunnishia": {
+      "sunni": 65,
+      "shia": 34
+    },
+    "stability": {
+      "level": "very-low",
+      "description": "Very low stability due to ongoing conflict and humanitarian crisis",
+      "factors": [
+        "Ongoing conflict",
+        "Humanitarian crisis",
+        "Economic collapse",
+        "Security concerns"
+      ]
+    },
+    "ramadanTraditions": "Yemeni iftar (saltah, dates, shafout); Taraweeh in historic Sana'a mosques; family and neighborhood iftars; charity; strong emphasis on Qur'an and night prayers.",
+    "religiousCultural": "Ancient Islamic city; Laylat al-Qadr; Yemeni Sunni (Shafi'i) tradition; resilience and community; mosque and scholarly heritage."
+  },
+  {
+    "city": "Kairouan",
+    "country": "Tunisia",
+    "region": "Middle East",
+    "slug": "kairouan",
+    "muslimPopulation": "~190,000 (99% of Tunisia, Kairouan region)",
+    "totalPopulation": "~12 million",
+    "muslimPercentage": 99,
+    "youthPopulation": "~30% under 25 years old",
+    "madrasasIslamicEducation": "Historic Great Mosque of Kairouan, extensive Islamic education tradition, historic Islamic scholarship center",
+    "tags": [
+      "middle-east",
+      "holy-city",
+      "historic-significance",
+      "unesco-heritage",
+      "north-african-islam"
+    ],
+    "sunnishia": {
+      "sunni": 99,
+      "shia": 0
+    },
+    "stability": {
+      "level": "moderate",
+      "description": "Moderate stability with economic challenges and political transitions",
+      "factors": [
+        "Economic challenges",
+        "Political transitions",
+        "Democratic progress"
+      ]
+    },
+    "ramadanTraditions": "Tunisian holy city Ramadan; iftar in the medina; Great Mosque of Kairouan; meshaharati; family and community; charity and religious programs.",
+    "religiousCultural": "Fourth holiest city in Islam; historic mosque and scholarly tradition; Laylat al-Qadr; Maliki heritage; pilgrimage and Ramadan combined."
+  },
+  {
+    "city": "Bukhara",
+    "country": "Uzbekistan",
+    "region": "Central Asia",
+    "slug": "bukhara",
+    "muslimPopulation": "~35 million (96% of Uzbekistan, Bukhara region)",
+    "totalPopulation": "~36 million",
+    "muslimPercentage": 96,
+    "youthPopulation": "~35% under 25 years old",
+    "madrasasIslamicEducation": "Historic madrasas (Islamic schools), extensive Islamic scholarship tradition, UNESCO heritage",
+    "tags": [
+      "central-asia",
+      "historic-city",
+      "silk-road",
+      "unesco-heritage",
+      "islamic-scholarship"
+    ],
+    "sunnishia": {
+      "sunni": 95,
+      "shia": 3
+    },
+    "stability": {
+      "level": "moderate",
+      "description": "Moderate stability with economic development and political stability",
+      "factors": [
+        "Economic development",
+        "Political stability",
+        "Infrastructure investment"
+      ]
+    },
+    "ramadanTraditions": "Central Asian Ramadan; iftar with plov, dates, bread; Taraweeh in historic madrasas and mosques; family and community; charity.",
+    "religiousCultural": "Silk Road Islamic heritage; Hanafi tradition; Laylat al-Qadr; shrine and mosque visits; Uzbek and Tajik customs."
+  },
+  {
+    "city": "Samarkand",
+    "country": "Uzbekistan",
+    "region": "Central Asia",
+    "slug": "samarkand",
+    "muslimPopulation": "~650,000 (96% of Uzbekistan, Samarkand region)",
+    "totalPopulation": "~36 million",
+    "muslimPercentage": 96,
+    "youthPopulation": "~35% under 25 years old",
+    "madrasasIslamicEducation": "Historic Registan madrasas, extensive Islamic scholarship tradition, UNESCO heritage",
+    "tags": [
+      "central-asia",
+      "historic-city",
+      "silk-road",
+      "unesco-heritage",
+      "islamic-scholarship"
+    ],
+    "sunnishia": {
+      "sunni": 95,
+      "shia": 3
+    },
+    "stability": {
+      "level": "moderate",
+      "description": "Moderate stability with economic development and political stability",
+      "factors": [
+        "Economic development",
+        "Political stability",
+        "Infrastructure investment"
+      ]
+    },
+    "ramadanTraditions": "Samarkand Ramadan; iftar with plov and local dishes; Taraweeh at Registan and Bibi-Khanym; family and community; charity and hospitality.",
+    "religiousCultural": "Timurid and Islamic heritage; Hanafi tradition; Laylat al-Qadr; historic mosques and madrasas; Uzbek cultural and religious blend."
+  },
+  {
+    "city": "Mumbai",
+    "country": "India",
+    "region": "South Asia",
+    "slug": "mumbai",
+    "muslimPopulation": "~3.5-4 million (12-15% of Mumbai metro)",
+    "totalPopulation": "~26 million (metro)",
+    "muslimPercentage": 13,
+    "youthPopulation": "~28% under 25 years old",
+    "madrasasIslamicEducation": "Extensive Islamic schools network, Mumbai Islamic centers, Arabic colleges",
+    "tags": [
+      "south-asia",
+      "major-tech-hub",
+      "large-muslim-population",
+      "diverse-talent",
+      "high-purchasing-power"
+    ],
+    "sunnishia": {
+      "sunni": 85,
+      "shia": 12
+    },
+    "stability": {
+      "level": "high",
+      "description": "High stability with strong democracy and growing economy",
+      "factors": [
+        "Stable democracy",
+        "Growing economy",
+        "Strong infrastructure"
+      ]
+    },
+    "ramadanTraditions": "Mumbai Ramadan; Mohammed Ali Road and Bhendi Bazaar iftar; kebabs, haleem, dates; Taraweeh in historic mosques; Ramadan markets; community and family iftars.",
+    "religiousCultural": "Cosmopolitan Indian Muslim community; Laylat al-Qadr; Sunni and Bohra traditions; charity and feeding; strong mosque and community culture."
+  },
+  {
+    "city": "Delhi",
+    "country": "India",
+    "region": "South Asia",
+    "slug": "delhi",
+    "muslimPopulation": "~2.5-3 million (12-15% of Delhi metro)",
+    "totalPopulation": "~20 million (metro)",
+    "muslimPercentage": 13,
+    "youthPopulation": "~28% under 25 years old",
+    "madrasasIslamicEducation": "Jamia Millia Islamia, extensive Islamic schools network, historic Islamic heritage",
+    "tags": [
+      "south-asia",
+      "capital-city",
+      "islamic-heritage",
+      "major-tech-hub",
+      "large-muslim-population"
+    ],
+    "sunnishia": {
+      "sunni": 88,
+      "shia": 10
+    },
+    "stability": {
+      "level": "high",
+      "description": "High stability with strong democracy and growing economy",
+      "factors": [
+        "Stable democracy",
+        "Growing economy",
+        "Strong infrastructure"
+      ]
+    },
+    "ramadanTraditions": "Indian Muslim Ramadan; Old Delhi iftar (kebabs, phirni, dates); Jama Masjid and neighborhood mosques; Taraweeh; Ramadan bazaars; sehri and iftar with family.",
+    "religiousCultural": "Mughal and Indian Islamic heritage; Laylat al-Qadr; Sunni majority; charity and dastarkhwan; mosque and shrine visits; blend of Urdu and regional customs."
+  },
+  {
+    "city": "Hyderabad",
+    "country": "India",
+    "region": "South Asia",
+    "slug": "hyderabad",
+    "muslimPopulation": "~1.8-2.2 million (30-35% of Hyderabad)",
+    "totalPopulation": "~10 million (metro)",
+    "muslimPercentage": 32,
+    "youthPopulation": "~30% under 25 years old",
+    "madrasasIslamicEducation": "Osmania University, extensive Islamic schools network, historic Islamic heritage (Charminar)",
+    "tags": [
+      "south-asia",
+      "high-muslim-concentration",
+      "major-tech-hub",
+      "islamic-heritage",
+      "muslim-cultural-center"
+    ],
+    "sunnishia": {
+      "sunni": 90,
+      "shia": 8
+    },
+    "stability": {
+      "level": "high",
+      "description": "High stability with strong democracy and growing economy",
+      "factors": [
+        "Stable democracy",
+        "Growing economy",
+        "Strong infrastructure"
+      ]
+    },
+    "ramadanTraditions": "Sehri and iftar with regional dishes; Taraweeh in mosques; Ramadan bazaars; dastarkhwan; family and neighborhood iftars.",
+    "religiousCultural": "Mughal and Indian Islamic heritage; Laylat al-Qadr; Sunni majority; charity; mosque and shrine visits; diverse regional customs."
+  },
+  {
+    "city": "Lucknow",
+    "country": "India",
+    "region": "South Asia",
+    "slug": "lucknow",
+    "muslimPopulation": "~1.2-1.5 million (25-30% of Lucknow)",
+    "totalPopulation": "~5 million (metro)",
+    "muslimPercentage": 27,
+    "youthPopulation": "~32% under 25 years old",
+    "madrasasIslamicEducation": "Nadwatul Ulama, extensive Shia Islamic schools, historic Indo-Islamic culture center",
+    "tags": [
+      "south-asia",
+      "indo-islamic-culture",
+      "shia-center",
+      "growing-tech-hub",
+      "affordable"
+    ],
+    "sunnishia": {
+      "sunni": 70,
+      "shia": 28
+    },
+    "stability": {
+      "level": "high",
+      "description": "High stability with strong democracy and growing economy",
+      "factors": [
+        "Stable democracy",
+        "Growing economy",
+        "Strong infrastructure"
+      ]
+    },
+    "ramadanTraditions": "Sehri and iftar with regional dishes; Taraweeh in mosques; Ramadan bazaars; dastarkhwan; family and neighborhood iftars.",
+    "religiousCultural": "Mughal and Indian Islamic heritage; Laylat al-Qadr; Sunni majority; charity; mosque and shrine visits; diverse regional customs."
+  },
+  {
+    "city": "Kolkata",
+    "country": "India",
+    "region": "South Asia",
+    "slug": "kolkata",
+    "muslimPopulation": "~2.5-3 million (18-22% of Kolkata metro)",
+    "totalPopulation": "~15 million (metro)",
+    "muslimPercentage": 20,
+    "youthPopulation": "~26% under 25 years old",
+    "madrasasIslamicEducation": "Extensive Islamic schools network, Kolkata Islamic centers",
+    "tags": [
+      "south-asia",
+      "large-muslim-population",
+      "growing-tech-hub",
+      "affordable",
+      "historic-significance"
+    ],
+    "sunnishia": {
+      "sunni": 90,
+      "shia": 8
+    },
+    "stability": {
+      "level": "high",
+      "description": "High stability with strong democracy and growing economy",
+      "factors": [
+        "Stable democracy",
+        "Growing economy",
+        "Strong infrastructure"
+      ]
+    },
+    "ramadanTraditions": "Sehri and iftar with regional dishes; Taraweeh in mosques; Ramadan bazaars; dastarkhwan; family and neighborhood iftars.",
+    "religiousCultural": "Mughal and Indian Islamic heritage; Laylat al-Qadr; Sunni majority; charity; mosque and shrine visits; diverse regional customs."
+  },
+  {
+    "city": "Bengaluru",
+    "country": "India",
+    "region": "South Asia",
+    "slug": "bengaluru",
+    "muslimPopulation": "~1.5-2 million (12-15% of Bengaluru metro)",
+    "totalPopulation": "~13 million (metro)",
+    "muslimPercentage": 13,
+    "youthPopulation": "~27% under 25 years old",
+    "madrasasIslamicEducation": "Extensive Islamic schools network, Bengaluru Islamic centers",
+    "tags": [
+      "south-asia",
+      "major-tech-hub",
+      "silicon-valley-india",
+      "large-muslim-population",
+      "diverse-talent"
+    ],
+    "sunnishia": {
+      "sunni": 88,
+      "shia": 10
+    },
+    "stability": {
+      "level": "high",
+      "description": "High stability with strong democracy and growing economy",
+      "factors": [
+        "Stable democracy",
+        "Growing economy",
+        "Strong infrastructure"
+      ]
+    },
+    "ramadanTraditions": "Sehri and iftar with regional dishes; Taraweeh in mosques; Ramadan bazaars; dastarkhwan; family and neighborhood iftars.",
+    "religiousCultural": "Mughal and Indian Islamic heritage; Laylat al-Qadr; Sunni majority; charity; mosque and shrine visits; diverse regional customs."
+  },
+  {
+    "city": "Ahmedabad",
+    "country": "India",
+    "region": "South Asia",
+    "slug": "ahmedabad",
+    "muslimPopulation": "~800,000-1 million (12-15% of Ahmedabad)",
+    "totalPopulation": "~8.5 million (metro)",
+    "muslimPercentage": 13,
+    "youthPopulation": "~28% under 25 years old",
+    "madrasasIslamicEducation": "Extensive Islamic schools network, Ahmedabad Islamic centers",
+    "tags": [
+      "south-asia",
+      "growing-tech-hub",
+      "affordable",
+      "manufacturing-tech",
+      "muslim-community"
+    ],
+    "sunnishia": {
+      "sunni": 92,
+      "shia": 6
+    },
+    "stability": {
+      "level": "high",
+      "description": "High stability with strong democracy and growing economy",
+      "factors": [
+        "Stable democracy",
+        "Growing economy",
+        "Strong infrastructure"
+      ]
+    },
+    "ramadanTraditions": "Sehri and iftar with regional dishes; Taraweeh in mosques; Ramadan bazaars; dastarkhwan; family and neighborhood iftars.",
+    "religiousCultural": "Mughal and Indian Islamic heritage; Laylat al-Qadr; Sunni majority; charity; mosque and shrine visits; diverse regional customs."
+  },
+  {
+    "city": "Chennai",
+    "country": "India",
+    "region": "South Asia",
+    "slug": "chennai",
+    "muslimPopulation": "~800,000-1 million (10-12% of Chennai metro)",
+    "totalPopulation": "~11 million (metro)",
+    "muslimPercentage": 11,
+    "youthPopulation": "~26% under 25 years old",
+    "madrasasIslamicEducation": "Extensive Islamic schools network, Chennai Islamic centers",
+    "tags": [
+      "south-asia",
+      "major-tech-hub",
+      "it-services",
+      "muslim-community",
+      "diverse-talent"
+    ],
+    "sunnishia": {
+      "sunni": 90,
+      "shia": 8
+    },
+    "stability": {
+      "level": "high",
+      "description": "High stability with strong democracy and growing economy",
+      "factors": [
+        "Stable democracy",
+        "Growing economy",
+        "Strong infrastructure"
+      ]
+    },
+    "ramadanTraditions": "Sehri and iftar with regional dishes; Taraweeh in mosques; Ramadan bazaars; dastarkhwan; family and neighborhood iftars.",
+    "religiousCultural": "Mughal and Indian Islamic heritage; Laylat al-Qadr; Sunni majority; charity; mosque and shrine visits; diverse regional customs."
+  },
+  {
+    "city": "Pune",
+    "country": "India",
+    "region": "South Asia",
+    "slug": "pune",
+    "muslimPopulation": "~600,000-800,000 (10-12% of Pune metro)",
+    "totalPopulation": "~7 million (metro)",
+    "muslimPercentage": 11,
+    "youthPopulation": "~27% under 25 years old",
+    "madrasasIslamicEducation": "Extensive Islamic schools network, Pune Islamic centers",
+    "tags": [
+      "south-asia",
+      "major-tech-hub",
+      "it-services",
+      "affordable",
+      "muslim-community"
+    ],
+    "sunnishia": {
+      "sunni": 90,
+      "shia": 8
+    },
+    "stability": {
+      "level": "high",
+      "description": "High stability with strong democracy and growing economy",
+      "factors": [
+        "Stable democracy",
+        "Growing economy",
+        "Strong infrastructure"
+      ]
+    },
+    "ramadanTraditions": "Sehri and iftar with regional dishes; Taraweeh in mosques; Ramadan bazaars; dastarkhwan; family and neighborhood iftars.",
+    "religiousCultural": "Mughal and Indian Islamic heritage; Laylat al-Qadr; Sunni majority; charity; mosque and shrine visits; diverse regional customs."
+  },
+  {
+    "city": "Jaipur",
+    "country": "India",
+    "region": "South Asia",
+    "slug": "jaipur",
+    "muslimPopulation": "~400,000-500,000 (8-10% of Jaipur)",
+    "totalPopulation": "~5 million (metro)",
+    "muslimPercentage": 9,
+    "youthPopulation": "~30% under 25 years old",
+    "madrasasIslamicEducation": "Extensive Islamic schools network, Jaipur Islamic centers",
+    "tags": [
+      "south-asia",
+      "growing-tech-hub",
+      "affordable",
+      "tourism-tech",
+      "muslim-community"
+    ],
+    "sunnishia": {
+      "sunni": 92,
+      "shia": 6
+    },
+    "stability": {
+      "level": "high",
+      "description": "High stability with strong democracy and growing economy",
+      "factors": [
+        "Stable democracy",
+        "Growing economy",
+        "Strong infrastructure"
+      ]
+    },
+    "ramadanTraditions": "Sehri and iftar with regional dishes; Taraweeh in mosques; Ramadan bazaars; dastarkhwan; family and neighborhood iftars.",
+    "religiousCultural": "Mughal and Indian Islamic heritage; Laylat al-Qadr; Sunni majority; charity; mosque and shrine visits; diverse regional customs."
+  }
+]

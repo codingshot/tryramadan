@@ -6,7 +6,7 @@ import { isRamadanDay } from "@/lib/ramadan";
 
 const REMINDERS_SENT_KEY = "tryramadan-reminders-sent";
 
-type ReminderType = "suhoor" | "iftar" | "iftar-time" | "sunnah-day";
+type ReminderType = "suhoor" | "iftar" | "iftar-time" | "sunnah-day" | `hydration-${string}`;
 
 function getRemindersSent(): Record<string, ReminderType[]> {
   try {
@@ -123,12 +123,32 @@ export function ReminderScheduler() {
           });
         }
       }
+
+      // Hydration reminders: at user-configured times (during non-fasting hours)
+      if (preferences.hydrationReminderEnabled && (preferences.hydrationReminderTimes?.length ?? 0) > 0) {
+        const times = preferences.hydrationReminderTimes ?? ["12:00", "15:00", "19:00"];
+        for (const timeStr of times) {
+          const slot = `hydration-${timeStr}` as ReminderType;
+          if (sent.includes(slot)) continue;
+          const [h, m] = timeStr.split(":").map(Number);
+          const targetMin = (h ?? 0) * 60 + (m ?? 0);
+          const diff = Math.abs(nowMinutes - targetMin);
+          if (diff <= 2) {
+            addSent(slot);
+            new Notification("Stay hydrated • ترطيب", {
+              body: "Log your water intake during non-fasting hours.",
+              icon: "/favicon.png",
+              tag: `hydration-${timeStr}-${todayStr}`,
+            });
+          }
+        }
+      }
     };
 
     checkAndNotify();
     const interval = setInterval(checkAndNotify, 60 * 1000);
     return () => clearInterval(interval);
-  }, [prayerTimes, notifSettings.suhoorEnabled, notifSettings.iftarEnabled, notifSettings.suhoorMinutesBefore, notifSettings.iftarMinutesBefore]);
+  }, [prayerTimes, notifSettings.suhoorEnabled, notifSettings.iftarEnabled, notifSettings.suhoorMinutesBefore, notifSettings.iftarMinutesBefore, preferences.hydrationReminderEnabled, preferences.hydrationReminderTimes]);
 
   return null;
 }

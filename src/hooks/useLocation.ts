@@ -6,6 +6,8 @@ export interface LocationResult {
   lat: number;
   lng: number;
   country: string;
+  /** IANA timezone (e.g. America/New_York) when available (e.g. from ipapi.co). */
+  timezone?: string;
 }
 
 export interface LocationState {
@@ -28,9 +30,25 @@ export async function getLocationFromIP(): Promise<LocationResult | null> {
       lat: data.latitude,
       lng: data.longitude,
       country: data.country_name,
+      timezone: data.timezone || undefined,
     };
   } catch (error) {
     console.error('IP location error:', error);
+    return null;
+  }
+}
+
+/** Resolve IANA timezone from coordinates (e.g. for Nominatim results that don't include timezone). */
+export async function getTimezoneFromCoords(lat: number, lng: number): Promise<string | null> {
+  try {
+    const response = await fetch(
+      `https://timeapi.io/api/TimeZone/coordinate?latitude=${lat}&longitude=${lng}`
+    );
+    if (!response.ok) return null;
+    const data = await response.json();
+    return typeof data.timeZone === 'string' ? data.timeZone : null;
+  } catch (error) {
+    console.error('Timezone lookup error:', error);
     return null;
   }
 }

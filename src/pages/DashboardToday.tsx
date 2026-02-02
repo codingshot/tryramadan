@@ -5,6 +5,7 @@ import {
   Moon, Sun, Clock, AlertTriangle, Battery, BatteryLow, BatteryMedium, BatteryFull,
   ArrowLeft, Droplets, Heart, ChevronRight, Zap
 } from "lucide-react";
+import { ArabicHover } from "@/components/ArabicHover";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FastingTimer } from "@/components/FastingTimer";
@@ -23,13 +24,32 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
 import { PrayerLocationBadge } from "@/components/PrayerLocationBadge";
 import { PageSEO } from "@/components/PageSEO";
-
-const HYDRATION_GOAL = 8;
+import {
+  getDefaultHydrationGoalMl,
+  getHydrationUnit,
+  formatHydrationAmount,
+  formatHydrationGoal,
+  HYDRATION_PRESETS_ML,
+} from "@/lib/hydration";
 
 const DashboardToday = () => {
   const [preferences] = useUserPreferences();
   const [progress, setProgress] = useFastingProgress();
-  const { intention, hydrationGlasses, energyEntries, setIntention, setHydrationGlasses, addEnergyEntry } = useTodayData();
+  const {
+    intention,
+    hydrationTotalMl,
+    hydrationEntries,
+    energyEntries,
+    setIntention,
+    addHydrationEntry,
+    addEnergyEntry,
+  } = useTodayData();
+  const hydrationGoalMl =
+    preferences.hydrationGoalMl && preferences.hydrationGoalMl > 0
+      ? preferences.hydrationGoalMl
+      : getDefaultHydrationGoalMl(preferences.country || "US");
+  const hydrationUnit = getHydrationUnit(preferences.country || "US");
+  const hydrationProgressPct = hydrationGoalMl > 0 ? Math.min(100, (hydrationTotalMl / hydrationGoalMl) * 100) : 0;
   const [energyLevel, setEnergyLevel] = useState<1 | 2 | 3 | 4 | 5>(3);
   const [showBreakFast, setShowBreakFast] = useState(false);
   const [showBreakFastDialog, setShowBreakFastDialog] = useState(false);
@@ -248,6 +268,7 @@ const DashboardToday = () => {
                 <TooltipContent side="top" className="max-w-xs p-3">
                   <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.suhoorEnds.title}</p>
                   <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.suhoorEnds.body}</p>
+                  <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{EATING_TIME_TOOLTIPS.suhoorEnds.bodyAr}</p>
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
@@ -271,6 +292,7 @@ const DashboardToday = () => {
                 <TooltipContent side="top" className="max-w-xs p-3">
                   <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.untilIftar.title}</p>
                   <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.untilIftar.body}</p>
+                  <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{EATING_TIME_TOOLTIPS.untilIftar.bodyAr}</p>
                 </TooltipContent>
               </Tooltip>
             </motion.div>
@@ -284,7 +306,9 @@ const DashboardToday = () => {
             className="mb-8 p-6 rounded-2xl bg-card border border-border"
           >
             <div className="flex items-center justify-between mb-3">
-              <span className="font-medium">Fasting Progress • تقدم الصيام</span>
+              <span className="font-medium">
+                <ArabicHover arabic="تقدم الصيام" transliteration="taqaddum aṣ-ṣiyām">Fasting Progress</ArabicHover>
+              </span>
               <span className="text-secondary font-bold">{Math.round(fastingProgress)}%</span>
             </div>
             <div className="h-4 bg-muted rounded-full overflow-hidden">
@@ -311,8 +335,10 @@ const DashboardToday = () => {
             transition={{ delay: 0.22 }}
             className="mb-8 p-6 rounded-2xl bg-card border border-border"
           >
-            <h3 className="font-display font-bold mb-2">Today's intention</h3>
-            <p className="text-sm text-muted-foreground mb-3">Set a short intention or goal for today's fast.</p>
+            <h3 className="font-display font-bold mb-2">
+              <ArabicHover arabic="نية اليوم">Today&apos;s intention</ArabicHover>
+            </h3>
+            <p className="text-sm text-muted-foreground mb-3">Set a short intention or goal for today&apos;s fast.</p>
             <textarea
               value={intention}
               onChange={(e) => setIntention(e.target.value)}
@@ -392,7 +418,7 @@ const DashboardToday = () => {
             )}
           </motion.div>
 
-          {/* Hydration tracker */}
+          {/* Hydration tracker — log only during non-fasting hours */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -401,33 +427,61 @@ const DashboardToday = () => {
           >
             <h3 className="font-display font-bold mb-2 flex items-center gap-2">
               <Droplets className="w-5 h-5 text-blue-500" />
-              Hydration (non-fasting hours)
+              Hydration • ترطيب
             </h3>
-            <p className="text-sm text-muted-foreground mb-4">Goal: {HYDRATION_GOAL} glasses after iftar</p>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setHydrationGlasses(hydrationGlasses - 1)}
-                className="w-10 h-10 rounded-full border-2 border-border hover:border-secondary font-bold text-lg"
-              >
-                −
-              </button>
-              <span className="text-3xl font-bold min-w-[3rem] text-center">{hydrationGlasses}</span>
-              <button
-                onClick={() => setHydrationGlasses(hydrationGlasses + 1)}
-                className="w-10 h-10 rounded-full border-2 border-secondary bg-secondary/10 font-bold text-lg"
-              >
-                +
-              </button>
-              <span className="text-sm text-muted-foreground">glasses</span>
+            <p className="text-sm text-muted-foreground mb-3">
+              Goal: {formatHydrationGoal(hydrationGoalMl, hydrationUnit)} (based on your region). Log water during iftar and before Fajr only.
+            </p>
+            <div className="flex flex-wrap items-baseline gap-2 mb-3">
+              <span className="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400">
+                {formatHydrationAmount(hydrationTotalMl, hydrationUnit)}
+              </span>
+              <span className="text-sm text-muted-foreground">
+                of {formatHydrationGoal(hydrationGoalMl, hydrationUnit)} today
+              </span>
             </div>
-            <div className="mt-2 h-2 bg-muted rounded-full overflow-hidden">
+            <div className="h-3 bg-muted rounded-full overflow-hidden mb-4">
               <motion.div
                 className="h-full bg-blue-500 rounded-full"
                 initial={{ width: 0 }}
-                animate={{ width: `${Math.min(100, (hydrationGlasses / HYDRATION_GOAL) * 100)}%` }}
+                animate={{ width: `${hydrationProgressPct}%` }}
                 transition={{ duration: 0.3 }}
               />
             </div>
+            {isFastingWindow ? (
+              <p className="text-sm text-muted-foreground py-2 rounded-lg bg-muted/50 border border-border">
+                You can log water after iftar and before Fajr. Quick-add is available during eating hours.
+              </p>
+            ) : (
+              <>
+                <p className="text-xs text-muted-foreground mb-3">Quick add (during non-fasting hours):</p>
+                <div className="flex flex-wrap gap-2">
+                  {HYDRATION_PRESETS_ML.map(({ ml, labelSmall, labelCups }) => (
+                    <button
+                      key={ml}
+                      type="button"
+                      onClick={() => addHydrationEntry(ml)}
+                      className="px-4 py-2 rounded-xl border-2 border-border hover:border-blue-500 hover:bg-blue-500/10 transition-colors text-sm font-medium min-h-[44px]"
+                    >
+                      {hydrationUnit === "cups" ? labelCups : `${labelSmall} ml`}
+                    </button>
+                  ))}
+                </div>
+                {hydrationEntries.length > 0 && (
+                  <div className="mt-4 pt-3 border-t border-border">
+                    <p className="text-xs text-muted-foreground mb-2">Today&apos;s logs</p>
+                    <ul className="text-sm text-muted-foreground space-y-1 max-h-24 overflow-y-auto">
+                      {hydrationEntries.slice().reverse().slice(0, 8).map((e, i) => (
+                        <li key={`${e.time}-${i}`}>
+                          +{formatHydrationAmount(e.amountMl, hydrationUnit)} at{" "}
+                          {new Date(e.time).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </>
+            )}
           </motion.div>
           
           {/* Quick Stats */}
@@ -439,8 +493,8 @@ const DashboardToday = () => {
           >
             <div className="p-4 rounded-2xl bg-card border border-border text-center">
               <Droplets className="w-6 h-6 text-blue-500 mx-auto mb-2" />
-              <span className="text-2xl font-bold block">8+</span>
-              <span className="text-xs text-muted-foreground">Glasses of water needed after iftar</span>
+              <span className="text-2xl font-bold block">{formatHydrationGoal(hydrationGoalMl, hydrationUnit)}</span>
+              <span className="text-xs text-muted-foreground">Daily water goal (non-fasting hours)</span>
             </div>
             <div className="p-4 rounded-2xl bg-card border border-border text-center">
               <Heart className="w-6 h-6 text-red-500 mx-auto mb-2" />

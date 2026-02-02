@@ -15,6 +15,10 @@ export interface Recipe {
   description: string;
   ingredients: string[];
   prepTime: string;
+  /** Active cooking time (e.g. "25 min"). Optional; when set, shown with prep on detail page. */
+  cookTime?: string;
+  /** Total time (e.g. "45 min"). Optional; when set, shown as total. If omitted and cookTime present, can be derived from prep + cook. */
+  totalTime?: string;
   benefits: string;
   tips: string;
   countryId?: string | null;

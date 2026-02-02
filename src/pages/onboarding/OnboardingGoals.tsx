@@ -40,6 +40,7 @@ export default function OnboardingGoals() {
       experience: state.experience,
       location: state.location?.displayName ?? "",
       locationCoords: state.location ? { lat: state.location.lat, lng: state.location.lng } : null,
+      timezone: state.location?.timezone ?? null,
       fastingGoal: state.selectedProgram === "traditional" ? "full" : state.selectedProgram,
       selectedProgram: state.selectedProgram,
       onboardingComplete: true,

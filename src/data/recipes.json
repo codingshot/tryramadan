@@ -6,7 +6,9 @@
       "region": "Middle East",
       "description": "Ful medames with eggs, tahini, fresh vegetables, and warm pita",
       "ingredients": ["Fava beans", "Eggs", "Tahini", "Olive oil", "Tomatoes", "Cucumber", "Pita bread"],
-      "prepTime": "20 min",
+      "prepTime": "10 min",
+      "cookTime": "10 min",
+      "totalTime": "20 min",
       "benefits": "High protein and fiber for sustained energy throughout the fast",
       "tips": "Add a drizzle of olive oil for healthy fats",
       "nutrition": { "calories": 420, "protein": "22g", "carbs": "38g", "fat": "18g" },
@@ -14,10 +16,10 @@
       "dietary": ["vegetarian"],
       "countryId": "egypt",
       "steps": [
-        "If using dried fava beans, soak overnight and simmer until tender; or use canned, drained fava beans.",
-        "Warm the beans in a pan with a little olive oil and cumin. Mash lightly with a fork.",
-        "Fry or poach eggs to your liking.",
-        "Slice tomatoes and cucumber. Warm pita.",
+        "If using dried fava beans, soak overnight (8–12 hr), then simmer 45–60 min until tender; or use canned, drained fava beans (no cook).",
+        "Warm the beans in a pan with a little olive oil and cumin over medium heat for 3–4 min. Mash lightly with a fork.",
+        "Fry or poach eggs to your liking (about 2–3 min for fried, 3–4 min for poached).",
+        "Slice tomatoes and cucumber (1 min). Warm pita in a dry pan or toaster for 1–2 min.",
         "Serve beans in a bowl, top with tahini, egg, vegetables, and a drizzle of olive oil. Serve with pita."
       ]
     },
@@ -27,10 +29,18 @@
       "region": "South Asia",
       "description": "Whole wheat paratha with egg curry and lassi",
       "ingredients": ["Whole wheat flour", "Eggs", "Onions", "Spices", "Yogurt"],
-      "prepTime": "30 min",
+      "prepTime": "15 min",
+      "cookTime": "15 min",
+      "totalTime": "30 min",
       "benefits": "Complex carbohydrates and protein keep you full longer",
       "tips": "Yogurt-based lassi helps with hydration",
-      "countryId": "pakistan"
+      "countryId": "pakistan",
+      "steps": [
+        "Make paratha dough: mix whole wheat flour with a pinch of salt and enough water to form a soft dough. Knead 5 min, cover, rest 15 min.",
+        "Divide dough into 4–6 balls. Roll each into a circle, brush with oil or ghee, fold and roll again. Cook on a hot tawa or skillet 2–3 min per side until golden and puffed. Keep warm.",
+        "For egg curry: sauté sliced onions 5–6 min until golden. Add turmeric, cumin, coriander, and a little chili; fry 1 min. Add chopped tomatoes; cook 4–5 min until soft. Add a splash of water, then crack in eggs and scramble 2–3 min until set. Season with salt.",
+        "For lassi: blend yogurt with cold water, a pinch of salt or a little sugar, and optional cumin (1 min). Pour into glasses. Serve parathas with egg curry and lassi."
+      ]
     },
     {
       "id": 3,
@@ -38,10 +48,18 @@
       "region": "Turkey",
       "description": "Cheese, olives, eggs, fresh bread, and Turkish tea",
       "ingredients": ["Feta cheese", "Olives", "Eggs", "Fresh bread", "Tomatoes", "Honey"],
-      "prepTime": "15 min",
+      "prepTime": "5 min",
+      "cookTime": "10 min",
+      "totalTime": "15 min",
       "benefits": "Balanced meal with proteins, healthy fats, and carbohydrates",
       "tips": "Limit caffeine intake; opt for herbal tea if possible",
-      "countryId": "turkey"
+      "countryId": "turkey",
+      "steps": [
+        "Slice feta and arrange on a plate with olives (black or green). Slice tomatoes and cucumber if using (about 2 min).",
+        "Fry or scramble eggs to your liking 2–3 min; season with a little salt and black pepper.",
+        "Warm or toast fresh bread (simit, pide, or baguette) 1–2 min. Drizzle honey in a small dish for dipping.",
+        "Brew Turkish tea (çay) in a double teapot 5–7 min, or use herbal tea to limit caffeine. Serve everything together for a quick, balanced sahur."
+      ]
     },
     {
       "id": 4,
@@ -49,10 +67,18 @@
       "region": "Southeast Asia",
       "description": "Savory chicken rice porridge with toppings",
       "ingredients": ["Rice", "Chicken", "Ginger", "Fried shallots", "Soy sauce", "Eggs"],
-      "prepTime": "45 min",
+      "prepTime": "10 min",
+      "cookTime": "45 min",
+      "totalTime": "55 min",
       "benefits": "Easily digestible, warming, and hydrating",
       "tips": "Prepare the night before for easy morning reheating",
-      "countryId": "indonesia"
+      "countryId": "indonesia",
+      "steps": [
+        "Rinse 1 cup rice (1 min) and put in a large pot with 8–10 cups water (or chicken broth). Bring to a boil (about 5 min), then reduce heat and simmer, stirring every 10 min, until rice breaks down into a thick porridge (about 45 min total). Add more water if needed.",
+        "Meanwhile, poach or boil chicken breast or thigh 15–20 min until cooked; shred the meat. Save the broth to add to the porridge.",
+        "Season the porridge with grated ginger, salt, white pepper, and a little garlic. Add shredded chicken; heat through 2–3 min.",
+        "Serve in bowls topped with fried shallots, sliced scallions, soy sauce, and optional soft-boiled egg (6–7 min) and cakwe (fried dough). Add kecap manis and sambal if you like."
+      ]
     },
     {
       "id": 5,
@@ -60,7 +86,9 @@
       "region": "Modern/Western",
       "description": "Steel-cut oats soaked overnight with dates, nuts, and honey",
       "ingredients": ["Oats", "Dates", "Almonds", "Milk", "Honey", "Cinnamon"],
-      "prepTime": "5 min (prep night before)",
+      "prepTime": "5 min",
+      "cookTime": "0 min",
+      "totalTime": "5 min (+ overnight soak)",
       "benefits": "Slow-release energy, easy to digest, no morning cooking needed",
       "tips": "Add chia seeds for extra fiber and omega-3s",
       "nutrition": { "calories": 380, "protein": "12g", "carbs": "52g", "fat": "14g" },
@@ -68,10 +96,10 @@
       "dietary": ["vegetarian", "vegan-option"],
       "countryId": "western-communities",
       "steps": [
-        "In a jar or bowl, combine oats, milk, a pinch of cinnamon, and a drizzle of honey. Stir well.",
-        "Chop 2–3 dates and add to the mixture. Add a handful of almonds (whole or sliced).",
-        "Cover and refrigerate overnight (or at least 4 hours).",
-        "In the morning, stir and eat cold or microwave briefly. Add extra dates or nuts on top if you like."
+        "In a jar or bowl, combine oats, milk, a pinch of cinnamon, and a drizzle of honey. Stir well (1 min).",
+        "Chop 2–3 dates and add to the mixture. Add a handful of almonds (whole or sliced) (1 min).",
+        "Cover and refrigerate overnight (at least 4–8 hours).",
+        "In the morning, stir and eat cold or microwave 1–2 min. Add extra dates or nuts on top if you like."
       ]
     },
     {
@@ -80,10 +108,18 @@
       "region": "Levant",
       "description": "Flatbread with za'atar or cheese, served with labneh and olives",
       "ingredients": ["Dough", "Za'atar", "Olive oil", "Labneh", "Olives", "Tomatoes"],
-      "prepTime": "25 min",
+      "prepTime": "15 min",
+      "cookTime": "12 min",
+      "totalTime": "27 min (+ 30 min rise if making dough)",
       "benefits": "Filling and hydrating; olive oil and labneh provide sustained energy",
       "tips": "Man'oushe is a classic Lebanese suhoor; pair with jallab or water",
-      "countryId": "lebanon"
+      "countryId": "lebanon",
+      "steps": [
+        "Use store-bought pizza dough or make a simple dough: 2 cups flour, 1 tsp yeast, 1 tsp salt, warm water (5 min). Let rise 30 min.",
+        "Preheat oven to 450°F (230°C) (about 10 min). Divide dough into 4–6 rounds and stretch into ovals. Place on a baking sheet (2 min).",
+        "Brush each round with olive oil and spread a generous layer of za'atar (thyme, sumac, sesame, salt). Optionally add cheese (akawi or mozzarella) (2 min).",
+        "Bake 8–12 min until edges are golden. Serve warm with labneh, olives, sliced tomatoes, and a drizzle of olive oil."
+      ]
     },
     {
       "id": 7,
@@ -91,10 +127,18 @@
       "region": "Levant",
       "description": "Thick strained yogurt with za'atar, olive oil, and warm bread",
       "ingredients": ["Labneh", "Za'atar", "Olive oil", "Pita or shrak bread", "Olives"],
-      "prepTime": "10 min",
+      "prepTime": "5 min",
+      "cookTime": "2 min",
+      "totalTime": "7 min",
       "benefits": "Protein-rich and easy to digest; olive oil for lasting energy",
       "tips": "Traditional Jordanian suhoor; add dates for quick energy",
-      "countryId": "jordan"
+      "countryId": "jordan",
+      "steps": [
+        "Scoop labneh (strained yogurt) into a shallow bowl. Swirl the top with a spoon and drizzle generously with olive oil (1 min).",
+        "Sprinkle za'atar over the labneh. Add a few olives and a pinch of salt if the labneh is plain (1 min).",
+        "Warm pita or shrak (thin flatbread) in the oven or on a stove burner 1–2 min until soft. Tear and use to scoop labneh.",
+        "Optional: serve with sliced cucumber, tomatoes, and dates for a complete suhoor."
+      ]
     },
     {
       "id": 8,
@@ -102,10 +146,18 @@
       "region": "West Africa",
       "description": "Millet-based drink (kunu) with rice pancakes (masa)",
       "ingredients": ["Millet", "Rice flour", "Yeast", "Sugar", "Ginger"],
-      "prepTime": "40 min",
+      "prepTime": "15 min",
+      "cookTime": "25 min",
+      "totalTime": "40 min (+ overnight soak for kunu)",
       "benefits": "Hydrating and filling; masa is light and easy before dawn",
       "tips": "Kunu is a traditional Hausa suhoor drink; often served cold",
-      "countryId": "nigeria"
+      "countryId": "nigeria",
+      "steps": [
+        "Kunu: Soak millet (or sorghum) overnight. Drain, blend with fresh ginger and a little water until smooth (2 min). Strain through a sieve. Boil the liquid, stirring, 8–10 min until it thickens slightly. Sweeten with sugar, cool, and refrigerate. Serve cold.",
+        "Masa: Mix rice flour with a pinch of yeast, sugar, and enough water for a thick batter (2 min). Let rest 30 min. The batter should be pourable but not runny.",
+        "Heat a greased pan or traditional masa mold over medium heat. Pour small rounds of batter; cook 2–3 min until bubbles form and edges set, then flip and cook 1–2 min until golden. Repeat in batches.",
+        "Serve masa warm with honey or sugar syrup; drink kunu on the side for a traditional Hausa suhoor."
+      ]
     },
     {
       "id": 9,
@@ -113,10 +165,18 @@
       "region": "South Asia",
       "description": "Fermented rice soaked in water, served with chili and salt",
       "ingredients": ["Rice", "Water", "Green chili", "Salt", "Onion"],
-      "prepTime": "5 min (rice prepared day before)",
+      "prepTime": "5 min",
+      "cookTime": "0 min (rice made day before)",
+      "totalTime": "5 min (+ overnight ferment)",
       "benefits": "Cooling and hydrating; traditional Bengali suhoor",
       "tips": "Often eaten with fried fish or bhorta (mashed vegetables)",
-      "countryId": "bangladesh"
+      "countryId": "bangladesh",
+      "steps": [
+        "The night before: cook plain white rice (slightly more water than usual so it’s soft). Let cool completely, then transfer to a bowl, cover with water, and leave at room temperature overnight to ferment lightly.",
+        "In the morning: the rice will be slightly sour and swollen. Drain off some water if you prefer thicker, or add cold water to thin. Add a good pinch of salt and mix (1 min).",
+        "Serve in a bowl with sliced raw onion, green chili, and a drizzle of mustard oil if you have it (2 min). Optional: serve with fried fish, bhorta (mashed potato or eggplant), or lime.",
+        "Eat with your hands or a spoon; it’s cooling and hydrating for suhoor."
+      ]
     },
     {
       "id": 10,
@@ -124,10 +184,18 @@
       "region": "East Africa",
       "description": "Sweet fried dough (mandazi) with spiced chai tea",
       "ingredients": ["Flour", "Sugar", "Cardamom", "Tea leaves", "Milk", "Ginger"],
-      "prepTime": "30 min",
+      "prepTime": "10 min",
+      "cookTime": "20 min",
+      "totalTime": "30 min (+ 15 min rest)",
       "benefits": "Quick energy from carbs; chai helps with warmth and alertness",
       "tips": "Common Swahili coast suhoor; pair with dates or fruit",
-      "countryId": "kenya"
+      "countryId": "kenya",
+      "steps": [
+        "Mandazi: Mix 2 cups flour, 2 tbsp sugar, 1 tsp baking powder, a pinch of salt, and 1/4 tsp cardamom. Add about 1/2 cup milk and 1 tbsp oil; knead into a soft dough (5 min). Rest 15 min.",
+        "Roll dough 1/2 in thick. Cut into triangles or circles. Heat oil in a deep pan; fry mandazi in batches 2–3 min per side until puffed and golden. Drain on paper towels.",
+        "Chai: Boil water with crushed ginger and cardamom pods (or powder) 2 min. Add black tea leaves and simmer 2 min. Add milk and sugar; bring to a gentle boil 1–2 min. Strain and serve hot.",
+        "Serve mandazi with chai and optional dates or fruit for a quick suhoor."
+      ]
     },
     {
       "id": 11,
@@ -135,10 +203,18 @@
       "region": "Balkans",
       "description": "Flaky pastry filled with meat, cheese, or spinach",
       "ingredients": ["Phyllo dough", "Ground meat or cheese", "Onions", "Eggs", "Yogurt"],
-      "prepTime": "50 min",
+      "prepTime": "25 min",
+      "cookTime": "45 min",
+      "totalTime": "70 min",
       "benefits": "Filling and protein-rich; traditional Balkan pre-dawn meal",
       "tips": "Often eaten with yogurt; popular in Sarajevo for suhoor",
-      "countryId": "bosnia"
+      "countryId": "bosnia",
+      "steps": [
+        "Filling: Sauté finely chopped onion 3–4 min; add ground beef or lamb and cook 8–10 min until no pink remains. Season with salt, pepper, and a little paprika. Cool. (For cheese: mix feta with an egg; for spinach: sauté spinach with onion 5 min, drain, mix with cheese and egg.)",
+        "Thaw phyllo if frozen. Keep covered with a damp towel. Brush a baking dish with melted butter. Layer 2–3 sheets of phyllo, brushing each with butter; spread a thin layer of filling. Repeat layers until filling is used, ending with phyllo. Brush top with butter (about 15 min).",
+        "Score the top into squares or diamonds. Bake at 375°F (190°C) 35–45 min until golden and crisp.",
+        "Let rest 10 min. Serve warm with plain yogurt on the side."
+      ]
     }
   ],
   "iftar": [
@@ -149,6 +225,8 @@
       "description": "The Prophetic way to break fast - dates and water first",
       "ingredients": ["Medjool dates", "Water", "Milk (optional)"],
       "prepTime": "0 min",
+      "cookTime": "0 min",
+      "totalTime": "1 min",
       "benefits": "Natural sugars provide quick energy; dates are easily digestible",
       "tips": "Eat 1-3 dates and drink water, then pray Maghrib before the main meal",
       "significance": "The Prophet (peace be upon him) broke his fast with dates and water; this tradition is followed by Muslims worldwide at iftar.",
@@ -165,7 +243,9 @@
       "region": "Morocco",
       "description": "Hearty tomato-based soup with lentils, chickpeas, and fresh herbs",
       "ingredients": ["Tomatoes", "Lentils", "Chickpeas", "Celery", "Cilantro", "Ginger"],
-      "prepTime": "45 min",
+      "prepTime": "15 min",
+      "cookTime": "35 min",
+      "totalTime": "50 min",
       "benefits": "Rehydrating, protein-rich, and gentle on the stomach after fasting",
       "tips": "Serve with chebakia (honey cookies) for a traditional experience",
       "nutrition": { "calories": 280, "protein": "14g", "carbs": "42g", "fat": "6g" },
@@ -173,9 +253,9 @@
       "dietary": ["vegetarian"],
       "countryId": "morocco",
       "steps": [
-        "Sauté chopped celery, onion, and ginger in olive oil until soft. Add tomatoes and cook until broken down.",
-        "Add lentils, chickpeas (canned or pre-cooked), water or broth, and spices (turmeric, cinnamon, pepper). Bring to a boil, then simmer until lentils are tender (about 25–30 min).",
-        "Stir in chopped cilantro and a little lemon juice. Adjust salt to taste.",
+        "Sauté chopped celery, onion, and ginger in olive oil 5–6 min until soft. Add tomatoes and cook 5–7 min until broken down.",
+        "Add lentils, chickpeas (canned or pre-cooked), water or broth, and spices (turmeric, cinnamon, pepper). Bring to a boil (2 min), then simmer 25–30 min until lentils are tender.",
+        "Stir in chopped cilantro and a little lemon juice. Adjust salt to taste (1 min).",
         "Serve hot with dates and chebakia (honey cookies) on the side for a traditional Moroccan iftar."
       ]
     },
@@ -185,10 +265,18 @@
       "region": "South Asia",
       "description": "Refreshing mixed fruit salad with chaat masala and lime",
       "ingredients": ["Seasonal fruits", "Chaat masala", "Lime juice", "Mint"],
-      "prepTime": "15 min",
+      "prepTime": "12 min",
+      "cookTime": "0 min",
+      "totalTime": "12 min",
       "benefits": "Hydrating fruits with electrolytes and vitamins",
       "tips": "Use a variety of colorful fruits for maximum nutrition",
-      "countryId": "pakistan"
+      "countryId": "pakistan",
+      "steps": [
+        "Wash and dry seasonal fruits: apples, bananas, mango, papaya, grapes, pomegranate seeds, orange segments, and melon (2 min). Cut into bite-sized pieces (5 min).",
+        "Combine all fruit in a large bowl. Squeeze fresh lime juice over the fruit and toss gently (1 min).",
+        "Sprinkle chaat masala (and a pinch of black salt if you have it) over the fruit. Add chopped fresh mint and a little sugar or honey if you like (1 min).",
+        "Chill 5–10 min or serve at room temperature. Perfect to break fast and rehydrate."
+      ]
     },
     {
       "id": 4,
@@ -196,15 +284,17 @@
       "region": "Egypt",
       "description": "Sweet cheese pastry with crispy kadaif and sugar syrup",
       "ingredients": ["Kadaif pastry", "Akkawi cheese", "Butter", "Sugar syrup", "Rose water"],
-      "prepTime": "40 min",
+      "prepTime": "15 min",
+      "cookTime": "30 min",
+      "totalTime": "45 min",
       "benefits": "Traditional celebration dessert (enjoy in moderation)",
       "tips": "Balance sweet treats with protein-rich main dishes",
       "countryId": "egypt",
       "steps": [
-        "Thaw kadaif (shredded phyllo) if frozen. Mix with melted butter. Press half into a greased baking dish.",
-        "Layer akkawi (or mild white) cheese over the kadaif. Top with the remaining kadaif and press gently.",
-        "Bake in a preheated 350°F (180°C) oven until golden and crisp (about 25–30 min).",
-        "Meanwhile, make sugar syrup: boil sugar, water, and a splash of rose water; cool slightly. Pour syrup over hot konafa. Let absorb before serving."
+        "Thaw kadaif (shredded phyllo) if frozen (about 30 min). Mix with melted butter (2 min). Press half into a greased baking dish.",
+        "Layer akkawi (or mild white) cheese over the kadaif. Top with the remaining kadaif and press gently (2 min).",
+        "Bake in a preheated 350°F (180°C) oven 25–30 min until golden and crisp.",
+        "Meanwhile, make sugar syrup: boil sugar, water, and a splash of rose water 5–7 min; cool slightly. Pour syrup over hot konafa. Let absorb 5–10 min before serving."
       ]
     },
     {
@@ -213,10 +303,18 @@
       "region": "Gulf States",
       "description": "Aromatic spiced rice with tender chicken, cooked in traditional style",
       "ingredients": ["Basmati rice", "Chicken", "Arabian spices", "Dried lime", "Onions"],
-      "prepTime": "90 min",
+      "prepTime": "25 min",
+      "cookTime": "75 min",
+      "totalTime": "100 min (+ 30 min marinate)",
       "benefits": "Complete meal with proteins and carbohydrates for recovery",
       "tips": "Serve with raita and fresh salad for balance",
-      "countryId": "saudi-arabia"
+      "countryId": "saudi-arabia",
+      "steps": [
+        "Marinate whole chicken or pieces with mandi spice (baharat, turmeric, cumin, coriander, cardamom, black pepper), salt, oil, and grated onion (5 min). Let sit 30 min.",
+        "In a large pot, sauté sliced onions 5–6 min until golden. Add mandi spice, dried lime (black lime), and water or broth. Add chicken and simmer 45 min until tender. Remove chicken; reserve broth.",
+        "Soak basmati rice 20 min; drain. In the same pot, layer rice over the broth (add more water if needed). Place chicken on top. Cover and cook on low 25 min until rice is done and liquid is absorbed.",
+        "Optional: brown the chicken under the broiler 5–8 min. Serve rice and chicken on a platter with raita, salad, and lime."
+      ]
     },
     {
       "id": 6,
@@ -224,10 +322,18 @@
       "region": "Levant",
       "description": "Toasted bread salad with sumac and refreshing jallab (date and grape drink)",
       "ingredients": ["Pita bread", "Cucumber", "Tomato", "Sumac", "Pomegranate molasses", "Dates", "Rose water"],
-      "prepTime": "20 min",
+      "prepTime": "12 min",
+      "cookTime": "3 min",
+      "totalTime": "15 min",
       "benefits": "Hydrating salad and sweet drink; jallab is a Ramadan staple in Lebanon",
       "tips": "Jallab is often served with ice and pine nuts; break fast with dates first",
-      "countryId": "lebanon"
+      "countryId": "lebanon",
+      "steps": [
+        "Fattoush: Chop cucumber, tomatoes, radish, lettuce, and scallions into a bowl (5 min). Add chopped mint and parsley. Toss with sumac, a little salt, and olive oil (1 min).",
+        "Toast or fry pita 2–3 min until crisp; break into pieces. Add pita to the salad just before serving. Dress with pomegranate molasses and lemon juice; taste and adjust salt (1 min).",
+        "Jallab: Dissolve jallab syrup (grape molasses, date syrup, rose water) in cold water (1 min). Serve over ice; top with pine nuts and optional raisins.",
+        "Serve fattoush with jallab for a refreshing iftar start after dates and water."
+      ]
     },
     {
       "id": 7,
@@ -235,11 +341,19 @@
       "region": "Levant",
       "description": "Lamb cooked in jameed (dried yogurt) sauce over rice, served on large platters",
       "ingredients": ["Lamb", "Jameed", "Rice", "Bread", "Pine nuts", "Spices"],
-      "prepTime": "120 min",
+      "prepTime": "20 min",
+      "cookTime": "100 min",
+      "totalTime": "120 min (+ jameed soak 2–3 hr)",
       "benefits": "Jordan's national dish; protein and carbs for recovery after fasting",
       "tips": "Eaten communally at Ramadan gatherings; symbolizes hospitality",
       "significance": "Mansaf is central to Jordanian identity and is often served at special Ramadan and Eid gatherings.",
-      "countryId": "jordan"
+      "countryId": "jordan",
+      "steps": [
+        "Soak jameed (dried yogurt balls) in warm water 2–3 hours; blend or mash until smooth (5 min). If using jameed paste, dilute with water.",
+        "In a large pot, brown lamb pieces in ghee or butter 5–7 min. Add water, bay leaf, and onion; simmer 1–1½ hours until lamb is tender. Add the jameed mixture and cook on low 20–30 min until the sauce thickens. Season with salt and a little allspice.",
+        "Cook long-grain rice (basmati or jasmine) in lamb broth or water 18–20 min until fluffy. Spread shrak or flatbread on a large platter; top with rice, then the lamb and jameed sauce (5 min).",
+        "Garnish with toasted pine nuts (2 min) and chopped parsley. Serve with more bread; eat with the right hand for a traditional experience."
+      ]
     },
     {
       "id": 8,
@@ -247,10 +361,18 @@
       "region": "Southeast Asia",
       "description": "Sweet coconut milk dessert with banana, sweet potato, and palm sugar",
       "ingredients": ["Banana", "Sweet potato", "Palm sugar", "Coconut milk", "Pandan leaf"],
-      "prepTime": "25 min",
+      "prepTime": "8 min",
+      "cookTime": "18 min",
+      "totalTime": "26 min",
       "benefits": "Quick energy and hydration; popular takjil (iftar snack) in Indonesia",
       "tips": "Kolak is one of the most common iftar sweets during Ramadan in Indonesia",
-      "countryId": "indonesia"
+      "countryId": "indonesia",
+      "steps": [
+        "Peel and cube sweet potato (3 min); boil in water 10 min until tender. Drain and set aside.",
+        "In a pot, combine coconut milk, water, palm sugar (or brown sugar), a pinch of salt, and a knotted pandan leaf. Heat gently 3–4 min until sugar dissolves; do not boil hard.",
+        "Add the cooked sweet potato and sliced banana (use firm bananas). Simmer 5–8 min until banana is soft but not mushy.",
+        "Remove pandan leaf. Serve kolak warm or chilled as a takjil to break fast."
+      ]
     },
     {
       "id": 9,
@@ -258,10 +380,18 @@
       "region": "West Africa",
       "description": "One-pot spiced tomato rice with chicken or fish",
       "ingredients": ["Rice", "Tomatoes", "Onions", "Chicken or fish", "Spices", "Bell pepper"],
-      "prepTime": "60 min",
+      "prepTime": "15 min",
+      "cookTime": "55 min",
+      "totalTime": "70 min",
       "benefits": "Complete meal; festive dish at Nigerian Ramadan iftars",
       "tips": "Jollof is a centerpiece at West African iftar gatherings",
-      "countryId": "nigeria"
+      "countryId": "nigeria",
+      "steps": [
+        "Blend tomatoes, onion, bell pepper, and Scotch bonnet (or habanero) into a smooth paste (2 min). Set aside.",
+        "In a large pot, heat oil; sauté sliced onion 5–6 min until golden. Add tomato paste and fry 2 min. Pour in the blended mix; cook 15–20 min until thick and oil rises. Add thyme, curry, bay leaf, salt, and stock cubes.",
+        "Add chicken pieces (or fish) and a little water; simmer 15 min. Add rinsed long-grain rice and enough broth or water to cover. Cover and cook on low 25 min until rice is tender and liquid is absorbed.",
+        "Fluff with a fork (1 min). Optional: add a layer of foil under the lid for a slight burn (party jollof). Serve with fried plantain or coleslaw."
+      ]
     },
     {
       "id": 10,
@@ -269,10 +399,18 @@
       "region": "South Asia",
       "description": "Lentil fritters (piaju) and slow-cooked meat and lentil stew (halim)",
       "ingredients": ["Lentils", "Onions", "Spices", "Beef or mutton", "Wheat", "Ginger"],
-      "prepTime": "90 min",
+      "prepTime": "20 min",
+      "cookTime": "180 min",
+      "totalTime": "200 min (+ overnight soak for halim, 2–3 hr for piaju dal)",
       "benefits": "Protein-rich and warming; halim is a Ramadan staple in Dhaka",
       "tips": "Piaju is a popular street iftar snack; halim is often sold in Chawk Bazaar",
-      "countryId": "bangladesh"
+      "countryId": "bangladesh",
+      "steps": [
+        "Piaju: Soak yellow lentils (moong dal) 2–3 hours; drain and blend with sliced onion, green chili, salt, turmeric, and a little water to a coarse batter (3 min). Heat oil; drop spoonfuls of batter and fry 2–3 min per side until golden and crisp. Drain and serve with cilantro and lime.",
+        "Halim: Soak wheat berries and lentils (masoor/mung) overnight. In a large pot, brown beef or mutton with ginger-garlic paste and onions 8–10 min. Add drained wheat and lentils, enough water, and spices (turmeric, cumin, garam masala). Simmer 2–3 hours, stirring every 20–30 min, until thick and creamy.",
+        "Shred the meat in the pot (2 min). Adjust salt and spice. Serve halim hot, garnished with fried onion (3 min), ginger, cilantro, lime, and green chili.",
+        "Serve piaju as an iftar snack and halim as a main with bread or rice."
+      ]
     },
     {
       "id": 11,
@@ -280,10 +418,18 @@
       "region": "Balkans",
       "description": "Chicken and vegetable soup with okra and sour cream",
       "ingredients": ["Chicken", "Okra", "Carrots", "Celery", "Sour cream", "Egg", "Vermicelli"],
-      "prepTime": "60 min",
+      "prepTime": "15 min",
+      "cookTime": "55 min",
+      "totalTime": "70 min",
       "benefits": "Warming and rehydrating; traditional Bosnian iftar starter",
       "tips": "Served with bread; often the first dish at Sarajevo iftar tables",
-      "countryId": "bosnia"
+      "countryId": "bosnia",
+      "steps": [
+        "In a large pot, simmer a whole chicken or pieces with onion, carrot, and celery 45 min until the meat is tender. Remove chicken; shred the meat and set aside (5 min). Strain the broth and return to the pot.",
+        "Add diced carrots and celery to the broth; simmer 8–10 min until tender. Add okra (fresh or frozen) and vermicelli; cook 8–10 min until okra is soft and noodles are done.",
+        "In a bowl, whisk an egg with a few spoonfuls of hot broth; stir in sour cream (1 min). Pour this mixture into the soup and stir on very low heat 2–3 min—do not boil. Add shredded chicken and season with salt, pepper, and a little lemon juice.",
+        "Serve hot with crusty bread and optional chopped parsley."
+      ]
     },
     {
       "id": 12,
@@ -291,10 +437,18 @@
       "region": "East Africa",
       "description": "Spiced rice with meat, often served at communal iftars",
       "ingredients": ["Rice", "Beef or chicken", "Pilau masala", "Onions", "Garlic", "Coconut milk"],
-      "prepTime": "55 min",
+      "prepTime": "15 min",
+      "cookTime": "45 min",
+      "totalTime": "60 min",
       "benefits": "Filling and aromatic; reflects Swahili and South Asian influences",
       "tips": "Common at Nairobi and Mombasa iftars; serve with kachumbari (tomato salad)",
-      "countryId": "kenya"
+      "countryId": "kenya",
+      "steps": [
+        "Make pilau masala: toast and grind cumin, coriander, black pepper, cardamom, cloves, and cinnamon 3–4 min (or use store-bought pilau masala).",
+        "In a large pot, heat oil; fry sliced onions 8–10 min until deeply golden. Add ginger-garlic paste, pilau masala, and tomato paste; fry 2 min. Add beef or chicken pieces and brown 5–7 min.",
+        "Add rinsed basmati rice, coconut milk, and enough water (about 1:1.5 rice to liquid). Add whole potatoes if you like. Bring to a boil (2 min), then cover and cook on low 25 min until rice is tender and liquid is absorbed.",
+        "Fluff with a fork (1 min). Serve with kachumbari (diced tomato, onion, cilantro, lime) and optional chutney."
+      ]
     }
   ]
 }

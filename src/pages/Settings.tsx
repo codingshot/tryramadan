@@ -4,13 +4,13 @@ import { Link, useLocation } from "react-router-dom";
 import { 
   ArrowLeft, MapPin, Bell, Moon, Sun, Trash2, Download, 
   ChevronRight, Check, Loader2, Monitor, Globe, Sunrise, Sunset,
-  BookOpen, Utensils, BookMarked, Scale, Target
+  BookOpen, Utensils, BookMarked, Scale, Target, Droplets
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArabicHover } from "@/components/ArabicHover";
 import { LocationSearch } from "@/components/LocationSearch";
-import { LocationResult, getLocationFromIP } from "@/hooks/useLocation";
+import { LocationResult, getLocationFromIP, getTimezoneFromCoords } from "@/hooks/useLocation";
 import { 
   useUserPreferences, 
   useFastingProgress, 
@@ -34,6 +34,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { LANGUAGE_OPTIONS, COUNTRY_OPTIONS } from "@/data/languages-and-countries";
+import { getDefaultHydrationGoalMl, getHydrationUnit, ML_PER_US_CUP } from "@/lib/hydration";
 
 const Settings = () => {
   const location = useLocation();
@@ -44,6 +45,11 @@ const Settings = () => {
   const { permission, requestPermission, supported } = useNotifications();
   const [locationLoading, setLocationLoading] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const hydrationUnit = getHydrationUnit(preferences.country || "US");
+  const effectiveGoalMl =
+    preferences.hydrationGoalMl && preferences.hydrationGoalMl > 0
+      ? preferences.hydrationGoalMl
+      : getDefaultHydrationGoalMl(preferences.country || "US");
 
   const applyPrioritiesToDashboard = () => {
     setQuickActionOrder(getQuickActionOrderFromPriorities(preferences));
@@ -56,11 +62,16 @@ const Settings = () => {
     }
   }, [location.hash]);
   
-  const handleLocationSelect = (location: LocationResult) => {
+  const handleLocationSelect = async (location: LocationResult) => {
+    let timezone: string | null = location.timezone ?? null;
+    if (!timezone) {
+      timezone = await getTimezoneFromCoords(location.lat, location.lng);
+    }
     setPreferences({
       ...preferences,
       location: location.displayName,
-      locationCoords: { lat: location.lat, lng: location.lng }
+      locationCoords: { lat: location.lat, lng: location.lng },
+      timezone,
     });
   };
   
@@ -456,6 +467,86 @@ const Settings = () => {
                 Enable Notifications
               </button>
             )}
+          </motion.div>
+
+          {/* Hydration */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="p-6 rounded-2xl bg-card border border-border mb-6"
+          >
+            <h2 className="font-display font-bold mb-4 flex items-center gap-2 flex-wrap">
+              <Droplets className="w-5 h-5 text-blue-500 flex-shrink-0" aria-hidden />
+              <ArabicHover arabic="الترطيب">Hydration</ArabicHover>
+            </h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Daily water goal and reminders during non-fasting hours. Default goal is based on your selected region.
+            </p>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium block mb-2">Daily goal</label>
+                <div className="flex flex-wrap items-center gap-2">
+                  <input
+                    type="number"
+                    min={1}
+                    max={hydrationUnit === "cups" ? 20 : 5}
+                    step={hydrationUnit === "cups" ? 1 : 0.5}
+                    value={
+                      hydrationUnit === "cups"
+                        ? Math.round((effectiveGoalMl || getDefaultHydrationGoalMl(preferences.country || "US")) / ML_PER_US_CUP)
+                        : (effectiveGoalMl || getDefaultHydrationGoalMl(preferences.country || "US")) / 1000
+                    }
+                    onChange={(e) => {
+                      const v = Number(e.target.value);
+                      if (isNaN(v)) return;
+                      const ml = hydrationUnit === "cups" ? Math.round(v * ML_PER_US_CUP) : Math.round(v * 1000);
+                      setPreferences({ ...preferences, hydrationGoalMl: Math.max(500, Math.min(5000, ml)) });
+                    }}
+                    className="w-24 rounded-lg border border-border bg-background px-3 py-2 text-sm tabular-nums"
+                  />
+                  <span className="text-sm text-muted-foreground">{hydrationUnit === "cups" ? "cups" : "L"}</span>
+                  <button
+                    type="button"
+                    onClick={() => setPreferences({ ...preferences, hydrationGoalMl: 0 })}
+                    className="text-xs text-muted-foreground hover:text-foreground underline"
+                  >
+                    Reset to region default
+                  </button>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 p-3 rounded-xl bg-muted/50">
+                <input
+                  type="checkbox"
+                  id="hydration-reminder"
+                  checked={preferences.hydrationReminderEnabled ?? false}
+                  onChange={(e) => setPreferences({ ...preferences, hydrationReminderEnabled: e.target.checked })}
+                  className="rounded"
+                />
+                <label htmlFor="hydration-reminder" className="text-sm">Remind me to log water during non-fasting hours</label>
+              </div>
+              {preferences.hydrationReminderEnabled && (
+                <div>
+                  <label className="text-sm font-medium block mb-2">Reminder times (HH:mm)</label>
+                  <div className="flex flex-wrap gap-2">
+                    {(preferences.hydrationReminderTimes ?? ["12:00", "15:00", "19:00"]).map((t, i) => (
+                      <input
+                        key={i}
+                        type="time"
+                        value={t}
+                        onChange={(e) => {
+                          const next = [...(preferences.hydrationReminderTimes ?? ["12:00", "15:00", "19:00"])];
+                          next[i] = e.target.value;
+                          setPreferences({ ...preferences, hydrationReminderTimes: next });
+                        }}
+                        className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                      />
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">Notifications fire at these times (when app is open). Set times during iftar/suhoor window.</p>
+                </div>
+              )}
+            </div>
           </motion.div>
           
           {/* Theme Settings */}

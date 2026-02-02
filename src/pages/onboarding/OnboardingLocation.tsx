@@ -4,7 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, MapPin, Check, Loader2 } from "lucide-react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { LocationSearch } from "@/components/LocationSearch";
-import { LocationResult, getLocationFromIP } from "@/hooks/useLocation";
+import { LocationResult, getLocationFromIP, getTimezoneFromCoords } from "@/hooks/useLocation";
 
 export default function OnboardingLocation() {
   const { state, setLocation } = useOnboarding();
@@ -21,8 +21,13 @@ export default function OnboardingLocation() {
     }
   }, [state.location, setLocation]);
 
-  const handleSelect = (loc: LocationResult) => {
-    setLocation(loc);
+  const handleSelect = async (loc: LocationResult) => {
+    if (loc.timezone) {
+      setLocation(loc);
+      return;
+    }
+    const timezone = await getTimezoneFromCoords(loc.lat, loc.lng);
+    setLocation({ ...loc, timezone: timezone ?? undefined });
   };
 
   const handleContinue = () => {

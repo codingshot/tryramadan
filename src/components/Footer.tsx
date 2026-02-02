@@ -1,10 +1,29 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Heart, ExternalLink } from "lucide-react";
+import { Heart, ExternalLink, Sun, Moon, Monitor, LogIn, Activity, Utensils, BookOpen, BookMarked } from "lucide-react";
 import logo from "@/assets/logo.png";
+import { useUserPreferences } from "@/hooks/useLocalStorage";
+
+function applyTheme(theme: "light" | "dark" | "system") {
+  if (theme === "dark") document.documentElement.classList.add("dark");
+  else if (theme === "light") document.documentElement.classList.remove("dark");
+  else {
+    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }
+}
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const [preferences, setPreferences] = useUserPreferences();
+
+  const handleThemeChange = (theme: "light" | "dark" | "system") => {
+    setPreferences({ ...preferences, theme });
+    applyTheme(theme);
+  };
 
   return (
     <footer className="bg-primary text-primary-foreground">
@@ -45,6 +64,48 @@ export const Footer = () => {
               </li>
               <li>
                 <Link to="/health-safety" className="inline-block py-2 sm:py-0 text-primary-foreground/70 hover:text-secondary transition-colors text-sm min-h-[44px] sm:min-h-0 flex items-center">Health Benefits</Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Your fasting */}
+          <div>
+            <h4 className="font-display font-bold mb-4">Your fasting</h4>
+            <ul className="space-y-1 sm:space-y-2">
+              <li>
+                <Link to="/dashboard/today" className="inline-flex items-center gap-2 py-2 sm:py-0 text-primary-foreground/70 hover:text-secondary transition-colors text-sm min-h-[44px] sm:min-h-0">
+                  <LogIn className="w-4 h-4 flex-shrink-0" aria-hidden />
+                  Log your fast
+                </Link>
+              </li>
+              <li>
+                <Link to="/dashboard/progress" className="inline-flex items-center gap-2 py-2 sm:py-0 text-primary-foreground/70 hover:text-secondary transition-colors text-sm min-h-[44px] sm:min-h-0">
+                  <Activity className="w-4 h-4 flex-shrink-0" aria-hidden />
+                  Fasting state
+                </Link>
+              </li>
+              <li>
+                <Link to="/dashboard/meals" className="inline-flex items-center gap-2 py-2 sm:py-0 text-primary-foreground/70 hover:text-secondary transition-colors text-sm min-h-[44px] sm:min-h-0">
+                  <Utensils className="w-4 h-4 flex-shrink-0" aria-hidden />
+                  Log your meal
+                </Link>
+              </li>
+              <li>
+                <Link to="/dashboard/journal" className="inline-flex items-center gap-2 py-2 sm:py-0 text-primary-foreground/70 hover:text-secondary transition-colors text-sm min-h-[44px] sm:min-h-0">
+                  <BookOpen className="w-4 h-4 flex-shrink-0" aria-hidden />
+                  Journal for today
+                </Link>
+              </li>
+              <li>
+                <Link to="/dashboard/quran" className="inline-flex items-center gap-2 py-2 sm:py-0 text-primary-foreground/70 hover:text-secondary transition-colors text-sm min-h-[44px] sm:min-h-0">
+                  <BookMarked className="w-4 h-4 flex-shrink-0" aria-hidden />
+                  Quran of the day
+                </Link>
+              </li>
+              <li>
+                <Link to="/dashboard" className="inline-block py-2 sm:py-0 text-primary-foreground/70 hover:text-secondary transition-colors text-sm min-h-[44px] sm:min-h-0">
+                  Dashboard
+                </Link>
               </li>
             </ul>
           </div>
@@ -123,6 +184,31 @@ export const Footer = () => {
               © {currentYear} TryRamadan.app. All rights reserved.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+              {/* Theme toggle */}
+              <span className="text-xs sm:text-sm text-primary-foreground/60 mr-1">Theme</span>
+              <div className="flex rounded-lg border border-primary-foreground/20 overflow-hidden" role="group" aria-label="Theme">
+                {[
+                  { id: "light" as const, label: "Light", Icon: Sun },
+                  { id: "dark" as const, label: "Dark", Icon: Moon },
+                  { id: "system" as const, label: "System", Icon: Monitor },
+                ].map(({ id, label, Icon }) => (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => handleThemeChange(id)}
+                    title={label}
+                    aria-pressed={preferences.theme === id}
+                    className={`min-h-[44px] min-w-[44px] sm:min-w-[48px] p-2 flex items-center justify-center transition-colors ${
+                      preferences.theme === id
+                        ? "bg-secondary text-secondary-foreground"
+                        : "text-primary-foreground/70 hover:bg-primary-foreground/10 hover:text-primary-foreground"
+                    }`}
+                  >
+                    <Icon className="w-5 h-5" aria-hidden />
+                    <span className="sr-only">{label}</span>
+                  </button>
+                ))}
+              </div>
               <Link to="/terms" className="text-xs sm:text-sm text-primary-foreground/60 hover:text-secondary transition-colors min-h-[44px] min-w-[44px] inline-flex items-center justify-center">
                 Terms
               </Link>

@@ -10,15 +10,25 @@ import { HadithSunnahLink } from "@/components/HadithSunnahLink";
 import glossaryData from "@/data/glossary.json";
 import { PageSEO } from "@/components/PageSEO";
 
+type GlossaryEntry = {
+  term: string;
+  arabic: string;
+  pronunciation: string;
+  definition: string;
+  definitionAr?: string;
+  category: string;
+};
+
 const LearnGlossary = () => {
   const location = useLocation();
   const fromDashboard = location.pathname.startsWith("/dashboard/glossary");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
-  const categories = [...new Set(glossaryData.glossary.map(item => item.category))];
+  const categories = [...new Set(glossary.map(item => item.category))];
   
-  const filteredTerms = glossaryData.glossary.filter(item => {
+  const glossary = glossaryData.glossary as GlossaryEntry[];
+  const filteredTerms = glossary.filter(item => {
     const matchesSearch = 
       item.term.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.arabic.includes(searchQuery) ||
@@ -137,7 +147,11 @@ const LearnGlossary = () => {
                             <span className="font-arabic text-secondary" title={item.pronunciation}>{item.arabic}</span>
                           </>
                         ) : (
-                          <ArabicHover arabic={item.arabic} transliteration={item.pronunciation}>
+                          <ArabicHover
+                            arabic={item.arabic}
+                            transliteration={item.pronunciation}
+                            hint={item.definitionAr ? "Term • المصطلح" : "Translation"}
+                          >
                             {item.term}
                           </ArabicHover>
                         )}
@@ -152,6 +166,11 @@ const LearnGlossary = () => {
                 </div>
                 
                 <p className="text-muted-foreground">{item.definition}</p>
+                {item.definitionAr && (
+                  <p className="mt-2 text-sm font-arabic text-secondary" dir="rtl">
+                    {item.definitionAr}
+                  </p>
+                )}
               </motion.div>
             ))}
             

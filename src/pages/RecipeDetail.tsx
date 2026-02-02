@@ -139,6 +139,18 @@ export default function RecipeDetail() {
                   <Clock className="w-4 h-4" aria-hidden />
                   Prep: {recipe.prepTime}
                 </span>
+                {recipe.cookTime && (
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-4 h-4" aria-hidden />
+                    Cook: {recipe.cookTime}
+                  </span>
+                )}
+                {recipe.totalTime && (
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-4 h-4" aria-hidden />
+                    Total: {recipe.totalTime}
+                  </span>
+                )}
                 {recipe.nutrition && (
                   <span>
                     {recipe.nutrition.calories} cal · P: {recipe.nutrition.protein} · C: {recipe.nutrition.carbs} · F: {recipe.nutrition.fat}

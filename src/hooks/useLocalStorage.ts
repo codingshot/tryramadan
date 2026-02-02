@@ -37,6 +37,8 @@ export interface UserPreferences {
   experience: string;
   location: string;
   locationCoords: { lat: number; lng: number } | null;
+  /** IANA timezone (e.g. America/New_York) for the selected location; used for navbar time. */
+  timezone: string | null;
   fastingGoal: string;
   onboardingComplete: boolean;
   selectedProgram: string;
@@ -58,6 +60,12 @@ export interface UserPreferences {
   macroTrackingEnabled: boolean;
   /** Simplify features based on location (e.g. local times, fewer options). */
   simplifyByLocation: boolean;
+  /** Daily water goal in ml; 0 = use region default from country. */
+  hydrationGoalMl: number;
+  /** Enable hydration reminders during non-fasting hours. */
+  hydrationReminderEnabled: boolean;
+  /** Times for hydration reminders (HH:mm), e.g. ["12:00", "15:00", "19:00"]. */
+  hydrationReminderTimes: string[];
 }
 
 export const defaultPreferences: UserPreferences = {
@@ -65,6 +73,7 @@ export const defaultPreferences: UserPreferences = {
   experience: '',
   location: '',
   locationCoords: null,
+  timezone: null,
   fastingGoal: 'full',
   onboardingComplete: false,
   selectedProgram: 'traditional',
@@ -79,6 +88,9 @@ export const defaultPreferences: UserPreferences = {
   quranPriority: 'some',
   macroTrackingEnabled: false,
   simplifyByLocation: true,
+  hydrationGoalMl: 0,
+  hydrationReminderEnabled: false,
+  hydrationReminderTimes: ['12:00', '15:00', '19:00'],
 };
 
 export function useUserPreferences() {
@@ -352,10 +364,17 @@ export interface EnergyEntry {
   level: 1 | 2 | 3 | 4 | 5;
 }
 
+export interface HydrationEntry {
+  time: string; // ISO
+  amountMl: number;
+}
+
 export interface TodayData {
   date: string; // YYYY-MM-DD
   intention: string;
   hydrationGlasses: number;
+  /** Per-entry water log in ml; total = sum(amountMl). Backward compat: if empty, display uses hydrationGlasses * 250. */
+  hydrationEntries: HydrationEntry[];
   energyEntries: EnergyEntry[];
 }
 
@@ -363,6 +382,7 @@ const defaultTodayData: TodayData = {
   date: "",
   intention: "",
   hydrationGlasses: 0,
+  hydrationEntries: [],
   energyEntries: [],
 };
 
@@ -372,6 +392,7 @@ export function useTodayData() {
   const todayData = store[today] || {
     intention: "",
     hydrationGlasses: 0,
+    hydrationEntries: [],
     energyEntries: [],
   };
 
@@ -381,6 +402,17 @@ export function useTodayData() {
 
   const setHydrationGlasses = useCallback((glasses: number) => {
     setStore((prev) => ({ ...prev, [today]: { ...(prev[today] || {}), hydrationGlasses: Math.max(0, glasses) } }));
+  }, [today, setStore]);
+
+  const addHydrationEntry = useCallback((amountMl: number) => {
+    const entry: HydrationEntry = { time: new Date().toISOString(), amountMl };
+    setStore((prev) => ({
+      ...prev,
+      [today]: {
+        ...(prev[today] || {}),
+        hydrationEntries: [...(prev[today]?.hydrationEntries || []), entry],
+      },
+    }));
   }, [today, setStore]);
 
   const addEnergyEntry = useCallback((level: 1 | 2 | 3 | 4 | 5) => {
@@ -394,12 +426,20 @@ export function useTodayData() {
     }));
   }, [today, setStore]);
 
+  const hydrationEntries = todayData.hydrationEntries || [];
+  const hydrationTotalMl = hydrationEntries.length
+    ? hydrationEntries.reduce((sum, e) => sum + e.amountMl, 0)
+    : (todayData.hydrationGlasses || 0) * 250;
+
   return {
     intention: todayData.intention,
     hydrationGlasses: todayData.hydrationGlasses,
+    hydrationEntries,
+    hydrationTotalMl,
     energyEntries: todayData.energyEntries || [],
     setIntention,
     setHydrationGlasses,
+    addHydrationEntry,
     addEnergyEntry,
   };
 }

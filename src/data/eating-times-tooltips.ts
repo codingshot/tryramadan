@@ -25,6 +25,11 @@ export const EATING_TIME_TOOLTIPS = {
     body: "Maghrib (sunset) prayer time. This is when you may break your fast. Many Muslims break fast with dates and water, then pray Maghrib, then enjoy the main meal.",
     bodyAr: "وقت المغرب يُفطر فيه بالتمر والماء ثم الصلاة.",
   },
+  imsak: {
+    title: "Imsak • إمساك",
+    body: "Time to stop eating and drinking before Fajr. Fasting begins at Fajr; finish suhoor and seal your water before then.",
+    bodyAr: "آخر وقت للأكل والشرب قبل الفجر.",
+  },
   eatCutoff: {
     title: "Eat cutoff • موعد التوقف",
     body: "Same as Fajr—the cutoff time for eating and drinking. After this, the fast has begun.",

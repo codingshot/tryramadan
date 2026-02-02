@@ -527,58 +527,6 @@
       ]
     },
     {
-      "country": "Senegal",
-      "region": "Africa",
-      "cities": [
-        {
-          "name": "Dakar",
-          "suhoor_meals": [
-            "bread and tea",
-            "thiakry (millet or couscous with yogurt and fruit)",
-            "light rice dishes"
-          ],
-          "iftar_meals": [
-            "dates and water",
-            "thieboudienne (rice with fish and vegetables)",
-            "yassa (onion-marinated chicken or fish)",
-            "soup kandja"
-          ],
-          "desserts_and_drinks": [
-            "café Touba (spiced coffee)",
-            "bissap (hibiscus drink)",
-            "fresh juices"
-          ],
-          "rituals_and_traditions": [
-            "Ndogou: moment of breaking fast shared communally from large bowls",
-            "Korité preparations and charity before Eid",
-            "Sufi brotherhoods (Tariqas) play a major role in religious and social life"
-          ],
-          "notes": "Thieboudienne and café Touba are widely associated with Senegalese Ramadan; ndogou marks the communal iftar moment."
-        },
-        {
-          "name": "Touba",
-          "suhoor_meals": [
-            "bread, dates, café Touba",
-            "light rice or millet"
-          ],
-          "iftar_meals": [
-            "dates and water",
-            "thieboudienne",
-            "communal dishes shared at mosques and homes"
-          ],
-          "desserts_and_drinks": [
-            "café Touba",
-            "bissap"
-          ],
-          "rituals_and_traditions": [
-            "Spiritual center of the Mouride brotherhood; pilgrimage site",
-            "Grand Magal pilgrimage draws millions; Ramadan observance is central"
-          ],
-          "notes": "Touba is the holy city of the Mouride order; Ramadan and café Touba are central to daily life."
-        }
-      ]
-    },
-    {
       "country": "Jordan",
       "region": "Middle East",
       "cities": [

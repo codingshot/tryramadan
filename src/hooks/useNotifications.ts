@@ -115,11 +115,41 @@ export function useNotifications() {
     return timeouts;
   }, [state.supported, state.permission, scheduleNotification]);
 
+  // Schedule hydration reminders at given local times (HH:mm); only future times today
+  const scheduleHydrationReminders = useCallback((
+    times: string[],
+    timezone?: string | null
+  ): ReturnType<typeof setTimeout>[] => {
+    if (!state.supported || state.permission !== 'granted' || !times.length) return [];
+
+    const timeouts: ReturnType<typeof setTimeout>[] = [];
+    const now = new Date();
+
+    for (const timeStr of times) {
+      const [hour, min] = timeStr.split(':').map(Number);
+      if (hour == null || min == null || isNaN(hour) || isNaN(min)) continue;
+
+      const scheduled = new Date(now);
+      scheduled.setHours(hour, min, 0, 0);
+      if (scheduled <= now) continue;
+
+      const t = scheduleNotification(
+        'Stay hydrated • ترطيب',
+        'Log your water intake during non-fasting hours.',
+        scheduled
+      );
+      if (t) timeouts.push(t);
+    }
+
+    return timeouts;
+  }, [state.supported, state.permission, scheduleNotification]);
+
   return {
     ...state,
     requestPermission,
     scheduleNotification,
     sendTestNotification,
     schedulePrayerReminders,
+    scheduleHydrationReminders,
   };
 }

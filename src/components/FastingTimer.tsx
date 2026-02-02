@@ -267,6 +267,7 @@ export const FastingTimer = ({
               <TooltipContent side="top" className="max-w-xs bg-card border-border p-3">
                 <p className="font-semibold text-sm">{nextLabel === "Suhoor end" ? EATING_TIME_TOOLTIPS.suhoorEnds.title : EATING_TIME_TOOLTIPS.iftar.title}</p>
                 <p className="text-xs text-muted-foreground mt-1">{nextLabel === "Suhoor end" ? EATING_TIME_TOOLTIPS.suhoorEnds.body : EATING_TIME_TOOLTIPS.iftar.body}</p>
+                <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{nextLabel === "Suhoor end" ? EATING_TIME_TOOLTIPS.suhoorEnds.bodyAr : EATING_TIME_TOOLTIPS.iftar.bodyAr}</p>
                 <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{nextLabel === "Suhoor end" ? (EATING_TIME_TOOLTIPS.suhoorEnds as { bodyAr?: string }).bodyAr : (EATING_TIME_TOOLTIPS.iftar as { bodyAr?: string }).bodyAr}</p>
               </TooltipContent>
             </Tooltip>

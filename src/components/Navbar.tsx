@@ -22,13 +22,21 @@ export const Navbar = () => {
   const locationShort = displayLocation ? displayLocation.split(",").slice(0, 2).join(",").trim() : "Set location";
 
   useEffect(() => {
+    const timeZone = preferences.timezone || undefined;
     const formatTime = () => {
-      setLocalTime(new Date().toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+      setLocalTime(
+        new Date().toLocaleTimeString(undefined, {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          ...(timeZone && { timeZone }),
+        })
+      );
     };
     formatTime();
     const interval = setInterval(formatTime, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [preferences.timezone]);
 
   const navLinks = [
     { name: "Features", nameAr: "المميزات", href: "#features", to: "/#features" },
