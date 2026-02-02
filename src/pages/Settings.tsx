@@ -237,6 +237,38 @@ const Settings = () => {
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">This is the only program available right now.</p>
               </div>
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground mb-2 block">Voluntary Sunnah fasting</label>
+                <p className="text-xs text-muted-foreground mb-2">Add optional Sunnah fasts (can be combined with Ramadan).</p>
+                <div className="space-y-2">
+                  {[
+                    { id: "monday-thursday", name: "Monday & Thursday", freq: "Weekly" },
+                    { id: "ayyam-al-beed", name: "Ayyam al-Beed (13–15 of each month)", freq: "Monthly" },
+                  ].map((opt) => {
+                    const selected = (preferences.voluntaryFasting ?? []).includes(opt.id);
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => {
+                          const curr = preferences.voluntaryFasting ?? [];
+                          const next = selected ? curr.filter((x) => x !== opt.id) : [...curr, opt.id];
+                          setPreferences({ ...preferences, voluntaryFasting: next });
+                        }}
+                        className={`w-full min-h-[44px] p-3 rounded-xl border-2 text-left transition-all flex items-center justify-between ${
+                          selected ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                        }`}
+                      >
+                        <span className="text-sm font-medium">{opt.name}</span>
+                        <span className="text-xs text-muted-foreground">{opt.freq}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                <Link to="/programs" className="text-xs text-secondary hover:underline mt-2 inline-block">
+                  Learn more about voluntary fasting →
+                </Link>
+              </div>
             </div>
           </motion.div>
 

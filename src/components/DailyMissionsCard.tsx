@@ -82,8 +82,8 @@ export function DailyMissionsCard() {
             </h3>
           </TooltipTrigger>
           <TooltipContent>
-            <p className="font-medium">{GENERAL_TOOLTIPS.todayMissions.title}</p>
-            <p className="text-xs mt-1 text-muted-foreground">{GENERAL_TOOLTIPS.todayMissions.body}</p>
+            <p className="text-sm text-foreground">{GENERAL_TOOLTIPS.todayMissions.body}</p>
+            <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{GENERAL_TOOLTIPS.todayMissions.bodyAr}</span></p>
           </TooltipContent>
         </Tooltip>
         <Tooltip>

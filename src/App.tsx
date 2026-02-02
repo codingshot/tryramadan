@@ -41,6 +41,7 @@ import FAQ from "./pages/FAQ";
 import Emergency from "./pages/Emergency";
 import Settings from "./pages/Settings";
 import Programs from "./pages/Programs";
+import VoluntaryFastingDetail from "./pages/VoluntaryFastingDetail";
 import Culture from "./pages/Culture";
 import CultureCountry from "./pages/CultureCountry";
 import Recipes from "./pages/Recipes";
@@ -198,6 +199,7 @@ const App = () => (
           <Route path="/faq" element={<FAQ />} />
           <Route path="/emergency" element={<Emergency />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/programs/:slug" element={<VoluntaryFastingDetail />} />
           <Route path="/programs" element={<Programs />} />
           <Route path="/culture" element={<Culture />} />
           <Route path="/culture/:countryId" element={<CultureCountry />} />

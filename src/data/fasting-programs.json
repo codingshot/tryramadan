@@ -62,6 +62,7 @@
     "description": "Beyond Ramadan, there are recommended voluntary fasts throughout the year that Muslims may observe.",
     "types": [
       {
+        "id": "monday-thursday",
         "name": "Monday & Thursday Fasting",
         "arabicName": "صوم الإثنين والخميس",
         "description": "The Prophet Muhammad (peace be upon him) used to fast on Mondays and Thursdays. He explained that deeds are presented to Allah on these days.",
@@ -70,6 +71,7 @@
         "hadithOutline": "The Prophet (ﷺ) was asked about fasting on Monday and Thursday. He said: \"Deeds are presented (to Allah) on Mondays and Thursdays, so I love that my deeds be presented when I am fasting.\""
       },
       {
+        "id": "ayyam-al-beed",
         "name": "Ayyam al-Beed",
         "arabicName": "أيام البيض",
         "description": "Fasting on the 13th, 14th, and 15th of each Islamic lunar month, called the 'white days' due to the full moon.",
@@ -78,6 +80,7 @@
         "hadithOutline": "Abu Huraira reported: The Prophet (ﷺ) said \"Fasting three days of each month is equivalent to fasting the whole year.\" And he recommended fasting the white days—the 13th, 14th, and 15th of each Islamic month."
       },
       {
+        "id": "day-of-arafah",
         "name": "Day of Arafah",
         "arabicName": "يوم عرفة",
         "description": "Fasting on the 9th of Dhul Hijjah (for non-pilgrims) is highly recommended and believed to expiate sins.",
@@ -86,6 +89,7 @@
         "hadithOutline": "The Prophet (ﷺ) said fasting the Day of Arafah expiates the sins of the past year and the coming year."
       },
       {
+        "id": "six-days-shawwal",
         "name": "Six Days of Shawwal",
         "arabicName": "ست من شوال",
         "description": "Fasting six days in the month following Ramadan. Combined with Ramadan, it's equivalent to fasting the entire year.",

@@ -39,6 +39,7 @@ export default function OnboardingGoals() {
       macroTrackingEnabled: false,
       simplifyByLocation: true,
     };
+    const voluntaryFasting = Array.isArray(state.voluntaryFasting) ? state.voluntaryFasting : [];
     const newPrefs = {
       ...preferences,
       userType: state.mode,
@@ -48,6 +49,7 @@ export default function OnboardingGoals() {
       timezone: state.location?.timezone ?? null,
       fastingGoal: state.selectedProgram === "traditional" ? "full" : state.selectedProgram,
       selectedProgram: state.selectedProgram,
+      voluntaryFasting,
       onboardingComplete: true,
       notificationsEnabled: state.notifications.suhoor || state.notifications.iftar,
       learningPriority: priorities.learningPriority,

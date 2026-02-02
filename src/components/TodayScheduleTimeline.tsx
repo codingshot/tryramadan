@@ -136,24 +136,24 @@ export function TodayScheduleTimeline({
                   <span className="font-medium text-sm block truncate cursor-help">{item.label}</span>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs p-3">
-                  <p className="font-medium">
-                    {item.label.includes("Suhoor") ? EATING_TIME_TOOLTIPS.suhoorEnds.title : item.label === "Fajr" ? EATING_TIME_TOOLTIPS.fajr.title : item.label === "Dhuhr" ? EATING_TIME_TOOLTIPS.dhuhr.title : item.label === "Asr" ? EATING_TIME_TOOLTIPS.asr.title : (item.label === iftarLabelShort || item.label.includes("Iftar")) ? EATING_TIME_TOOLTIPS.iftarTime.title : item.label === "Isha" ? EATING_TIME_TOOLTIPS.isha.title : item.label.includes("Taraweeh") ? GENERAL_TOOLTIPS.taraweeh.title : item.label}
-                  </p>
-                  {item.sublabel && (
+                  {item.label.includes("Suhoor") && <p className="text-sm text-foreground">{EATING_TIME_TOOLTIPS.suhoorEnds.body}</p>}
+                  {item.label === "Fajr" && <p className="text-sm text-foreground">{EATING_TIME_TOOLTIPS.fajr.body}</p>}
+                  {item.label === "Dhuhr" && <p className="text-sm text-foreground">{EATING_TIME_TOOLTIPS.dhuhr.body}</p>}
+                  {item.label === "Asr" && <p className="text-sm text-foreground">{EATING_TIME_TOOLTIPS.asr.body}</p>}
+                  {(item.label === iftarLabelShort || item.label.includes("Iftar")) && !item.label.includes("Taraweeh") && (
+                    <p className="text-sm text-foreground">{EATING_TIME_TOOLTIPS.iftarTime.body}</p>
+                  )}
+                  {item.label === "Isha" && <p className="text-sm text-foreground">{EATING_TIME_TOOLTIPS.isha.body}</p>}
+                  {item.label.includes("Taraweeh") && <p className="text-sm text-foreground">{GENERAL_TOOLTIPS.taraweeh.body}</p>}
+                  {item.sublabel && !["Fajr","Dhuhr","Asr","Isha"].includes(item.label) && !item.label.includes("Suhoor") && !item.label.includes("Iftar") && !item.label.includes("Taraweeh") && (
                     <p className="text-xs text-muted-foreground mt-1">{item.sublabel}</p>
                   )}
-                  {item.label.includes("Suhoor") && (
-                    <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.suhoorEnds.body}</p>
-                  )}
-                  {item.label === "Fajr" && <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.fajr.body}</p>}
-                  {item.label === "Dhuhr" && <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.dhuhr.body}</p>}
-                  {item.label === "Asr" && <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.asr.body}</p>}
-                  {(item.label === iftarLabelShort || item.label.includes("Iftar")) && !item.label.includes("Taraweeh") && (
-                    <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.iftarTime.body}</p>
-                  )}
-                  {item.label === "Isha" && <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.isha.body}</p>}
-                  {item.label.includes("Taraweeh") && (
-                    <p className="text-xs text-muted-foreground mt-1">{GENERAL_TOOLTIPS.taraweeh.body}</p>
+                  {(item.label.includes("Suhoor") || item.label === "Fajr" || item.label === "Dhuhr" || item.label === "Asr" || (item.label === iftarLabelShort || item.label.includes("Iftar")) || item.label === "Isha" || item.label.includes("Taraweeh")) && (
+                    <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">
+                      Arabic: <span className="font-arabic" dir="rtl">
+                        {item.label.includes("Suhoor") ? (EATING_TIME_TOOLTIPS.suhoorEnds as { bodyAr?: string }).bodyAr : item.label === "Fajr" ? (EATING_TIME_TOOLTIPS.fajr as { bodyAr?: string }).bodyAr : item.label === "Dhuhr" ? (EATING_TIME_TOOLTIPS.dhuhr as { bodyAr?: string }).bodyAr : item.label === "Asr" ? (EATING_TIME_TOOLTIPS.asr as { bodyAr?: string }).bodyAr : (item.label === iftarLabelShort || item.label.includes("Iftar")) ? (EATING_TIME_TOOLTIPS.iftarTime as { bodyAr?: string }).bodyAr : item.label === "Isha" ? (EATING_TIME_TOOLTIPS.isha as { bodyAr?: string }).bodyAr : GENERAL_TOOLTIPS.taraweeh.bodyAr}
+                      </span>
+                    </p>
                   )}
                 </TooltipContent>
               </Tooltip>

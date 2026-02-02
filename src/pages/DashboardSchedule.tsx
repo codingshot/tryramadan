@@ -790,9 +790,8 @@ const DashboardSchedule = () => {
                 </div>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
-                <p className="font-medium">{GENERAL_TOOLTIPS.ramadan.title}</p>
-                <p className="text-xs mt-1">{GENERAL_TOOLTIPS.ramadan.body}</p>
-                <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.ramadan.bodyAr}</p>
+                <p className="text-sm text-foreground">{GENERAL_TOOLTIPS.ramadan.body}</p>
+                <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{GENERAL_TOOLTIPS.ramadan.bodyAr}</span></p>
               </TooltipContent>
             </Tooltip>
             <Tooltip>
@@ -803,9 +802,8 @@ const DashboardSchedule = () => {
                 </div>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs p-3">
-                <p className="font-medium">{GENERAL_TOOLTIPS.sunnah.title}</p>
-                <p className="text-xs mt-1">{GENERAL_TOOLTIPS.sunnah.body}</p>
-                <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.sunnah.bodyAr}</p>
+                <p className="text-sm text-foreground">{GENERAL_TOOLTIPS.sunnah.body}</p>
+                <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{GENERAL_TOOLTIPS.sunnah.bodyAr}</span></p>
               </TooltipContent>
             </Tooltip>
             <Tooltip>
@@ -828,9 +826,8 @@ const DashboardSchedule = () => {
                 </div>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs p-3">
-                <p className="font-medium">Hours fasted this month</p>
-                <p className="text-xs mt-1">Sum of hours fasted on days where you logged start/end or hours. Shown for the currently viewed calendar month.</p>
-                <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">إجمالي ساعات الصيام</p>
+                <p className="text-sm text-foreground">Sum of hours fasted on days where you logged start/end or hours. Shown for the currently viewed calendar month.</p>
+                <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">إجمالي ساعات الصيام</span></p>
               </TooltipContent>
             </Tooltip>
           </motion.div>
@@ -1622,9 +1619,8 @@ const DashboardSchedule = () => {
                   </div>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs p-3">
-                  <p className="font-medium">{GENERAL_TOOLTIPS.markComplete.title}</p>
-                  <p className="text-xs mt-1">{GENERAL_TOOLTIPS.markComplete.body}</p>
-                  <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.markComplete.bodyAr}</p>
+                  <p className="text-sm text-foreground">{GENERAL_TOOLTIPS.markComplete.body}</p>
+                  <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{GENERAL_TOOLTIPS.markComplete.bodyAr}</span></p>
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
@@ -1635,9 +1631,8 @@ const DashboardSchedule = () => {
                   </div>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs p-3">
-                  <p className="font-medium">{GENERAL_TOOLTIPS.ramadan.title}</p>
-                  <p className="text-xs mt-1">{GENERAL_TOOLTIPS.ramadan.body}</p>
-                  <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.ramadan.bodyAr}</p>
+                  <p className="text-sm text-foreground">{GENERAL_TOOLTIPS.ramadan.body}</p>
+                  <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{GENERAL_TOOLTIPS.ramadan.bodyAr}</span></p>
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
@@ -1648,9 +1643,8 @@ const DashboardSchedule = () => {
                   </div>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs p-3">
-                  <p className="font-medium">{GENERAL_TOOLTIPS.laylatAlQadr.title}</p>
-                  <p className="text-xs mt-1">{GENERAL_TOOLTIPS.laylatAlQadr.body}</p>
-                  <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.laylatAlQadr.bodyAr}</p>
+                  <p className="text-sm text-foreground">{GENERAL_TOOLTIPS.laylatAlQadr.body}</p>
+                  <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{GENERAL_TOOLTIPS.laylatAlQadr.bodyAr}</span></p>
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
@@ -1661,9 +1655,8 @@ const DashboardSchedule = () => {
                   </div>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs p-3">
-                  <p className="font-medium">{GENERAL_TOOLTIPS.sunnah.title}</p>
-                  <p className="text-xs mt-1">{GENERAL_TOOLTIPS.sunnah.body}</p>
-                  <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.sunnah.bodyAr}</p>
+                  <p className="text-sm text-foreground">{GENERAL_TOOLTIPS.sunnah.body}</p>
+                  <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{GENERAL_TOOLTIPS.sunnah.bodyAr}</span></p>
                 </TooltipContent>
               </Tooltip>
               <div className="flex items-center gap-2">

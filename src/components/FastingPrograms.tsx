@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import fastingData from "@/data/fasting-programs.json";
-import { HadithSunnahLink } from "@/components/HadithSunnahLink";
 
 interface FastingProgramsProps {
   onSelectProgram?: (programId: string) => void;
@@ -103,24 +103,28 @@ export const FastingPrograms = ({ onSelectProgram, selectedProgram = "traditiona
             </p>
 
             <div className="grid sm:grid-cols-2 gap-3">
-              {fastingData.sunnahFasting.types.map((type) => (
-                <HadithSunnahLink
-                  key={type.name}
-                  source={type.hadithSource ?? "Sahih al-Bukhari fasting voluntary"}
-                  className="block p-3 rounded-lg bg-background/50 hover:bg-background/70 hover:border-secondary/30 border border-transparent transition-colors cursor-pointer text-left"
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-semibold text-sm">{type.name}</span>
-                    <span className="text-xs text-secondary">{type.frequency}</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">{type.description}</p>
-                  {type.hadithOutline && (
-                    <p className="text-xs text-secondary mt-2 border-t border-border/50 pt-2">
-                      Hadith: {type.hadithOutline}
-                    </p>
-                  )}
-                </HadithSunnahLink>
-              ))}
+              {fastingData.sunnahFasting.types.map((type) => {
+                const slug = (type as { id?: string }).id ?? type.name.toLowerCase().replace(/\s+/g, "-").replace(/&/g, "and");
+                return (
+                  <Link
+                    key={type.name}
+                    to={`/programs/${slug}`}
+                    className="block p-3 rounded-lg bg-background/50 hover:bg-background/70 hover:border-secondary/30 border border-transparent transition-colors cursor-pointer text-left"
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-semibold text-sm">{type.name}</span>
+                      <span className="text-xs text-secondary">{type.frequency}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{type.description}</p>
+                    {type.hadithOutline && (
+                      <p className="text-xs text-secondary mt-2 border-t border-border/50 pt-2">
+                        Hadith: {type.hadithOutline}
+                      </p>
+                    )}
+                    <p className="text-xs text-secondary mt-1">View details →</p>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </div>

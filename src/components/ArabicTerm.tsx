@@ -31,14 +31,17 @@ export const ArabicTerm = ({ term, arabic, transliteration, definition, children
         className="max-w-xs bg-card border-border shadow-elevated p-4 rounded-xl"
       >
         <div className="space-y-2">
-          <div className="flex items-center justify-between gap-4">
-            <span className="font-semibold text-foreground">{term}</span>
-            <span className="font-arabic text-xl text-secondary">{arabic}</span>
-          </div>
-          {transliteration && (
-            <p className="text-sm text-muted-foreground italic">/{transliteration}/</p>
-          )}
           <p className="text-sm text-foreground leading-relaxed">{definition}</p>
+          <div className="pt-2 border-t border-border/50">
+            <p className="text-xs text-muted-foreground mb-0.5">Arabic</p>
+            <div className="flex items-center justify-between gap-4">
+              <span className="font-semibold text-foreground">{term}</span>
+              <span className="font-arabic text-lg text-secondary" dir="rtl">{arabic}</span>
+            </div>
+            {transliteration && (
+              <p className="text-xs text-muted-foreground italic mt-0.5">/{transliteration}/</p>
+            )}
+          </div>
         </div>
       </TooltipContent>
     </Tooltip>

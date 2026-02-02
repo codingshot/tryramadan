@@ -150,7 +150,7 @@ const LearnGlossary = () => {
                           <ArabicHover
                             arabic={item.arabic}
                             transliteration={item.pronunciation}
-                            hint={item.definitionAr ? "Term • المصطلح" : "Translation"}
+                            explanation={item.definition}
                           >
                             {item.term}
                           </ArabicHover>

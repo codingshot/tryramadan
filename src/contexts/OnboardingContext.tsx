@@ -22,6 +22,7 @@ export interface OnboardingState {
   healthWarnings: string[]; // e.g. ["diabetes", "pregnancy"]
   location: LocationResult | null;
   selectedProgram: string; // beginner | intermediate | traditional
+  voluntaryFasting: string[]; // monday-thursday, ayyam-al-beed, etc.
   notifications: {
     suhoor: boolean;
     iftar: boolean;
@@ -49,6 +50,7 @@ const defaultState: OnboardingState = {
   healthWarnings: [],
   location: null,
   selectedProgram: "traditional",
+  voluntaryFasting: [],
   notifications: {
     suhoor: true,
     iftar: true,
@@ -69,6 +71,7 @@ type OnboardingContextValue = {
   setHealthWarnings: (warnings: string[] | ((prev: string[]) => string[])) => void;
   setLocation: (loc: LocationResult | null) => void;
   setSelectedProgram: (id: string) => void;
+  setVoluntaryFasting: (ids: string[] | ((prev: string[]) => string[])) => void;
   setNotifications: (n: Partial<OnboardingState["notifications"]>) => void;
   setPriorities: (p: Partial<OnboardingPriorities>) => void;
   setGoals: (goals: string[]) => void;
@@ -89,6 +92,7 @@ function loadDraft(): OnboardingState | null {
       ...defaultState,
       ...parsed,
       healthWarnings: Array.isArray(parsed.healthWarnings) ? parsed.healthWarnings : defaultState.healthWarnings,
+      voluntaryFasting: Array.isArray(parsed.voluntaryFasting) ? parsed.voluntaryFasting : defaultState.voluntaryFasting,
       priorities: parsed.priorities && typeof parsed.priorities === "object"
         ? { ...defaultPriorities, ...parsed.priorities }
         : defaultPriorities,
@@ -143,6 +147,12 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   const setSelectedProgram = useCallback((selectedProgram: string) => {
     setState((s) => ({ ...s, selectedProgram }));
   }, []);
+  const setVoluntaryFasting = useCallback((voluntaryFasting: string[] | ((prev: string[]) => string[])) => {
+    setState((s) => ({
+      ...s,
+      voluntaryFasting: typeof voluntaryFasting === "function" ? voluntaryFasting(s.voluntaryFasting) : voluntaryFasting,
+    }));
+  }, []);
   const setNotifications = useCallback((n: Partial<OnboardingState["notifications"]>) => {
     setState((s) => ({ ...s, notifications: { ...s.notifications, ...n } }));
   }, []);
@@ -169,6 +179,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     setHealthWarnings,
     setLocation,
     setSelectedProgram,
+    setVoluntaryFasting,
     setNotifications,
     setPriorities,
     setGoals,

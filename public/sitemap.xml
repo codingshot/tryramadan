@@ -24,6 +24,10 @@
   <url><loc>https://tryramadan.app/faq</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://tryramadan.app/emergency</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://tryramadan.app/programs</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://tryramadan.app/programs/monday-thursday</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/programs/ayyam-al-beed</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/programs/day-of-arafah</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/programs/six-days-shawwal</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://tryramadan.app/guides</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://tryramadan.app/personas</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://tryramadan.app/settings</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>

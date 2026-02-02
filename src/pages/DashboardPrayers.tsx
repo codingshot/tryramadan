@@ -114,9 +114,8 @@ const DashboardPrayers = () => {
                 </h1>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs p-3">
-                <p className="font-semibold text-sm">Prayer Times</p>
-                <p className="text-xs text-muted-foreground mt-1">{GENERAL_TOOLTIPS.prayerTimes.body}</p>
-                <p className="text-xs text-muted-foreground mt-1 font-arabic" dir="rtl">{GENERAL_TOOLTIPS.prayerTimes.bodyAr}</p>
+                <p className="text-sm text-foreground">{GENERAL_TOOLTIPS.prayerTimes.body}</p>
+                <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{GENERAL_TOOLTIPS.prayerTimes.bodyAr}</span></p>
               </TooltipContent>
             </Tooltip>
             <p className="text-muted-foreground mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
@@ -149,9 +148,8 @@ const DashboardPrayers = () => {
                     </p>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs p-3">
-                    <p className="font-semibold text-sm">Hijri date</p>
-                    <p className="text-xs text-muted-foreground mt-1">{GENERAL_TOOLTIPS.hijriDate.body}</p>
-                    <p className="text-xs text-muted-foreground mt-1 font-arabic" dir="rtl">{hijriDate.monthAr} · {GENERAL_TOOLTIPS.hijriDate.bodyAr}</p>
+                    <p className="text-sm text-foreground">{GENERAL_TOOLTIPS.hijriDate.body}</p>
+                    <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{hijriDate.monthAr} · {GENERAL_TOOLTIPS.hijriDate.bodyAr}</span></p>
                   </TooltipContent>
                 </Tooltip>
               )}
@@ -328,9 +326,8 @@ const DashboardPrayers = () => {
                 </h3>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs p-3">
-                <p className="font-medium">{GENERAL_TOOLTIPS.adhan.title}</p>
-                <p className="text-xs mt-1 text-muted-foreground">{GENERAL_TOOLTIPS.adhan.body}</p>
-                <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.adhan.bodyAr}</p>
+                <p className="text-sm text-foreground">{GENERAL_TOOLTIPS.adhan.body}</p>
+                <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{GENERAL_TOOLTIPS.adhan.bodyAr}</span></p>
               </TooltipContent>
             </Tooltip>
             <p className="text-sm text-muted-foreground mb-4">

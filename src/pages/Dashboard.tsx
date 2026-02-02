@@ -336,9 +336,8 @@ const Dashboard = () => {
                     <span className="cursor-help border-b border-dotted border-muted-foreground/40">Suhoor: {prayerTimes.imsak}</span>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs p-3">
-                    <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.suhoor.title}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.suhoor.body}</p>
-                    <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{(EATING_TIME_TOOLTIPS.suhoor as { bodyAr?: string }).bodyAr}</p>
+                    <p className="text-sm text-foreground">{EATING_TIME_TOOLTIPS.suhoor.body}</p>
+                    <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{(EATING_TIME_TOOLTIPS.suhoor as { bodyAr?: string }).bodyAr}</span></p>
                   </TooltipContent>
                 </Tooltip>
                 <Tooltip>
@@ -346,9 +345,8 @@ const Dashboard = () => {
                     <span className="cursor-help border-b border-dotted border-muted-foreground/40">{iftarLabel}: {prayerTimes.maghrib}</span>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs p-3">
-                    <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.iftar.title}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.iftar.body}</p>
-                    <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{(EATING_TIME_TOOLTIPS.iftar as { bodyAr?: string }).bodyAr}</p>
+                    <p className="text-sm text-foreground">{EATING_TIME_TOOLTIPS.iftar.body}</p>
+                    <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{(EATING_TIME_TOOLTIPS.iftar as { bodyAr?: string }).bodyAr}</span></p>
                   </TooltipContent>
                 </Tooltip>
                 <PrayerLocationBadge onClickToUpdate={() => setLocationEditorOpen(true)} />
@@ -377,9 +375,8 @@ const Dashboard = () => {
                     </div>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs p-3">
-                    <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.suhoorEnds.title}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.suhoorEnds.body}</p>
-                    <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{(EATING_TIME_TOOLTIPS.suhoorEnds as { bodyAr?: string }).bodyAr}</p>
+                    <p className="text-sm text-foreground">{EATING_TIME_TOOLTIPS.suhoorEnds.body}</p>
+                    <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{(EATING_TIME_TOOLTIPS.suhoorEnds as { bodyAr?: string }).bodyAr}</span></p>
                   </TooltipContent>
                 </Tooltip>
                 <Tooltip>
@@ -390,9 +387,8 @@ const Dashboard = () => {
                     </div>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs p-3">
-                    <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.iftar.title}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.iftar.body}</p>
-                    <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{(EATING_TIME_TOOLTIPS.iftar as { bodyAr?: string }).bodyAr}</p>
+                    <p className="text-sm text-foreground">{EATING_TIME_TOOLTIPS.iftar.body}</p>
+                    <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{(EATING_TIME_TOOLTIPS.iftar as { bodyAr?: string }).bodyAr}</span></p>
                   </TooltipContent>
                 </Tooltip>
                 <Tooltip>
@@ -403,9 +399,8 @@ const Dashboard = () => {
                     </div>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs p-3">
-                    <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.fajr.title}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.fajr.body}</p>
-                    <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{(EATING_TIME_TOOLTIPS.fajr as { bodyAr?: string }).bodyAr}</p>
+                    <p className="text-sm text-foreground">{EATING_TIME_TOOLTIPS.fajr.body}</p>
+                    <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{(EATING_TIME_TOOLTIPS.fajr as { bodyAr?: string }).bodyAr}</span></p>
                   </TooltipContent>
                 </Tooltip>
                 <Tooltip>
@@ -416,9 +411,8 @@ const Dashboard = () => {
                     </div>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs p-3">
-                    <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.maghrib.title}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.maghrib.body}</p>
-                    <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{(EATING_TIME_TOOLTIPS.maghrib as { bodyAr?: string }).bodyAr}</p>
+                    <p className="text-sm text-foreground">{EATING_TIME_TOOLTIPS.maghrib.body}</p>
+                    <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{(EATING_TIME_TOOLTIPS.maghrib as { bodyAr?: string }).bodyAr}</span></p>
                   </TooltipContent>
                 </Tooltip>
               </Link>
@@ -568,9 +562,8 @@ const Dashboard = () => {
                   )
                   : (
                     <>
-                      <p className="font-semibold text-sm">{GENERAL_TOOLTIPS.markComplete.title}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{GENERAL_TOOLTIPS.markComplete.body}</p>
-                      <p className="text-xs text-muted-foreground mt-1 font-arabic" dir="rtl">{GENERAL_TOOLTIPS.markComplete.bodyAr}</p>
+                      <p className="text-sm text-foreground">{GENERAL_TOOLTIPS.markComplete.body}</p>
+                      <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{GENERAL_TOOLTIPS.markComplete.bodyAr}</span></p>
                     </>
                   )}
               </TooltipContent>

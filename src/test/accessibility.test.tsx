@@ -8,13 +8,12 @@ describe("Arabic translations and tooltips", () => {
   it("ArabicHover has focusable trigger for touch and keyboard", () => {
     render(
       <TooltipProvider>
-        <ArabicHover arabic="رمضان">Ramadan</ArabicHover>
+        <ArabicHover arabic="رمضان" explanation="The ninth month of the Islamic calendar; Muslims fast from dawn to sunset.">Ramadan</ArabicHover>
       </TooltipProvider>
     );
     const trigger = screen.getByRole("button", { name: /ramadan/i });
     expect(trigger).toBeInTheDocument();
     expect(trigger).toHaveAttribute("tabIndex", "0");
-    expect(trigger).toHaveAttribute("title", "رمضان");
   });
 
   it("ArabicTerm has focusable trigger for touch and keyboard", () => {

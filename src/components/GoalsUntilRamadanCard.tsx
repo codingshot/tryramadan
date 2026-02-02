@@ -66,9 +66,8 @@ export function GoalsUntilRamadanCard() {
             </h3>
           </TooltipTrigger>
           <TooltipContent className="max-w-xs p-3">
-            <p className="font-medium">{GENERAL_TOOLTIPS.goalsUntilRamadan.title}</p>
-            <p className="text-xs mt-1 text-muted-foreground">{GENERAL_TOOLTIPS.goalsUntilRamadan.body}</p>
-            <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{GENERAL_TOOLTIPS.goalsUntilRamadan.bodyAr}</p>
+            <p className="text-sm text-foreground">{GENERAL_TOOLTIPS.goalsUntilRamadan.body}</p>
+            <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{GENERAL_TOOLTIPS.goalsUntilRamadan.bodyAr}</span></p>
           </TooltipContent>
         </Tooltip>
         <Link
@@ -88,9 +87,8 @@ export function GoalsUntilRamadanCard() {
               </div>
             </TooltipTrigger>
             <TooltipContent className="max-w-xs p-3">
-              <p className="font-medium">{GENERAL_TOOLTIPS.ramadanMubarak.title}</p>
-              <p className="text-xs mt-1 text-muted-foreground">{GENERAL_TOOLTIPS.ramadanMubarak.body}</p>
-              <p className="text-xs text-muted-foreground mt-1 font-arabic" dir="rtl">{GENERAL_TOOLTIPS.ramadanMubarak.bodyAr}</p>
+              <p className="text-sm text-foreground">{GENERAL_TOOLTIPS.ramadanMubarak.body}</p>
+              <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{GENERAL_TOOLTIPS.ramadanMubarak.bodyAr}</span></p>
             </TooltipContent>
           </Tooltip>
           <button
@@ -146,9 +144,8 @@ export function GoalsUntilRamadanCard() {
               </div>
             </TooltipTrigger>
             <TooltipContent className="max-w-xs p-3">
-              <p className="font-medium">{GENERAL_TOOLTIPS.ramadan.title}</p>
-              <p className="text-xs mt-1 text-muted-foreground">{GENERAL_TOOLTIPS.ramadan.body}</p>
-              <p className="text-xs text-muted-foreground mt-1 font-arabic" dir="rtl">{GENERAL_TOOLTIPS.ramadan.bodyAr}</p>
+              <p className="text-sm text-foreground">{GENERAL_TOOLTIPS.ramadan.body}</p>
+              <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{GENERAL_TOOLTIPS.ramadan.bodyAr}</span></p>
             </TooltipContent>
           </Tooltip>
           <button

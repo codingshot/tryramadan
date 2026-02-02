@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Clock, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, Clock, Check, Star } from "lucide-react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 
 /** Only Ramadan-based option; other fasting plans hidden for now. */
@@ -8,9 +8,32 @@ const PROGRAMS = [
   { id: "traditional", name: "Full Ramadan", desc: "Dawn to sunset (Fajr to Maghrib)", hours: "Full", emoji: "🌙" },
 ];
 
+/** Voluntary Sunnah fasting options for onboarding (multi-select). */
+const VOLUNTARY_OPTIONS = [
+  {
+    id: "monday-thursday",
+    name: "Monday & Thursday Fasting",
+    desc: "The Prophet (ﷺ) fasted on Mondays and Thursdays—deeds are presented to Allah on these days.",
+    frequency: "Weekly",
+  },
+  {
+    id: "ayyam-al-beed",
+    name: "Ayyam al-Beed",
+    desc: "Fasting on the 13th, 14th, and 15th of each Islamic lunar month—the 'white days' (full moon).",
+    frequency: "Monthly",
+  },
+];
+
 export default function OnboardingSchedule() {
-  const { state, setSelectedProgram } = useOnboarding();
+  const { state, setSelectedProgram, setVoluntaryFasting } = useOnboarding();
   const navigate = useNavigate();
+  const voluntary = Array.isArray(state.voluntaryFasting) ? state.voluntaryFasting : [];
+
+  const toggleVoluntary = (id: string) => {
+    setVoluntaryFasting((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
 
   const handleContinue = () => {
     navigate("/onboarding/notifications");
@@ -26,7 +49,7 @@ export default function OnboardingSchedule() {
       </Link>
       <h2 className="font-display text-2xl font-bold mb-2">Fasting schedule</h2>
       <p className="text-muted-foreground mb-6">
-        Full Ramadan fast (dawn to sunset). Voluntary Sunnah fasting is available in the app.
+        Choose your Ramadan schedule. You can also add voluntary Sunnah fasting.
       </p>
 
       <div className="space-y-3 mb-6">
@@ -48,6 +71,37 @@ export default function OnboardingSchedule() {
             {state.selectedProgram === prog.id && <Check className="w-5 h-5 text-secondary flex-shrink-0" />}
           </button>
         ))}
+      </div>
+
+      <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+        <Star className="w-4 h-4 text-primary" />
+        Add voluntary Sunnah fasting (optional)
+      </h3>
+      <p className="text-xs text-muted-foreground mb-3">
+        These can be combined with Full Ramadan. Tap to add or remove.
+      </p>
+      <div className="space-y-2 mb-6">
+        {VOLUNTARY_OPTIONS.map((opt) => {
+          const selected = voluntary.includes(opt.id);
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => toggleVoluntary(opt.id)}
+              className={`w-full min-h-[44px] p-4 rounded-xl border-2 text-left transition-all flex items-center gap-3 cursor-pointer touch-manipulation ${
+                selected ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+              }`}
+            >
+              <span className="text-xl shrink-0" aria-hidden>☪️</span>
+              <div className="flex-1">
+                <span className="font-medium text-sm">{opt.name}</span>
+                <span className="text-xs text-secondary ml-2">· {opt.frequency}</span>
+                <p className="text-xs text-muted-foreground mt-0.5">{opt.desc}</p>
+              </div>
+              {selected && <Check className="w-5 h-5 text-primary flex-shrink-0" />}
+            </button>
+          );
+        })}
       </div>
 
       <button

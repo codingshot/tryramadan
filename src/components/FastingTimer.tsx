@@ -222,9 +222,8 @@ export const FastingTimer = ({
                     </span>
                   </TooltipTrigger>
                   <TooltipContent side="top" className="max-w-xs bg-card border-border p-3">
-                    <p className="font-semibold text-sm">{GENERAL_TOOLTIPS.eatingPeriod.title}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{GENERAL_TOOLTIPS.eatingPeriod.body}</p>
-                    <p className="text-xs text-muted-foreground mt-1 font-arabic" dir="rtl">{GENERAL_TOOLTIPS.eatingPeriod.bodyAr}</p>
+                    <p className="text-sm text-foreground">{GENERAL_TOOLTIPS.eatingPeriod.body}</p>
+                    <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{GENERAL_TOOLTIPS.eatingPeriod.bodyAr}</span></p>
                   </TooltipContent>
                 </Tooltip>
               </>
@@ -238,9 +237,8 @@ export const FastingTimer = ({
                     </span>
                   </TooltipTrigger>
                   <TooltipContent side="top" className="max-w-xs bg-card border-border p-3">
-                    <p className="font-semibold text-sm">{GENERAL_TOOLTIPS.fastingPeriod.title}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{GENERAL_TOOLTIPS.fastingPeriod.body}</p>
-                    <p className="text-xs text-muted-foreground mt-1 font-arabic" dir="rtl">{GENERAL_TOOLTIPS.fastingPeriod.bodyAr}</p>
+                    <p className="text-sm text-foreground">{GENERAL_TOOLTIPS.fastingPeriod.body}</p>
+                    <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{GENERAL_TOOLTIPS.fastingPeriod.bodyAr}</span></p>
                   </TooltipContent>
                 </Tooltip>
               </>

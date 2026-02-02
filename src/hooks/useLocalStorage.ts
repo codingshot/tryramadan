@@ -70,6 +70,8 @@ export interface UserPreferences {
   hydrationReminderEnabled: boolean;
   /** Times for hydration reminders (HH:mm), e.g. ["12:00", "15:00", "19:00"]. */
   hydrationReminderTimes: string[];
+  /** Voluntary Sunnah fasting IDs: monday-thursday, ayyam-al-beed, etc. */
+  voluntaryFasting: string[];
 }
 
 export const defaultPreferences: UserPreferences = {
@@ -96,6 +98,7 @@ export const defaultPreferences: UserPreferences = {
   hydrationGoalMl: 0,
   hydrationReminderEnabled: false,
   hydrationReminderTimes: ['12:00', '15:00', '19:00'],
+  voluntaryFasting: [],
 };
 
 const PREFERENCES_KEY = 'tryramadan-preferences';

@@ -4,27 +4,24 @@ import { cn } from "@/lib/utils";
 interface ArabicHoverProps {
   /** English text shown by default */
   children: React.ReactNode;
-  /** Arabic form shown only in tooltip (next to English on hover) */
+  /** Arabic form shown in tooltip (supplementary) */
   arabic: string;
-  /** Short explanation of the English term (shown in tooltip) */
+  /** Explanation of what the term means – primary content in tooltip */
   explanation?: string;
   /** Optional transliteration */
   transliteration?: string;
-  /** Label above explanation (e.g. "Explanation") */
-  explanationLabel?: string;
   className?: string;
 }
 
 /**
- * Shows English only by default; on hover shows Arabic next to English with explanation.
- * Use for page titles, labels, and terms—Arabic appears only on hover with context.
+ * Shows English by default; on hover shows explanation of the term first, then Arabic as supplementary.
+ * Use for Islamic terms—tooltip explains what the word means, not just the Arabic translation.
  */
 export const ArabicHover = ({
   children,
   arabic,
   explanation,
   transliteration,
-  explanationLabel = "Explanation",
   className = "",
 }: ArabicHoverProps) => {
   return (
@@ -51,17 +48,17 @@ export const ArabicHover = ({
         side="top"
         className="max-w-xs bg-card border-border shadow-elevated p-3 rounded-xl"
       >
-        <div className="space-y-1.5">
-          <p className="font-arabic text-lg text-secondary" dir="rtl">{arabic}</p>
-          {transliteration && (
-            <p className="text-sm text-muted-foreground italic">/{transliteration}/</p>
-          )}
+        <div className="space-y-2">
           {explanation && (
-            <>
-              <p className="text-xs text-muted-foreground uppercase tracking-wide">{explanationLabel}</p>
-              <p className="text-sm text-foreground leading-relaxed">{explanation}</p>
-            </>
+            <p className="text-sm text-foreground leading-relaxed">{explanation}</p>
           )}
+          <div className="pt-1 border-t border-border/50">
+            <p className="text-xs text-muted-foreground mb-0.5">Arabic</p>
+            <p className="font-arabic text-base text-secondary" dir="rtl">{arabic}</p>
+            {transliteration && (
+              <p className="text-xs text-muted-foreground italic mt-0.5">/{transliteration}/</p>
+            )}
+          </div>
         </div>
       </TooltipContent>
     </Tooltip>
