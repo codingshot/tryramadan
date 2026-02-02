@@ -11,10 +11,10 @@ import { FastingTimer } from "@/components/FastingTimer";
 import {
   useUserPreferences,
   useFastingProgress,
-  startFastingToday,
+  completeFastingToday,
   breakFastingToday,
   getTodayFastingLog,
-  isFastingToday,
+  getBrokenReasonLabel,
   useTodayData,
 } from "@/hooks/useLocalStorage";
 import { BreakFastReasonDialog } from "@/components/BreakFastReasonDialog";
@@ -60,18 +60,39 @@ const DashboardToday = () => {
   };
   
   const fastingProgress = getFastingProgress();
-  const fastingToday = isFastingToday(progress);
-  const todayLog = getTodayFastingLog(progress);
+  const todayStr = new Date().toISOString().split("T")[0];
+  const todayCompleted = progress.completedDays.includes(todayStr);
+  const todayBrokenEntry = progress.fastingLog?.find((e) => e.date === todayStr && e.status === "broken");
 
-  // Dual countdown: time until Suhoor ends (Fajr) and time until Iftar (Maghrib)
+  // Is currently in fasting window? (after Fajr, before Maghrib) — for timer target
+  const isFastingWindow =
+    prayerTimes &&
+    (() => {
+      const now = new Date();
+      const [fajrH, fajrM] = prayerTimes.fajr.split(":").map(Number);
+      const [maghribH, maghribM] = prayerTimes.maghrib.split(":").map(Number);
+      const fajr = new Date();
+      fajr.setHours(fajrH, fajrM, 0);
+      const maghrib = new Date();
+      maghrib.setHours(maghribH, maghribM, 0);
+      return now >= fajr && now < maghrib;
+    })();
+
+  // Dual countdown: Suhoor end (Fajr) and Iftar (Maghrib) — show "passed" when past
+  const [suhoorPassed, setSuhoorPassed] = useState(false);
+  const [iftarPassed, setIftarPassed] = useState(false);
   useEffect(() => {
     if (!prayerTimes) return;
     const interval = setInterval(() => {
       const now = new Date();
-      const [fajrH, fajrM] = prayerTimes.fajr.split(':').map(Number);
-      const [maghribH, maghribM] = prayerTimes.maghrib.split(':').map(Number);
-      const fajr = new Date(); fajr.setHours(fajrH, fajrM, 0);
-      const maghrib = new Date(); maghrib.setHours(maghribH, maghribM, 0);
+      const [fajrH, fajrM] = prayerTimes.fajr.split(":").map(Number);
+      const [maghribH, maghribM] = prayerTimes.maghrib.split(":").map(Number);
+      const fajr = new Date();
+      fajr.setHours(fajrH, fajrM, 0);
+      const maghrib = new Date();
+      maghrib.setHours(maghribH, maghribM, 0);
+      setSuhoorPassed(now >= fajr);
+      setIftarPassed(now >= maghrib);
       if (now < fajr) {
         const d = fajr.getTime() - now.getTime();
         setCountdownSuhoorEnd({ h: Math.floor(d / 36e5), m: Math.floor((d % 36e5) / 6e4) });
@@ -82,9 +103,7 @@ const DashboardToday = () => {
         const d = maghrib.getTime() - now.getTime();
         setCountdownIftar({ h: Math.floor(d / 36e5), m: Math.floor((d % 36e5) / 6e4) });
       } else {
-        const nextMaghrib = new Date(maghrib); nextMaghrib.setDate(nextMaghrib.getDate() + 1);
-        const d = nextMaghrib.getTime() - now.getTime();
-        setCountdownIftar({ h: Math.floor(d / 36e5), m: Math.floor((d % 36e5) / 6e4) });
+        setCountdownIftar({ h: 0, m: 0 });
       }
     }, 1000);
     return () => clearInterval(interval);
@@ -135,41 +154,46 @@ const DashboardToday = () => {
             </p>
           </motion.div>
           
-          {/* Main Timer */}
+          {/* Today's fast status: mark fasted / broke — above countdown */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="mb-8"
+            transition={{ delay: 0.05 }}
+            className="mb-6 p-4 rounded-2xl bg-card border border-border"
           >
-            <FastingTimer 
-              suhoorTime={prayerTimes?.imsak}
-              iftarTime={prayerTimes?.maghrib}
-            />
-            {/* Log that you're fasting */}
-            {!fastingToday && !progress.completedDays.includes(new Date().toISOString().split('T')[0]) && (
-              <button
-                onClick={() => startFastingToday(progress, setProgress)}
-                className="mt-4 w-full py-3 px-4 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
-              >
-                <Moon className="w-5 h-5" />
-                I'm fasting — Log it
-              </button>
-            )}
-            {fastingToday && todayLog && (
-              <div className="mt-4 space-y-2">
-                <div className="py-3 px-4 rounded-xl bg-secondary/20 border border-secondary/40 text-center text-sm">
-                  <span className="font-medium text-secondary">You're fasting</span>
-                  <span className="text-muted-foreground ml-2">
-                    since {new Date(todayLog.startedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+            <h3 className="font-display font-bold text-sm mb-3 text-muted-foreground">
+              Today&apos;s fast • صيام اليوم
+            </h3>
+            {todayCompleted ? (
+              <div className="py-3 px-4 rounded-xl bg-secondary/20 border border-secondary/40 text-center">
+                <span className="font-medium text-secondary">You fasted today ✓</span>
+                <span className="font-arabic text-secondary ml-2">صمت اليوم</span>
+              </div>
+            ) : todayBrokenEntry ? (
+              <div className="py-3 px-4 rounded-xl border border-destructive/40 bg-destructive/10 text-center text-sm">
+                <span className="font-medium text-destructive">You broke your fast today</span>
+                {todayBrokenEntry.brokenReason && (
+                  <span className="text-muted-foreground block mt-1">
+                    {getBrokenReasonLabel(todayBrokenEntry.brokenReason)}
                   </span>
-                </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col sm:flex-row gap-2">
+                <button
+                  onClick={() => completeFastingToday(progress, setProgress)}
+                  className="flex-1 py-3 px-4 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                >
+                  <Moon className="w-5 h-5" />
+                  I fasted today — mark complete
+                </button>
                 <button
                   type="button"
                   onClick={() => setShowBreakFastDialog(true)}
-                  className="w-full py-2.5 px-4 rounded-xl border border-destructive/40 bg-destructive/10 text-destructive font-medium text-sm hover:bg-destructive/20 transition-colors"
+                  className="flex-1 py-3 px-4 rounded-xl border border-destructive/40 bg-destructive/10 text-destructive font-medium hover:bg-destructive/20 transition-colors flex items-center justify-center gap-2"
                 >
-                  I broke my fast — choose reason
+                  <AlertTriangle className="w-5 h-5" />
+                  I broke my fast
                 </button>
               </div>
             )}
@@ -179,20 +203,46 @@ const DashboardToday = () => {
               onSelectReason={(reasonId) => breakFastingToday(progress, setProgress, reasonId)}
             />
           </motion.div>
-          
-          {/* Dual countdown */}
+
+          {/* Main Timer (countdown to Iftar or Suhoor) */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="mb-6"
+          >
+            <FastingTimer
+              suhoorTime={prayerTimes?.imsak}
+              iftarTime={prayerTimes?.maghrib}
+              isFasting={isFastingWindow ?? true}
+            />
+          </motion.div>
+
+          {/* Dual countdown: Suhoor end (Fajr) & Iftar — one label per on mobile to save space */}
           {prayerTimes && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.12 }}
-              className="mb-6 grid grid-cols-2 gap-3 sm:gap-4"
+              className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4"
             >
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="p-4 rounded-2xl bg-card border border-border text-center cursor-help">
-                    <span className="text-xs text-muted-foreground block">Until Suhoor ends (Fajr)</span>
-                    <span className="text-xl font-bold text-secondary">{String(countdownSuhoorEnd.h).padStart(2, '0')}:{String(countdownSuhoorEnd.m).padStart(2, '0')}</span>
+                  <div className="p-3 sm:p-4 rounded-2xl bg-card border border-border text-center cursor-help min-w-0">
+                    <span className="text-xs text-muted-foreground block truncate">
+                      {suhoorPassed ? "Suhoor ended" : "Until suhoor end"}
+                      <span className="hidden sm:inline"> (Fajr)</span>
+                    </span>
+                    {suhoorPassed ? (
+                      <span className="text-base sm:text-lg font-bold text-muted-foreground tabular-nums">
+                        {prayerTimes.fajr}
+                      </span>
+                    ) : (
+                      <span className="text-lg sm:text-xl font-bold text-secondary tabular-nums">
+                        {String(countdownSuhoorEnd.h).padStart(2, "0")}:
+                        {String(countdownSuhoorEnd.m).padStart(2, "0")}
+                      </span>
+                    )}
                   </div>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="max-w-xs p-3">
@@ -202,9 +252,20 @@ const DashboardToday = () => {
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="p-4 rounded-2xl bg-card border border-border text-center cursor-help">
-                    <span className="text-xs text-muted-foreground block">Until Iftar</span>
-                    <span className="text-xl font-bold text-secondary">{String(countdownIftar.h).padStart(2, '0')}:{String(countdownIftar.m).padStart(2, '0')}</span>
+                  <div className="p-3 sm:p-4 rounded-2xl bg-card border border-border text-center cursor-help min-w-0">
+                    <span className="text-xs text-muted-foreground block truncate">
+                      {iftarPassed ? "Iftar passed" : "Until Iftar"}
+                    </span>
+                    {iftarPassed ? (
+                      <span className="text-base sm:text-lg font-bold text-muted-foreground tabular-nums">
+                        {prayerTimes.maghrib}
+                      </span>
+                    ) : (
+                      <span className="text-lg sm:text-xl font-bold text-secondary tabular-nums">
+                        {String(countdownIftar.h).padStart(2, "0")}:
+                        {String(countdownIftar.m).padStart(2, "0")}
+                      </span>
+                    )}
                   </div>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="max-w-xs p-3">
@@ -234,9 +295,9 @@ const DashboardToday = () => {
                 transition={{ duration: 1, ease: "easeOut" }}
               />
             </div>
-            <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-              <span>Fajr {prayerTimes?.fajr || '05:30'}</span>
-              <span>Maghrib {prayerTimes?.maghrib || '18:30'}</span>
+            <div className="flex justify-between mt-2 text-xs text-muted-foreground gap-2">
+              <span className="truncate min-w-0" title="Fajr (dawn)"><span className="sm:inline hidden">Fajr </span>{prayerTimes?.fajr || '05:30'}</span>
+              <span className="truncate min-w-0 shrink-0" title="Maghrib (sunset)"><span className="sm:inline hidden">Maghrib </span>{prayerTimes?.maghrib || '18:30'}</span>
             </div>
             <div className="mt-2 pt-2 border-t border-border">
               <PrayerLocationBadge />
@@ -374,7 +435,7 @@ const DashboardToday = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="grid grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8"
+            className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8"
           >
             <div className="p-4 rounded-2xl bg-card border border-border text-center">
               <Droplets className="w-6 h-6 text-blue-500 mx-auto mb-2" />
@@ -427,13 +488,13 @@ const DashboardToday = () => {
                     to="/emergency"
                     className="flex-1 text-center py-2 rounded-lg bg-destructive text-destructive-foreground text-sm font-medium"
                   >
-                    I need to break fast
+                    I need to break my fast — go to emergency
                   </Link>
                   <button 
                     onClick={() => setShowBreakFast(false)}
                     className="flex-1 py-2 rounded-lg bg-muted text-sm font-medium"
                   >
-                    I'm okay, continue
+                    I'm okay — stay on this page
                   </button>
                 </div>
               </motion.div>

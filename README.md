@@ -1,6 +1,6 @@
 # TryRamadan.app 🌙
 
-> A culturally immersive wellness app for non-Muslims to experience Ramadan fasting through progressive programs, cultural education, and interfaith understanding.
+> **Fast like a Muslim for the holy month of Ramadan.** A culturally immersive wellness app for everyone: progressive fasting, prayer times, cultural education, and interfaith understanding.
 
 **Live URL**: [https://tryramadan.app](https://tryramadan.app)
 
@@ -8,12 +8,16 @@
 
 ## ✨ What's New
 
-- **User Guides (/guides)** – Step-by-step guides for every flow (onboarding, dashboard, today, schedule, prayers, meals, learn, progress, journal, health, settings). Quick links to app sections, arrow-key navigation, SEO & HowTo schema. Add screenshots to `public/guide-assets/`.
+- **User Guides (/guides)** – Step-by-step guides for every flow (onboarding, dashboard, today, schedule, prayers, meals, macros, Quran, culture, personas, settings). Quick links to app sections, arrow-key navigation, SEO & HowTo schema. Add screenshots to `public/guide-assets/`.
 - **Fasting tag & bottom bar** – When you’re fasting, the navbar shows a **Fasting · X days** tag and (on mobile) a **bottom bar** with Iftar countdown and quick actions: Today, Meals, Break fast.
 - **Prayer times per day** – Main timer and “today” views refetch prayer times when the date changes (e.g. after midnight). Schedule and day view use prayer times for the selected day.
 - **Suhoor & Iftar reminders** – Notifications X minutes before Imsak (suhoor end) and Maghrib (iftar). Configurable in **Settings** (on/off and “minutes before”). Uses today’s prayer times; reminders fire when the app is open.
 - **Break fast with reason** – When breaking a fast, choose a predetermined reason (e.g. illness, travel, ate by mistake). Stored in the fasting log.
 - **Goals until Ramadan** – Pre-Ramadan checklist (e.g. read Quran, give charity). Countdown and manage goals at `/dashboard/goals`.
+- **Priorities & dashboard** – Onboarding asks how much to learn, culture/recipes, Quran/glossary, macro tracking, and simplify by location. Dashboard quick access and features are prioritized from Settings → Your priorities.
+- **Personas (/personas)** – Personas and user journeys based on onboarding flows; each persona has a detail page with journey, resources, and links.
+- **Quran & Glossary** – Quran reading plan at `/dashboard/quran`, Islamic glossary at `/dashboard/glossary` and `/learn/glossary`.
+- **Macro tracker (/dashboard/macros)** – Plan meals and track calories/protein/carbs/fat; optional per your priorities.
 - **Journal** – Mood (1–5), write for any date, calendar of entries, export journal as JSON.
 - **Calendar** – Shared Ramadan dates (multi-year), “Go to Ramadan” and “Go to today” next to date, journal dots on schedule. “This Week” links to full calendar.
 - **Add to calendar & export .ics** – Quick-add Suhoor, Iftar, all prayers, Taraweeh, “Get food,” and custom events per day. Export to **Google Calendar, Apple Calendar, or Outlook** (This month, Next 30 days, or Ramadan).
@@ -34,6 +38,7 @@
 - **Location Setup (/onboarding/location):** Set location for accurate prayer/fasting times with address lookup and dropdown selection
 - **Schedule Builder (/onboarding/schedule):** Customize fasting schedule and progression plan (12-hour, 16-hour, 18-hour, or full fasting)
 - **Notification Preferences (/onboarding/notifications):** Set up suhoor, iftar, and hydration reminders
+- **Priorities (/onboarding/priorities):** Choose how much to learn, culture & recipes, Quran & glossary, macro tracking, and simplify by location
 - **Goals & Intentions (/onboarding/goals):** Set personal goals and intentions for the fasting journey
 
 ### Main App Dashboard (Authenticated)
@@ -58,7 +63,7 @@
 ### Core Functionality
 - **🕐 Smart Fasting Timer** - Real-time countdown to Suhoor and Iftar with live prayer times from Aladhan API. **Prayer times refresh per day** (refetch when date changes, e.g. after midnight).
 - **📍 Location-Based Prayer Times** - Auto-detect location or search any city for accurate fasting times. Today’s times and selected-day times (Schedule, Dashboard day view) use the correct date.
-- **📅 Ramadan Countdown** - Shows days until Ramadan with Hijri calendar integration (multi-year via `lib/ramadan.ts`)
+- **📅 Ramadan Countdown** - Shows days until **upcoming Ramadan** (multi-year via `lib/ramadan.ts`); no hardcoded year
 - **⭐ Sunnah Fasting Indicators** - Highlights Monday/Thursday fasting and Ayyam al-Beed (13th-15th lunar)
 - **📊 Progress Tracking** - Track completed fasting days with streak counters, fasting log (with optional break reason), and visual progress
 - **🔔 Notifications** - **Suhoor & Iftar reminders** (X minutes before Imsak/Maghrib; configurable in Settings). **Adhan at prayer times** (Fajr, Dhuhr, Asr, Maghrib, Isha) with optional sound. All use today’s prayer times.
@@ -75,7 +80,7 @@
 - **💪 Health Benefits** - Science-backed benefits of intermittent fasting
 
 ### User Experience
-- **🎯 Onboarding** - Multi-step flow (welcome, mode, knowledge, health, location, schedule, notifications, goals); **works locally** with defensive merge for preferences/notifications
+- **🎯 Onboarding** - Multi-step flow (welcome, mode, knowledge, health, location, schedule, notifications, **priorities**, goals); **works locally** with defensive merge for preferences/notifications
 - **🔄 Progressive Programs** - Three fasting tracks: Beginner (12h), Intermediate (16h), Full Ramadan
 - **💾 Local Storage** - All preferences, progress, calendar events, journal, and notification settings saved locally
 - **🌐 Bilingual** - English and Arabic (hover for translations). **Tooltips** on Suhoor, Iftar, Fajr, Maghrib, etc. (see `data/eating-times-tooltips.ts`) for learning.
@@ -99,6 +104,8 @@
 7. **Journal** – Use the reflection journal for daily prompts, mood, and gratitude; export your entries (JSON) from the Journal page if you want a backup.
 8. **User Guides** – Visit `/guides` for step-by-step guides to every flow; use quick links to jump into the app.
 9. **Tooltips** – Hover over Suhoor, Iftar, Fajr, Maghrib, and related labels on Dashboard and Today for short explanations in English and Arabic.
+10. **Personas** – Visit `/personas` to see user personas and journeys; each has a detail page with onboarding flow and related resources.
+11. **Your priorities** – In Settings, adjust learning, culture, Quran, macro tracking, and “simplify by location”; use “Apply to dashboard quick access” to reorder links.
 
 ---
 

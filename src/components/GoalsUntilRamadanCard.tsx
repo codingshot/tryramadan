@@ -33,7 +33,7 @@ export function GoalsUntilRamadanCard() {
           to="/dashboard/goals"
           className="text-sm text-secondary hover:underline flex items-center gap-1"
         >
-          Manage <ChevronRight className="w-4 h-4" />
+          Manage goals <ChevronRight className="w-4 h-4" />
         </Link>
       </div>
       {inRamadan ? (
@@ -57,7 +57,7 @@ export function GoalsUntilRamadanCard() {
             className="inline-flex items-center gap-2 py-2 px-4 rounded-xl bg-secondary/20 text-secondary font-medium text-sm hover:bg-secondary/30"
           >
             <Target className="w-4 h-4" />
-            Add goals
+            Add or edit goals
           </Link>
         </>
       ) : (

@@ -88,6 +88,13 @@ describe("User flow checks", () => {
   });
 
   it("dashboard route renders with main content", () => {
+    // Dashboard redirects to onboarding when not complete; set preferences so dashboard content renders
+    const prefs = {
+      onboardingComplete: true,
+      userType: "muslim",
+      theme: "dark",
+    };
+    localStorage.setItem("tryramadan-preferences", JSON.stringify(prefs));
     renderAt("/dashboard", <Dashboard />);
     expect(screen.getByRole("link", { name: /today/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /schedule/i })).toBeInTheDocument();

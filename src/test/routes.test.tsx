@@ -47,6 +47,8 @@ export const ROUTES = [
   "/dashboard/journal",
   "/dashboard/goals",
   "/dashboard/achievements",
+  "/dashboard/quran",
+  "/dashboard/macros",
   "/onboarding/welcome",
   "/onboarding/mode",
   "/onboarding/knowledge",
@@ -54,8 +56,12 @@ export const ROUTES = [
   "/onboarding/location",
   "/onboarding/schedule",
   "/onboarding/notifications",
+  "/onboarding/priorities",
   "/onboarding/goals",
+  "/dashboard/glossary",
   "/guides",
+  "/personas",
+  "/personas/non-muslim-curious",
 ] as const;
 
 describe("Routes", () => {
@@ -138,6 +144,8 @@ describe("Route list", () => {
     expect(ROUTES).toContain("/privacy");
     expect(ROUTES).toContain("/dashboard");
     expect(ROUTES).toContain("/dashboard/prayers");
+    expect(ROUTES).toContain("/dashboard/quran");
+    expect(ROUTES).toContain("/dashboard/macros");
     expect(ROUTES).toContain("/learn/glossary");
     expect(ROUTES).toContain("/learn/hadith");
     expect(ROUTES).toContain("/health-safety");

@@ -47,7 +47,7 @@ export function PWAInstallBanner() {
             disabled={installing}
             className="bg-primary text-primary-foreground hover:bg-primary/90"
           >
-            {installing ? "Installing…" : "Install app"}
+            {installing ? "Installing…" : "Install app on home screen"}
           </Button>
           <button
             type="button"

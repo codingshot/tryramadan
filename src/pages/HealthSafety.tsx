@@ -207,7 +207,7 @@ const HealthSafety = () => {
               className="flex items-center justify-center gap-2 w-full p-4 rounded-2xl border-2 border-destructive/50 text-destructive hover:bg-destructive/10 transition-colors"
             >
               <AlertTriangle className="w-5 h-5" />
-              Access Emergency Break Fast Resources
+              I need to break my fast — open emergency resources
             </Link>
           </motion.div>
         </div>

@@ -2,14 +2,15 @@ import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { 
-  ArrowLeft, Coffee, Utensils, Clock, ShoppingCart, 
+  ArrowLeft, Clock, ShoppingCart, Sunrise, Sunset,
   Flame, Plus, Heart, Filter, Globe, BookOpen
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import recipesData from "@/data/recipes.json";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useRecipeFavorites, useDayMealPlans } from "@/hooks/useLocalStorage";
+import { useRecipeFavorites, useDayMealPlans, useDayFoodLog } from "@/hooks/useLocalStorage";
+import { parseNutrient } from "@/lib/cultureRecipes";
 import { toast } from "sonner";
 import {
   Select,
@@ -18,6 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { PageSEO } from "@/components/PageSEO";
 
 type MealType = "suhoor" | "iftar";
@@ -46,8 +50,19 @@ const DashboardMeals = () => {
   const [selectedRecipes, setSelectedRecipes] = useState<number[]>([]);
   const [favorites, setFavorites] = useRecipeFavorites();
   const [mealPlans, setMealPlans] = useDayMealPlans();
+  const [foodLogs, setFoodLogs] = useDayFoodLog();
   const [regionFilter, setRegionFilter] = useState<string>("all");
   const [dietaryFilter, setDietaryFilter] = useState<string>("all");
+  const [showCreateMeal, setShowCreateMeal] = useState(false);
+  const [customMeal, setCustomMeal] = useState({
+    name: "",
+    mealType: "suhoor" as MealType,
+    cal: "",
+    protein: "",
+    carbs: "",
+    fat: "",
+    portions: "1",
+  });
   const today = new Date().toISOString().split("T")[0];
 
   const baseRecipes = activeTab === "suhoor" ? allSuhoor : allIftar;
@@ -112,6 +127,80 @@ const DashboardMeals = () => {
     toast.success(`Added ${selectedRecipes.length} recipe(s) to today's ${activeTab}.`);
   };
 
+  /** Add a recipe to today's food log (macro tracker) and optionally to meal plan notes */
+  const addRecipeToFoodLog = (recipe: Recipe, mealType: MealType, alsoAddToPlan = true) => {
+    const cal = recipe.nutrition?.calories ?? 0;
+    const protein = parseNutrient(recipe.nutrition?.protein);
+    const carbs = parseNutrient(recipe.nutrition?.carbs);
+    const fat = parseNutrient(recipe.nutrition?.fat);
+    const entry = {
+      id: `${Date.now()}-${mealType}-${recipe.id}`,
+      type: "recipe" as const,
+      mealType,
+      name: recipe.name,
+      portions: 1,
+      caloriesPerPortion: cal,
+      proteinPerPortion: protein || undefined,
+      carbsPerPortion: carbs || undefined,
+      fatPerPortion: fat || undefined,
+      recipeId: `${mealType}-${recipe.id}`,
+    };
+    setFoodLogs((prev) => {
+      const day = prev[today] || { suhoor: [], iftar: [] };
+      const list = mealType === "suhoor" ? [...day.suhoor, entry] : [...day.iftar, entry];
+      return { ...prev, [today]: { ...day, [mealType]: list } };
+    });
+    if (alsoAddToPlan) {
+      setMealPlans((prev) => {
+        const current = prev[today] || {};
+        const existing = (mealType === "suhoor" ? current.suhoor : current.iftar) || "";
+        const merged = existing ? `${existing}, ${recipe.name}` : recipe.name;
+        return { ...prev, [today]: { ...current, [mealType]: merged } };
+      });
+    }
+    toast.success(`Added ${recipe.name} to today's food log and meal plan.`);
+  };
+
+  /** Create your own meal: add to food log (macro tracker) and meal plan */
+  const submitCreateOwnMeal = () => {
+    const name = customMeal.name.trim() || "My meal";
+    const cal = parseInt(customMeal.cal, 10) || 0;
+    const portions = Math.max(0.1, parseFloat(customMeal.portions) || 1);
+    const protein = parseFloat(customMeal.protein) || 0;
+    const carbs = parseFloat(customMeal.carbs) || 0;
+    const fat = parseFloat(customMeal.fat) || 0;
+    if (cal <= 0 && !protein && !carbs && !fat) {
+      toast.info("Enter at least calories or one macro.");
+      return;
+    }
+    const mealType = customMeal.mealType;
+    const entry = {
+      id: `custom-${Date.now()}`,
+      type: "custom" as const,
+      mealType,
+      name,
+      portions,
+      caloriesPerPortion: cal,
+      proteinPerPortion: protein || undefined,
+      carbsPerPortion: carbs || undefined,
+      fatPerPortion: fat || undefined,
+    };
+    setFoodLogs((prev) => {
+      const day = prev[today] || { suhoor: [], iftar: [] };
+      const list = mealType === "suhoor" ? [...day.suhoor, entry] : [...day.iftar, entry];
+      return { ...prev, [today]: { ...day, [mealType]: list } };
+    });
+    setMealPlans((prev) => {
+      const current = prev[today] || {};
+      const existing = (mealType === "suhoor" ? current.suhoor : current.iftar) || "";
+      const merged = existing ? `${existing}, ${name}` : name;
+      return { ...prev, [today]: { ...current, [mealType]: merged } };
+    });
+    setCustomMeal({ name: "", mealType: "suhoor", cal: "", protein: "", carbs: "", fat: "", portions: "1" });
+    setShowCreateMeal(false);
+    toast.success(`Added "${name}" to today's food log and meal plan.`);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <PageSEO
@@ -164,11 +253,12 @@ const DashboardMeals = () => {
                   ? 'border-secondary bg-secondary/10' 
                   : 'border-border hover:border-secondary/50'
               }`}
+              aria-label="Suhoor — morning meal"
             >
-              <Coffee className="w-5 h-5" />
+              <Sunrise className="w-5 h-5 shrink-0" aria-hidden />
               <div className="text-left">
                 <span className="font-bold block">Suhoor</span>
-                <span className="text-xs text-muted-foreground font-arabic">السحور</span>
+                <span className="text-xs text-muted-foreground font-arabic">السحور · morning</span>
               </div>
             </button>
             <button
@@ -178,11 +268,12 @@ const DashboardMeals = () => {
                   ? 'border-secondary bg-secondary/10' 
                   : 'border-border hover:border-secondary/50'
               }`}
+              aria-label="Iftar — evening meal"
             >
-              <Utensils className="w-5 h-5" />
+              <Sunset className="w-5 h-5 shrink-0" aria-hidden />
               <div className="text-left">
                 <span className="font-bold block">Iftar</span>
-                <span className="text-xs text-muted-foreground font-arabic">الإفطار</span>
+                <span className="text-xs text-muted-foreground font-arabic">الإفطار · evening</span>
               </div>
             </button>
           </motion.div>
@@ -192,13 +283,14 @@ const DashboardMeals = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.12 }}
-            className="flex flex-wrap gap-3 mb-6"
+            className="flex flex-wrap items-center gap-3 mb-6"
+            aria-label="Filter recipes"
           >
             <div className="flex items-center gap-2">
-              <Globe className="w-4 h-4 text-muted-foreground" />
+              <Label htmlFor="filter-region" className="text-xs text-muted-foreground whitespace-nowrap">Region</Label>
               <Select value={regionFilter} onValueChange={setRegionFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Region" />
+                <SelectTrigger id="filter-region" className="w-[180px]" aria-label="Filter by region">
+                  <SelectValue placeholder="All regions" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All regions</SelectItem>
@@ -209,10 +301,10 @@ const DashboardMeals = () => {
               </Select>
             </div>
             <div className="flex items-center gap-2">
-              <Filter className="w-4 h-4 text-muted-foreground" />
+              <Label htmlFor="filter-diet" className="text-xs text-muted-foreground whitespace-nowrap">Diet</Label>
               <Select value={dietaryFilter} onValueChange={setDietaryFilter}>
-                <SelectTrigger className="w-[160px]">
-                  <SelectValue placeholder="Diet" />
+                <SelectTrigger id="filter-diet" className="w-[160px]" aria-label="Filter by diet">
+                  <SelectValue placeholder="All" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All</SelectItem>
@@ -222,6 +314,145 @@ const DashboardMeals = () => {
                 </SelectContent>
               </Select>
             </div>
+            <span className="text-sm text-muted-foreground">
+              {recipes.length} {recipes.length === 1 ? "recipe" : "recipes"}
+            </span>
+            {(regionFilter !== "all" || dietaryFilter !== "all") && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => { setRegionFilter("all"); setDietaryFilter("all"); }}
+              >
+                Clear filters
+              </Button>
+            )}
+          </motion.div>
+
+          {/* Create your own meal — add to food log (macro tracker) and meal plan */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.13 }}
+            className="mb-8 p-4 rounded-2xl bg-card border border-border"
+          >
+            <button
+              type="button"
+              onClick={() => setShowCreateMeal(!showCreateMeal)}
+              className="w-full flex items-center justify-between font-medium text-left"
+              aria-expanded={showCreateMeal}
+            >
+              <span className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-secondary" />
+                Create your own meal
+              </span>
+              <span className="text-sm text-muted-foreground">
+                {showCreateMeal ? "Hide" : "Add custom meal to macro tracker & plan"}
+              </span>
+            </button>
+            {showCreateMeal && (
+              <div className="mt-4 pt-4 border-t border-border space-y-3">
+                <p className="text-xs text-muted-foreground">
+                  Add a custom meal for today. It will appear in your food log (macro tracker) on the Schedule page and in your meal plan notes.
+                </p>
+                <div className="flex flex-wrap gap-2 items-center">
+                  <Label className="text-xs shrink-0">Meal</Label>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant={customMeal.mealType === "suhoor" ? "secondary" : "outline"}
+                      size="sm"
+                      onClick={() => setCustomMeal((c) => ({ ...c, mealType: "suhoor" }))}
+                    >
+                      Suhoor
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={customMeal.mealType === "iftar" ? "secondary" : "outline"}
+                      size="sm"
+                      onClick={() => setCustomMeal((c) => ({ ...c, mealType: "iftar" }))}
+                    >
+                      Iftar
+                    </Button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  <div className="col-span-2 sm:col-span-1">
+                    <Label className="text-xs">Name</Label>
+                    <Input
+                      placeholder="e.g. Homemade soup"
+                      value={customMeal.name}
+                      onChange={(e) => setCustomMeal((c) => ({ ...c, name: e.target.value }))}
+                      className="mt-0.5"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Cal</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      placeholder="0"
+                      value={customMeal.cal}
+                      onChange={(e) => setCustomMeal((c) => ({ ...c, cal: e.target.value }))}
+                      className="mt-0.5"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Portions</Label>
+                    <Input
+                      type="number"
+                      step="0.5"
+                      min={0.1}
+                      placeholder="1"
+                      value={customMeal.portions}
+                      onChange={(e) => setCustomMeal((c) => ({ ...c, portions: e.target.value }))}
+                      className="mt-0.5"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Protein (g)</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      placeholder="0"
+                      value={customMeal.protein}
+                      onChange={(e) => setCustomMeal((c) => ({ ...c, protein: e.target.value }))}
+                      className="mt-0.5"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Carbs (g)</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      placeholder="0"
+                      value={customMeal.carbs}
+                      onChange={(e) => setCustomMeal((c) => ({ ...c, carbs: e.target.value }))}
+                      className="mt-0.5"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Fat (g)</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      placeholder="0"
+                      value={customMeal.fat}
+                      onChange={(e) => setCustomMeal((c) => ({ ...c, fat: e.target.value }))}
+                      className="mt-0.5"
+                    />
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button type="button" size="sm" onClick={submitCreateOwnMeal}>
+                    Add to food log & meal plan
+                  </Button>
+                  <Button type="button" variant="ghost" size="sm" onClick={() => setShowCreateMeal(false)}>
+                    Cancel (don't add)
+                  </Button>
+                </div>
+              </div>
+            )}
           </motion.div>
 
           {/* Meal tips */}
@@ -313,6 +544,24 @@ const DashboardMeals = () => {
                       </TooltipTrigger>
                       <TooltipContent>
                         {selectedRecipes.includes(recipe.id) ? "Remove from meal plan" : "Add to meal plan"}
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            addRecipeToFoodLog(recipe, activeTab);
+                          }}
+                          className="p-2 rounded-full transition-colors bg-muted hover:bg-primary/20 text-primary"
+                          aria-label={`Add ${recipe.name} to food log and macro tracker`}
+                        >
+                          <Flame className="w-4 h-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        Add to today's food log (macro tracker) & meal plan
                       </TooltipContent>
                     </Tooltip>
                   </div>
@@ -421,7 +670,7 @@ const DashboardMeals = () => {
                 onClick={addSelectedToTodaySchedule}
                 className="w-full py-3 px-4 rounded-2xl border-2 border-secondary bg-secondary/10 text-secondary font-medium hover:bg-secondary/20 transition-colors"
               >
-                Add selected to today's schedule ({activeTab})
+                Add selected recipes to today's meal plan ({activeTab})
               </button>
             </motion.div>
           )}

@@ -59,7 +59,7 @@ export const guides: Guide[] = [
       },
       {
         title: "Complete onboarding",
-        body: "Follow the onboarding steps: Welcome, Mode (new/muslim), Knowledge, Health, Location, Schedule, Notifications, and Goals. You can change most of these later in Settings.",
+        body: "Follow the onboarding steps: Welcome, Mode (new/muslim), Knowledge, Health, Location, Schedule, Notifications, Priorities, and Goals. You can change most of these later in Settings.",
         image: `${ASSETS}/onboarding-welcome.png`,
         quickLink: { path: "/onboarding", label: "Open Onboarding" },
       },
@@ -76,7 +76,7 @@ export const guides: Guide[] = [
     title: "Onboarding Flow Guide",
     shortDescription: "Walk through each onboarding step.",
     description:
-      "Complete guide to the TryRamadan onboarding flow: welcome, experience mode, knowledge check, health disclaimer, location, Ramadan schedule, notifications, and pre-Ramadan goals. Includes quick links to each section.",
+      "Complete guide to the TryRamadan onboarding flow: welcome, experience mode, knowledge check, health disclaimer, location, Ramadan schedule, notifications, priorities (learning, culture, Quran, macro tracking), and pre-Ramadan goals. Includes quick links to each section.",
     category: "onboarding",
     relatedSlugs: ["getting-started", "dashboard-overview", "settings"],
     steps: [
@@ -119,9 +119,40 @@ export const guides: Guide[] = [
         quickLink: { path: "/onboarding/notifications", label: "Open Notifications" },
       },
       {
+        title: "Priorities",
+        body: "Choose how much to learn, interest in culture & recipes, Quran & glossary, macro tracking, and whether to simplify by location. This prioritizes your dashboard and features.",
+        quickLink: { path: "/onboarding/priorities", label: "Open Priorities" },
+      },
+      {
         title: "Goals",
         body: "Set optional pre-Ramadan goals (e.g. read about Ramadan, adjust sleep). You can manage goals from the dashboard.",
         quickLink: { path: "/onboarding/goals", label: "Open Goals" },
+      },
+    ],
+  },
+  {
+    slug: "personas-and-journeys",
+    title: "Personas & User Journeys",
+    shortDescription: "See who uses TryRamadan and their journeys.",
+    description:
+      "TryRamadan personas and user journeys: Non-Muslim curious, Muslim observer, health & wellness, culture & food, Quran & learning. Each persona has a detail page with onboarding flow, journey phases, and related resources. Data from personas.json.",
+    category: "general",
+    relatedSlugs: ["getting-started", "onboarding-flow", "dashboard-overview"],
+    steps: [
+      {
+        title: "Open Personas",
+        body: "Visit /personas to see all personas. Each card shows a short journey and key resources; tap “View journey” for the full persona page.",
+        quickLink: { path: "/personas", label: "Open Personas" },
+      },
+      {
+        title: "Persona detail page",
+        body: "On a persona page you’ll see: journey phases (Discover → Set up → Daily use → …), onboarding steps in order, typical goals, and related resources (Learn, Culture, Recipes, etc.).",
+        quickLink: { path: "/personas/non-muslim-curious", label: "Example: Non-Muslim curious" },
+      },
+      {
+        title: "Use it for design or support",
+        body: "Personas help align onboarding flows and dashboard with user types. Share persona links when guiding users (e.g. “If you’re here for culture, see Culture & food explorer”).",
+        quickLink: { path: "/personas", label: "Back to Personas" },
       },
     ],
   },
@@ -157,7 +188,7 @@ export const guides: Guide[] = [
       },
       {
         title: "Quick links",
-        body: "Use the grid to open Today’s Fast, Schedule, Prayers, Meals, Learn, Progress, Culture, Health, Journal, and Goals.",
+        body: "Use the grid to open Today’s Fast, Schedule, Prayers, Meals, Macros (macro tracker), Learn, Quran, Progress, Culture, Health, Journal, Achievements, and Goals.",
         quickLink: { path: "/dashboard", label: "Open Dashboard" },
       },
     ],
@@ -267,6 +298,11 @@ export const guides: Guide[] = [
         title: "Recipe cards",
         body: "Tap a recipe card to open the full recipe: ingredients, steps, and tips. Use “Recipes” in the app or footer to browse all recipes.",
         quickLink: { path: "/recipes", label: "Browse Recipes" },
+      },
+      {
+        title: "Add to food log & macro tracker",
+        body: "From a recipe card you can add it to today’s food log and meal plan for macro tracking. For full planning and logging (planned vs actual, Suhoor/Iftar/between meals), use the Macro Tracker from the dashboard.",
+        quickLink: { path: "/dashboard/macros", label: "Open Macro Tracker" },
       },
     ],
   },
@@ -387,6 +423,11 @@ export const guides: Guide[] = [
         body: "Switch between light, dark, or system theme. Changes apply immediately.",
         quickLink: { path: "/settings", label: "Open Settings" },
       },
+      {
+        title: "Language & region",
+        body: "Set your country and UI language (e.g. English, Arabic) for display. Affects date and number formatting and labels.",
+        quickLink: { path: "/settings", label: "Open Settings" },
+      },
     ],
   },
   {
@@ -407,6 +448,151 @@ export const guides: Guide[] = [
         title: "Filter and open",
         body: "Filter by Suhoor or Iftar. Tap a recipe to see ingredients, steps, and tips. Use “Meals” in the dashboard for daily suggestions.",
         quickLink: { path: "/recipes", label: "Open Recipes" },
+      },
+    ],
+  },
+  {
+    slug: "macro-tracker",
+    title: "Macro Tracker",
+    shortDescription: "Plan meals and track macros: planned vs actual, goals, Suhoor/Iftar/between.",
+    description:
+      "How to use the Macro Tracker: add items to your daily plan (meal prep), log what you actually eat (Suhoor, Iftar, between meals), compare planned vs actual vs daily goals, and navigate by day. Quick add for each meal type.",
+    category: "dashboard",
+    relatedSlugs: ["meals-recipes", "dashboard-overview", "progress-goals"],
+    steps: [
+      {
+        title: "Open Macro Tracker",
+        body: "From the dashboard, tap “Macros”. You’ll see the day selector, daily goals, and sections for plan, logs, and comparison.",
+        quickLink: { path: "/dashboard/macros", label: "Open Macro Tracker" },
+      },
+      {
+        title: "Add to plan",
+        body: "Use “Add to plan for this day” to plan what you intend to eat. Choose Suhoor, Iftar, or Between meals; enter name, calories, portions, and optional protein/carbs/fat. Tap “Add to plan”.",
+        quickLink: { path: "/dashboard/macros", label: "Open Macro Tracker" },
+      },
+      {
+        title: "Meal prep plan (planned)",
+        body: "Your planned items appear under “Meal prep plan (planned)” by meal type. You can remove items. Planned totals are shown at the bottom.",
+        quickLink: { path: "/dashboard/macros", label: "Open Macro Tracker" },
+      },
+      {
+        title: "Quick add actual food",
+        body: "Under “Actual food eaten (logs)”, tap Suhoor, Iftar, or Between meals to open the quick-add form. Enter what you ate (name, cal, portions, P/C/F) and tap “Add to log”.",
+        quickLink: { path: "/dashboard/macros", label: "Open Macro Tracker" },
+      },
+      {
+        title: "Day navigation & goals",
+        body: "Use the day arrows to view or edit any date. Daily goals are shown at the top; “This day: planned vs actual vs goals” shows progress bars for calories and macros.",
+        quickLink: { path: "/dashboard/macros", label: "Open Macro Tracker" },
+      },
+    ],
+  },
+  {
+    slug: "quran",
+    title: "Quran Reading Plan",
+    shortDescription: "Follow a day-by-day juz plan with Arabic and translation.",
+    description:
+      "How to use the Quran page: select a day (1–30), sync with Ramadan day, view the corresponding juz, read a short in-app preview with Arabic and English translation, and open the full juz on Quran.com.",
+    category: "dashboard",
+    relatedSlugs: ["dashboard-overview", "today-fast"],
+    steps: [
+      {
+        title: "Open Quran",
+        body: "From the dashboard, tap “Quran”. You’ll see the day selector and the current juz for that day (Day N / Juz N of 30).",
+        quickLink: { path: "/dashboard/quran", label: "Open Quran" },
+      },
+      {
+        title: "Sync with Ramadan day",
+        body: "Use “Sync with Ramadan day” to set the selected day to the current Ramadan day. Use the arrows or the 30-day grid to pick any day.",
+        quickLink: { path: "/dashboard/quran", label: "Open Quran" },
+      },
+      {
+        title: "In-app preview",
+        body: "The page shows a short preview of the juz with Arabic (Uthmani) text and English translation. Scroll to read the first verses.",
+        quickLink: { path: "/dashboard/quran", label: "Open Quran" },
+      },
+      {
+        title: "Read on Quran.com",
+        body: "Tap “Read on Quran.com” to open the full juz on Quran.com in a new tab for full reading and translation options.",
+        quickLink: { path: "/dashboard/quran", label: "Open Quran" },
+      },
+    ],
+  },
+  {
+    slug: "culture",
+    title: "Culture & Traditions",
+    shortDescription: "Explore Ramadan traditions by country and recipes.",
+    description:
+      "How to explore culture: use the dashboard Culture page to see featured countries and traditions, open a country page for traditions and recipes, and browse the main Culture list. Links to Recipes and country-specific content.",
+    category: "general",
+    relatedSlugs: ["dashboard-overview", "meals-recipes", "recipes-explore"],
+    steps: [
+      {
+        title: "Open Culture",
+        body: "From the dashboard, tap “Culture”, or use the main nav/footer “Culture”. You’ll see featured countries and a link to the full culture list.",
+        quickLink: { path: "/dashboard/culture", label: "Open Dashboard Culture" },
+      },
+      {
+        title: "Country page",
+        body: "Tap a country to open its page: traditions, Ramadan customs, and linked recipes. Use “Back to Culture” to return to the list.",
+        quickLink: { path: "/culture", label: "Open Culture" },
+      },
+      {
+        title: "Recipes by culture",
+        body: "Recipes can be filtered or linked by country. From a country page you can open individual recipes; from Recipes you can browse by meal type.",
+        quickLink: { path: "/recipes", label: "Open Recipes" },
+      },
+    ],
+  },
+  {
+    slug: "achievements",
+    title: "Achievements & Badges",
+    shortDescription: "View badges and fasting milestones.",
+    description:
+      "How to view achievements: open the Achievements page from the dashboard to see badges and milestones (e.g. first fast, streak, completed days). Link to Progress for full fasting log.",
+    category: "dashboard",
+    relatedSlugs: ["progress-goals", "dashboard-overview"],
+    steps: [
+      {
+        title: "Open Achievements",
+        body: "From the dashboard, tap “Achievements”. You’ll see your badges and milestones (e.g. first fast, streaks, days completed).",
+        quickLink: { path: "/dashboard/achievements", label: "Open Achievements" },
+      },
+      {
+        title: "Progress & log",
+        body: "For your full fasting log, streak, and ring, use the Progress page. Achievements summarizes milestones; Progress shows day-by-day history.",
+        quickLink: { path: "/dashboard/progress", label: "Open Progress" },
+      },
+    ],
+  },
+  {
+    slug: "faq-and-help",
+    title: "FAQ & Help",
+    shortDescription: "Find answers and user guides.",
+    description:
+      "Where to get help: FAQ for common questions (fasting, health, app usage), User Guides for step-by-step flows, Emergency for breaking fast safely, and Settings for location and notifications.",
+    category: "general",
+    relatedSlugs: ["health-safety-emergency", "settings", "getting-started"],
+    steps: [
+      {
+        title: "FAQ",
+        body: "Open the FAQ page for answers on fasting, health, and using TryRamadan. Linked from the footer under Resources.",
+        quickLink: { path: "/faq", label: "Open FAQ" },
+      },
+      {
+        title: "User Guides",
+        body: "For step-by-step guides (onboarding, dashboard, meals, macro tracker, Quran, etc.), open User Guides. Each guide has quick links to the right screen.",
+        quickLink: { path: "/guides", label: "Open User Guides" },
+      },
+      {
+        title: "Emergency",
+        body: "If you need to break your fast now, open the Emergency page for reassurance and steps. Use Health & Safety for general guidance.",
+        quickLink: { path: "/emergency", label: "Open Emergency" },
+      },
+      {
+        title: "Settings",
+        body: "To change location, notification times, theme, or language and region, open Settings from the footer or dashboard.",
+        quickLink: { path: "/settings", label: "Open Settings" },
       },
     ],
   },

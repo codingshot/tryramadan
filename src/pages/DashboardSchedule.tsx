@@ -11,7 +11,6 @@ import {
   PenLine,
   Utensils,
   Target,
-  Coffee,
   Flame,
   CalendarDays,
   X,
@@ -19,6 +18,11 @@ import {
   Plus,
   Trash2,
   Download,
+  Sunrise,
+  Sunset,
+  GripVertical,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -30,10 +34,14 @@ import {
   useDayNutrition,
   useDayFoodLog,
   getDayTotalsFromFoodLog,
+  normalizeDayFoodLog,
   getFastingLogForDate,
   hoursBetween,
   useUserPreferences,
   useCalendarEvents,
+  useDashboardQuickActions,
+  DASHBOARD_QUICK_ACTIONS,
+  DASHBOARD_QUICK_ACTION_IDS,
   type FoodLogEntry,
   type CalendarEvent,
   type CalendarEventType,
@@ -137,6 +145,8 @@ const DashboardSchedule = () => {
   const [noteInput, setNoteInput] = useState("");
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [showGoalsEditor, setShowGoalsEditor] = useState(false);
+  const [showQuickActionsEditor, setShowQuickActionsEditor] = useState(false);
+  const [quickActionOrder, setQuickActionOrder] = useDashboardQuickActions();
   const [addFoodMeal, setAddFoodMeal] = useState<MealType | null>(null);
   const [addFoodCustomInputs, setAddFoodCustomInputs] = useState({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "" });
   const [exportLoading, setExportLoading] = useState(false);
@@ -238,8 +248,22 @@ const DashboardSchedule = () => {
 
   const selectedDayMeals = selectedDate ? mealPlans[selectedDate] : undefined;
   const selectedDayNutrition = selectedDate ? nutrition[selectedDate] : undefined;
-  const selectedDayFoodLog = selectedDate ? foodLogs[selectedDate] : undefined;
+  const selectedDayFoodLog = selectedDate ? normalizeDayFoodLog(foodLogs[selectedDate]) : undefined;
   const selectedDayTotalsFromFood = getDayTotalsFromFoodLog(selectedDayFoodLog);
+  // Effective totals: manual nutrition if any set, otherwise food log totals (for goal comparison)
+  const effectiveDayTotals = selectedDate
+    ? {
+        calories: selectedDayNutrition?.calories ?? selectedDayTotalsFromFood.calories ?? 0,
+        protein: selectedDayNutrition?.protein ?? selectedDayTotalsFromFood.protein ?? 0,
+        carbs: selectedDayNutrition?.carbs ?? selectedDayTotalsFromFood.carbs ?? 0,
+        fat: selectedDayNutrition?.fat ?? selectedDayTotalsFromFood.fat ?? 0,
+      }
+    : { calories: 0, protein: 0, carbs: 0, fat: 0 };
+  const hasEffectiveTotals =
+    effectiveDayTotals.calories > 0 ||
+    effectiveDayTotals.protein > 0 ||
+    effectiveDayTotals.carbs > 0 ||
+    effectiveDayTotals.fat > 0;
   const selectedFastingLog = selectedDate ? getFastingLogForDate(progress, selectedDate) : undefined;
   const selectedDateObj = selectedDate ? new Date(selectedDate + "T12:00:00") : null;
   const selectedIsRamadan = selectedDateObj ? isRamadanDay(selectedDateObj) : false;
@@ -271,7 +295,7 @@ const DashboardSchedule = () => {
       recipeId: recipeKey,
     };
     setFoodLogs((prev) => {
-      const day = prev[selectedDate] || { suhoor: [], iftar: [] };
+      const day = normalizeDayFoodLog(prev[selectedDate]);
       const list = meal === "suhoor" ? [...day.suhoor, entry] : [...day.iftar, entry];
       return {
         ...prev,
@@ -302,7 +326,7 @@ const DashboardSchedule = () => {
       fatPerPortion: fat || undefined,
     };
     setFoodLogs((prev) => {
-      const day = prev[selectedDate] || { suhoor: [], iftar: [] };
+      const day = normalizeDayFoodLog(prev[selectedDate]);
       const list = mealType === "suhoor" ? [...day.suhoor, entry] : [...day.iftar, entry];
       return { ...prev, [selectedDate]: { ...day, [mealType]: list } };
     });
@@ -313,7 +337,7 @@ const DashboardSchedule = () => {
   const removeFoodEntry = (mealType: MealType, id: string) => {
     if (!selectedDate) return;
     setFoodLogs((prev) => {
-      const day = prev[selectedDate] || { suhoor: [], iftar: [] };
+      const day = normalizeDayFoodLog(prev[selectedDate]);
       const list = mealType === "suhoor" ? day.suhoor.filter((e) => e.id !== id) : day.iftar.filter((e) => e.id !== id);
       return { ...prev, [selectedDate]: { ...day, [mealType]: list } };
     });
@@ -322,7 +346,7 @@ const DashboardSchedule = () => {
   const updateFoodPortions = (mealType: MealType, id: string, portions: number) => {
     if (!selectedDate) return;
     setFoodLogs((prev) => {
-      const day = prev[selectedDate] || { suhoor: [], iftar: [] };
+      const day = normalizeDayFoodLog(prev[selectedDate]);
       const list = (mealType === "suhoor" ? day.suhoor : day.iftar).map((e) =>
         e.id === id ? { ...e, portions: Math.max(0.1, portions) } : e
       );
@@ -457,9 +481,26 @@ const DashboardSchedule = () => {
               <span className="block font-arabic text-lg text-secondary mt-1">جدول الصيام</span>
             </h1>
             <p className="text-muted-foreground mt-2">
-              Click any day to view history, meal plan, and macros
+              Click a calendar day to view or edit its meal plan, food log, and macros. Hover stats and labels for tips.
             </p>
           </motion.div>
+
+          {/* Today is Sunnah fasting day (Mon/Thu) — clear notice */}
+          {isSunnahDay(today) && !isRamadanDay(today) && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 p-4 rounded-2xl bg-primary/15 border-2 border-primary/40 flex items-center gap-3"
+            >
+              <Star className="w-6 h-6 text-primary fill-primary shrink-0" aria-hidden />
+              <div>
+                <p className="font-semibold text-primary">Today is a Sunnah fasting day</p>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  {today.getDay() === 1 ? "Monday" : "Thursday"} — voluntary fasting is recommended in Islamic tradition. • يوم صيام سنة
+                </p>
+              </div>
+            </motion.div>
+          )}
 
           {/* Daily goals */}
           <motion.div
@@ -489,7 +530,7 @@ const DashboardSchedule = () => {
                   exit={{ height: 0, opacity: 0 }}
                   className="overflow-hidden"
                 >
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-4 pt-4 border-t border-border">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-4 pt-4 border-t border-border">
                     <div>
                       <Label className="text-xs">Calories</Label>
                       <Input
@@ -544,6 +585,120 @@ const DashboardSchedule = () => {
             </AnimatePresence>
           </motion.div>
 
+          {/* Configure dashboard quick access */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            transition={{ delay: 0.06 }}
+            className="mb-6 p-4 rounded-2xl bg-card border border-border"
+          >
+            <button
+              type="button"
+              onClick={() => setShowQuickActionsEditor(!showQuickActionsEditor)}
+              className="w-full flex items-center justify-between font-medium"
+            >
+              <span className="flex items-center gap-2">
+                <Target className="w-4 h-4 text-secondary" />
+                Dashboard quick access
+              </span>
+              <span className="text-sm text-muted-foreground">
+                {quickActionOrder.length} link{quickActionOrder.length !== 1 ? "s" : ""} on dashboard
+              </span>
+            </button>
+            <p className="text-xs text-muted-foreground mt-1">Choose which links appear on the dashboard and in what order. Configure from this fasting schedule page.</p>
+            <AnimatePresence>
+              {showQuickActionsEditor && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <ul className="mt-4 pt-4 border-t border-border space-y-2">
+                    {quickActionOrder.map((id, index) => {
+                      const action = DASHBOARD_QUICK_ACTIONS.find((a) => a.id === id);
+                      if (!action) return null;
+                      return (
+                        <li
+                          key={action.id}
+                          className="flex items-center gap-2 p-2 rounded-xl bg-muted/50 border border-border"
+                        >
+                          <GripVertical className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden />
+                          <span className="font-medium text-sm flex-1 min-w-0 truncate">{action.label}</span>
+                          <div className="flex items-center gap-0.5 shrink-0">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              disabled={index === 0}
+                              onClick={() => {
+                                if (index === 0) return;
+                                const next = [...quickActionOrder];
+                                [next[index - 1], next[index]] = [next[index], next[index - 1]];
+                                setQuickActionOrder(next);
+                              }}
+                              aria-label="Move up"
+                            >
+                              <ChevronUp className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              disabled={index === quickActionOrder.length - 1}
+                              onClick={() => {
+                                if (index === quickActionOrder.length - 1) return;
+                                const next = [...quickActionOrder];
+                                [next[index], next[index + 1]] = [next[index + 1], next[index]];
+                                setQuickActionOrder(next);
+                              }}
+                              aria-label="Move down"
+                            >
+                              <ChevronDown className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                              onClick={() => setQuickActionOrder(quickActionOrder.filter((i) => i !== id))}
+                              aria-label="Remove from quick access"
+                            >
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  {quickActionOrder.length < DASHBOARD_QUICK_ACTION_IDS.length && (
+                    <div className="mt-3 pt-3 border-t border-border">
+                      <span className="text-xs text-muted-foreground block mb-2">Add back:</span>
+                      <div className="flex flex-wrap gap-2">
+                        {DASHBOARD_QUICK_ACTION_IDS.filter((id) => !quickActionOrder.includes(id)).map((id) => {
+                          const action = DASHBOARD_QUICK_ACTIONS.find((a) => a.id === id);
+                          if (!action) return null;
+                          return (
+                            <Button
+                              key={action.id}
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setQuickActionOrder([...quickActionOrder, action.id])}
+                            >
+                              + {action.label}
+                            </Button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+
           {/* Export to calendar (.ics) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -564,9 +719,10 @@ const DashboardSchedule = () => {
                 onClick={() => handleExportIcal("month")}
                 disabled={exportLoading || !lat || !lng}
                 className="gap-2"
+                aria-label="Download .ics file for current month"
               >
                 {exportLoading ? <span className="animate-pulse">Loading…</span> : <Download className="w-4 h-4" />}
-                This month
+                Download .ics: this month
               </Button>
               <Button
                 variant="outline"
@@ -574,8 +730,9 @@ const DashboardSchedule = () => {
                 onClick={() => handleExportIcal("30days")}
                 disabled={exportLoading || !lat || !lng}
                 className="gap-2"
+                aria-label="Download .ics file for next 30 days"
               >
-                Next 30 days
+                Download .ics: next 30 days
               </Button>
               <Button
                 variant="outline"
@@ -583,8 +740,9 @@ const DashboardSchedule = () => {
                 onClick={() => handleExportIcal("ramadan")}
                 disabled={exportLoading || !lat || !lng}
                 className="gap-2"
+                aria-label="Download .ics file for Ramadan only"
               >
-                Ramadan
+                Download .ics: Ramadan only
               </Button>
             </div>
             {(!lat || !lng) && (
@@ -596,18 +754,18 @@ const DashboardSchedule = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             transition={{ delay: 0.1 }}
-            className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6"
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6"
           >
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="p-4 rounded-2xl bg-secondary/10 border border-secondary/20 text-center cursor-help">
                   <span className="text-2xl md:text-3xl font-bold text-secondary">{ramadanDaysInMonth}</span>
-                  <span className="block text-xs text-muted-foreground">Ramadan this month</span>
+                  <span className="block text-xs text-muted-foreground">Ramadan days this month</span>
                 </div>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
-                <p className="font-medium">Ramadan days</p>
-                <p className="text-xs mt-1">Days of the blessed month in this calendar view. Fast from dawn (Fajr) to sunset (Maghrib).</p>
+                <p className="font-medium">Ramadan days in this month</p>
+                <p className="text-xs mt-1">How many days in the calendar month you’re viewing fall within Ramadan (the blessed month of fasting). Fast from dawn (Fajr) to sunset (Maghrib) on these days.</p>
               </TooltipContent>
             </Tooltip>
             <Tooltip>
@@ -617,19 +775,37 @@ const DashboardSchedule = () => {
                   <span className="block text-xs text-muted-foreground">Sunnah (Mon/Thu)</span>
                 </div>
               </TooltipTrigger>
-              <TooltipContent className="max-w-xs">
+              <TooltipContent className="max-w-xs p-3">
                 <p className="font-medium">Sunnah fasting days</p>
                 <p className="text-xs mt-1">Monday and Thursday are recommended for voluntary fasting outside Ramadan (Prophetic tradition).</p>
+                <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">أيام السنة • الاثنين والخميس</p>
               </TooltipContent>
             </Tooltip>
-            <div className="p-4 rounded-2xl bg-card border border-border text-center">
-              <span className="text-2xl md:text-3xl font-bold text-secondary">{completedCount}</span>
-              <span className="block text-xs text-muted-foreground">Days completed</span>
-            </div>
-            <div className="p-4 rounded-2xl bg-card border border-border text-center">
-              <span className="text-2xl md:text-3xl font-bold">{totalHoursFasted > 0 ? totalHoursFasted.toFixed(1) : "—"}</span>
-              <span className="block text-xs text-muted-foreground">Total hours fasted</span>
-            </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="p-4 rounded-2xl bg-card border border-border text-center cursor-help">
+                  <span className="text-2xl md:text-3xl font-bold text-secondary">{completedCount}</span>
+                  <span className="block text-xs text-muted-foreground">Days completed</span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs">
+                <p className="font-medium">Days you marked as fast completed</p>
+                <p className="text-xs mt-1">Fasting days you’ve marked complete in this month. Tap a day in the calendar and use “Mark day complete” to update.</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="p-4 rounded-2xl bg-card border border-border text-center cursor-help">
+                  <span className="text-2xl md:text-3xl font-bold">{totalHoursFasted > 0 ? totalHoursFasted.toFixed(1) : "—"}</span>
+                  <span className="block text-xs text-muted-foreground">Total hours fasted</span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs p-3">
+                <p className="font-medium">Hours fasted this month</p>
+                <p className="text-xs mt-1">Sum of hours fasted on days where you logged start/end or hours. Shown for the currently viewed calendar month.</p>
+                <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">إجمالي ساعات الصيام</p>
+              </TooltipContent>
+            </Tooltip>
           </motion.div>
 
           {/* Calendar */}
@@ -661,10 +837,10 @@ const DashboardSchedule = () => {
               <div className="flex gap-2 flex-wrap">
                 <Button variant="outline" size="sm" onClick={goToRamadan} className="gap-2">
                   <CalendarDays className="w-4 h-4" />
-                  Go to Ramadan
+                  Jump to Ramadan in calendar
                 </Button>
                 <Button variant="outline" size="sm" onClick={goToToday} className="gap-2">
-                  Go to today
+                  Jump to today in calendar
                 </Button>
               </div>
             </div>
@@ -717,10 +893,14 @@ const DashboardSchedule = () => {
                           ${completed ? "bg-secondary text-secondary-foreground" : ""}
                           ${isSpecialNight && !completed ? "bg-amber-500/20 border border-amber-500/40" : ""}
                           ${isRamadan && !completed && !isSpecialNight ? "bg-secondary/10 hover:bg-secondary/20" : ""}
-                          ${isSunnah && !isRamadan && !completed ? "bg-primary/10 hover:bg-primary/20" : ""}
+                          ${isSunnah && !isRamadan && !completed ? "bg-primary/10 hover:bg-primary/20 ring-2 ring-primary/50 border border-primary/40" : ""}
+                          ${isToday && isSunnah && !isRamadan ? "ring-2 ring-primary ring-offset-2 ring-offset-background" : ""}
                           ${!isRamadan && !isSunnah ? "bg-muted/50 hover:bg-muted text-muted-foreground" : ""}
                         `}
                       >
+                        {isToday && isSunnah && !isRamadan && (
+                          <span className="absolute top-0 left-0 right-0 text-[9px] font-semibold text-primary truncate px-0.5">Today</span>
+                        )}
                         <span className="font-medium">{i + 1}</span>
                         {ramadanDay != null && (
                           <>
@@ -734,7 +914,7 @@ const DashboardSchedule = () => {
                           <Check className="w-3 h-3 absolute top-0.5 right-0.5" />
                         )}
                         {isSunnah && !isRamadan && (
-                          <Star className="w-2 h-2 absolute top-0.5 right-0.5 text-secondary" />
+                          <Star className="w-2.5 h-2.5 absolute top-0.5 right-0.5 text-primary fill-primary" aria-hidden />
                         )}
                         {isSpecialNight && (
                           <Sparkles className="w-2.5 h-2.5 absolute bottom-0.5 text-amber-600" />
@@ -752,11 +932,12 @@ const DashboardSchedule = () => {
                         )}
                       </button>
                     </TooltipTrigger>
-                    <TooltipContent>
+                    <TooltipContent className="max-w-xs p-3">
                       {date.toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
-                      {isRamadan && ` · Ramadan Day ${ramadanDay}`}
+                      {isToday && " · Today"}
+                      {isRamadan && ramadanDay != null && ` · Ramadan Day ${ramadanDay} (of 30)`}
                       {isSpecialNight && " · Laylat al-Qadr"}
-                      {isSunnah && !isRamadan && " · Sunnah day"}
+                      {isSunnah && !isRamadan && (isToday ? " · Today is a Sunnah fasting day (Mon/Thu)" : " · Sunnah day (Mon/Thu)")}
                       {completed && " · Completed ✓"}
                       {hasNote && " · Has note"}
                       {hasJournal && " · Journal entry"}
@@ -778,7 +959,7 @@ const DashboardSchedule = () => {
                 >
                   <div className="p-4 rounded-2xl bg-muted/50 border border-border space-y-4">
                     <div className="flex items-center justify-between flex-wrap gap-2">
-                      <h4 className="font-display font-bold flex items-center gap-2">
+                      <h4 className="font-display font-bold flex items-center gap-2 flex-wrap">
                         {selectedDateObj?.toLocaleDateString("en", {
                           weekday: "long",
                           month: "long",
@@ -786,9 +967,17 @@ const DashboardSchedule = () => {
                           year: "numeric",
                         })}
                         {selectedRamadanDay != null && (
-                          <span className="text-sm font-normal text-secondary">
-                            Ramadan Day {selectedRamadanDay}
-                          </span>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="text-sm font-normal text-secondary cursor-help border-b border-dotted border-secondary/50">
+                                Ramadan Day {selectedRamadanDay} (of 30)
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="font-medium">Day {selectedRamadanDay} of 30 in Ramadan</p>
+                              <p className="text-xs mt-1">This date is the {selectedRamadanDay}{selectedRamadanDay === 1 ? "st" : selectedRamadanDay === 2 ? "nd" : selectedRamadanDay === 3 ? "rd" : "th"} day of the blessed month of fasting.</p>
+                            </TooltipContent>
+                          </Tooltip>
                         )}
                       </h4>
                       <button
@@ -928,19 +1117,28 @@ const DashboardSchedule = () => {
                       )}
                     </div>
 
-                    {/* Meal plan (short text) */}
+                    {/* Meal plan: quick notes for Suhoor & Iftar */}
                     <div>
-                      <Label className="flex items-center gap-2 text-sm font-medium mb-2">
-                        <Utensils className="w-4 h-4" />
-                        Meal plan (notes)
-                      </Label>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Label className="flex items-center gap-2 text-sm font-medium mb-2 cursor-help w-fit">
+<Sunrise className="w-4 h-4" aria-hidden />
+                        <Sunset className="w-4 h-4" aria-hidden />
+                        Meal plan (Suhoor & Iftar)
+                          </Label>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <p className="font-medium">What you plan to eat this day</p>
+                          <p className="text-xs mt-1">Short notes for your pre-dawn meal (Suhoor) and break-fast meal (Iftar). Use the Meals page to browse recipes and add them to your schedule.</p>
+                        </TooltipContent>
+                      </Tooltip>
                       <div className="grid gap-2">
                         <div className="flex items-center gap-2">
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <span className="flex items-center gap-1 text-muted-foreground shrink-0">
-                                <Coffee className="w-4 h-4" />
-                                <span className="text-xs">Suhoor</span>
+                                <Sunrise className="w-4 h-4" aria-hidden />
+                                <span className="text-xs">Suhoor (morning)</span>
                               </span>
                             </TooltipTrigger>
                             <TooltipContent className="max-w-xs">
@@ -967,8 +1165,8 @@ const DashboardSchedule = () => {
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <span className="flex items-center gap-1 text-muted-foreground shrink-0">
-                                <Utensils className="w-4 h-4" />
-                                <span className="text-xs">Iftar</span>
+                                <Sunset className="w-4 h-4" aria-hidden />
+                                <span className="text-xs">Iftar (evening)</span>
                               </span>
                             </TooltipTrigger>
                             <TooltipContent className="max-w-xs">
@@ -996,10 +1194,18 @@ const DashboardSchedule = () => {
 
                     {/* Food log: what you ate with portions & macros */}
                     <div>
-                      <Label className="flex items-center gap-2 text-sm font-medium mb-2">
-                        <Flame className="w-4 h-4" />
-                        Food log (calories & macros)
-                      </Label>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Label className="flex items-center gap-2 text-sm font-medium mb-2 cursor-help w-fit">
+                            <Flame className="w-4 h-4" />
+                            Food log (calories & macros)
+                          </Label>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <p className="font-medium">What you ate and nutrition per portion</p>
+                          <p className="text-xs mt-1">Log Suhoor and Iftar items (from recipes or custom). Set portions; calories and macros are per portion. Totals feed into “Goal today” above.</p>
+                        </TooltipContent>
+                      </Tooltip>
                       <p className="text-xs text-muted-foreground mb-2">
                         Add items from recipes or type custom. Set portions; macros are per portion.
                       </p>
@@ -1009,7 +1215,7 @@ const DashboardSchedule = () => {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <span className="text-xs font-medium text-muted-foreground flex items-center gap-1 mb-1">
-                              <Coffee className="w-3 h-3" /> Suhoor
+                              <Sunrise className="w-3 h-3" aria-hidden /> Suhoor
                             </span>
                           </TooltipTrigger>
                           <TooltipContent className="max-w-xs">
@@ -1038,7 +1244,7 @@ const DashboardSchedule = () => {
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <span className="text-xs font-medium text-muted-foreground flex items-center gap-1 mb-1">
-                              <Utensils className="w-3 h-3" /> Iftar
+                              <Sunset className="w-3 h-3" aria-hidden /> Iftar
                             </span>
                           </TooltipTrigger>
                           <TooltipContent className="max-w-xs">
@@ -1083,10 +1289,10 @@ const DashboardSchedule = () => {
                         {addFoodMeal === null ? (
                           <div className="flex gap-2">
                             <Button type="button" variant="outline" size="sm" onClick={() => setAddFoodMeal("suhoor")} className="gap-1">
-                              <Plus className="w-3 h-3" /> Add Suhoor
+                              <Plus className="w-3 h-3" /> Log a Suhoor item
                             </Button>
                             <Button type="button" variant="outline" size="sm" onClick={() => setAddFoodMeal("iftar")} className="gap-1">
-                              <Plus className="w-3 h-3" /> Add Iftar
+                              <Plus className="w-3 h-3" /> Log an Iftar item
                             </Button>
                           </div>
                         ) : (
@@ -1115,7 +1321,7 @@ const DashboardSchedule = () => {
                                   </SelectContent>
                                 </Select>
                               </div>
-                              <span className="text-xs text-muted-foreground">or custom:</span>
+                              <span className="text-xs font-medium text-muted-foreground">Create your own meal:</span>
                               <Input
                                 placeholder="Name"
                                 className="w-28 h-9"
@@ -1159,10 +1365,10 @@ const DashboardSchedule = () => {
                                 onChange={(e) => setAddFoodCustomInputs((c) => ({ ...c, fat: e.target.value }))}
                               />
                               <Button type="button" size="sm" onClick={() => submitAddFoodCustom(addFoodMeal)}>
-                                Add
+                                Add this meal to food log
                               </Button>
                               <Button type="button" variant="ghost" size="sm" onClick={() => { setAddFoodMeal(null); setAddFoodCustomInputs({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "" }); }}>
-                                Cancel
+                                Cancel (don't add)
                               </Button>
                             </div>
                           </div>
@@ -1176,7 +1382,7 @@ const DashboardSchedule = () => {
                         <Flame className="w-4 h-4" />
                         Calories & macros (estimate or log)
                       </Label>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
                         <div>
                           <Label className="text-xs text-muted-foreground">Calories</Label>
                           <Input
@@ -1266,25 +1472,22 @@ const DashboardSchedule = () => {
                           />
                         </div>
                       </div>
-                      {(selectedDayNutrition?.calories != null ||
-                        selectedDayNutrition?.protein != null) && (
+                      {hasEffectiveTotals && (
                         <div className="mt-2 flex flex-wrap gap-3 text-xs">
                           <span className="text-muted-foreground">Goal today:</span>
                           <span>
                             Cal{" "}
-                            {(selectedDayNutrition?.calories ?? dailyGoals.calories) >= dailyGoals.calories
-                              ? "✓"
-                              : ""}{" "}
-                            {selectedDayNutrition?.calories ?? "—"} / {dailyGoals.calories}
+                            {effectiveDayTotals.calories >= dailyGoals.calories ? "✓" : ""}{" "}
+                            {Math.round(effectiveDayTotals.calories)} / {dailyGoals.calories}
                           </span>
                           <span>
-                            P {selectedDayNutrition?.protein ?? "—"} / {dailyGoals.protein}g
+                            P {Math.round(effectiveDayTotals.protein)} / {dailyGoals.protein}g
                           </span>
                           <span>
-                            C {selectedDayNutrition?.carbs ?? "—"} / {dailyGoals.carbs}g
+                            C {Math.round(effectiveDayTotals.carbs)} / {dailyGoals.carbs}g
                           </span>
                           <span>
-                            F {selectedDayNutrition?.fat ?? "—"} / {dailyGoals.fat}g
+                            F {Math.round(effectiveDayTotals.fat)} / {dailyGoals.fat}g
                           </span>
                         </div>
                       )}

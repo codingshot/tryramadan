@@ -15,7 +15,7 @@ export default function OnboardingWelcome() {
         <span className="block font-arabic text-xl text-secondary mt-2">مرحباً بك في تجربة رمضان</span>
       </h1>
       <p className="text-muted-foreground mb-6">
-        Experience Ramadan through cultural immersion and wellness. We'll personalize your journey with a few quick steps.
+        Fast like a Muslim for the holy month of Ramadan. We'll personalize your journey with a few quick steps.
       </p>
       <ul className="text-left text-sm text-muted-foreground space-y-2 mb-8 max-w-sm mx-auto">
         <li>• Choose your mode (learning or full observance)</li>

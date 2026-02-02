@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { ArrowLeft, Search, BookOpen, Volume2 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -11,6 +11,8 @@ import glossaryData from "@/data/glossary.json";
 import { PageSEO } from "@/components/PageSEO";
 
 const LearnGlossary = () => {
+  const location = useLocation();
+  const fromDashboard = location.pathname.startsWith("/dashboard/glossary");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
@@ -39,11 +41,11 @@ const LearnGlossary = () => {
       <main className="main-content">
         <div className="container mx-auto px-4 max-w-4xl min-w-0">
           <Link 
-            to="/dashboard/learn" 
+            to={fromDashboard ? "/dashboard" : "/dashboard/learn"} 
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Learn
+            {fromDashboard ? "Back to Dashboard" : "Back to Learn"}
           </Link>
           
           <motion.div 

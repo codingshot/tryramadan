@@ -155,7 +155,7 @@ const DashboardProgress = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8"
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8"
           >
             <div className="p-4 rounded-2xl bg-secondary/10 border border-secondary/20 text-center">
               <Calendar className="w-6 h-6 text-secondary mx-auto mb-2" />
@@ -303,7 +303,7 @@ const DashboardProgress = () => {
                   <Trophy className="w-5 h-5 text-secondary" />
                   Earned Badges • الشارات المكتسبة
                 </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                   {unlockedBadges.map((badge, index) => (
                     <motion.div
                       key={badge.id}
@@ -327,7 +327,7 @@ const DashboardProgress = () => {
                 <span className="opacity-50">🔒</span>
                 Upcoming Badges • الشارات القادمة
               </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                 {lockedBadges.map((badge) => (
                   <Tooltip key={badge.id}>
                     <TooltipTrigger asChild>

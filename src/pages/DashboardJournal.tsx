@@ -81,6 +81,26 @@ export default function DashboardJournal() {
   const handleSelectDate = (date: Date | undefined) => {
     if (!date) return;
     const iso = date.toISOString().split("T")[0];
+    if (iso === writeDate) return;
+    // Save current entry before switching date if there are unsaved changes
+    const currentExisting = entries.find((e) => e.date === writeDate);
+    const hasDirtyContent =
+      content.trim() !== (currentExisting?.content ?? "") ||
+      gratitude.trim() !== (currentExisting?.gratitude ?? "") ||
+      mood !== currentExisting?.mood;
+    if (content.trim() && hasDirtyContent) {
+      const newEntry: JournalEntry = {
+        date: writeDate,
+        prompt: getPromptForDate(writeDate),
+        content: content.trim(),
+        gratitude: gratitude.trim() || undefined,
+        mood,
+      };
+      setEntries((prev) => {
+        const rest = prev.filter((e) => e.date !== writeDate);
+        return [...rest, newEntry].sort((a, b) => b.date.localeCompare(a.date));
+      });
+    }
     setWriteDate(iso);
     const existing = entries.find((e) => e.date === iso);
     setContent(existing?.content ?? "");
@@ -146,7 +166,7 @@ export default function DashboardJournal() {
               <ArabicHover arabic="يوميات التأمل">Reflection Journal</ArabicHover>
             </h1>
             <p className="text-muted-foreground mt-2">
-              Daily gratitude and mindfulness. Your entries stay on this device.
+              Daily gratitude and mindfulness. Write for any date — past, today, or future. Your entries stay on this device.
             </p>
           </motion.div>
 
@@ -162,7 +182,7 @@ export default function DashboardJournal() {
               Calendar
             </h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Days with an entry are marked. Click a day to write or edit.
+              Days with an entry are marked. Click any day to write or edit — past, today, or future dates.
             </p>
             <Calendar
               mode="single"
@@ -193,7 +213,11 @@ export default function DashboardJournal() {
             <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
               <h3 className="font-display font-bold flex items-center gap-2">
                 <PenLine className="w-5 h-5 text-secondary" />
-                {writeDate === today ? "Today's prompt" : `Entry for ${writeDate}`}
+                {writeDate === today
+                  ? "Today's prompt"
+                  : writeDate > today
+                    ? `Entry for ${writeDate} (future)`
+                    : `Entry for ${writeDate}`}
               </h3>
               <label className="text-sm text-muted-foreground flex items-center gap-2">
                 Date
@@ -202,6 +226,7 @@ export default function DashboardJournal() {
                   value={writeDate}
                   onChange={(e) => handleSelectDate(new Date(e.target.value + "T12:00:00"))}
                   className="px-2 py-1 rounded-lg border border-border bg-background text-sm"
+                  title="Pick any date — past, today, or future"
                 />
               </label>
             </div>
@@ -262,7 +287,7 @@ export default function DashboardJournal() {
               className="inline-flex items-center gap-2 py-2 px-4 rounded-xl border border-border bg-card hover:bg-muted/50 text-sm font-medium"
             >
               <Download className="w-4 h-4" />
-              Export journal (JSON)
+              Download journal as JSON
             </button>
           </motion.div>
 

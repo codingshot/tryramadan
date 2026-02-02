@@ -15,16 +15,11 @@ import { CTASection } from "@/components/CTASection";
 import { Footer } from "@/components/Footer";
 import { ArabicTerm } from "@/components/ArabicTerm";
 import { useFastingProgress } from "@/hooks/useLocalStorage";
+import { PageSEO } from "@/components/PageSEO";
+import { getRamadanDayNumber } from "@/lib/ramadan";
 import { ChevronRight } from "lucide-react";
 
-const RAMADAN_START = new Date("2025-02-28");
-const RAMADAN_END = new Date("2025-03-29");
 const TOTAL_DAYS = 30;
-
-function getRamadanDayNumber(date: Date): number | null {
-  if (date < RAMADAN_START || date > RAMADAN_END) return null;
-  return Math.floor((date.getTime() - RAMADAN_START.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-}
 
 const Index = () => {
   const navigate = useNavigate();
@@ -55,6 +50,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageSEO
+        title="TryRamadan.app | Fast Like a Muslim for the Holy Month of Ramadan"
+        description="Fast like a Muslim for the holy month of Ramadan. Free app: prayer times, suhoor & iftar, cultural education, and progressive fasting. For everyone."
+        path="/"
+      />
       <Navbar />
       
       {/* Hero Section */}
@@ -126,7 +126,7 @@ const Index = () => {
               />
               <div className="mt-6 flex items-center justify-center gap-2 text-secondary font-medium text-sm">
                 <span>
-                  {hasRealProgress ? "View your progress" : "Go to Dashboard"}
+                  {hasRealProgress ? "View your progress on dashboard" : "Go to dashboard (see today & progress)"}
                 </span>
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>

@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { 
   ArrowLeft, MapPin, Bell, Moon, Sun, Trash2, Download, 
-  ChevronRight, Check, Loader2, Monitor
+  ChevronRight, Check, Loader2, Monitor, Globe, Sunrise, Sunset,
+  BookOpen, Utensils, BookMarked, Scale, Target
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -14,20 +15,46 @@ import {
   useUserPreferences, 
   useFastingProgress, 
   useNotificationSettings,
+  getQuickActionOrderFromPriorities,
+  useDashboardQuickActions,
   defaultPreferences,
   defaultProgress,
-  defaultNotificationSettings
+  defaultNotificationSettings,
+  type LearningPriority,
+  type CultureRecipesPriority,
+  type QuranPriority,
 } from "@/hooks/useLocalStorage";
 import { useNotifications } from "@/hooks/useNotifications";
 import { PageSEO } from "@/components/PageSEO";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { LANGUAGE_OPTIONS, COUNTRY_OPTIONS } from "@/data/languages-and-countries";
 
 const Settings = () => {
+  const location = useLocation();
   const [preferences, setPreferences] = useUserPreferences();
   const [progress, setProgress] = useFastingProgress();
   const [notifSettings, setNotifSettings] = useNotificationSettings();
+  const [, setQuickActionOrder] = useDashboardQuickActions();
   const { permission, requestPermission, supported } = useNotifications();
   const [locationLoading, setLocationLoading] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+  const applyPrioritiesToDashboard = () => {
+    setQuickActionOrder(getQuickActionOrderFromPriorities(preferences));
+  };
+
+  useEffect(() => {
+    if (location.hash === "#settings-notifications") {
+      const el = document.getElementById("settings-notifications");
+      el?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [location.hash]);
   
   const handleLocationSelect = (location: LocationResult) => {
     setPreferences({
@@ -117,6 +144,122 @@ const Settings = () => {
               <ArabicHover arabic="الإعدادات">Settings</ArabicHover>
             </h1>
           </motion.div>
+
+          {/* Your Priorities — personalize dashboard & features */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="p-6 rounded-2xl bg-gradient-to-br from-primary/5 to-secondary/5 border border-border mb-6"
+          >
+            <h2 className="font-display font-bold mb-1 flex items-center gap-2 flex-wrap">
+              <Target className="w-5 h-5 text-secondary flex-shrink-0" />
+              <ArabicHover arabic="أولوياتك">Your priorities</ArabicHover>
+            </h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              We prioritize your dashboard and simplify features based on this. Full access remains under Learn.
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
+                  <BookOpen className="w-3.5 h-3.5" /> Learning
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {(["minimal", "moderate", "deep"] as LearningPriority[]).map((v) => (
+                    <button
+                      key={v}
+                      onClick={() => setPreferences({ ...preferences, learningPriority: v })}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors ${
+                        (preferences.learningPriority ?? "moderate") === v
+                          ? "bg-secondary text-secondary-foreground"
+                          : "bg-muted/70 hover:bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {v}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
+                  <Utensils className="w-3.5 h-3.5" /> Culture & recipes
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {(["none", "some", "lots"] as CultureRecipesPriority[]).map((v) => (
+                    <button
+                      key={v}
+                      onClick={() => setPreferences({ ...preferences, cultureRecipesPriority: v })}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors ${
+                        (preferences.cultureRecipesPriority ?? "some") === v
+                          ? "bg-secondary text-secondary-foreground"
+                          : "bg-muted/70 hover:bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {v}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
+                  <BookMarked className="w-3.5 h-3.5" /> Quran & glossary
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {(["none", "some", "daily"] as QuranPriority[]).map((v) => (
+                    <button
+                      key={v}
+                      onClick={() => setPreferences({ ...preferences, quranPriority: v })}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors ${
+                        (preferences.quranPriority ?? "some") === v
+                          ? "bg-secondary text-secondary-foreground"
+                          : "bg-muted/70 hover:bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {v}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-4 pt-2">
+                <div className="flex items-center gap-2">
+                  <Scale className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm">Macro tracking</span>
+                </div>
+                <button
+                  onClick={() => setPreferences({ ...preferences, macroTrackingEnabled: !(preferences.macroTrackingEnabled ?? false) })}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    preferences.macroTrackingEnabled ? "bg-secondary text-secondary-foreground" : "bg-muted/70 hover:bg-muted"
+                  }`}
+                >
+                  {preferences.macroTrackingEnabled ? "On" : "Off"}
+                </button>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-4">
+                <span className="text-sm">Simplify by location</span>
+                <button
+                  onClick={() => setPreferences({ ...preferences, simplifyByLocation: !(preferences.simplifyByLocation ?? true) })}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    preferences.simplifyByLocation ? "bg-secondary text-secondary-foreground" : "bg-muted/70 hover:bg-muted"
+                  }`}
+                >
+                  {preferences.simplifyByLocation ? "On" : "Off"}
+                </button>
+              </div>
+            </div>
+
+            <button
+              onClick={applyPrioritiesToDashboard}
+              className="mt-4 w-full py-2.5 rounded-xl border-2 border-secondary/50 text-secondary hover:bg-secondary/10 font-medium text-sm flex items-center justify-center gap-2"
+            >
+              <Target className="w-4 h-4" />
+              Apply to dashboard quick access
+            </button>
+          </motion.div>
           
           {/* Location Settings */}
           <motion.div
@@ -164,13 +307,78 @@ const Settings = () => {
               Auto-detect my location
             </button>
           </motion.div>
-          
-          {/* Notification Settings */}
+
+          {/* Language & region */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+            transition={{ delay: 0.15 }}
             className="p-6 rounded-2xl bg-card border border-border mb-6"
+          >
+            <h2 className="font-display font-bold mb-4 flex items-center gap-2 flex-wrap">
+              <Globe className="w-5 h-5 text-secondary flex-shrink-0" />
+              <ArabicHover arabic="اللغة والمنطقة">Language & region</ArabicHover>
+            </h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Display preference. Location above is used for prayer times.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="settings-country" className="text-xs font-medium text-muted-foreground block mb-2">
+                  Country
+                </label>
+                <Select
+                  value={preferences.country ?? "US"}
+                  onValueChange={(v) => setPreferences({ ...preferences, country: v })}
+                >
+                  <SelectTrigger id="settings-country" className="w-full" aria-label="Select country">
+                    <SelectValue placeholder="Select country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {COUNTRY_OPTIONS.map((c) => (
+                      <SelectItem key={c.value} value={c.value}>
+                        <span className="inline-flex items-center gap-2">
+                          <span aria-hidden>{c.flag}</span>
+                          {c.label}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label htmlFor="settings-language" className="text-xs font-medium text-muted-foreground block mb-2">
+                  Language
+                </label>
+                <Select
+                  value={preferences.language ?? "en"}
+                  onValueChange={(v) => setPreferences({ ...preferences, language: v })}
+                >
+                  <SelectTrigger id="settings-language" className="w-full" aria-label="Select language">
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LANGUAGE_OPTIONS.map((lang) => (
+                      <SelectItem key={lang.value} value={lang.value}>
+                        <span className="inline-flex items-center gap-2">
+                          <span aria-hidden>{lang.flag}</span>
+                          {lang.label}
+                        </span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </motion.div>
+          
+          {/* Notification Settings */}
+          <motion.div
+            id="settings-notifications"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="p-6 rounded-2xl bg-card border border-border mb-6 scroll-mt-24"
           >
             <h2 className="font-display font-bold mb-4 flex items-center gap-2 flex-wrap">
               <Bell className="w-5 h-5 text-secondary flex-shrink-0" />
@@ -190,7 +398,10 @@ const Settings = () => {
                 
                 <div className="space-y-3">
                   <label className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-muted/50">
-                    <span className="text-sm">Suhoor reminder</span>
+                    <span className="text-sm flex items-center gap-2">
+                      <Sunrise className="w-4 h-4 text-secondary" aria-hidden />
+                      Suhoor reminder (morning meal)
+                    </span>
                     <div className="flex items-center gap-2">
                       <input
                         type="number"
@@ -212,7 +423,10 @@ const Settings = () => {
                   <p className="text-xs text-muted-foreground px-1">Notify before Imsak (suhoor ends). Uses today&apos;s prayer times.</p>
                   
                   <label className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-muted/50">
-                    <span className="text-sm">Iftar reminder</span>
+                    <span className="text-sm flex items-center gap-2">
+                      <Sunset className="w-4 h-4 text-secondary" aria-hidden />
+                      Iftar reminder (evening meal)
+                    </span>
                     <div className="flex items-center gap-2">
                       <input
                         type="number"

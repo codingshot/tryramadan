@@ -22,7 +22,7 @@ export default defineConfig(({ mode }) => ({
       manifest: {
         name: "TryRamadan.app",
         short_name: "TryRamadan",
-        description: "Experience Ramadan fasting with a free, culturally immersive wellness app",
+        description: "Fast like a Muslim for the holy month of Ramadan. Prayer times, suhoor & iftar, cultural education, progressive fasting.",
         theme_color: "#1a3d2e",
         background_color: "#f8f6f1",
         display: "standalone",

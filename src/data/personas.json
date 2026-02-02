@@ -1,0 +1,161 @@
+{
+  "onboardingSteps": [
+    { "path": "welcome", "label": "Welcome", "description": "Introduction and what to expect" },
+    { "path": "mode", "label": "Mode", "description": "Choose Non-Muslim or Muslim mode" },
+    { "path": "knowledge", "label": "Knowledge", "description": "Quick quiz to tailor content" },
+    { "path": "health", "label": "Health", "description": "Health screening and contraindications" },
+    { "path": "location", "label": "Location", "description": "Set location for prayer and fasting times" },
+    { "path": "schedule", "label": "Schedule", "description": "Fasting program and calendar" },
+    { "path": "notifications", "label": "Notifications", "description": "Suhoor and iftar reminders" },
+    { "path": "priorities", "label": "Priorities", "description": "Learning, culture, Quran, macro tracking" },
+    { "path": "goals", "label": "Goals", "description": "Personal goals and intention" }
+  ],
+  "personas": [
+    {
+      "slug": "non-muslim-curious",
+      "name": "Non-Muslim curious",
+      "shortName": "Curious explorer",
+      "description": "You want to experience Ramadan fasting and learn about the culture without religious obligation. TryRamadan tailors content for learning and wellness.",
+      "icon": "🌱",
+      "mode": "new",
+      "goals": [
+        "Learn about Ramadan culture",
+        "Try intermittent fasting safely",
+        "Support Muslim friends and family",
+        "Spiritual reflection",
+        "Health and wellness",
+        "Build discipline"
+      ],
+      "onboardingStepIds": ["welcome", "mode", "knowledge", "health", "location", "schedule", "notifications", "priorities", "goals"],
+      "journey": [
+        { "phase": "Discover", "description": "Land on TryRamadan, read about fasting like a Muslim for the holy month.", "path": "/" },
+        { "phase": "Set up", "description": "Complete onboarding: choose Non-Muslim mode, knowledge check, health screening, location, schedule, priorities, and goals.", "path": "/onboarding/welcome" },
+        { "phase": "Daily use", "description": "Use the dashboard: countdown, I'm fasting / Break fast, today's plan, Learn, Culture, Recipes.", "path": "/dashboard" },
+        { "phase": "Go deeper", "description": "Explore guides, glossary, hadith, culture by country, and health & safety when needed.", "path": "/guides" }
+      ],
+      "resources": [
+        { "label": "Learn", "path": "/dashboard/learn", "description": "Hadith, glossary, Islamic facts, learning paths" },
+        { "label": "Culture", "path": "/dashboard/culture", "description": "Traditions and recipes by country" },
+        { "label": "Recipes", "path": "/recipes", "description": "Suhoor and iftar ideas by region" },
+        { "label": "Glossary", "path": "/learn/glossary", "description": "Arabic and Islamic terms" },
+        { "label": "Health & safety", "path": "/health-safety", "description": "When to break fast, contraindications" },
+        { "label": "User guides", "path": "/guides", "description": "Step-by-step guides for every flow" },
+        { "label": "FAQ", "path": "/faq", "description": "Common questions and answers" }
+      ]
+    },
+    {
+      "slug": "muslim-observer",
+      "name": "Muslim observer",
+      "shortName": "Muslim mode",
+      "description": "You observe Ramadan and want prayer times, fasting tracking, Quran, and spiritual content in one place. TryRamadan supports full observance.",
+      "icon": "☪️",
+      "mode": "muslim",
+      "goals": [
+        "Learn about Ramadan culture",
+        "Spiritual reflection",
+        "Health and wellness",
+        "Build discipline"
+      ],
+      "onboardingStepIds": ["welcome", "mode", "knowledge", "health", "location", "schedule", "notifications", "priorities", "goals"],
+      "journey": [
+        { "phase": "Discover", "description": "Land on TryRamadan or open the app for the holy month.", "path": "/" },
+        { "phase": "Set up", "description": "Complete onboarding: choose Muslim mode, knowledge check, health, location for accurate prayer times, schedule, notifications, priorities (Quran/glossary), goals.", "path": "/onboarding/welcome" },
+        { "phase": "Daily use", "description": "Dashboard: countdown to iftar, I'm fasting / Break fast, prayer times, Quran, Glossary, today's plan, progress.", "path": "/dashboard" },
+        { "phase": "Observe", "description": "Prayers page, Quran reading plan, hadith, culture, and emergency break-fast if needed.", "path": "/dashboard/prayers" }
+      ],
+      "resources": [
+        { "label": "Prayers", "path": "/dashboard/prayers", "description": "Five daily prayer times for your location" },
+        { "label": "Quran", "path": "/dashboard/quran", "description": "Juz-by-juz reading plan and links to Quran.com" },
+        { "label": "Glossary", "path": "/dashboard/glossary", "description": "Islamic terms (from dashboard)" },
+        { "label": "Hadith", "path": "/learn/hadith", "description": "Prophetic sayings about fasting" },
+        { "label": "Schedule", "path": "/dashboard/schedule", "description": "Calendar, suhoor/iftar times, food log" },
+        { "label": "Meals & recipes", "path": "/dashboard/meals", "description": "Suhoor and iftar recipes by culture" },
+        { "label": "Health & safety", "path": "/health-safety", "description": "When to break fast safely" },
+        { "label": "Emergency", "path": "/emergency", "description": "Break fast safely and get help" }
+      ]
+    },
+    {
+      "slug": "health-wellness",
+      "name": "Health & wellness focus",
+      "shortName": "Wellness",
+      "description": "You're interested in intermittent fasting, nutrition, and wellness during Ramadan. TryRamadan offers macro tracking, hydration, and health checks.",
+      "icon": "💪",
+      "mode": "new",
+      "goals": [
+        "Try intermittent fasting safely",
+        "Health and wellness",
+        "Build discipline"
+      ],
+      "onboardingStepIds": ["welcome", "mode", "knowledge", "health", "location", "schedule", "notifications", "priorities", "goals"],
+      "journey": [
+        { "phase": "Discover", "description": "Find TryRamadan for a structured fasting experience with health in mind.", "path": "/" },
+        { "phase": "Set up", "description": "Onboarding: health screening first, then location, schedule, priorities (enable macro tracking if you want), goals.", "path": "/onboarding/welcome" },
+        { "phase": "Daily use", "description": "Dashboard and Today: fasting timer, hydration, energy check-in, macro tracker, meals and recipes.", "path": "/dashboard/today" },
+        { "phase": "Track", "description": "Schedule page for food log and macros; Health page for wellness and symptoms; Programs for progressive fasting.", "path": "/dashboard/schedule" }
+      ],
+      "resources": [
+        { "label": "Today", "path": "/dashboard/today", "description": "Hydration, energy, intention" },
+        { "label": "Macros", "path": "/dashboard/macros", "description": "Meal plan and macro tracking" },
+        { "label": "Schedule", "path": "/dashboard/schedule", "description": "Calendar and daily nutrition" },
+        { "label": "Health", "path": "/dashboard/health", "description": "Wellness and symptom tracking" },
+        { "label": "Meals & recipes", "path": "/recipes", "description": "Nutritious suhoor and iftar ideas" },
+        { "label": "Health & safety", "path": "/health-safety", "description": "Who should not fast, when to break" },
+        { "label": "Programs", "path": "/programs", "description": "Progressive fasting programs" }
+      ]
+    },
+    {
+      "slug": "culture-food",
+      "name": "Culture & food explorer",
+      "shortName": "Culture & food",
+      "description": "You want to explore Ramadan through food and traditions from different countries. TryRamadan surfaces recipes and culture by region.",
+      "icon": "🍽️",
+      "mode": "new",
+      "goals": [
+        "Learn about Ramadan culture",
+        "Support Muslim friends and family"
+      ],
+      "onboardingStepIds": ["welcome", "mode", "knowledge", "health", "location", "schedule", "notifications", "priorities", "goals"],
+      "journey": [
+        { "phase": "Discover", "description": "Land on TryRamadan to experience Ramadan through culture and food.", "path": "/" },
+        { "phase": "Set up", "description": "Onboarding: set priorities to Culture & recipes (some or lots), then location, schedule, goals.", "path": "/onboarding/welcome" },
+        { "phase": "Daily use", "description": "Dashboard quick access to Culture and Meals; today's plan for suhoor/iftar notes.", "path": "/dashboard/culture" },
+        { "phase": "Explore", "description": "Culture by country, recipes by region, and traditions. Add recipes to meal plan.", "path": "/culture" }
+      ],
+      "resources": [
+        { "label": "Culture", "path": "/culture", "description": "Ramadan around the world" },
+        { "label": "Dashboard Culture", "path": "/dashboard/culture", "description": "Compare traditions by country" },
+        { "label": "Recipes", "path": "/recipes", "description": "Suhoor and iftar by region" },
+        { "label": "Meals", "path": "/dashboard/meals", "description": "Meal planning and favorites" },
+        { "label": "Learn", "path": "/dashboard/learn", "description": "Cultural education and hadith" },
+        { "label": "Guides", "path": "/guides", "description": "Meals and culture guides" }
+      ]
+    },
+    {
+      "slug": "quran-learning",
+      "name": "Quran & learning focus",
+      "shortName": "Quran & learning",
+      "description": "You want to read the Quran during Ramadan and learn Islamic terms and hadith. TryRamadan prioritizes Quran, glossary, and learning.",
+      "icon": "📖",
+      "mode": "muslim",
+      "goals": [
+        "Learn about Ramadan culture",
+        "Spiritual reflection"
+      ],
+      "onboardingStepIds": ["welcome", "mode", "knowledge", "health", "location", "schedule", "notifications", "priorities", "goals"],
+      "journey": [
+        { "phase": "Discover", "description": "Open TryRamadan for Quran and learning during the holy month.", "path": "/" },
+        { "phase": "Set up", "description": "Onboarding: Muslim mode, priorities set Quran to Some or Daily, Glossary and Learn high. Location for prayer times.", "path": "/onboarding/welcome" },
+        { "phase": "Daily use", "description": "Dashboard quick access: Quran, Glossary, Learn. Countdown to iftar, prayer times.", "path": "/dashboard/quran" },
+        { "phase": "Read & learn", "description": "Quran juz plan, glossary for terms, hadith, and daily facts.", "path": "/dashboard/learn" }
+      ],
+      "resources": [
+        { "label": "Quran", "path": "/dashboard/quran", "description": "30-day juz reading plan" },
+        { "label": "Glossary", "path": "/dashboard/glossary", "description": "Islamic and Arabic terms" },
+        { "label": "Learn", "path": "/dashboard/learn", "description": "Hadith, facts, learning paths" },
+        { "label": "Hadith", "path": "/learn/hadith", "description": "Prophetic sayings" },
+        { "label": "Prayers", "path": "/dashboard/prayers", "description": "Prayer times" },
+        { "label": "Guides", "path": "/guides", "description": "Quran and glossary guides" }
+      ]
+    }
+  ]
+}

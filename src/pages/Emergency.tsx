@@ -183,7 +183,7 @@ const Emergency = () => {
               className="w-full py-4 rounded-2xl bg-secondary text-secondary-foreground font-medium flex items-center justify-center gap-2"
             >
               <Check className="w-5 h-5" />
-              I've broken my fast — choose reason & return
+              I've broken my fast — choose a reason and log it
             </button>
             <BreakFastReasonDialog
               open={showReasonDialog}
@@ -197,7 +197,7 @@ const Emergency = () => {
               className="w-full py-4 rounded-2xl bg-muted text-foreground font-medium flex items-center justify-center gap-2"
             >
               <Home className="w-5 h-5" />
-              I'm okay - Continue fasting
+              I'm okay — go back to dashboard
             </button>
           </motion.div>
         </div>

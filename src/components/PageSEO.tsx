@@ -2,10 +2,12 @@ import { useEffect } from "react";
 
 const SITE_URL = "https://tryramadan.app";
 
+const META_DESCRIPTION_MAX_LENGTH = 160;
+
 export interface PageSEOProps {
   /** Page title (e.g. "Middle Eastern Power Bowl | TryRamadan Recipes") */
   title: string;
-  /** Meta description for SEO and social previews */
+  /** Meta description for SEO and social previews (truncated to 160 chars) */
   description: string;
   /** Optional path for canonical and og:url (e.g. "/recipe/suhoor/1") */
   path?: string;
@@ -13,15 +15,21 @@ export interface PageSEOProps {
   image?: string;
   /** Optional type for og:type (default "website") */
   type?: "website" | "article";
+  /** Optional robots (e.g. "noindex, nofollow" for 404). Default: index, follow */
+  robots?: string;
 }
 
 /**
  * Sets document title and meta tags for SEO and AEO (accessibility + SEO).
  * Use on every recipe and country page for unique, indexable content.
  */
-export function PageSEO({ title, description, path = "", image, type = "website" }: PageSEOProps) {
+export function PageSEO({ title, description, path = "", image, type = "website", robots }: PageSEOProps) {
   const url = path ? `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}` : SITE_URL;
   const imageUrl = image ? (image.startsWith("http") ? image : `${SITE_URL}${image}`) : `${SITE_URL}/og-image.jpg`;
+  const metaDescription =
+    description.length > META_DESCRIPTION_MAX_LENGTH
+      ? description.slice(0, META_DESCRIPTION_MAX_LENGTH - 3).trim() + "..."
+      : description;
 
   useEffect(() => {
     document.title = title;
@@ -36,15 +44,18 @@ export function PageSEO({ title, description, path = "", image, type = "website"
       el.setAttribute("content", value);
     };
 
-    setMeta("name", "description", description);
+    setMeta("name", "description", metaDescription);
     setMeta("property", "og:title", title);
-    setMeta("property", "og:description", description);
+    setMeta("property", "og:description", metaDescription);
     setMeta("property", "og:url", url);
     setMeta("property", "og:type", type);
     setMeta("property", "og:image", imageUrl);
+    setMeta("name", "twitter:card", "summary_large_image");
     setMeta("name", "twitter:title", title);
-    setMeta("name", "twitter:description", description);
+    setMeta("name", "twitter:description", metaDescription);
     setMeta("name", "twitter:image", imageUrl);
+
+    setMeta("name", "robots", robots ?? "index, follow");
 
     if (path) {
       let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
@@ -59,7 +70,7 @@ export function PageSEO({ title, description, path = "", image, type = "website"
     return () => {
       // Optionally reset to default on unmount; for SPA we often leave as-is until next page
     };
-  }, [title, description, url, imageUrl, type, path]);
+  }, [title, metaDescription, url, imageUrl, type, path, robots]);
 
   return null;
 }

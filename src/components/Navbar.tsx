@@ -127,9 +127,10 @@ export const Navbar = () => {
                   to="/onboarding/welcome"
                   onClick={handleStartJourney}
                   className="bg-primary text-primary-foreground hover:bg-primary/90 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all"
+                  aria-label="Start your journey — go to setup"
                 >
                   <ArabicHover arabic="ابدأ" className="border-0 text-primary-foreground hover:border-primary-foreground/50">
-                    Start Journey
+                    Start your journey (setup)
                   </ArabicHover>
                 </Link>
               )}
@@ -203,7 +204,7 @@ export const Navbar = () => {
                   <Link 
                     to="/onboarding/welcome"
                     onClick={handleStartJourney}
-                    className="bg-primary text-primary-foreground hover:bg-primary/90 text-sm w-full mt-4 py-3 rounded-xl font-semibold flex items-center justify-center"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 text-sm w-full mt-4 py-3 min-h-[44px] rounded-xl font-semibold flex items-center justify-center"
                   >
                     <ArabicHover arabic="ابدأ رحلتك" className="border-0 text-primary-foreground">
                       Start Your Journey

@@ -324,7 +324,7 @@ export default function DashboardHealth() {
               className="inline-flex items-center justify-center gap-2 px-4 sm:px-6 py-3 rounded-xl border-2 border-destructive/50 text-destructive hover:bg-destructive/10 transition-colors min-h-[44px]"
             >
               <AlertTriangle className="w-5 h-5" />
-              Need to break fast early?
+              I need to break my fast — open emergency resources
             </Link>
           </motion.div>
         </div>

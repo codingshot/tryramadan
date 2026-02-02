@@ -29,7 +29,7 @@ const Guides = () => {
     <div className="min-h-screen bg-background">
       <PageSEO
         title="User Guides | TryRamadan.app"
-        description="Step-by-step user guides for TryRamadan: onboarding, dashboard, today's fast, schedule, prayers, meals, learn, progress, journal, health, settings, and more. Mobile and desktop."
+        description="Step-by-step user guides for TryRamadan: onboarding, dashboard, today's fast, schedule, prayers, meals, macro tracker, Quran, culture, personas and journeys, achievements, FAQ, health, settings, and more. Mobile and desktop."
         path="/guides"
       />
       <Navbar />

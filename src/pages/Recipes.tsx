@@ -104,11 +104,12 @@ export default function Recipes() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="flex flex-wrap gap-4 mb-8"
+            className="flex flex-wrap items-center gap-4 mb-8"
             aria-label="Filter recipes"
           >
             <div className="flex items-center gap-2">
               <Globe className="w-4 h-4 text-muted-foreground" aria-hidden />
+              <label htmlFor="filter-country" className="sr-only">Culture</label>
               <Select value={countryFilter} onValueChange={setCountryFilter}>
                 <SelectTrigger className="w-[220px]" id="filter-country" aria-label="Filter by culture or country">
                   <SelectValue placeholder="All cultures" />
@@ -124,6 +125,7 @@ export default function Recipes() {
               </Select>
             </div>
             <div className="flex items-center gap-2">
+              <label htmlFor="filter-meal" className="sr-only">Meal type</label>
               <Select value={mealFilter} onValueChange={setMealFilterAndUrl}>
                 <SelectTrigger className="w-[160px]" id="filter-meal" aria-label="Filter by meal type">
                   <SelectValue placeholder="All meals" />
@@ -135,6 +137,18 @@ export default function Recipes() {
                 </SelectContent>
               </Select>
             </div>
+            <span className="text-sm text-muted-foreground">
+              {filtered.length} {filtered.length === 1 ? "recipe" : "recipes"}
+            </span>
+            {(countryFilter !== "all" || mealFilter !== "all") && (
+              <button
+                type="button"
+                onClick={() => { setCountryFilter("all"); setMealFilterAndUrl("all"); }}
+                className="text-sm text-secondary hover:underline"
+              >
+                Clear filters
+              </button>
+            )}
           </motion.section>
 
           {/* Recipe list */}
@@ -148,13 +162,22 @@ export default function Recipes() {
             )}
           </section>
 
-          <p className="mt-8 text-sm text-muted-foreground">
-            Add these to your day:{" "}
-            <Link to="/dashboard/meals" className="text-secondary hover:underline">
-              Dashboard → Meals
-            </Link>
-            {" "}to plan suhoor and iftar and build your grocery list.
-          </p>
+          <div className="mt-8 p-4 rounded-2xl bg-card border border-border space-y-2">
+            <p className="text-sm text-muted-foreground">
+              <strong className="text-foreground">Plan & track:</strong>{" "}
+              <Link to="/dashboard/meals" className="text-secondary hover:underline">
+                Dashboard → Meals
+              </Link>
+              {" "}to add recipes to your meal plan, build a grocery list, and add items to your food log (macro tracker).
+            </p>
+            <p className="text-sm text-muted-foreground">
+              <strong className="text-foreground">Create your own meal?</strong> In Meals, use “Create your own meal” to add a custom dish to today’s food log and meal plan. Or open{" "}
+              <Link to="/dashboard/schedule" className="text-secondary hover:underline">
+                Schedule
+              </Link>
+              , pick a day, and add custom food under the food log.
+            </p>
+          </div>
         </div>
       </main>
       <Footer />
@@ -213,11 +236,19 @@ function RecipeCard({
               </span>
             </div>
             <p className="text-sm text-muted-foreground mt-1">{recipe.description}</p>
-            <div className="flex items-center gap-3 mt-2 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Clock className="w-4 h-4" aria-hidden />
                 {recipe.prepTime}
               </span>
+              {recipe.nutrition && (
+                <span className="text-xs">
+                  {recipe.nutrition.calories} cal
+                  {recipe.nutrition.protein && ` · P ${recipe.nutrition.protein}`}
+                  {recipe.nutrition.carbs && ` · C ${recipe.nutrition.carbs}`}
+                  {recipe.nutrition.fat && ` · F ${recipe.nutrition.fat}`}
+                </span>
+              )}
               {country && (
                 <Link
                   to={`/culture/${recipe.countryId}`}

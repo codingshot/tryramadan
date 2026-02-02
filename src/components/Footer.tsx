@@ -25,34 +25,26 @@ export const Footer = () => {
             </p>
           </div>
 
-          {/* Quick Links */}
+          {/* Quick Links - touch-friendly on mobile */}
           <div>
             <h4 className="font-display font-bold mb-4">Quick Links</h4>
-            <ul className="space-y-2">
+            <ul className="space-y-1 sm:space-y-2">
               <li>
-                <Link to="/" state={{ scrollTo: "features" }} className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
+                <Link to="/" state={{ scrollTo: "features" }} className="inline-block py-2 sm:py-0 text-primary-foreground/70 hover:text-secondary transition-colors text-sm min-h-[44px] sm:min-h-0 flex items-center">
                   Features
                 </Link>
               </li>
               <li>
-                <Link to="/programs" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
-                  Fasting Programs
-                </Link>
+                <Link to="/programs" className="inline-block py-2 sm:py-0 text-primary-foreground/70 hover:text-secondary transition-colors text-sm min-h-[44px] sm:min-h-0 flex items-center">Fasting Programs</Link>
               </li>
               <li>
-                <Link to="/recipes" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
-                  Recipes
-                </Link>
+                <Link to="/recipes" className="inline-block py-2 sm:py-0 text-primary-foreground/70 hover:text-secondary transition-colors text-sm min-h-[44px] sm:min-h-0 flex items-center">Recipes</Link>
               </li>
               <li>
-                <Link to="/culture" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
-                  Culture
-                </Link>
+                <Link to="/culture" className="inline-block py-2 sm:py-0 text-primary-foreground/70 hover:text-secondary transition-colors text-sm min-h-[44px] sm:min-h-0 flex items-center">Culture</Link>
               </li>
               <li>
-                <Link to="/health-safety" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
-                  Health Benefits
-                </Link>
+                <Link to="/health-safety" className="inline-block py-2 sm:py-0 text-primary-foreground/70 hover:text-secondary transition-colors text-sm min-h-[44px] sm:min-h-0 flex items-center">Health Benefits</Link>
               </li>
             </ul>
           </div>
@@ -60,24 +52,21 @@ export const Footer = () => {
           {/* Resources */}
           <div>
             <h4 className="font-display font-bold mb-4">Resources</h4>
-            <ul className="space-y-2">
+            <ul className="space-y-1 sm:space-y-2">
               <li>
-                <Link to="/guides" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
-                  User Guides
-                </Link>
+                <Link to="/guides" className="inline-block py-2 sm:py-0 text-primary-foreground/70 hover:text-secondary transition-colors text-sm min-h-[44px] sm:min-h-0 flex items-center">User Guides</Link>
               </li>
               <li>
-                <Link to="/learn/glossary" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
-                  Glossary
-                </Link>
+                <Link to="/personas" className="inline-block py-2 sm:py-0 text-primary-foreground/70 hover:text-secondary transition-colors text-sm min-h-[44px] sm:min-h-0 flex items-center">Personas</Link>
               </li>
               <li>
-                <Link to="/learn/hadith" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
-                  Hadith
-                </Link>
+                <Link to="/learn/glossary" className="inline-block py-2 sm:py-0 text-primary-foreground/70 hover:text-secondary transition-colors text-sm min-h-[44px] sm:min-h-0 flex items-center">Glossary</Link>
               </li>
               <li>
-                <Link to="/health-safety" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
+                <Link to="/learn/hadith" className="inline-block py-2 sm:py-0 text-primary-foreground/70 hover:text-secondary transition-colors text-sm min-h-[44px] sm:min-h-0 flex items-center">Hadith</Link>
+              </li>
+              <li>
+                <Link to="/health-safety" className="inline-block py-2 sm:py-0 text-primary-foreground/70 hover:text-secondary transition-colors text-sm min-h-[44px] sm:min-h-0 flex items-center">
                   Health & Safety
                 </Link>
               </li>
@@ -88,12 +77,12 @@ export const Footer = () => {
               </li>
               <li>
                 <Link to="/emergency" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
-                  Emergency
+                  Emergency: break fast & resources
                 </Link>
               </li>
               <li>
                 <Link to="/settings" className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
-                  Settings
+                  Settings (location, notifications)
                 </Link>
               </li>
               <li>

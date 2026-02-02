@@ -5,19 +5,12 @@ import { ArrowRight } from "lucide-react";
 import { FastingTimer } from "./FastingTimer";
 import { ArabicHover } from "./ArabicHover";
 import { RamadanStartInfoDialog } from "./RamadanStartInfoDialog";
+import { getDaysUntilRamadan as getDaysUntilNextRamadan } from "@/lib/ramadan";
 import heroBg from "@/assets/hero-bg.jpg";
 import logo from "@/assets/logo.png";
 
-// Calculate days until Ramadan 2025
-const RAMADAN_START = new Date('2025-02-28T00:00:00');
-const getDaysUntilRamadan = () => {
-  const now = new Date();
-  const diffTime = RAMADAN_START.getTime() - now.getTime();
-  return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
-};
-
 export const HeroSection = () => {
-  const daysUntil = getDaysUntilRamadan();
+  const daysUntil = Math.max(0, getDaysUntilNextRamadan());
   const [ramadanInfoOpen, setRamadanInfoOpen] = useState(false);
 
   return (
@@ -92,23 +85,23 @@ export const HeroSection = () => {
               />
               <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/20 text-secondary text-sm font-medium backdrop-blur-sm">
                 <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
-                <ArabicHover arabic="رمضان ٢٠٢٥" className="border-0">Ramadan 2025</ArabicHover>
+                <ArabicHover arabic="رمضان القادم" className="border-0">Upcoming Ramadan</ArabicHover>
               </span>
             </motion.div>
 
-            {/* Main headline */}
+            {/* Main headline - responsive for mobile */}
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-3xl md:text-5xl lg:text-6xl font-display font-bold text-center text-primary-foreground mb-4 leading-tight"
+              className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-display font-bold text-center text-primary-foreground mb-4 leading-tight px-1"
             >
               Experience{" "}
-              <ArabicHover arabic="رمضان" className="border-0 text-gradient-gold text-2xl md:text-4xl">
+              <ArabicHover arabic="رمضان" className="border-0 text-gradient-gold text-xl sm:text-2xl md:text-4xl">
                 Ramadan
               </ArabicHover>
               <br />
-              <span className="text-primary-foreground/90 text-2xl md:text-4xl">Through Cultural Immersion</span>
+              <span className="text-primary-foreground/90 text-xl sm:text-2xl md:text-4xl">Through Cultural Immersion</span>
             </motion.h1>
 
             {/* Subtitle */}
@@ -118,32 +111,33 @@ export const HeroSection = () => {
               transition={{ delay: 0.2 }}
               className="text-base md:text-lg text-primary-foreground/80 text-center max-w-2xl mx-auto mb-8"
             >
-              A wellness journey combining{" "}
-              <ArabicHover arabic="صوم" transliteration="Sawm" className="text-secondary font-semibold">
-                Sawm
-              </ArabicHover>{" "}fasting 
-              with cultural education and interfaith understanding.
+              Fast like a Muslim for the holy month of{" "}
+              <ArabicHover arabic="رمضان" className="text-secondary font-semibold">
+                Ramadan
+              </ArabicHover>.
             </motion.p>
 
-            {/* CTA Buttons */}
+            {/* CTA Buttons - touch-friendly min height */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12"
+              className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-12"
             >
               <Link 
                 to="/onboarding/welcome"
-                className="btn-hero group flex items-center gap-2 w-full sm:w-auto justify-center"
+                className="btn-hero group flex items-center justify-center gap-2 w-full sm:w-auto min-h-[48px] px-6 py-3"
+                aria-label="Start your Ramadan journey — go to setup"
               >
-                <ArabicHover arabic="ابدأ رحلتك" className="border-0 text-inherit">Start Your Journey</ArabicHover>
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <ArabicHover arabic="ابدأ رحلتك" className="border-0 text-inherit">Start your journey → setup</ArabicHover>
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform shrink-0" />
               </Link>
               <Link 
                 to="/onboarding/welcome"
-                className="btn-hero-outline w-full sm:w-auto flex items-center justify-center gap-2"
+                className="btn-hero-outline w-full sm:w-auto flex items-center justify-center gap-2 min-h-[48px] px-6 py-3"
+                aria-label="I'm Muslim — go to setup"
               >
-                <ArabicHover arabic="أنا مسلم" className="border-0 text-inherit">I'm Already Muslim</ArabicHover>
+                <ArabicHover arabic="أنا مسلم" className="border-0 text-inherit">I'm Muslim — go to setup</ArabicHover>
               </Link>
             </motion.div>
 

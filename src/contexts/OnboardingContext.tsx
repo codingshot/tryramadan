@@ -3,6 +3,16 @@ import { LocationResult } from "@/hooks/useLocation";
 
 export type OnboardingMode = "new" | "muslim" | null;
 
+import type { LearningPriority, CultureRecipesPriority, QuranPriority } from "@/hooks/useLocalStorage";
+
+export interface OnboardingPriorities {
+  learningPriority: LearningPriority;
+  cultureRecipesPriority: CultureRecipesPriority;
+  quranPriority: QuranPriority;
+  macroTrackingEnabled: boolean;
+  simplifyByLocation: boolean;
+}
+
 export interface OnboardingState {
   mode: OnboardingMode;
   experience: string;
@@ -17,9 +27,18 @@ export interface OnboardingState {
     suhoorTime: string;
     iftarTime: string;
   };
+  priorities: OnboardingPriorities;
   goals: string[];
   intention: string;
 }
+
+const defaultPriorities: OnboardingPriorities = {
+  learningPriority: "moderate",
+  cultureRecipesPriority: "some",
+  quranPriority: "some",
+  macroTrackingEnabled: false,
+  simplifyByLocation: true,
+};
 
 const defaultState: OnboardingState = {
   mode: null,
@@ -35,6 +54,7 @@ const defaultState: OnboardingState = {
     suhoorTime: "04:30",
     iftarTime: "18:30",
   },
+  priorities: defaultPriorities,
   goals: [],
   intention: "",
 };
@@ -48,6 +68,7 @@ type OnboardingContextValue = {
   setLocation: (loc: LocationResult | null) => void;
   setSelectedProgram: (id: string) => void;
   setNotifications: (n: Partial<OnboardingState["notifications"]>) => void;
+  setPriorities: (p: Partial<OnboardingPriorities>) => void;
   setGoals: (goals: string[]) => void;
   setIntention: (text: string) => void;
   reset: () => void;
@@ -79,6 +100,9 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   const setNotifications = useCallback((n: Partial<OnboardingState["notifications"]>) => {
     setState((s) => ({ ...s, notifications: { ...s.notifications, ...n } }));
   }, []);
+  const setPriorities = useCallback((p: Partial<OnboardingPriorities>) => {
+    setState((s) => ({ ...s, priorities: { ...s.priorities, ...p } }));
+  }, []);
   const setGoals = useCallback((goals: string[]) => {
     setState((s) => ({ ...s, goals }));
   }, []);
@@ -96,6 +120,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     setLocation,
     setSelectedProgram,
     setNotifications,
+    setPriorities,
     setGoals,
     setIntention,
     reset,

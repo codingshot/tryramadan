@@ -9,6 +9,7 @@ const STEPS = [
   { path: "location", label: "Location" },
   { path: "schedule", label: "Schedule" },
   { path: "notifications", label: "Notifications" },
+  { path: "priorities", label: "Priorities" },
   { path: "goals", label: "Goals" },
 ];
 

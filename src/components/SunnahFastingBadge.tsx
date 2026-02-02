@@ -23,10 +23,10 @@ export const SunnahFastingBadge = ({ hijriDay }: SunnahFastingBadgeProps) => {
       className="flex flex-wrap items-center justify-center gap-2"
     >
       {sunnahInfo && (
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/20 border border-secondary/30">
-          <Star className="w-4 h-4 text-secondary fill-secondary" />
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/20 border-2 border-secondary/40 ring-2 ring-secondary/30">
+          <Star className="w-4 h-4 text-secondary fill-secondary shrink-0" />
           <div className="text-sm">
-            <span className="font-semibold text-secondary">{sunnahInfo.reason}</span>
+            <span className="font-semibold text-secondary">Today · {sunnahInfo.reason}</span>
             <span className="font-arabic text-secondary/80 ml-2">{sunnahInfo.reasonAr}</span>
           </div>
         </div>
@@ -45,7 +45,7 @@ export const SunnahFastingBadge = ({ hijriDay }: SunnahFastingBadgeProps) => {
 
       {(sunnahInfo || isAyyamAlBeed) && (
         <p className="w-full text-center text-xs text-muted-foreground mt-1">
-          💡 Today is a recommended day to fast in Islamic tradition
+          💡 Today is a recommended day to fast in Islamic tradition • يوم صيام سنة
         </p>
       )}
     </motion.div>

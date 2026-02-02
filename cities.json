@@ -5,10 +5,18 @@
     "cities": [
       {
         "name": "string",
-        "suhoor_meals": ["string"],
-        "iftar_meals": ["string"],
-        "desserts_and_drinks": ["string"],
-        "rituals_and_traditions": ["string"],
+        "suhoor_meals": [
+          "string"
+        ],
+        "iftar_meals": [
+          "string"
+        ],
+        "desserts_and_drinks": [
+          "string"
+        ],
+        "rituals_and_traditions": [
+          "string"
+        ],
         "notes": "string"
       }
     ]
@@ -20,9 +28,20 @@
       "cities": [
         {
           "name": "Kano",
-          "suhoor_meals": ["kunu (millet-based drink/porridge)", "light rice or tuwo dishes"],
-          "iftar_meals": ["dates and water", "dambu (shredded spiced meat)", "masa (rice pancakes)", "jollof rice"],
-          "desserts_and_drinks": ["kunu variations", "local juices"],
+          "suhoor_meals": [
+            "kunu (millet-based drink/porridge)",
+            "light rice or tuwo dishes"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "dambu (shredded spiced meat)",
+            "masa (rice pancakes)",
+            "jollof rice"
+          ],
+          "desserts_and_drinks": [
+            "kunu variations",
+            "local juices"
+          ],
           "rituals_and_traditions": [
             "Community iftar in mosques and family homes",
             "Women preparing large communal spreads for extended family"
@@ -31,9 +50,19 @@
         },
         {
           "name": "Lagos",
-          "suhoor_meals": ["bread and tea", "rice dishes", "kunu where available"],
-          "iftar_meals": ["jollof rice with chicken or fish", "fried plantains (dodo)"],
-          "desserts_and_drinks": ["local soft drinks", "fruit juices"],
+          "suhoor_meals": [
+            "bread and tea",
+            "rice dishes",
+            "kunu where available"
+          ],
+          "iftar_meals": [
+            "jollof rice with chicken or fish",
+            "fried plantains (dodo)"
+          ],
+          "desserts_and_drinks": [
+            "local soft drinks",
+            "fruit juices"
+          ],
           "rituals_and_traditions": [
             "Urban mosques host iftar for travelers and the poor",
             "Strong West African jollof culture at large family gatherings"
@@ -48,9 +77,20 @@
       "cities": [
         {
           "name": "Cairo",
-          "suhoor_meals": ["fava beans (ful medames)", "baladi bread", "cheese and eggs"],
-          "iftar_meals": ["dates and water", "ful medames with bread", "various stews and rice"],
-          "desserts_and_drinks": ["karkadeh (hibiscus drink)", "kunafa and basbousa"],
+          "suhoor_meals": [
+            "fava beans (ful medames)",
+            "baladi bread",
+            "cheese and eggs"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "ful medames with bread",
+            "various stews and rice"
+          ],
+          "desserts_and_drinks": [
+            "karkadeh (hibiscus drink)",
+            "kunafa and basbousa"
+          ],
           "rituals_and_traditions": [
             "Fanoos (Ramadan lanterns) decorating streets and homes",
             "Lanterns carried by children while singing Ramadan songs",
@@ -60,9 +100,17 @@
         },
         {
           "name": "Alexandria",
-          "suhoor_meals": ["ful medames", "bread and cheese"],
-          "iftar_meals": ["seafood dishes alongside standard Egyptian iftar items"],
-          "desserts_and_drinks": ["karkadeh", "local sweets"],
+          "suhoor_meals": [
+            "ful medames",
+            "bread and cheese"
+          ],
+          "iftar_meals": [
+            "seafood dishes alongside standard Egyptian iftar items"
+          ],
+          "desserts_and_drinks": [
+            "karkadeh",
+            "local sweets"
+          ],
           "rituals_and_traditions": [
             "Coastal iftars with extended families",
             "Neighborhood lantern displays similar to Cairo"
@@ -77,9 +125,20 @@
       "cities": [
         {
           "name": "Nairobi",
-          "suhoor_meals": ["rice with vegetables and stews", "bread and tea"],
-          "iftar_meals": ["dates and water", "pilau (spiced rice)", "samosas", "bhajias"],
-          "desserts_and_drinks": ["fresh juices", "sweet chai"],
+          "suhoor_meals": [
+            "rice with vegetables and stews",
+            "bread and tea"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "pilau (spiced rice)",
+            "samosas",
+            "bhajias"
+          ],
+          "desserts_and_drinks": [
+            "fresh juices",
+            "sweet chai"
+          ],
           "rituals_and_traditions": [
             "Multicultural mosques with diverse cuisines at iftar",
             "Family-focused iftars with a mix of local and South Asian dishes"
@@ -88,9 +147,19 @@
         },
         {
           "name": "Mombasa",
-          "suhoor_meals": ["ugali with fish or vegetables", "mandazi with tea"],
-          "iftar_meals": ["street iftar with ugali", "grilled fish", "kaimati (sweet fried dough balls)"],
-          "desserts_and_drinks": ["sugarcane juice", "fresh juices"],
+          "suhoor_meals": [
+            "ugali with fish or vegetables",
+            "mandazi with tea"
+          ],
+          "iftar_meals": [
+            "street iftar with ugali",
+            "grilled fish",
+            "kaimati (sweet fried dough balls)"
+          ],
+          "desserts_and_drinks": [
+            "sugarcane juice",
+            "fresh juices"
+          ],
           "rituals_and_traditions": [
             "Street iftar gatherings hosted by mosques and community centers",
             "Strong Swahili coastal culture in food and dress"
@@ -105,9 +174,21 @@
       "cities": [
         {
           "name": "Zanzibar City",
-          "suhoor_meals": ["ugali", "rice and beans", "mandazi"],
-          "iftar_meals": ["dates and water", "grilled fish", "kaimati", "Swahili rice dishes"],
-          "desserts_and_drinks": ["sugarcane juice", "fresh tropical juices"],
+          "suhoor_meals": [
+            "ugali",
+            "rice and beans",
+            "mandazi"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "grilled fish",
+            "kaimati",
+            "Swahili rice dishes"
+          ],
+          "desserts_and_drinks": [
+            "sugarcane juice",
+            "fresh tropical juices"
+          ],
           "rituals_and_traditions": [
             "Street iftar gatherings near mosques",
             "Communal sharing of food along the seafront"
@@ -122,9 +203,20 @@
       "cities": [
         {
           "name": "Casablanca",
-          "suhoor_meals": ["bread with olive oil and cheese", "tagines in lighter portions"],
-          "iftar_meals": ["dates and water", "harira (hearty soup)", "chebakia (sesame honey pastry)", "breads and tagines"],
-          "desserts_and_drinks": ["mint tea", "fresh juices"],
+          "suhoor_meals": [
+            "bread with olive oil and cheese",
+            "tagines in lighter portions"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "harira (hearty soup)",
+            "chebakia (sesame honey pastry)",
+            "breads and tagines"
+          ],
+          "desserts_and_drinks": [
+            "mint tea",
+            "fresh juices"
+          ],
           "rituals_and_traditions": [
             "Family-centered iftar centered around harira",
             "Traditional clothing like djellaba and kaftan for prayers and gatherings"
@@ -133,9 +225,18 @@
         },
         {
           "name": "Marrakesh",
-          "suhoor_meals": ["bread, olive oil, and local cheeses"],
-          "iftar_meals": ["harira", "tanjia marrakchia", "rfissa (chicken and lentils over shredded bread)"],
-          "desserts_and_drinks": ["mint tea", "chebakia"],
+          "suhoor_meals": [
+            "bread, olive oil, and local cheeses"
+          ],
+          "iftar_meals": [
+            "harira",
+            "tanjia marrakchia",
+            "rfissa (chicken and lentils over shredded bread)"
+          ],
+          "desserts_and_drinks": [
+            "mint tea",
+            "chebakia"
+          ],
           "rituals_and_traditions": [
             "Large family gatherings after Maghrib",
             "Old city squares buzzing at night with food stalls"
@@ -150,9 +251,19 @@
       "cities": [
         {
           "name": "Riyadh",
-          "suhoor_meals": ["light rice dishes", "bread with cheese and dates"],
-          "iftar_meals": ["dates and water", "thareed (bread soaked in lamb and vegetable stew)", "kabsa (spiced rice with chicken or lamb)"],
-          "desserts_and_drinks": ["qamar al-din (apricot drink)", "Arabic coffee and dates"],
+          "suhoor_meals": [
+            "light rice dishes",
+            "bread with cheese and dates"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "thareed (bread soaked in lamb and vegetable stew)",
+            "kabsa (spiced rice with chicken or lamb)"
+          ],
+          "desserts_and_drinks": [
+            "qamar al-din (apricot drink)",
+            "Arabic coffee and dates"
+          ],
           "rituals_and_traditions": [
             "Large family and tribal gatherings",
             "Night prayers (taraweeh) with packed mosques"
@@ -161,9 +272,17 @@
         },
         {
           "name": "Jeddah",
-          "suhoor_meals": ["similar to Riyadh with more seafood options"],
-          "iftar_meals": ["thareed", "kabsa", "fried and grilled fish"],
-          "desserts_and_drinks": ["regional desserts and juices"],
+          "suhoor_meals": [
+            "similar to Riyadh with more seafood options"
+          ],
+          "iftar_meals": [
+            "thareed",
+            "kabsa",
+            "fried and grilled fish"
+          ],
+          "desserts_and_drinks": [
+            "regional desserts and juices"
+          ],
           "rituals_and_traditions": [
             "Coastal city gatherings with extended families",
             "Charity iftars near major mosques"
@@ -178,9 +297,19 @@
       "cities": [
         {
           "name": "Istanbul",
-          "suhoor_meals": ["olives, cheese, bread, eggs", "soups"],
-          "iftar_meals": ["dates and water", "soup", "Ramazan pidesi (special Ramadan flatbread) with meat or vegetable dishes"],
-          "desserts_and_drinks": ["güllaç (milk and pomegranate dessert)", "tea"],
+          "suhoor_meals": [
+            "olives, cheese, bread, eggs",
+            "soups"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "soup",
+            "Ramazan pidesi (special Ramadan flatbread) with meat or vegetable dishes"
+          ],
+          "desserts_and_drinks": [
+            "güllaç (milk and pomegranate dessert)",
+            "tea"
+          ],
           "rituals_and_traditions": [
             "Mosques hang mahya (illuminated messages) between minarets",
             "Public iftar tents by municipalities",
@@ -190,9 +319,16 @@
         },
         {
           "name": "Ankara",
-          "suhoor_meals": ["bread, cheese, olives, eggs"],
-          "iftar_meals": ["Ramazan pidesi with stews and kebabs"],
-          "desserts_and_drinks": ["tea", "regional sweets"],
+          "suhoor_meals": [
+            "bread, cheese, olives, eggs"
+          ],
+          "iftar_meals": [
+            "Ramazan pidesi with stews and kebabs"
+          ],
+          "desserts_and_drinks": [
+            "tea",
+            "regional sweets"
+          ],
           "rituals_and_traditions": [
             "Mahya lights on major mosques",
             "Municipal iftar programs"
@@ -207,9 +343,21 @@
       "cities": [
         {
           "name": "Karachi",
-          "suhoor_meals": ["paratha with eggs or curry", "tea"],
-          "iftar_meals": ["dates and water", "samosas", "pakoras", "fruit chaat", "haleem"],
-          "desserts_and_drinks": ["rooh afza or rose-flavored sharbat", "falooda"],
+          "suhoor_meals": [
+            "paratha with eggs or curry",
+            "tea"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "samosas",
+            "pakoras",
+            "fruit chaat",
+            "haleem"
+          ],
+          "desserts_and_drinks": [
+            "rooh afza or rose-flavored sharbat",
+            "falooda"
+          ],
           "rituals_and_traditions": [
             "Bustling iftar bazaars selling fried snacks",
             "Charity iftar tables along main roads",
@@ -219,9 +367,19 @@
         },
         {
           "name": "Lahore",
-          "suhoor_meals": ["paratha and nihari or other meat stews"],
-          "iftar_meals": ["samosas", "pakoras", "dahi bhalle", "fruit chaat"],
-          "desserts_and_drinks": ["sweet lassi", "rooh afza drinks"],
+          "suhoor_meals": [
+            "paratha and nihari or other meat stews"
+          ],
+          "iftar_meals": [
+            "samosas",
+            "pakoras",
+            "dahi bhalle",
+            "fruit chaat"
+          ],
+          "desserts_and_drinks": [
+            "sweet lassi",
+            "rooh afza drinks"
+          ],
           "rituals_and_traditions": [
             "Old-city food streets packed after iftar",
             "Strong communal culture around late-night eating"
@@ -236,9 +394,19 @@
       "cities": [
         {
           "name": "Jakarta",
-          "suhoor_meals": ["rice with side dishes", "soups"],
-          "iftar_meals": ["dates and water", "kolak (sweet banana, coconut, palm sugar dessert)", "gorengan (fried snacks)"],
-          "desserts_and_drinks": ["es buah (fruit drink)", "sweet iced teas"],
+          "suhoor_meals": [
+            "rice with side dishes",
+            "soups"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "kolak (sweet banana, coconut, palm sugar dessert)",
+            "gorengan (fried snacks)"
+          ],
+          "desserts_and_drinks": [
+            "es buah (fruit drink)",
+            "sweet iced teas"
+          ],
           "rituals_and_traditions": [
             "Nyekar/nyadran style grave visits and prayers in some Javanese communities before Ramadan",
             "Crowded street food markets (pasar Ramadan) each evening"
@@ -247,9 +415,16 @@
         },
         {
           "name": "Yogyakarta",
-          "suhoor_meals": ["rice with local dishes"],
-          "iftar_meals": ["kolak", "local snacks and rice dishes"],
-          "desserts_and_drinks": ["iced teas and juices"],
+          "suhoor_meals": [
+            "rice with local dishes"
+          ],
+          "iftar_meals": [
+            "kolak",
+            "local snacks and rice dishes"
+          ],
+          "desserts_and_drinks": [
+            "iced teas and juices"
+          ],
           "rituals_and_traditions": [
             "Padusan ritual cleansing in springs or lakes before Ramadan",
             "Javanese cultural elements woven into pre-Ramadan observances"
@@ -258,9 +433,16 @@
         },
         {
           "name": "Aceh",
-          "suhoor_meals": ["rice and fish or meat dishes"],
-          "iftar_meals": ["dates", "meugang meat dishes (beef, goat, or buffalo) eaten around start of Ramadan"],
-          "desserts_and_drinks": ["local sweets and drinks"],
+          "suhoor_meals": [
+            "rice and fish or meat dishes"
+          ],
+          "iftar_meals": [
+            "dates",
+            "meugang meat dishes (beef, goat, or buffalo) eaten around start of Ramadan"
+          ],
+          "desserts_and_drinks": [
+            "local sweets and drinks"
+          ],
           "rituals_and_traditions": [
             "Meugang, a communal meat feast with family just before Ramadan begins"
           ],
@@ -274,9 +456,18 @@
       "cities": [
         {
           "name": "Beirut",
-          "suhoor_meals": ["man’oushe (flatbread with toppings)", "foul (fava beans)"],
-          "iftar_meals": ["dates and water", "rice with stews and grilled meats"],
-          "desserts_and_drinks": ["qatayef", "jallab (date and grape drink)"],
+          "suhoor_meals": [
+            "man’oushe (flatbread with toppings)",
+            "foul (fava beans)"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "rice with stews and grilled meats"
+          ],
+          "desserts_and_drinks": [
+            "qatayef",
+            "jallab (date and grape drink)"
+          ],
           "rituals_and_traditions": [
             "Midfa al-iftar (iftar cannons) to signal sunset",
             "Family and neighborhood gatherings"
@@ -291,9 +482,16 @@
       "cities": [
         {
           "name": "Sarajevo",
-          "suhoor_meals": ["bread, cheese, local meats"],
-          "iftar_meals": ["dates", "soups and meat dishes"],
-          "desserts_and_drinks": ["local sweets and coffee"],
+          "suhoor_meals": [
+            "bread, cheese, local meats"
+          ],
+          "iftar_meals": [
+            "dates",
+            "soups and meat dishes"
+          ],
+          "desserts_and_drinks": [
+            "local sweets and coffee"
+          ],
           "rituals_and_traditions": [
             "Iftar cannon fired from Yellow Fortress to signal sunset",
             "People gather around the fortress and mosques for iftar"
@@ -308,9 +506,18 @@
       "cities": [
         {
           "name": "Cape Town",
-          "suhoor_meals": ["bread, tea, light stews"],
-          "iftar_meals": ["dates and water", "Cape Malay biryani", "samosas"],
-          "desserts_and_drinks": ["koeksisters (syrup-soaked dough twists)", "boeber (sweet milk drink in some communities)"],
+          "suhoor_meals": [
+            "bread, tea, light stews"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "Cape Malay biryani",
+            "samosas"
+          ],
+          "desserts_and_drinks": [
+            "koeksisters (syrup-soaked dough twists)",
+            "boeber (sweet milk drink in some communities)"
+          ],
           "rituals_and_traditions": [
             "Cape Malay Muslim community hosting large family iftars",
             "Mix of Asian and African influences in food and dress"
@@ -320,18 +527,562 @@
       ]
     },
     {
+      "country": "Senegal",
+      "region": "Africa",
+      "cities": [
+        {
+          "name": "Dakar",
+          "suhoor_meals": [
+            "bread and tea",
+            "thiakry (millet or couscous with yogurt and fruit)",
+            "light rice dishes"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "thieboudienne (rice with fish and vegetables)",
+            "yassa (onion-marinated chicken or fish)",
+            "soup kandja"
+          ],
+          "desserts_and_drinks": [
+            "café Touba (spiced coffee)",
+            "bissap (hibiscus drink)",
+            "fresh juices"
+          ],
+          "rituals_and_traditions": [
+            "Ndogou: moment of breaking fast shared communally from large bowls",
+            "Korité preparations and charity before Eid",
+            "Sufi brotherhoods (Tariqas) play a major role in religious and social life"
+          ],
+          "notes": "Thieboudienne and café Touba are widely associated with Senegalese Ramadan; ndogou marks the communal iftar moment."
+        },
+        {
+          "name": "Touba",
+          "suhoor_meals": [
+            "bread, dates, café Touba",
+            "light rice or millet"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "thieboudienne",
+            "communal dishes shared at mosques and homes"
+          ],
+          "desserts_and_drinks": [
+            "café Touba",
+            "bissap"
+          ],
+          "rituals_and_traditions": [
+            "Spiritual center of the Mouride brotherhood; pilgrimage site",
+            "Grand Magal pilgrimage draws millions; Ramadan observance is central"
+          ],
+          "notes": "Touba is the holy city of the Mouride order; Ramadan and café Touba are central to daily life."
+        }
+      ]
+    },
+    {
       "country": "Jordan",
       "region": "Middle East",
       "cities": [
         {
           "name": "Amman",
-          "suhoor_meals": ["bread, cheese, hummus, foul"],
-          "iftar_meals": ["dates and water", "mansaf (lamb with rice and jameed yogurt)", "various rice and meat dishes"],
-          "desserts_and_drinks": ["qatayef", "juices"],
+          "suhoor_meals": [
+            "bread, cheese, hummus, foul"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "mansaf (lamb with rice and jameed yogurt)",
+            "various rice and meat dishes"
+          ],
+          "desserts_and_drinks": [
+            "qatayef",
+            "juices"
+          ],
           "rituals_and_traditions": [
             "Mansaf at large family gatherings and special Ramadan occasions"
           ],
           "notes": "Mansaf, Jordan’s national dish, is central to celebrations and gatherings, including Ramadan.[web:5]"
+        },
+        {
+          "name": "Irbid",
+          "suhoor_meals": [
+            "bread, cheese, hummus, foul"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "rice with meat stews",
+            "mansaf during special gatherings"
+          ],
+          "desserts_and_drinks": [
+            "qatayef",
+            "juices"
+          ],
+          "rituals_and_traditions": [
+            "Family and tribal gatherings on weekends of Ramadan",
+            "Community support for poorer families with food parcels"
+          ],
+          "notes": "Beyond Amman, mansaf and qatayef remain core parts of Jordanian Ramadan cuisine.[web:5]"
+        }
+      ]
+    },
+    {
+      "country": "United Arab Emirates",
+      "region": "GCC",
+      "cities": [
+        {
+          "name": "Dubai",
+          "suhoor_meals": [
+            "khubz (Arabic bread) with cheese and dates",
+            "light rice and meat dishes"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "harees (cracked wheat with meat)",
+            "thareed (bread soaked in stew)",
+            "machboos (spiced rice with meat)"
+          ],
+          "desserts_and_drinks": [
+            "luqaimat (fried dough with date syrup)",
+            "vimto",
+            "Arabic coffee"
+          ],
+          "rituals_and_traditions": [
+            "Large Ramadan tents at hotels and along the creek",
+            "Corporate and community iftars for workers and travelers",
+            "Children's Haq Al Laila style traditions of going door to door for sweets in some emirates"
+          ],
+          "notes": "Ramadan tents and iftars with harees, thareed, machboos, and luqaimat are common throughout the UAE.[web:4][web:12][web:18]"
+        },
+        {
+          "name": "Abu Dhabi",
+          "suhoor_meals": [
+            "similar to Dubai with emphasis on bread, cheese, dates"
+          ],
+          "iftar_meals": [
+            "harees",
+            "thareed",
+            "machboos"
+          ],
+          "desserts_and_drinks": [
+            "luqaimat",
+            "vimto"
+          ],
+          "rituals_and_traditions": [
+            "Government-organized charity iftars",
+            "Family-focused evenings with taraweeh in major mosques"
+          ],
+          "notes": "Abu Dhabi follows broader Gulf food patterns with strong emphasis on hospitality and charity.[web:4][web:12]"
+        }
+      ]
+    },
+    {
+      "country": "Qatar",
+      "region": "GCC",
+      "cities": [
+        {
+          "name": "Doha",
+          "suhoor_meals": [
+            "bread, cheese, dates",
+            "light rice dishes"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "thareed",
+            "machboos",
+            "grilled meats"
+          ],
+          "desserts_and_drinks": [
+            "luqaimat",
+            "vimto"
+          ],
+          "rituals_and_traditions": [
+            "Gargee'an around mid-Ramadan where children dress up and collect sweets",
+            "Ramadan tents in hotels and majlis-style gatherings"
+          ],
+          "notes": "Gargee'an is celebrated mid-Ramadan in parts of the Gulf, including Qatar, with children collecting sweets.[web:18]"
+        }
+      ]
+    },
+    {
+      "country": "Kuwait",
+      "region": "GCC",
+      "cities": [
+        {
+          "name": "Kuwait City",
+          "suhoor_meals": [
+            "bread with cheese and dates",
+            "simple stews"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "harees",
+            "machboos",
+            "grilled fish and meats"
+          ],
+          "desserts_and_drinks": [
+            "luqaimat",
+            "sweet drinks like vimto"
+          ],
+          "rituals_and_traditions": [
+            "Gargee'an on the 15th of Ramadan with children receiving sweets from neighbors",
+            "Family majlis gatherings late into the night"
+          ],
+          "notes": "Kuwait shares Gargee'an traditions with other Gulf states along with typical Gulf Ramadan dishes.[web:18]"
+        }
+      ]
+    },
+    {
+      "country": "Bahrain",
+      "region": "GCC",
+      "cities": [
+        {
+          "name": "Manama",
+          "suhoor_meals": [
+            "bread, cheese, dates",
+            "light stews"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "rice with meat stews",
+            "fish dishes"
+          ],
+          "desserts_and_drinks": [
+            "luqaimat",
+            "regional sweets"
+          ],
+          "rituals_and_traditions": [
+            "Gargee'an celebrations around mid-Ramadan",
+            "Community iftars supported by charities and mosques"
+          ],
+          "notes": "Bahrain's mid-Ramadan children's celebrations mirror Gargee'an traditions seen elsewhere in the Gulf.[web:18]"
+        }
+      ]
+    },
+    {
+      "country": "Oman",
+      "region": "GCC",
+      "cities": [
+        {
+          "name": "Muscat",
+          "suhoor_meals": [
+            "bread with honey or cheese",
+            "rice and fish"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "harees",
+            "thareed",
+            "rice with fish or meat"
+          ],
+          "desserts_and_drinks": [
+            "luqaimat-style sweets",
+            "Omani halwa",
+            "tea"
+          ],
+          "rituals_and_traditions": [
+            "Strong emphasis on neighborhood sharing and charity",
+            "Families gathering with traditional Omani halwa after iftar"
+          ],
+          "notes": "Core Gulf dishes like harees and thareed appear alongside local Omani halwa in Ramadan.[web:5][web:7]"
+        }
+      ]
+    },
+    {
+      "country": "Iran",
+      "region": "Middle East",
+      "cities": [
+        {
+          "name": "Tehran",
+          "suhoor_meals": [
+            "barbari bread with cheese and herbs",
+            "light stews and rice"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "ash-e reshteh (noodle and bean soup)",
+            "khoresht stews with rice"
+          ],
+          "desserts_and_drinks": [
+            "sholeh zard (saffron rice pudding)",
+            "tea"
+          ],
+          "rituals_and_traditions": [
+            "Late-night street life after iftar",
+            "Special religious gatherings and Quran recitation sessions"
+          ],
+          "notes": "Ash-e reshteh and sholeh zard are widely associated with Iranian Ramadan tables.[web:12][web:13]"
+        },
+        {
+          "name": "Mazandaran (province)",
+          "suhoor_meals": [
+            "local bread, cheese, herbs",
+            "rice dishes"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "regional stews with rice"
+          ],
+          "desserts_and_drinks": [
+            "tea and local sweets"
+          ],
+          "rituals_and_traditions": [
+            "Some communities begin fasting three days before Ramadan starts, effectively fasting 33 days"
+          ],
+          "notes": "In Mazandaran, some people traditionally start fasting at the end of Sha'ban, adding three extra days.[web:12]"
+        }
+      ]
+    },
+    {
+      "country": "India",
+      "region": "South Asia",
+      "cities": [
+        {
+          "name": "Hyderabad",
+          "suhoor_meals": [
+            "paratha with curry",
+            "tea"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "haleem",
+            "samosas",
+            "fruit chaat"
+          ],
+          "desserts_and_drinks": [
+            "falooda",
+            "rooh afza-based drinks"
+          ],
+          "rituals_and_traditions": [
+            "Haleem stalls all over the city during Ramadan",
+            "Night markets around Charminar packed after taraweeh"
+          ],
+          "notes": "Hyderabadi haleem is one of the most famous South Asian Ramadan dishes.[web:5][web:13]"
+        },
+        {
+          "name": "Delhi",
+          "suhoor_meals": [
+            "paratha, eggs, chai"
+          ],
+          "iftar_meals": [
+            "shami kebab",
+            "biryani",
+            "samosas"
+          ],
+          "desserts_and_drinks": [
+            "rooh afza sharbat"
+          ],
+          "rituals_and_traditions": [
+            "Old Delhi food streets like Jama Masjid area crowded for iftar and late-night snacks",
+            "Seheriwalas (drummers) waking people up for suhoor in some neighborhoods"
+          ],
+          "notes": "India shares many Ramadan foods with Pakistan and Bangladesh, including haleem, biryani, and rooh afza drinks.[web:5][web:13][web:16]"
+        },
+        {
+          "name": "Kolkata",
+          "suhoor_meals": [
+            "paratha and curry",
+            "chai"
+          ],
+          "iftar_meals": [
+            "biryani",
+            "chops and cutlets",
+            "samosas"
+          ],
+          "desserts_and_drinks": [
+            "sweet lassi",
+            "rooh afza"
+          ],
+          "rituals_and_traditions": [
+            "Ramadan food lanes around Zakaria Street and central mosques",
+            "Strong street-food culture after iftar"
+          ],
+          "notes": "Kolkata's Ramadan is known for dense street-food scenes centered on mosques and market lanes.[web:4]"
+        }
+      ]
+    },
+    {
+      "country": "Bangladesh",
+      "region": "South Asia",
+      "cities": [
+        {
+          "name": "Dhaka",
+          "suhoor_meals": [
+            "rice with curry",
+            "paratha and dal"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "biryani",
+            "panta ilish (fermented rice with hilsa fish) for some",
+            "piaju (lentil fritters)",
+            "beguni (battered fried eggplant)"
+          ],
+          "desserts_and_drinks": [
+            "rooh afza drinks",
+            "mishti (sweets)"
+          ],
+          "rituals_and_traditions": [
+            "Crowded iftar markets selling fritters and biryanis",
+            "Strong culture of giving food to the poor during Ramadan"
+          ],
+          "notes": "Bangladeshi iftars feature biryani, panta ilish, and various fried snacks, with a big emphasis on charity.[web:4][web:14]"
+        }
+      ]
+    },
+    {
+      "country": "Malaysia",
+      "region": "Southeast Asia",
+      "cities": [
+        {
+          "name": "Kuala Lumpur",
+          "suhoor_meals": [
+            "rice with curries",
+            "roti canai with dhal",
+            "teh tarik"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "nasi lemak",
+            "satay",
+            "various curries"
+          ],
+          "desserts_and_drinks": [
+            "cendol",
+            "sirap bandung (rose syrup with milk)"
+          ],
+          "rituals_and_traditions": [
+            "Bazaar Ramadan markets selling a wide variety of take-away iftar foods",
+            "Family-centric iftars that blend Malay, Chinese, and Indian culinary influences"
+          ],
+          "notes": "Bazaar Ramadan is a defining Malaysian institution, with temporary markets dedicated to iftar food.[web:14]"
+        },
+        {
+          "name": "Penang",
+          "suhoor_meals": [
+            "rice and curry",
+            "bread with tea"
+          ],
+          "iftar_meals": [
+            "nasi kandar",
+            "satay",
+            "laksa in some areas"
+          ],
+          "desserts_and_drinks": [
+            "cendol",
+            "iced drinks"
+          ],
+          "rituals_and_traditions": [
+            "Heritage streets lined with Ramadan food stalls",
+            "Mix of Malay and Indian Muslim influences"
+          ],
+          "notes": "Penang's Ramadan food reflects its reputation as a food capital with strong Indian Muslim presence.[web:14]"
+        }
+      ]
+    },
+    {
+      "country": "Tunisia",
+      "region": "North Africa",
+      "cities": [
+        {
+          "name": "Tunis",
+          "suhoor_meals": [
+            "bread, olive oil, cheese",
+            "light stews"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "lablabi (chickpea soup)",
+            "brik (fried pastry with egg)"
+          ],
+          "desserts_and_drinks": [
+            "baklava",
+            "mint tea"
+          ],
+          "rituals_and_traditions": [
+            "Iftar cannon firing in some areas",
+            "Family gatherings around hearty soups and pastries"
+          ],
+          "notes": "Lablabi and brik are emblematic Tunisian Ramadan dishes.[web:14]"
+        }
+      ]
+    },
+    {
+      "country": "Uzbekistan",
+      "region": "Central Asia",
+      "cities": [
+        {
+          "name": "Tashkent",
+          "suhoor_meals": [
+            "non (flatbread) with cheese and tea",
+            "light pilaf"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "plov (rice with meat)",
+            "shashlik (grilled skewered meat)",
+            "samsa (savory pastries)"
+          ],
+          "desserts_and_drinks": [
+            "tea",
+            "local sweets"
+          ],
+          "rituals_and_traditions": [
+            "Community iftars with extended family and neighbors",
+            "Evening prayers followed by tea and sweets"
+          ],
+          "notes": "Plov, shashlik, and samsa are common Uzbek dishes served during Ramadan.[web:14]"
+        }
+      ]
+    },
+    {
+      "country": "Kazakhstan",
+      "region": "Central Asia",
+      "cities": [
+        {
+          "name": "Almaty",
+          "suhoor_meals": [
+            "bread, cheese, tea",
+            "light meat dishes"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "plov",
+            "beshbarmak (boiled meat with pasta)"
+          ],
+          "desserts_and_drinks": [
+            "tea",
+            "local sweets"
+          ],
+          "rituals_and_traditions": [
+            "Strong emphasis on family gatherings at iftar",
+            "Taraweeh prayers at neighborhood mosques"
+          ],
+          "notes": "Plov and beshbarmak appear in Kazakh Ramadan meals along with shared family iftars.[web:14]"
+        }
+      ]
+    },
+    {
+      "country": "Yemen",
+      "region": "Middle East",
+      "cities": [
+        {
+          "name": "Sanaa",
+          "suhoor_meals": [
+            "bread, honey, tea",
+            "simple stews"
+          ],
+          "iftar_meals": [
+            "dates and water",
+            "aseeda (wheat dough with broth)",
+            "saltah (meat stew with fenugreek foam)"
+          ],
+          "desserts_and_drinks": [
+            "local sweets",
+            "tea"
+          ],
+          "rituals_and_traditions": [
+            "Extended family meals with shared platters",
+            "Coffee and qat sessions in some communities after taraweeh"
+          ],
+          "notes": "Aseeda is a well-known Yemeni Ramadan dish, often eaten with broth by hand.[web:13]"
         }
       ]
     }

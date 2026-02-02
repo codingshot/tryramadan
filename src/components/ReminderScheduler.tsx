@@ -1,11 +1,12 @@
 import { useEffect, useRef } from "react";
 import { useUserPreferences } from "@/hooks/useLocalStorage";
 import { useNotificationSettings } from "@/hooks/useLocalStorage";
-import { usePrayerTimes } from "@/hooks/usePrayerTimes";
+import { usePrayerTimes, getSunnahFastingInfo } from "@/hooks/usePrayerTimes";
+import { isRamadanDay } from "@/lib/ramadan";
 
 const REMINDERS_SENT_KEY = "tryramadan-reminders-sent";
 
-type ReminderType = "suhoor" | "iftar" | "iftar-time";
+type ReminderType = "suhoor" | "iftar" | "iftar-time" | "sunnah-day";
 
 function getRemindersSent(): Record<string, ReminderType[]> {
   try {
@@ -67,6 +68,21 @@ export function ReminderScheduler() {
         sentRef.current = { ...sentRef.current, [todayStr]: sent };
         markReminderSent(todayStr, type);
       };
+
+      // Sunnah day (Mon/Thu) notification: once per day when today is a Sunnah fasting day and not Ramadan
+      if (!sent.includes("sunnah-day")) {
+        const sunnahInfo = getSunnahFastingInfo();
+        const todayDate = new Date();
+        todayDate.setHours(0, 0, 0, 0);
+        if (sunnahInfo && !isRamadanDay(todayDate)) {
+          addSent("sunnah-day");
+          new Notification("Sunnah fasting day • يوم صيام سنة", {
+            body: `Today is ${sunnahInfo.reason}. Voluntary fasting is recommended.`,
+            icon: "/favicon.png",
+            tag: `sunnah-day-${todayStr}`,
+          });
+        }
+      }
 
       // Suhoor reminder: X minutes before Imsak (stop eating)
       if (notifSettings.suhoorEnabled) {

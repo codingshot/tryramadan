@@ -19,7 +19,7 @@ export default function OnboardingNotifications() {
   };
 
   const handleContinue = () => {
-    navigate("/onboarding/goals");
+    navigate("/onboarding/priorities");
   };
 
   return (

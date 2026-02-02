@@ -1,15 +1,11 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Calendar, Moon } from "lucide-react";
+import { getNextRamadanStart } from "@/lib/ramadan";
 
-/** Exact date for Ramadan 2025 (Gregorian and Islamic). */
-const RAMADAN_2025_START = new Date("2025-02-28T00:00:00");
-const RAMADAN_2025_GREGORIAN = RAMADAN_2025_START.toLocaleDateString("en", {
-  weekday: "long",
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-});
-const RAMADAN_1446_HIJRI = "1 Ramadan 1446 AH";
+/** Approximate Hijri year for a Gregorian year (e.g. 2025 → 1446 AH). */
+function getApproxHijriYear(gregorianYear: number): number {
+  return Math.round(622 + (gregorianYear - 622) * (33 / 32));
+}
 
 interface RamadanStartInfoDialogProps {
   open: boolean;
@@ -17,6 +13,15 @@ interface RamadanStartInfoDialogProps {
 }
 
 export function RamadanStartInfoDialog({ open, onOpenChange }: RamadanStartInfoDialogProps) {
+  const nextStart = getNextRamadanStart();
+  const gregorianFormatted = nextStart.toLocaleDateString("en", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  const hijriYear = getApproxHijriYear(nextStart.getFullYear());
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md bg-background text-foreground border-border">
@@ -33,13 +38,14 @@ export function RamadanStartInfoDialog({ open, onOpenChange }: RamadanStartInfoD
           <div className="flex items-start gap-2 p-3 rounded-xl bg-secondary/10 border border-secondary/20">
             <Moon className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
             <div>
-              <p className="font-medium text-foreground">Exact date for Ramadan 2025</p>
+              <p className="font-medium text-foreground">Upcoming Ramadan (approximate)</p>
               <p className="text-foreground mt-1">
-                <strong>{RAMADAN_2025_GREGORIAN}</strong>
+                <strong>{gregorianFormatted}</strong>
               </p>
               <p className="text-muted-foreground mt-0.5 font-arabic">
-                {RAMADAN_1446_HIJRI} · ١ رمضان ١٤٤٦
+                1 Ramadan {hijriYear} AH · ١ رمضان {hijriYear}
               </p>
+              <p className="text-xs text-muted-foreground mt-1">Moon sighting may shift the date by a day.</p>
             </div>
           </div>
           <p className="text-xs text-muted-foreground">

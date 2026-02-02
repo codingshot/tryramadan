@@ -3,7 +3,8 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Check } from "lucide-react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
-import { useUserPreferences } from "@/hooks/useLocalStorage";
+import { useUserPreferences, getQuickActionOrderFromPriorities } from "@/hooks/useLocalStorage";
+import { useDashboardQuickActions } from "@/hooks/useLocalStorage";
 
 const GOAL_OPTIONS = [
   "Learn about Ramadan culture",
@@ -17,6 +18,7 @@ const GOAL_OPTIONS = [
 export default function OnboardingGoals() {
   const { state, setGoals, setIntention } = useOnboarding();
   const [preferences, setPreferences] = useUserPreferences();
+  const [, setQuickActionOrder] = useDashboardQuickActions();
   const [selectedGoals, setSelectedGoals] = useState<string[]>(state.goals);
   const [intention, setIntentionLocal] = useState(state.intention);
   const navigate = useNavigate();
@@ -30,6 +32,7 @@ export default function OnboardingGoals() {
   const handleComplete = () => {
     setGoals(selectedGoals);
     setIntention(intention);
+    const priorities = state.priorities;
     // Persist to preferences and mark onboarding complete
     setPreferences({
       ...preferences,
@@ -41,14 +44,23 @@ export default function OnboardingGoals() {
       selectedProgram: state.selectedProgram,
       onboardingComplete: true,
       notificationsEnabled: state.notifications.suhoor || state.notifications.iftar,
+      learningPriority: priorities.learningPriority,
+      cultureRecipesPriority: priorities.cultureRecipesPriority,
+      quranPriority: priorities.quranPriority,
+      macroTrackingEnabled: priorities.macroTrackingEnabled,
+      simplifyByLocation: priorities.simplifyByLocation,
     });
+    // Set dashboard quick action order from priorities
+    setQuickActionOrder(
+      getQuickActionOrderFromPriorities(priorities)
+    );
     navigate("/dashboard");
   };
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
       <button
-        onClick={() => navigate("/onboarding/notifications")}
+        onClick={() => navigate("/onboarding/priorities")}
         className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6"
       >
         <ArrowLeft className="w-4 h-4" /> Back
@@ -85,7 +97,7 @@ export default function OnboardingGoals() {
         onClick={handleComplete}
         className="w-full mt-6 py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2"
       >
-        Start my journey <Check className="w-5 h-5" />
+        Finish setup and go to dashboard <Check className="w-5 h-5" />
       </button>
     </motion.div>
   );

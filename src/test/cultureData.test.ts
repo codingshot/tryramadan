@@ -54,4 +54,17 @@ describe("Culture data (cities.json backfill)", () => {
     expect(ids).toContain("south-africa");
     expect(ids).toContain("bosnia");
   });
+
+  it("Senegal exists with cities (Dakar, Touba) from cities.json alignment", () => {
+    const country = getCountryById("senegal");
+    expect(country).toBeDefined();
+    expect(country!.name).toContain("Senegal");
+    expect(country!.cities).toBeDefined();
+    expect(country!.cities!.length).toBeGreaterThanOrEqual(2);
+    const cityNames = country!.cities!.map((c) => c.name);
+    expect(cityNames).toContain("Dakar");
+    expect(cityNames).toContain("Touba");
+    expect(country!.cities![0].suhoor_meals).toBeDefined();
+    expect(country!.cities![0].iftar_meals).toBeDefined();
+  });
 });

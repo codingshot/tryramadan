@@ -24,6 +24,13 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T 
   return [storedValue, setStoredValue];
 }
 
+/** How much religion/learning content the user wants. */
+export type LearningPriority = 'minimal' | 'moderate' | 'deep';
+/** Interest in culture and food recipes. */
+export type CultureRecipesPriority = 'none' | 'some' | 'lots';
+/** Interest in Quran (reading, glossary). */
+export type QuranPriority = 'none' | 'some' | 'daily';
+
 // User preferences interface
 export interface UserPreferences {
   userType: 'new' | 'muslim' | null;
@@ -37,6 +44,20 @@ export interface UserPreferences {
   suhoorReminder: string;
   iftarReminder: string;
   theme: 'light' | 'dark' | 'system';
+  /** UI language code (e.g. en, ar). */
+  language: string;
+  /** Country/region code for display (e.g. US, GB). */
+  country: string;
+  /** How much religion/learning content to show. */
+  learningPriority: LearningPriority;
+  /** Interest in culture & recipes. */
+  cultureRecipesPriority: CultureRecipesPriority;
+  /** Interest in Quran (and glossary). */
+  quranPriority: QuranPriority;
+  /** Show macro tracking (Meals/Macros). */
+  macroTrackingEnabled: boolean;
+  /** Simplify features based on location (e.g. local times, fewer options). */
+  simplifyByLocation: boolean;
 }
 
 export const defaultPreferences: UserPreferences = {
@@ -51,6 +72,13 @@ export const defaultPreferences: UserPreferences = {
   suhoorReminder: '04:30',
   iftarReminder: '18:30',
   theme: 'dark',
+  language: 'en',
+  country: 'US',
+  learningPriority: 'moderate',
+  cultureRecipesPriority: 'some',
+  quranPriority: 'some',
+  macroTrackingEnabled: false,
+  simplifyByLocation: true,
 };
 
 export function useUserPreferences() {
@@ -463,6 +491,76 @@ export function useDailyGoals() {
   return useLocalStorage<DailyGoals>('tryramadan-daily-goals', defaultDailyGoals);
 }
 
+// --- Dashboard quick access (configurable from Fasting Schedule) ---
+
+export const DASHBOARD_QUICK_ACTION_IDS = [
+  'today', 'goals', 'schedule', 'prayers', 'meals', 'macros', 'learn', 'glossary', 'quran',
+  'progress', 'culture', 'health', 'journal', 'achievements',
+] as const;
+
+export type DashboardQuickActionId = (typeof DASHBOARD_QUICK_ACTION_IDS)[number];
+
+export const DASHBOARD_QUICK_ACTIONS: { id: DashboardQuickActionId; label: string; path: string }[] = [
+  { id: 'today', label: 'Today', path: '/dashboard/today' },
+  { id: 'goals', label: 'Goals', path: '/dashboard/goals' },
+  { id: 'schedule', label: 'Schedule', path: '/dashboard/schedule' },
+  { id: 'prayers', label: 'Prayers', path: '/dashboard/prayers' },
+  { id: 'meals', label: 'Meals', path: '/dashboard/meals' },
+  { id: 'macros', label: 'Macros', path: '/dashboard/macros' },
+  { id: 'learn', label: 'Learn', path: '/dashboard/learn' },
+  { id: 'glossary', label: 'Glossary', path: '/dashboard/glossary' },
+  { id: 'quran', label: 'Quran', path: '/dashboard/quran' },
+  { id: 'progress', label: 'Progress', path: '/dashboard/progress' },
+  { id: 'culture', label: 'Culture', path: '/dashboard/culture' },
+  { id: 'health', label: 'Health', path: '/dashboard/health' },
+  { id: 'journal', label: 'Journal', path: '/dashboard/journal' },
+  { id: 'achievements', label: 'Achievements', path: '/dashboard/achievements' },
+];
+
+const defaultQuickActionOrder: string[] = [...DASHBOARD_QUICK_ACTION_IDS];
+
+/** Build a personalized quick-action order from user priorities (for onboarding and Settings). */
+export function getQuickActionOrderFromPriorities(prefs: Pick<UserPreferences, 'learningPriority' | 'cultureRecipesPriority' | 'quranPriority' | 'macroTrackingEnabled'>): DashboardQuickActionId[] {
+  const all = [...DASHBOARD_QUICK_ACTION_IDS];
+  const priority: DashboardQuickActionId[] = [];
+  // Core: always near top
+  ['today', 'schedule', 'prayers'].forEach((id) => {
+    if (all.includes(id as DashboardQuickActionId)) priority.push(id as DashboardQuickActionId);
+  });
+  // Quran/glossary first if user cares
+  if (prefs.quranPriority === 'daily' || prefs.quranPriority === 'some') {
+    if (!priority.includes('quran')) priority.push('quran');
+    if (!priority.includes('glossary')) priority.push('glossary');
+  }
+  if (prefs.learningPriority === 'deep' || prefs.learningPriority === 'moderate') {
+    if (!priority.includes('learn')) priority.push('learn');
+  }
+  // Culture/recipes
+  if (prefs.cultureRecipesPriority === 'lots' || prefs.cultureRecipesPriority === 'some') {
+    if (!priority.includes('culture')) priority.push('culture');
+    if (!priority.includes('meals')) priority.push('meals');
+  }
+  if (prefs.macroTrackingEnabled && !priority.includes('macros')) priority.push('macros');
+  // Rest in default order
+  all.forEach((id) => {
+    if (!priority.includes(id)) priority.push(id);
+  });
+  return priority;
+}
+
+export function useDashboardQuickActions() {
+  const [order, setOrder] = useLocalStorage<string[]>('tryramadan-dashboard-quick-actions', defaultQuickActionOrder);
+  const seen = new Set<string>();
+  const validOrder = order.filter((id) => {
+    if (!DASHBOARD_QUICK_ACTION_IDS.includes(id as DashboardQuickActionId)) return false;
+    if (seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
+  const displayOrder = validOrder.length > 0 ? validOrder : defaultQuickActionOrder;
+  return [displayOrder, setOrder] as const;
+}
+
 export interface DayMealPlan {
   suhoor?: string;  // free text or "suhoor-1" for recipe id
   iftar?: string;  // free text or "iftar-2"
@@ -483,12 +581,56 @@ export function useDayNutrition() {
   return useLocalStorage<Record<string, DayNutrition>>('tryramadan-day-nutrition', {});
 }
 
+// --- Per-day planned items (meal prep plan with macros) ---
+
+export type MealCategory = 'suhoor' | 'iftar' | 'between';
+
+export interface PlannedItem {
+  id: string;
+  mealType: MealCategory;
+  name: string;
+  portions: number;
+  caloriesPerPortion: number;
+  proteinPerPortion?: number;
+  carbsPerPortion?: number;
+  fatPerPortion?: number;
+}
+
+export interface DayPlannedItems {
+  suhoor: PlannedItem[];
+  iftar: PlannedItem[];
+  between: PlannedItem[];
+}
+
+function defaultDayPlannedItems(): DayPlannedItems {
+  return { suhoor: [], iftar: [], between: [] };
+}
+
+export function useDayPlannedItems() {
+  return useLocalStorage<Record<string, DayPlannedItems>>('tryramadan-day-planned-items', {});
+}
+
+/** Get total calories and macros for a day from planned items */
+export function getDayTotalsFromPlanned(dayPlanned: DayPlannedItems | undefined): DayNutrition {
+  if (!dayPlanned) return {};
+  const entries = [...dayPlanned.suhoor, ...dayPlanned.iftar, ...(dayPlanned.between ?? [])];
+  let calories = 0, protein = 0, carbs = 0, fat = 0;
+  for (const e of entries) {
+    const p = e.portions || 1;
+    calories += (e.caloriesPerPortion || 0) * p;
+    protein += (e.proteinPerPortion || 0) * p;
+    carbs += (e.carbsPerPortion || 0) * p;
+    fat += (e.fatPerPortion || 0) * p;
+  }
+  return { calories, protein, carbs, fat };
+}
+
 // --- Per-day food log: recipe or custom items with portions and macros ---
 
 export interface FoodLogEntry {
   id: string;
   type: 'recipe' | 'custom';
-  mealType: 'suhoor' | 'iftar';
+  mealType: MealCategory;
   /** Recipe key e.g. "suhoor-1", or custom name */
   name: string;
   portions: number;
@@ -504,20 +646,31 @@ export interface FoodLogEntry {
 export interface DayFoodLog {
   suhoor: FoodLogEntry[];
   iftar: FoodLogEntry[];
+  between?: FoodLogEntry[];
 }
 
 function defaultDayFoodLog(): DayFoodLog {
-  return { suhoor: [], iftar: [] };
+  return { suhoor: [], iftar: [], between: [] };
 }
 
 export function useDayFoodLog() {
   return useLocalStorage<Record<string, DayFoodLog>>('tryramadan-day-food-log', {});
 }
 
+/** Normalize day log so between array exists (for older stored data). */
+export function normalizeDayFoodLog(dayLog: DayFoodLog | undefined): DayFoodLog {
+  if (!dayLog) return defaultDayFoodLog();
+  return {
+    suhoor: dayLog.suhoor ?? [],
+    iftar: dayLog.iftar ?? [],
+    between: dayLog.between ?? [],
+  };
+}
+
 /** Get total calories and macros for a day from food log */
 export function getDayTotalsFromFoodLog(dayLog: DayFoodLog | undefined): DayNutrition {
-  if (!dayLog) return {};
-  const entries = [...dayLog.suhoor, ...dayLog.iftar];
+  const log = normalizeDayFoodLog(dayLog);
+  const entries = [...log.suhoor, ...log.iftar, ...log.between];
   let calories = 0, protein = 0, carbs = 0, fat = 0;
   for (const e of entries) {
     const p = e.portions || 1;

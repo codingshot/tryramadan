@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +19,8 @@ import DashboardHealth from "./pages/DashboardHealth";
 import DashboardJournal from "./pages/DashboardJournal";
 import DashboardAchievements from "./pages/DashboardAchievements";
 import DashboardGoals from "./pages/DashboardGoals";
+import DashboardQuran from "./pages/DashboardQuran";
+import DashboardMacros from "./pages/DashboardMacros";
 import OnboardingLayout from "./pages/onboarding/OnboardingLayout";
 import OnboardingWelcome from "./pages/onboarding/OnboardingWelcome";
 import OnboardingMode from "./pages/onboarding/OnboardingMode";
@@ -26,6 +29,7 @@ import OnboardingHealth from "./pages/onboarding/OnboardingHealth";
 import OnboardingLocation from "./pages/onboarding/OnboardingLocation";
 import OnboardingSchedule from "./pages/onboarding/OnboardingSchedule";
 import OnboardingNotifications from "./pages/onboarding/OnboardingNotifications";
+import OnboardingPriorities from "./pages/onboarding/OnboardingPriorities";
 import OnboardingGoals from "./pages/onboarding/OnboardingGoals";
 import LearnGlossary from "./pages/LearnGlossary";
 import LearnHadith from "./pages/LearnHadith";
@@ -43,12 +47,23 @@ import Legal from "./pages/Legal";
 import Privacy from "./pages/Privacy";
 import Guides from "./pages/Guides";
 import GuidePage from "./pages/GuidePage";
+import Personas from "./pages/Personas";
+import PersonaPage from "./pages/PersonaPage";
 import NotFound from "./pages/NotFound";
 import { AdhanScheduler } from "./components/AdhanScheduler";
 import { FastingBottomBar } from "./components/FastingBottomBar";
 import { ReminderScheduler } from "./components/ReminderScheduler";
 
 const queryClient = new QueryClient();
+
+/** Scroll window to top when the route (pathname) changes. */
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
 
 function ThemeSync() {
   useEffect(() => {
@@ -82,6 +97,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         <AdhanScheduler />
         <ReminderScheduler />
         <FastingBottomBar />
@@ -103,6 +119,7 @@ const App = () => (
             <Route path="location" element={<OnboardingLocation />} />
             <Route path="schedule" element={<OnboardingSchedule />} />
             <Route path="notifications" element={<OnboardingNotifications />} />
+            <Route path="priorities" element={<OnboardingPriorities />} />
             <Route path="goals" element={<OnboardingGoals />} />
           </Route>
           <Route path="/dashboard" element={<Dashboard />} />
@@ -117,6 +134,9 @@ const App = () => (
           <Route path="/dashboard/journal" element={<DashboardJournal />} />
           <Route path="/dashboard/achievements" element={<DashboardAchievements />} />
           <Route path="/dashboard/goals" element={<DashboardGoals />} />
+          <Route path="/dashboard/quran" element={<DashboardQuran />} />
+          <Route path="/dashboard/macros" element={<DashboardMacros />} />
+          <Route path="/dashboard/glossary" element={<LearnGlossary />} />
           <Route path="/learn/glossary" element={<LearnGlossary />} />
           <Route path="/learn/hadith" element={<LearnHadith />} />
           <Route path="/health-safety" element={<HealthSafety />} />
@@ -133,6 +153,8 @@ const App = () => (
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/guides" element={<Guides />} />
           <Route path="/guides/:slug" element={<GuidePage />} />
+          <Route path="/personas" element={<Personas />} />
+          <Route path="/personas/:slug" element={<PersonaPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
