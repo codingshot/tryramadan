@@ -60,6 +60,34 @@ const DashboardQuran = () => {
 
   const goPrev = () => setPlanDay((d) => Math.max(1, d - 1));
   const goNext = () => setPlanDay((d) => Math.min(TOTAL_JUZ, d + 1));
+  const goFirst = () => setPlanDay(1);
+  const goLast = () => setPlanDay(TOTAL_JUZ);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = document.activeElement as HTMLElement | null;
+      const isInput = target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.isContentEditable;
+      if (isInput) return;
+
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        if (e.ctrlKey || e.metaKey) goFirst();
+        else goPrev();
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        if (e.ctrlKey || e.metaKey) goLast();
+        else goNext();
+      } else if (e.key === "Home") {
+        e.preventDefault();
+        goFirst();
+      } else if (e.key === "End") {
+        e.preventDefault();
+        goLast();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -152,6 +180,9 @@ const DashboardQuran = () => {
             </div>
             <p className="text-xs text-muted-foreground mt-3">
               Content and translation from Quran.com (api.quran.com). Open the link above to read the full juz with multiple translations and tafsir.
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Keyboard: ← → prev/next day · Ctrl+← / Ctrl+→ first/last · Home / End jump to day 1 / 30
             </p>
           </motion.div>
 

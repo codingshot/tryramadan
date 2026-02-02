@@ -6,7 +6,6 @@ import {
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { ArabicHover } from "@/components/ArabicHover";
 import { useFastingProgress, breakFastingToday } from "@/hooks/useLocalStorage";
 import { BreakFastReasonDialog } from "@/components/BreakFastReasonDialog";
 import { PageSEO } from "@/components/PageSEO";
@@ -56,7 +55,7 @@ const Emergency = () => {
               <AlertTriangle className="w-10 h-10 text-destructive" />
             </div>
             <h1 className="text-2xl md:text-3xl font-display font-bold">
-              <ArabicHover arabic="لا بأس أن تفطر">It's Okay to Break Your Fast</ArabicHover>
+              It's Okay to Break Your Fast
             </h1>
           </motion.div>
           
@@ -68,7 +67,7 @@ const Emergency = () => {
             className="p-6 rounded-2xl bg-card border border-border mb-8"
           >
             <p className="text-center text-lg leading-relaxed">
-              Your health is a trust (<ArabicHover arabic="أمانة">trust</ArabicHover>) from Allah. 
+              Your health is a trust from Allah. 
               Taking care of your body is an act of worship. 
               <strong className="block mt-2">You are not a failure.</strong>
             </p>
@@ -82,7 +81,7 @@ const Emergency = () => {
             className="mb-8"
           >
             <h2 className="font-display font-bold text-lg mb-4 text-center">
-              <ArabicHover arabic="ماذا تفعل الآن">What to do now</ArabicHover>
+              What to do now
             </h2>
             
             <div className="space-y-3">
@@ -100,9 +99,7 @@ const Emergency = () => {
                       <Icon className="w-6 h-6 text-secondary" />
                     </div>
                     <div>
-                      <span className="font-medium block">
-                        <ArabicHover arabic={step.textAr}>{step.text}</ArabicHover>
-                      </span>
+                      <span className="font-medium block">{step.text}</span>
                     </div>
                   </motion.div>
                 );

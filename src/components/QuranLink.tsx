@@ -1,8 +1,6 @@
 import { useState, useCallback } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-
-const QURAN_COM_BASE = "https://quran.com";
-const QURAN_API = "https://api.quran.com/api/v4";
+import { API_CONFIG, EXTERNAL_LINKS } from "@/lib/config";
 
 type QuranLinkProps = {
   /** Chapter number 1–114; omit for main Quran link */
@@ -17,15 +15,15 @@ export function QuranLink({ chapterNumber, children, className = "" }: QuranLink
   const [loading, setLoading] = useState(false);
 
   const url = chapterNumber
-    ? `${QURAN_COM_BASE}/${chapterNumber}`
-    : QURAN_COM_BASE;
+    ? `${EXTERNAL_LINKS.quran}/${chapterNumber}`
+    : EXTERNAL_LINKS.quran;
 
   const loadHoverContent = useCallback(async () => {
     if (hoverContent !== null) return;
     setLoading(true);
     try {
       if (chapterNumber) {
-        const res = await fetch(`${QURAN_API}/chapters/${chapterNumber}`);
+        const res = await fetch(`${API_CONFIG.quranApi}/chapters/${chapterNumber}`);
         const data = await res.json();
         const ch = data?.chapter;
         if (ch) {

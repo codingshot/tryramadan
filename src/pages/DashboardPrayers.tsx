@@ -110,9 +110,7 @@ const DashboardPrayers = () => {
             <Tooltip>
               <TooltipTrigger asChild>
                 <h1 className="text-2xl md:text-3xl font-display font-bold cursor-help border-b border-dotted border-transparent hover:border-muted-foreground/40 w-fit">
-                  <ArabicHover arabic="أوقات الصلاة" explanation={GENERAL_TOOLTIPS.prayerTimes.body}>
-                    Prayer Times
-                  </ArabicHover>
+                  Prayer Times
                 </h1>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs p-3">

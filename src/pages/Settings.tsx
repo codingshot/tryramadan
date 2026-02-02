@@ -8,7 +8,6 @@ import {
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { ArabicHover } from "@/components/ArabicHover";
 import { LocationSearch } from "@/components/LocationSearch";
 import { LocationResult, getLocationFromIP, getTimezoneFromCoords } from "@/hooks/useLocation";
 import { 
@@ -181,7 +180,7 @@ const Settings = () => {
             className="mb-8"
           >
             <h1 className="text-2xl md:text-3xl font-display font-bold">
-              <ArabicHover arabic="الإعدادات" explanation="Settings — location, notifications, theme, and data">Settings</ArabicHover>
+              Settings
             </h1>
           </motion.div>
 
@@ -195,7 +194,7 @@ const Settings = () => {
           >
             <h2 className="font-display font-bold mb-1 flex items-center gap-2 flex-wrap">
               <Moon className="w-5 h-5 text-secondary flex-shrink-0" />
-              <ArabicHover arabic="مسار الصيام" explanation="Fasting path — your mode and observance">Fasting path</ArabicHover>
+              Fasting path
             </h2>
             <p className="text-sm text-muted-foreground mb-4">
               Choose how you&apos;re using the app. This affects labels (e.g. &quot;Iftar&quot; vs &quot;Breaking Fast&quot;) and content tone.
@@ -250,7 +249,7 @@ const Settings = () => {
           >
             <h2 className="font-display font-bold mb-1 flex items-center gap-2 flex-wrap">
               <Target className="w-5 h-5 text-secondary flex-shrink-0" />
-              <ArabicHover arabic="أولوياتك" explanation="Your priorities — learning, culture, Quran, dashboard">Your priorities</ArabicHover>
+              Your priorities
             </h2>
             <p className="text-sm text-muted-foreground mb-4">
               We prioritize your dashboard and simplify features based on this. Full access remains under Learn.
@@ -396,7 +395,7 @@ const Settings = () => {
           >
             <h2 className="font-display font-bold mb-4 flex items-center gap-2 flex-wrap">
               <MapPin className="w-5 h-5 text-secondary flex-shrink-0" />
-              <ArabicHover arabic="الموقع" explanation="Location — for prayer and fasting times">Location</ArabicHover>
+              Location
             </h2>
             
             <p className="text-sm text-muted-foreground mb-4">
@@ -448,7 +447,7 @@ const Settings = () => {
           >
             <h2 className="font-display font-bold mb-4 flex items-center gap-2 flex-wrap">
               <Globe className="w-5 h-5 text-secondary flex-shrink-0" />
-              <ArabicHover arabic="اللغة والمنطقة" explanation="Language and region — display and units">Language & region</ArabicHover>
+              Language & region
             </h2>
             <p className="text-sm text-muted-foreground mb-4">
               Display preference. Location above is used for prayer times.
@@ -513,7 +512,7 @@ const Settings = () => {
           >
             <h2 className="font-display font-bold mb-4 flex items-center gap-2 flex-wrap">
               <Bell className="w-5 h-5 text-secondary flex-shrink-0" />
-              <ArabicHover arabic="الإشعارات" explanation="Notifications — suhoor, iftar, and prayer reminders">Notifications</ArabicHover>
+              Notifications
             </h2>
             
             {!supported ? (
@@ -598,7 +597,7 @@ const Settings = () => {
           >
             <h2 className="font-display font-bold mb-4 flex items-center gap-2 flex-wrap">
               <Droplets className="w-5 h-5 text-blue-500 flex-shrink-0" aria-hidden />
-              <ArabicHover arabic="الترطيب" explanation="Hydration — water goal and reminders">Hydration</ArabicHover>
+              Hydration
             </h2>
             <p className="text-sm text-muted-foreground mb-4">
               Daily water goal and reminders during non-fasting hours. Default goal is based on your selected region.
@@ -678,7 +677,7 @@ const Settings = () => {
           >
             <h2 className="font-display font-bold mb-4 flex items-center gap-2 flex-wrap">
               <Sun className="w-5 h-5 text-secondary flex-shrink-0" />
-              <ArabicHover arabic="المظهر" explanation="Theme — light, dark, or system">Theme</ArabicHover>
+              Theme
             </h2>
             
             <div className="flex gap-2">
@@ -714,7 +713,7 @@ const Settings = () => {
             className="p-6 rounded-2xl bg-card border border-border"
           >
             <h2 className="font-display font-bold mb-4">
-              <ArabicHover arabic="إدارة البيانات" explanation="Data management — export or reset your data">Data Management</ArabicHover>
+              Data Management
             </h2>
             
             <div className="space-y-3">

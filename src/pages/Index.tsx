@@ -182,7 +182,7 @@ const Index = () => {
               Cultural Education
             </Link>
             <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
-              <Link to="/culture" className="hover:opacity-90 transition-opacity focus:outline-none focus:ring-2 focus:ring-secondary rounded">
+              <Link to="/culture" className="hover:opacity-90 transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 rounded">
                 Ramadan Around the <span className="text-gradient-gold">World</span>
               </Link>
             </h2>

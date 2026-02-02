@@ -5,7 +5,6 @@ import {
   Moon, Sun, Clock, AlertTriangle, Battery, BatteryLow, BatteryMedium, BatteryFull,
   ArrowLeft, Droplets, Heart, ChevronRight, Zap
 } from "lucide-react";
-import { ArabicHover } from "@/components/ArabicHover";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FastingTimer } from "@/components/FastingTimer";
@@ -174,7 +173,7 @@ const DashboardToday = () => {
             className="mb-8"
           >
             <h1 className="text-2xl md:text-3xl font-display font-bold">
-              <ArabicHover arabic="صيام اليوم" explanation="Today's fast — track from suhoor end until iftar">Today&apos;s Fast</ArabicHover>
+              Today&apos;s Fast
             </h1>
             <p className="text-muted-foreground mt-2">
               Track your current fast and monitor how you're feeling
@@ -355,7 +354,7 @@ const DashboardToday = () => {
           >
             <div className="flex items-center justify-between mb-3">
               <span className="font-medium">
-                <ArabicHover arabic="تقدم الصيام" transliteration="taqaddum aṣ-ṣiyām">Fasting Progress</ArabicHover>
+                Fasting Progress
               </span>
               <span className="text-secondary font-bold">{Math.round(fastingProgress)}%</span>
             </div>
@@ -384,7 +383,7 @@ const DashboardToday = () => {
             className="mb-8 p-6 rounded-2xl bg-card border border-border"
           >
             <h3 className="font-display font-bold mb-2">
-              <ArabicHover arabic="نية اليوم">Today&apos;s intention</ArabicHover>
+              Today&apos;s intention
             </h3>
             <p className="text-sm text-muted-foreground mb-3">Set a short intention or goal for today&apos;s fast.</p>
             <textarea

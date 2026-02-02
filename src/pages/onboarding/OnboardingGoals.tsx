@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Check } from "lucide-react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
-import { useUserPreferences, getQuickActionOrderFromPriorities } from "@/hooks/useLocalStorage";
+import { useUserPreferences, getQuickActionOrderFromPriorities, persistPreferencesSync, persistQuickActionsSync } from "@/hooks/useLocalStorage";
 import { useDashboardQuickActions } from "@/hooks/useLocalStorage";
 
 const GOAL_OPTIONS: { emoji: string; label: string }[] = [
@@ -32,9 +32,14 @@ export default function OnboardingGoals() {
   const handleComplete = () => {
     setGoals(selectedGoals);
     setIntention(intention);
-    const priorities = state.priorities;
-    // Persist to preferences and mark onboarding complete
-    setPreferences({
+    const priorities = state.priorities && typeof state.priorities === "object" ? state.priorities : {
+      learningPriority: "moderate" as const,
+      cultureRecipesPriority: "some" as const,
+      quranPriority: "some" as const,
+      macroTrackingEnabled: false,
+      simplifyByLocation: true,
+    };
+    const newPrefs = {
       ...preferences,
       userType: state.mode,
       experience: state.experience,
@@ -50,11 +55,12 @@ export default function OnboardingGoals() {
       quranPriority: priorities.quranPriority,
       macroTrackingEnabled: priorities.macroTrackingEnabled,
       simplifyByLocation: priorities.simplifyByLocation,
-    });
-    // Set dashboard quick action order from priorities
-    setQuickActionOrder(
-      getQuickActionOrderFromPriorities(priorities)
-    );
+    };
+    // Persist synchronously BEFORE navigating so Dashboard reads fresh data from localStorage
+    persistPreferencesSync(newPrefs);
+    persistQuickActionsSync(getQuickActionOrderFromPriorities(priorities));
+    setPreferences(newPrefs);
+    setQuickActionOrder(getQuickActionOrderFromPriorities(priorities));
     navigate("/dashboard");
   };
 
@@ -102,7 +108,7 @@ export default function OnboardingGoals() {
         onClick={handleComplete}
         className="w-full mt-6 min-h-[44px] py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2 cursor-pointer"
       >
-        Finish setup and go to dashboard <Check className="w-5 h-5" />
+        Go to dashboard <Check className="w-5 h-5" />
       </button>
     </motion.div>
   );

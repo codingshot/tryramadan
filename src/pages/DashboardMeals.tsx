@@ -6,7 +6,6 @@ import {
   Flame, Plus, Heart, Filter, Globe, BookOpen
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
-import { ArabicHover } from "@/components/ArabicHover";
 import { Footer } from "@/components/Footer";
 import recipesData from "@/data/recipes.json";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -243,7 +242,7 @@ const DashboardMeals = () => {
             className="mb-8"
           >
             <h1 className="text-2xl md:text-3xl font-display font-bold">
-              <ArabicHover arabic="تخطيط الوجبات" explanation="Plan suhoor and iftar meals for each day">Meal Planning</ArabicHover>
+              Meal Planning
             </h1>
             <p className="text-muted-foreground mt-2">
               Suhoor (pre-dawn) and Iftar (evening break-fast) recipes from around the world. Pick recipes to add to today’s schedule; open any for full ingredients and step-by-step instructions.

@@ -78,13 +78,24 @@ type OnboardingContextValue = {
   saveDraft: () => void;
 };
 
-/** Load saved onboarding draft from localStorage, if any. */
+/** Load saved onboarding draft from localStorage, if any. Merges with defaults so missing/corrupt fields are safe. */
 function loadDraft(): OnboardingState | null {
   try {
     const raw = typeof window !== "undefined" ? window.localStorage.getItem(ONBOARDING_DRAFT_KEY) : null;
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as OnboardingState;
-    if (parsed && typeof parsed === "object" && (parsed.mode === null || parsed.mode === "new" || parsed.mode === "muslim")) return parsed;
+    const parsed = JSON.parse(raw) as Partial<OnboardingState>;
+    if (!parsed || typeof parsed !== "object" || !(parsed.mode === null || parsed.mode === "new" || parsed.mode === "muslim")) return null;
+    return {
+      ...defaultState,
+      ...parsed,
+      healthWarnings: Array.isArray(parsed.healthWarnings) ? parsed.healthWarnings : defaultState.healthWarnings,
+      priorities: parsed.priorities && typeof parsed.priorities === "object"
+        ? { ...defaultPriorities, ...parsed.priorities }
+        : defaultPriorities,
+      notifications: parsed.notifications && typeof parsed.notifications === "object"
+        ? { ...defaultState.notifications, ...parsed.notifications }
+        : defaultState.notifications,
+    };
   } catch {
     // ignore
   }

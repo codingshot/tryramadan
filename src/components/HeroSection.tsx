@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { FastingTimer } from "./FastingTimer";
-import { ArabicHover } from "./ArabicHover";
 import heroBg from "@/assets/hero-bg.jpg";
 import logo from "@/assets/logo.png";
 
@@ -52,7 +51,7 @@ export const HeroSection = () => {
               />
               <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/20 text-secondary text-sm font-medium backdrop-blur-sm">
                 <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
-                <ArabicHover arabic="رمضان القادم" className="border-0">Upcoming Ramadan</ArabicHover>
+                Upcoming Ramadan
               </span>
             </motion.div>
 
@@ -64,9 +63,7 @@ export const HeroSection = () => {
               className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-display font-bold text-center text-primary-foreground mb-4 leading-tight px-1"
             >
               Experience{" "}
-              <ArabicHover arabic="رمضان" className="border-0 text-gradient-gold text-xl sm:text-2xl md:text-4xl">
-                Ramadan
-              </ArabicHover>
+              <span className="text-gradient-gold text-xl sm:text-2xl md:text-4xl">Ramadan</span>
               <br />
               <span className="text-primary-foreground/90 text-xl sm:text-2xl md:text-4xl">Through Cultural Immersion</span>
             </motion.h1>
@@ -79,9 +76,7 @@ export const HeroSection = () => {
               className="text-base md:text-lg text-primary-foreground/80 text-center max-w-2xl mx-auto mb-8"
             >
               Fast like a Muslim for the holy month of{" "}
-              <ArabicHover arabic="رمضان" className="text-secondary font-semibold">
-                Ramadan
-              </ArabicHover>.
+              <span className="text-secondary font-semibold">Ramadan</span>.
             </motion.p>
 
             {/* CTA Buttons - touch-friendly min height */}

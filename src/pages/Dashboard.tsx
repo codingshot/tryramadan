@@ -221,9 +221,9 @@ const Dashboard = () => {
               <div>
                 <h1 className="text-2xl md:text-3xl font-display font-bold">
                   {preferences.userType === 'muslim' ? (
-                    <ArabicHover arabic="رمضان مبارك" explanation={GENERAL_TOOLTIPS.ramadanMubarak.body}>Ramadan Mubarak</ArabicHover>
+                    <>Ramadan Mubarak</>
                   ) : (
-                    <ArabicHover arabic="رحلة صيامك" explanation="Your fasting journey and progress">Your Fasting Journey</ArabicHover>
+                    <>Your Fasting Journey</>
                   )}
                 </h1>
               </div>
@@ -1028,15 +1028,13 @@ const Dashboard = () => {
               className="mb-8"
             >
               <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-                <ArabicHover arabic="أوقات الصلاة" explanation={GENERAL_TOOLTIPS.prayerTimes.body}>
-                  <Link
-                    to="/dashboard/prayers"
-                    className="font-display font-bold flex items-center gap-2 hover:text-secondary transition-colors"
-                  >
-                    <Clock className="w-5 h-5 text-secondary" />
-                    Today&apos;s Prayer Times
-                  </Link>
-                </ArabicHover>
+                <Link
+                  to="/dashboard/prayers"
+                  className="font-display font-bold flex items-center gap-2 hover:text-secondary transition-colors"
+                >
+                  <Clock className="w-5 h-5 text-secondary" />
+                  Today&apos;s Prayer Times
+                </Link>
                 <PrayerLocationBadge onClickToUpdate={() => setLocationEditorOpen(true)} />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">

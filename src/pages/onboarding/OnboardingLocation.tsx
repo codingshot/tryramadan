@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowRight, MapPin, Check, Loader2, Navigation } from "lucid
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { LocationSearch } from "@/components/LocationSearch";
 import { LocationResult, getLocationFromIP, getTimezoneFromCoords } from "@/hooks/useLocation";
+import { API_CONFIG } from "@/lib/config";
 
 export default function OnboardingLocation() {
   const { state, setLocation } = useOnboarding();
@@ -27,7 +28,7 @@ export default function OnboardingLocation() {
             });
           });
           const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`,
+            `${API_CONFIG.nominatim}/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`,
             { headers: { "User-Agent": "TryRamadan.app" } }
           );
           if (response.ok) {
@@ -147,9 +148,18 @@ export default function OnboardingLocation() {
         Continue <ArrowRight className="w-5 h-5" />
       </button>
       {!hasLocation && (
-        <p className="mt-2 text-sm text-muted-foreground text-center">
-          Select or detect a location above to continue. Prayer and fasting times need your location.
-        </p>
+        <>
+          <p className="mt-2 text-sm text-muted-foreground text-center">
+            Select or detect a location above to continue. Prayer and fasting times need your location.
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate("/onboarding/schedule")}
+            className="w-full mt-3 min-h-[44px] py-2 px-4 rounded-xl border border-border text-muted-foreground hover:bg-muted/50 text-sm"
+          >
+            Skip for now (set location later in Settings)
+          </button>
+        </>
       )}
     </motion.div>
   );

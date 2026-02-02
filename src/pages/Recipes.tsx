@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Coffee, Utensils, Globe, Clock, ChevronRight } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
-import { ArabicHover } from "@/components/ArabicHover";
 import { Footer } from "@/components/Footer";
 import { PageSEO } from "@/components/PageSEO";
 import {
@@ -71,7 +70,7 @@ export default function Recipes() {
             className="mb-8"
           >
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold">
-              <ArabicHover arabic="وصفات رمضان" explanation="Ramadan recipes — suhoor and iftar from around the world">Ramadan Recipes</ArabicHover>
+              Ramadan Recipes
             </h1>
             <p className="text-muted-foreground mt-2">
               Suhoor (pre-dawn) and Iftar (evening break-fast) recipes from Muslim communities worldwide. Filter by culture or meal type; open any recipe for ingredients and steps.

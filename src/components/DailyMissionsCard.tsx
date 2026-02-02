@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { Target, Check, Circle, ChevronRight } from "lucide-react";
 import { useDailyMissions, type DailyMission } from "@/hooks/useLocalStorage";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { ArabicHover } from "@/components/ArabicHover";
 import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
 
 const MISSION_TOOLTIPS: Record<string, string> = {
@@ -79,7 +78,7 @@ export function DailyMissionsCard() {
           <TooltipTrigger asChild>
             <h3 className="font-display font-bold flex items-center gap-2 cursor-help w-fit border-b border-dotted border-transparent hover:border-muted-foreground/40">
               <Target className="w-5 h-5 text-secondary" />
-              <ArabicHover arabic="مهام اليوم" explanation={GENERAL_TOOLTIPS.todayMissions.body}>Today&apos;s missions</ArabicHover>
+              Today&apos;s missions
             </h3>
           </TooltipTrigger>
           <TooltipContent>

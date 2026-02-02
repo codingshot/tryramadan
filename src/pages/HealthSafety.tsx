@@ -6,7 +6,6 @@ import {
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { ArabicHover } from "@/components/ArabicHover";
 import { PageSEO } from "@/components/PageSEO";
 
 const HealthSafety = () => {
@@ -53,7 +52,7 @@ const HealthSafety = () => {
             className="mb-8"
           >
             <h1 className="text-2xl md:text-3xl font-display font-bold">
-              <ArabicHover arabic="الصحة والسلامة">Health & Safety</ArabicHover>
+              Health & Safety
             </h1>
             <p className="text-muted-foreground mt-2">
               Important information for safe fasting practices
@@ -89,7 +88,7 @@ const HealthSafety = () => {
           >
             <h2 className="font-display font-bold text-xl mb-4 flex items-center gap-2 flex-wrap">
               <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0" />
-              <ArabicHover arabic="من لا يجب أن يصوم">Who Should Not Fast</ArabicHover>
+              Who Should Not Fast
             </h2>
             
             <div className="grid md:grid-cols-2 gap-4">
@@ -102,9 +101,7 @@ const HealthSafety = () => {
                         <Icon className="w-5 h-5 text-amber-600" />
                       </div>
                       <div>
-                        <h4 className="font-medium">
-                          <ArabicHover arabic={item.titleAr}>{item.title}</ArabicHover>
-                        </h4>
+                        <h4 className="font-medium">{item.title}</h4>
                         <p className="text-sm text-muted-foreground mt-1">{item.desc}</p>
                       </div>
                     </div>
@@ -123,7 +120,7 @@ const HealthSafety = () => {
           >
             <h2 className="font-display font-bold text-xl mb-4 flex items-center gap-2 flex-wrap">
               <Shield className="w-5 h-5 text-secondary flex-shrink-0" />
-              <ArabicHover arabic="إرشادات الصيام الآمن">Safe Fasting Guidelines</ArabicHover>
+              Safe Fasting Guidelines
             </h2>
             
             <div className="grid md:grid-cols-2 gap-3">

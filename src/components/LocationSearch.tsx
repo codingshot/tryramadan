@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Loader2, Navigation, X } from 'lucide-react';
 import { searchLocations, LocationResult, getLocationFromIP } from '@/hooks/useLocation';
+import { API_CONFIG } from '@/lib/config';
 
 interface LocationSearchProps {
   value: string;
@@ -77,7 +78,7 @@ export const LocationSearch = ({ value, onSelect, placeholder = "Search city..."
 
         // Reverse geocode
         const response = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`,
+          `${API_CONFIG.nominatim}/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`,
           { headers: { 'User-Agent': 'TryRamadan.app' } }
         );
 

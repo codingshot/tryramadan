@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
-import { ArabicHover } from "@/components/ArabicHover";
 import fastingData from "@/data/fasting-programs.json";
+import { HadithSunnahLink } from "@/components/HadithSunnahLink";
 
 interface FastingProgramsProps {
   onSelectProgram?: (programId: string) => void;
@@ -37,7 +37,7 @@ export const FastingPrograms = ({ onSelectProgram, selectedProgram = "traditiona
               <div className="absolute top-0 left-0 right-0 bg-gradient-gold py-1 px-3 text-center">
                 <span className="text-xs font-bold text-foreground flex items-center justify-center gap-1">
                   <span aria-hidden>⭐</span>
-                  <ArabicHover arabic="موصى به" className="border-0 text-foreground">Recommended</ArabicHover>
+                  Recommended
                 </span>
               </div>
             )}
@@ -56,13 +56,7 @@ export const FastingPrograms = ({ onSelectProgram, selectedProgram = "traditiona
                 <span className="text-sm font-semibold text-secondary">{program.duration}</span>
               </div>
 
-              <h3 className="font-display text-xl font-bold mb-1">
-                {program.nameAr ? (
-                  <ArabicHover arabic={program.nameAr}>{program.name}</ArabicHover>
-                ) : (
-                  program.name
-                )}
-              </h3>
+              <h3 className="font-display text-xl font-bold mb-1">{program.name}</h3>
               <p className="text-sm text-muted-foreground mb-4">{program.description}</p>
 
               {/* Weekly schedule preview */}
@@ -103,24 +97,29 @@ export const FastingPrograms = ({ onSelectProgram, selectedProgram = "traditiona
         <div className="flex items-start gap-4">
           <span className="text-3xl">☪️</span>
           <div>
-            <h4 className="font-display text-lg font-bold mb-1">
-              <ArabicHover arabic={fastingData.sunnahFasting.arabicName}>
-                {fastingData.sunnahFasting.title}
-              </ArabicHover>
-            </h4>
+            <h4 className="font-display text-lg font-bold mb-1">{fastingData.sunnahFasting.title}</h4>
             <p className="text-sm text-muted-foreground mb-4">
               {fastingData.sunnahFasting.description}
             </p>
 
             <div className="grid sm:grid-cols-2 gap-3">
-              {fastingData.sunnahFasting.types.slice(0, 2).map((type) => (
-                <div key={type.name} className="p-3 rounded-lg bg-background/50">
+              {fastingData.sunnahFasting.types.map((type) => (
+                <HadithSunnahLink
+                  key={type.name}
+                  source={type.hadithSource ?? "Sahih al-Bukhari fasting voluntary"}
+                  className="block p-3 rounded-lg bg-background/50 hover:bg-background/70 hover:border-secondary/30 border border-transparent transition-colors cursor-pointer text-left"
+                >
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-semibold text-sm">{type.name}</span>
                     <span className="text-xs text-secondary">{type.frequency}</span>
                   </div>
                   <p className="text-xs text-muted-foreground">{type.description}</p>
-                </div>
+                  {type.hadithOutline && (
+                    <p className="text-xs text-secondary mt-2 border-t border-border/50 pt-2">
+                      Hadith: {type.hadithOutline}
+                    </p>
+                  )}
+                </HadithSunnahLink>
               ))}
             </div>
           </div>

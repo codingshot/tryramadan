@@ -2,8 +2,9 @@
  * Adhan (call to prayer) audio. Play at prayer times when user has enabled adhan sound.
  * Using a public domain / CDN adhan clip. Falls back to no audio if load fails.
  */
-const ADHAN_AUDIO_URL =
-  "https://cdn.aladhan.com/audio/abdul-basit/1.mp3";
+import { API_CONFIG } from "@/lib/config";
+
+const ADHAN_AUDIO_URL = `${API_CONFIG.adhanAudio}/audio/abdul-basit/1.mp3`;
 
 let audioInstance: HTMLAudioElement | null = null;
 

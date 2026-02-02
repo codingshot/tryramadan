@@ -6,7 +6,7 @@
       "countries": [
         {
           "id": "saudi-arabia",
-          "name": "Saudi Arabia & Gulf States",
+          "name": "Saudi Arabia",
           "flag": "🇸🇦",
           "traditions": [
             {
@@ -457,7 +457,7 @@
         },
         {
           "id": "pakistan",
-          "name": "Pakistan & India",
+          "name": "Pakistan",
           "flag": "🇵🇰",
           "traditions": [
             {

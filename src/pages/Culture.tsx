@@ -4,7 +4,6 @@ import { ArrowLeft } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { CulturalCarousel } from "@/components/CulturalCarousel";
-import { ArabicHover } from "@/components/ArabicHover";
 import { PageSEO } from "@/components/PageSEO";
 
 const Culture = () => {
@@ -31,7 +30,7 @@ const Culture = () => {
             className="mb-8 text-center sm:text-left"
           >
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold">
-              <ArabicHover arabic="رمضان حول العالم">Ramadan Around the World</ArabicHover>
+              Ramadan Around the World
             </h1>
             <p className="text-muted-foreground mt-2 text-sm sm:text-base max-w-2xl">
               Explore traditions, foods, and customs from Muslim communities across the globe.

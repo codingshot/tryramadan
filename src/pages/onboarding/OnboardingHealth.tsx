@@ -15,25 +15,30 @@ const HEALTH_OPTIONS = [
 
 export default function OnboardingHealth() {
   const { state, setHealthWarnings } = useOnboarding();
-  const [selected, setSelected] = useState<string[]>(state.healthWarnings);
+  const [selected, setSelected] = useState<string[]>(() =>
+    Array.isArray(state.healthWarnings) ? state.healthWarnings : []
+  );
   const navigate = useNavigate();
+
+  const sel = Array.isArray(selected) ? selected : [];
 
   const toggle = (id: string) => {
     if (id === "none") {
       setSelected([]);
       return;
     }
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : prev.filter((x) => x !== "none").concat(id)
-    );
+    setSelected((prev) => {
+      const p = Array.isArray(prev) ? prev : [];
+      return p.includes(id) ? p.filter((x) => x !== id) : p.filter((x) => x !== "none").concat(id);
+    });
   };
 
   const handleContinue = () => {
-    setHealthWarnings(selected.filter((x) => x !== "none"));
+    setHealthWarnings(sel.filter((x) => x !== "none"));
     navigate("/onboarding/location");
   };
 
-  const hasWarning = selected.some((id) => id !== "none" && HEALTH_OPTIONS.find((o) => o.id === id)?.safe === false);
+  const hasWarning = sel.some((id) => id !== "none" && HEALTH_OPTIONS.find((o) => o.id === id)?.safe === false);
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -55,7 +60,7 @@ export default function OnboardingHealth() {
             type="button"
             onClick={() => toggle(opt.id)}
             className={`w-full min-h-[44px] p-4 rounded-xl border-2 text-left transition-all cursor-pointer touch-manipulation flex items-center gap-3 ${
-              selected.includes(opt.id)
+              sel.includes(opt.id)
                 ? "border-secondary bg-secondary/5"
                 : "border-border hover:border-secondary/50"
             }`}

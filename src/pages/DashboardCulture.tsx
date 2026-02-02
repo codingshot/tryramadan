@@ -5,7 +5,6 @@ import { ArrowLeft, GitCompare } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { CulturalCarousel } from "@/components/CulturalCarousel";
-import { ArabicHover } from "@/components/ArabicHover";
 import culturalData from "@/data/cultural-traditions.json";
 import {
   Select,
@@ -60,7 +59,7 @@ export default function DashboardCulture() {
             className="mb-8 text-center sm:text-left"
           >
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold">
-              <ArabicHover arabic="رمضان حول العالم">Cultural Explorer</ArabicHover>
+              Cultural Explorer
             </h1>
             <p className="text-muted-foreground mt-2 text-sm sm:text-base max-w-2xl">
               Ramadan traditions by region. Explore customs, foods, and stories from Muslim communities worldwide.

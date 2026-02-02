@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, BookOpen, ExternalLink, Filter } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { ArabicHover } from "@/components/ArabicHover";
 import { HadithSunnahLink } from "@/components/HadithSunnahLink";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { markHadithViewedToday } from "@/hooks/useLocalStorage";
@@ -49,7 +48,7 @@ const LearnHadith = () => {
             className="mb-8"
           >
             <h1 className="text-2xl md:text-3xl font-display font-bold">
-              <ArabicHover arabic="مجموعة الأحاديث">Hadith Collection</ArabicHover>
+              Hadith Collection
             </h1>
             <p className="text-muted-foreground mt-2">
               Prophetic sayings about fasting, Ramadan, and spiritual conduct

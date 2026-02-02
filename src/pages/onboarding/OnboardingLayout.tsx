@@ -2,7 +2,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
-import { useUserPreferences, getQuickActionOrderFromPriorities } from "@/hooks/useLocalStorage";
+import { useUserPreferences, getQuickActionOrderFromPriorities, persistPreferencesSync, persistQuickActionsSync } from "@/hooks/useLocalStorage";
 import { useDashboardQuickActions } from "@/hooks/useLocalStorage";
 
 const STEPS = [
@@ -31,8 +31,14 @@ export default function OnboardingLayout() {
   const handleClose = () => {
     const hasBeenOnDashboard = preferences.onboardingComplete === true;
     if (hasBeenOnDashboard) {
-      const priorities = state.priorities;
-      setPreferences({
+      const priorities = state.priorities && typeof state.priorities === "object" ? state.priorities : {
+        learningPriority: "moderate" as const,
+        cultureRecipesPriority: "some" as const,
+        quranPriority: "some" as const,
+        macroTrackingEnabled: false,
+        simplifyByLocation: true,
+      };
+      const newPrefs = {
         ...preferences,
         userType: state.mode,
         experience: state.experience,
@@ -48,7 +54,11 @@ export default function OnboardingLayout() {
         quranPriority: priorities.quranPriority,
         macroTrackingEnabled: priorities.macroTrackingEnabled,
         simplifyByLocation: priorities.simplifyByLocation,
-      });
+      };
+      // Persist synchronously before navigating so Dashboard reads fresh data
+      persistPreferencesSync(newPrefs);
+      persistQuickActionsSync(getQuickActionOrderFromPriorities(priorities));
+      setPreferences(newPrefs);
       setQuickActionOrder(getQuickActionOrderFromPriorities(priorities));
       navigate("/dashboard");
     } else {
@@ -59,7 +69,7 @@ export default function OnboardingLayout() {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <div className="flex items-center justify-end gap-2 px-4 py-2 bg-muted/30 border-b border-border">
-        <span className="text-xs text-muted-foreground mr-auto">Setup</span>
+        <span className="text-xs text-muted-foreground mr-auto">Getting started</span>
         <button
           type="button"
           onClick={handleClose}

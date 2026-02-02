@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Heart, Droplets, AlertTriangle, Sun, Moon, Stethoscope, TrendingUp } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { ArabicHover } from "@/components/ArabicHover";
 import { useWellnessLog, useSymptomLog, useTodayData } from "@/hooks/useLocalStorage";
 import { Button } from "@/components/ui/button";
 import {
@@ -100,7 +99,7 @@ export default function DashboardHealth() {
             className="mb-8"
           >
             <h1 className="text-2xl md:text-3xl font-display font-bold">
-              <ArabicHover arabic="تتبع الصحة">Health Tracker</ArabicHover>
+              Health Tracker
             </h1>
             <p className="text-muted-foreground mt-2">
               Daily wellness check-ins, energy levels, and hydration. Pause or adjust fasting when needed.

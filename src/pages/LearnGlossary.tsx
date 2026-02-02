@@ -64,7 +64,7 @@ const LearnGlossary = () => {
             className="mb-8"
           >
             <h1 className="text-2xl md:text-3xl font-display font-bold">
-              <ArabicHover arabic="المصطلحات الإسلامية">Islamic Glossary</ArabicHover>
+              Islamic Glossary
             </h1>
             <p className="text-muted-foreground mt-2">
               Learn essential Arabic and Islamic terms with English definitions

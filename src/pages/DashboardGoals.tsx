@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Target, Plus, Check, Circle, Trash2, Moon } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { ArabicHover } from "@/components/ArabicHover";
 import { useGoalsUntilRamadan, type GoalUntilRamadan } from "@/hooks/useLocalStorage";
 import { getDaysUntilRamadan, getNextRamadanStart, isCurrentlyRamadan } from "@/lib/ramadan";
 import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
@@ -69,7 +68,7 @@ export default function DashboardGoals() {
             className="mb-8"
           >
             <h1 className="text-2xl md:text-3xl font-display font-bold">
-              <ArabicHover arabic="أهداف حتى رمضان">Goals until Ramadan</ArabicHover>
+              Goals until Ramadan
             </h1>
             <p className="text-muted-foreground mt-2">
               Set intentions and habits to complete before Ramadan begins.
@@ -88,7 +87,7 @@ export default function DashboardGoals() {
               {inRamadan ? (
                 <div>
                   <h2 className="font-display font-bold text-secondary">
-                    <ArabicHover arabic="رمضان مبارك" explanation={GENERAL_TOOLTIPS.ramadanMubarak.body}>Ramadan Mubarak!</ArabicHover>
+                    Ramadan Mubarak!
                   </h2>
                 </div>
               ) : daysUntil > 0 ? (

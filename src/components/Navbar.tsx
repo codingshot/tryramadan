@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Menu, X, MapPin, User } from "lucide-react";
 import logo from "@/assets/logo.png";
-import { ArabicHover } from "./ArabicHover";
 import { useUserPreferences, useFastingProgress, isFastingToday, useDisplayTimezone } from "@/hooks/useLocalStorage";
 import { useAutoLocation } from "@/hooks/useLocation";
 
@@ -71,14 +70,12 @@ export const Navbar = () => {
             <div className="flex items-center gap-2 min-w-0">
               <Link to="/" onClick={scrollToTop} className="flex items-center gap-2 md:gap-3 shrink-0">
                 <img src={logo} alt="TryRamadan" className="w-9 h-9 md:w-11 md:h-11" />
-                <ArabicHover arabic="تجربة رمضان" className="border-0">
-                  <span className="font-display font-bold text-base md:text-lg leading-tight text-foreground">
-                    Try<span className="text-primary-contrast">Ramadan</span>
-                  </span>
-                </ArabicHover>
+                <span className="font-display font-bold text-base md:text-lg leading-tight text-foreground">
+                  Try<span className="text-primary-contrast">Ramadan</span>
+                </span>
               </Link>
               {fastingToday && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-secondary/20 text-secondary text-xs font-medium shrink-0" title={`Fasting · ${daysFasting} days completed`}>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-secondary/20 text-secondary text-xs font-medium shrink-0 cursor-default">
                   <span className="sm:hidden">{daysFasting}d</span>
                   <span className="hidden sm:inline">Fasting · {daysFasting} days</span>
                 </span>
@@ -103,8 +100,7 @@ export const Navbar = () => {
             <div className="hidden md:flex items-center gap-3">
               <Link
                 to="/settings"
-                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors min-w-0 max-w-[140px]"
-                title={displayLocation || "Set location for prayer times"}
+                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors min-w-0 max-w-[140px] cursor-pointer"
               >
                 <MapPin className="w-4 h-4 flex-shrink-0" />
                 <span className="truncate">{locationShort}</span>
@@ -173,7 +169,7 @@ export const Navbar = () => {
                   </Link>
                 ))}
                 <div className="mt-4 pt-4 border-t border-border flex flex-col gap-2">
-                  <Link to="/settings" onClick={() => setIsOpen(false)} className="flex items-center gap-2 text-sm text-muted-foreground min-h-[44px] items-center" title={displayLocation || "Set location"}>
+                  <Link to="/settings" onClick={() => setIsOpen(false)} className="flex items-center gap-2 text-sm text-muted-foreground min-h-[44px] items-center cursor-pointer">
                     <MapPin className="w-4 h-4" />
                     <span className="truncate">{locationShort}</span>
                   </Link>

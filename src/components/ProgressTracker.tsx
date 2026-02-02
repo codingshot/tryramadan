@@ -1,6 +1,4 @@
 import { motion } from "framer-motion";
-import { ArabicHover } from "@/components/ArabicHover";
-
 interface ProgressTrackerProps {
   currentDay: number;
   totalDays: number;
@@ -37,10 +35,10 @@ export const ProgressTracker = ({
       <div className="text-center">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/10 text-secondary text-sm font-medium mb-2">
           <span aria-hidden>📅</span>
-          <ArabicHover arabic="تقويم رمضان" explanation="Ramadan calendar — track days and progress">Ramadan Calendar</ArabicHover>
+          Ramadan Calendar
         </div>
         {isPlaceholder && (
-          <p className="text-xs text-muted-foreground mt-1">Sample preview — complete setup to track your own</p>
+          <p className="text-xs text-muted-foreground mt-1">Sample preview — get started to track your own</p>
         )}
       </div>
 

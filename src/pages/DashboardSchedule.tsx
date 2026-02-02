@@ -25,7 +25,6 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
-import { ArabicHover } from "@/components/ArabicHover";
 import { Footer } from "@/components/Footer";
 import {
   useFastingProgress,
@@ -60,9 +59,11 @@ import { buildIcalContent, downloadIcal } from "@/lib/ical";
 import { fetchPrayerTimesForMonth } from "@/hooks/usePrayerTimes";
 import { getRecipes, getRecipe, parseNutrient, type MealType } from "@/lib/cultureRecipes";
 import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
+import { EXTERNAL_LINKS } from "@/lib/config";
 import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
 import { PageSEO } from "@/components/PageSEO";
 import { TodayScheduleTimeline } from "@/components/TodayScheduleTimeline";
+import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -468,6 +469,9 @@ const DashboardSchedule = () => {
         includePrayers: true,
       });
       downloadIcal(ics, `tryramadan-${startStr}-to-${endStr}.ics`);
+      toast.success("Calendar exported successfully");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to export calendar. Try again.");
     } finally {
       setExportLoading(false);
     }
@@ -494,28 +498,33 @@ const DashboardSchedule = () => {
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
             <h1 className="text-2xl md:text-3xl font-display font-bold">
-              <ArabicHover arabic="جدول الصيام" explanation="Your fasting calendar and meal plan for each day">Fasting Schedule</ArabicHover>
+              Fasting Schedule
             </h1>
             <p className="text-muted-foreground mt-2">
               Click a calendar day to view or edit its meal plan, food log, and macros. Hover stats and labels for tips.
             </p>
           </motion.div>
 
-          {/* Today is Sunnah fasting day (Mon/Thu) — clear notice */}
+          {/* Today is Sunnah fasting day (Mon/Thu) — clear notice, clickable to hadith */}
           {isSunnahDay(today) && !isRamadanDay(today) && (
-            <motion.div
+            <motion.a
+              href={`${EXTERNAL_LINKS.sunnah}/search?q=${encodeURIComponent("Sahih Muslim 1162 Monday Thursday fasting")}`}
+              target="_blank"
+              rel="noopener noreferrer"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-6 p-4 rounded-2xl bg-primary/15 border-2 border-primary/40 flex items-center gap-3"
+              className="mb-6 p-4 rounded-2xl bg-primary/15 border-2 border-primary/40 flex items-center gap-3 cursor-pointer hover:bg-primary/20 hover:border-primary/50 transition-colors"
+              title="View hadith: Deeds are presented to Allah on Mondays and Thursdays, so the Prophet (ﷺ) fasted on these days."
             >
               <Star className="w-6 h-6 text-foreground fill-foreground shrink-0" aria-hidden />
-              <div>
+              <div className="flex-1">
                 <p className="font-semibold text-foreground">Today is a Sunnah fasting day</p>
                 <p className="text-sm text-muted-foreground mt-0.5">
                   {today.getDay() === 1 ? "Monday" : "Thursday"} — voluntary fasting is recommended in Islamic tradition. • يوم صيام سنة
                 </p>
+                <p className="text-xs text-secondary mt-2">Click to view hadith on Sunnah.com →</p>
               </div>
-            </motion.div>
+            </motion.a>
           )}
 
           {/* Daily goals */}

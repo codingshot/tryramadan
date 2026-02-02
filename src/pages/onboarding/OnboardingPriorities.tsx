@@ -24,7 +24,13 @@ const QURAN_OPTIONS = [
 export default function OnboardingPriorities() {
   const { state, setPriorities } = useOnboarding();
   const navigate = useNavigate();
-  const p = state.priorities;
+  const p = state.priorities && typeof state.priorities === "object" ? state.priorities : {
+    learningPriority: "moderate" as const,
+    cultureRecipesPriority: "some" as const,
+    quranPriority: "some" as const,
+    macroTrackingEnabled: false,
+    simplifyByLocation: true,
+  };
 
   const handleContinue = () => {
     navigate("/onboarding/goals");

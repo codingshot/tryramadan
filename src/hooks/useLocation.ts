@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { API_CONFIG } from '@/lib/config';
 
 export interface LocationResult {
   name: string;
@@ -19,7 +20,7 @@ export interface LocationState {
 // Get location from IP using free API
 export async function getLocationFromIP(): Promise<LocationResult | null> {
   try {
-    const response = await fetch('https://ipapi.co/json/');
+    const response = await fetch(`${API_CONFIG.ipapi}/json/`);
     if (!response.ok) throw new Error('IP location failed');
     
     const data = await response.json();
@@ -42,7 +43,7 @@ export async function getLocationFromIP(): Promise<LocationResult | null> {
 export async function getTimezoneFromCoords(lat: number, lng: number): Promise<string | null> {
   try {
     const response = await fetch(
-      `https://timeapi.io/api/TimeZone/coordinate?latitude=${lat}&longitude=${lng}`
+      `${API_CONFIG.timeapi}/api/TimeZone/coordinate?latitude=${lat}&longitude=${lng}`
     );
     if (!response.ok) return null;
     const data = await response.json();
@@ -59,7 +60,7 @@ export async function searchLocations(query: string): Promise<LocationResult[]> 
 
   try {
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`,
+      `${API_CONFIG.nominatim}/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`,
       {
         headers: {
           'Accept-Language': 'en',
@@ -115,7 +116,7 @@ export function useAutoLocation() {
 
         // Reverse geocode to get city name
         const response = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`,
+          `${API_CONFIG.nominatim}/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`,
           { headers: { 'User-Agent': 'TryRamadan.app' } }
         );
 

@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { ArabicHover } from "@/components/ArabicHover";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { Calendar } from "@/components/ui/calendar";
 import { PageSEO } from "@/components/PageSEO";
@@ -183,7 +182,7 @@ export default function DashboardJournal() {
             className="mb-8"
           >
             <h1 className="text-2xl md:text-3xl font-display font-bold">
-              <ArabicHover arabic="يوميات التأمل">Reflection Journal</ArabicHover>
+              Reflection Journal
             </h1>
             <p className="text-muted-foreground mt-2">
               Daily gratitude and mindfulness. Write for any date — past, today, or future. Your entries stay on this device.

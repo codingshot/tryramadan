@@ -98,8 +98,22 @@ export const defaultPreferences: UserPreferences = {
   hydrationReminderTimes: ['12:00', '15:00', '19:00'],
 };
 
+const PREFERENCES_KEY = 'tryramadan-preferences';
+
+/** Persist preferences to localStorage synchronously. Use before navigating so Dashboard reads fresh data. */
+export function persistPreferencesSync(partial: Partial<UserPreferences>): void {
+  try {
+    const raw = typeof window !== 'undefined' ? window.localStorage.getItem(PREFERENCES_KEY) : null;
+    const current = raw ? JSON.parse(raw) : {};
+    const merged = { ...defaultPreferences, ...current, ...partial };
+    window.localStorage.setItem(PREFERENCES_KEY, JSON.stringify(merged));
+  } catch (e) {
+    console.error('persistPreferencesSync:', e);
+  }
+}
+
 export function useUserPreferences() {
-  const [stored, setStored] = useLocalStorage<UserPreferences>('tryramadan-preferences', defaultPreferences);
+  const [stored, setStored] = useLocalStorage<UserPreferences>(PREFERENCES_KEY, defaultPreferences);
   // Ensure we always have all keys (merge with defaults for old or partial localStorage)
   const preferences: UserPreferences = { ...defaultPreferences, ...stored };
   return [preferences, setStored] as const;
@@ -662,6 +676,19 @@ export const DASHBOARD_QUICK_ACTIONS: { id: DashboardQuickActionId; label: strin
 
 const defaultQuickActionOrder: string[] = [...DASHBOARD_QUICK_ACTION_IDS];
 
+const QUICK_ACTIONS_KEY = 'tryramadan-dashboard-quick-actions';
+
+/** Persist dashboard quick action order to localStorage synchronously. Use before navigating. */
+export function persistQuickActionsSync(order: string[]): void {
+  try {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(QUICK_ACTIONS_KEY, JSON.stringify(order));
+    }
+  } catch (e) {
+    console.error('persistQuickActionsSync:', e);
+  }
+}
+
 /** Build a personalized quick-action order from user priorities (for onboarding and Settings). */
 export function getQuickActionOrderFromPriorities(prefs: Pick<UserPreferences, 'learningPriority' | 'cultureRecipesPriority' | 'quranPriority' | 'macroTrackingEnabled'>): DashboardQuickActionId[] {
   const all = [...DASHBOARD_QUICK_ACTION_IDS];
@@ -692,7 +719,7 @@ export function getQuickActionOrderFromPriorities(prefs: Pick<UserPreferences, '
 }
 
 export function useDashboardQuickActions() {
-  const [order, setOrder] = useLocalStorage<string[]>('tryramadan-dashboard-quick-actions', defaultQuickActionOrder);
+  const [order, setOrder] = useLocalStorage<string[]>(QUICK_ACTIONS_KEY, defaultQuickActionOrder);
   const seen = new Set<string>();
   const validOrder = order.filter((id) => {
     if (!DASHBOARD_QUICK_ACTION_IDS.includes(id as DashboardQuickActionId)) return false;

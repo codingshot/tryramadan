@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toLocalDateString } from '@/lib/utils';
 import { getRamadanDateRange } from '@/lib/ramadan';
+import { API_CONFIG } from '@/lib/config';
 
 export interface PrayerTimes {
   fajr: string;
@@ -75,7 +76,7 @@ export function usePrayerTimes(lat: number | null, lng: number | null) {
       const date = new Date(y, m - 1, d);
       const dateStr = toAladhanDateStr(date);
       const response = await fetch(
-        `https://api.aladhan.com/v1/timings/${dateStr}?latitude=${lat}&longitude=${lng}&method=2`
+        `${API_CONFIG.aladhan}/v1/timings/${dateStr}?latitude=${lat}&longitude=${lng}&method=2`
       );
       if (!response.ok) throw new Error('Failed to fetch prayer times');
       const data: AladhanResponse = await response.json();
@@ -144,7 +145,7 @@ export function usePrayerTimesForDate(
       setError(null);
       try {
         const response = await fetch(
-          `https://api.aladhan.com/v1/timings/${dateStr}?latitude=${lat}&longitude=${lng}&method=2`
+          `${API_CONFIG.aladhan}/v1/timings/${dateStr}?latitude=${lat}&longitude=${lng}&method=2`
         );
         if (!response.ok) throw new Error('Failed to fetch prayer times');
         const data: AladhanResponse = await response.json();
@@ -212,7 +213,7 @@ export async function fetchPrayerTimesForMonth(
   month: number
 ): Promise<Record<string, PrayerTimes>> {
   const response = await fetch(
-    `https://api.aladhan.com/v1/calendar?latitude=${lat}&longitude=${lng}&method=2&month=${month}&year=${year}`
+    `${API_CONFIG.aladhan}/v1/calendar?latitude=${lat}&longitude=${lng}&method=2&month=${month}&year=${year}`
   );
   if (!response.ok) throw new Error('Failed to fetch prayer times calendar');
   const json = await response.json();
@@ -368,7 +369,7 @@ export async function checkAyyamAlBeed(lat: number, lng: number): Promise<{ isAy
     const dateStr = `${today.getDate()}-${today.getMonth() + 1}-${today.getFullYear()}`;
     
     const response = await fetch(
-      `https://api.aladhan.com/v1/timings/${dateStr}?latitude=${lat}&longitude=${lng}&method=2`
+      `${API_CONFIG.aladhan}/v1/timings/${dateStr}?latitude=${lat}&longitude=${lng}&method=2`
     );
 
     if (!response.ok) return null;

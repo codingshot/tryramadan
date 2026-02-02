@@ -4,7 +4,6 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, ChevronDown, Search, HelpCircle } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { ArabicHover } from "@/components/ArabicHover";
 import { PageSEO } from "@/components/PageSEO";
 
 const FAQ = () => {
@@ -137,7 +136,7 @@ const FAQ = () => {
             className="mb-8"
           >
             <h1 className="text-2xl md:text-3xl font-display font-bold">
-              <ArabicHover arabic="الأسئلة الشائعة">Frequently Asked Questions</ArabicHover>
+              Frequently Asked Questions
             </h1>
             <p className="text-muted-foreground mt-2">
               Everything you need to know about fasting and using TryRamadan
@@ -192,9 +191,7 @@ const FAQ = () => {
                           className="w-full p-4 min-h-[44px] flex items-center justify-between text-left bg-card hover:bg-muted/50 transition-colors"
                         >
                           <div>
-                            <span className="font-medium">
-                              <ArabicHover arabic={faq.qAr}>{faq.q}</ArabicHover>
-                            </span>
+                            <span className="font-medium">{faq.q}</span>
                           </div>
                           <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform ${isOpen ? 'rotate-180' : ''}`} />
                         </button>

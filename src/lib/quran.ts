@@ -2,19 +2,20 @@
  * Quran reading plan: API helpers for api.quran.com (Quran.com).
  * Used for day-by-day juz plan with translation preview.
  */
+import { API_CONFIG, EXTERNAL_LINKS } from "@/lib/config";
 
-export const QURAN_API_BASE = "https://api.quran.com/api/v4";
+export const QURAN_API_BASE = API_CONFIG.quranApi;
 /** Saheeh International (English) */
 export const DEFAULT_TRANSLATION_ID = 20;
 
 /** Quran.com URL for a juz (e.g. open juz 1 with translation). */
 export function getQuranComJuzUrl(juzNumber: number): string {
-  return `https://quran.com/juz/${juzNumber}`;
+  return `${EXTERNAL_LINKS.quran}/juz/${juzNumber}`;
 }
 
 /** Quran.com URL for a chapter (surah). */
 export function getQuranComChapterUrl(chapterNumber: number): string {
-  return `https://quran.com/${chapterNumber}`;
+  return `${EXTERNAL_LINKS.quran}/${chapterNumber}`;
 }
 
 export interface QuranVerse {

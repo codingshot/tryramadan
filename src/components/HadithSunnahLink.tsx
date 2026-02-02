@@ -1,6 +1,5 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-
-const SUNNAH_COM_BASE = "https://sunnah.com";
+import { EXTERNAL_LINKS } from "@/lib/config";
 
 type HadithSunnahLinkProps = {
   /** Hadith source text (e.g. "Sahih al-Bukhari 1899") for search */
@@ -15,7 +14,7 @@ type HadithSunnahLinkProps = {
  * Link to Sunnah.com search for a hadith source, with tooltip explaining it.
  */
 export function HadithSunnahLink({ source, children, className = "" }: HadithSunnahLinkProps) {
-  const searchUrl = `${SUNNAH_COM_BASE}/search?q=${encodeURIComponent(source)}`;
+  const searchUrl = `${EXTERNAL_LINKS.sunnah}/search?q=${encodeURIComponent(source)}`;
 
   return (
     <Tooltip delayDuration={200}>

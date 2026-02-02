@@ -4,7 +4,6 @@ import { ArrowLeft, Trophy, ChevronRight } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useFastingProgress, useLocalStorage } from "@/hooks/useLocalStorage";
-import { ArabicHover } from "@/components/ArabicHover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { PageSEO } from "@/components/PageSEO";
 
@@ -67,7 +66,7 @@ export default function DashboardAchievements() {
             className="mb-8"
           >
             <h1 className="text-2xl md:text-3xl font-display font-bold">
-              <ArabicHover arabic="الإنجازات">Achievements</ArabicHover>
+              Achievements
             </h1>
             <p className="text-muted-foreground mt-2">
               Badges for milestones. Celebrate every fast.
