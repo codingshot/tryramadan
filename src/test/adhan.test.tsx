@@ -11,6 +11,10 @@ const mockRequestPermission = vi.fn();
 
 beforeEach(() => {
   vi.clearAllMocks();
+  localStorage.setItem(
+    "tryramadan-preferences",
+    JSON.stringify({ userType: "muslim", locationCoords: { lat: 51.5, lng: -0.1 } })
+  );
   Object.defineProperty(window, "Notification", {
     writable: true,
     value: Object.assign(mockNotification, {

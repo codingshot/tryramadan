@@ -5,6 +5,7 @@ import { Menu, X, MapPin, User } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { useUserPreferences, useFastingProgress, isFastingToday, useDisplayTimezone } from "@/hooks/useLocalStorage";
 import { useAutoLocation } from "@/hooks/useLocation";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -69,16 +70,31 @@ export const Navbar = () => {
             {/* Logo + fasting tag when fasting */}
             <div className="flex items-center gap-2 min-w-0">
               <Link to="/" onClick={scrollToTop} className="flex items-center gap-2 md:gap-3 shrink-0">
-                <img src={logo} alt="TryRamadan" className="w-9 h-9 md:w-11 md:h-11" />
+                <img src={logo} alt="" width={44} height={44} decoding="async" className="w-9 h-9 md:w-11 md:h-11" aria-hidden />
                 <span className="font-display font-bold text-base md:text-lg leading-tight text-foreground">
                   Try<span className="text-primary-contrast">Ramadan</span>
                 </span>
               </Link>
               {fastingToday && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-secondary/20 text-secondary text-xs font-medium shrink-0 cursor-default">
-                  <span className="sm:hidden">{daysFasting}d</span>
-                  <span className="hidden sm:inline">Fasting · {daysFasting} days</span>
-                </span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link
+                      to="/dashboard"
+                      onClick={() => setIsOpen(false)}
+                      className="inline-flex items-center px-2 py-0.5 rounded-full bg-secondary/20 text-secondary text-xs font-medium shrink-0 cursor-pointer hover:bg-secondary/30 transition-colors"
+                      aria-label={`Fasting today; ${daysFasting} day${daysFasting === 1 ? "" : "s"} completed — open dashboard`}
+                    >
+                      <span className="sm:hidden">{daysFasting} day{daysFasting === 1 ? "" : "s"}</span>
+                      <span className="hidden sm:inline">Fasting · {daysFasting} day{daysFasting === 1 ? "" : "s"}</span>
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-xs">
+                    <p className="font-medium text-sm">You&apos;re fasting today</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {daysFasting} day{daysFasting === 1 ? "" : "s"} completed this Ramadan. Click to open dashboard.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
               )}
             </div>
 

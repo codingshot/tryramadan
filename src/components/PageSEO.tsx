@@ -9,7 +9,7 @@ export interface PageSEOProps {
   title: string;
   /** Meta description for SEO and social previews (truncated to 160 chars) */
   description: string;
-  /** Optional path for canonical and og:url (e.g. "/recipe/suhoor/1") */
+  /** Optional path for canonical and og:url (e.g. "/recipe/suhoor/1"). Omit on 404 so canonical is not set to the error URL. */
   path?: string;
   /** Optional image URL for og:image (defaults to site og-image) */
   image?: string;
@@ -55,6 +55,7 @@ export function PageSEO({ title, description, path = "", image, imageAlt = DEFAU
     setMeta("property", "og:type", type);
     setMeta("property", "og:image", imageUrl);
     setMeta("property", "og:image:alt", imageAlt);
+    setMeta("property", "og:site_name", "TryRamadan.app");
     setMeta("name", "twitter:card", "summary_large_image");
     setMeta("name", "twitter:title", title);
     setMeta("name", "twitter:description", metaDescription);

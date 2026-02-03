@@ -4,15 +4,24 @@ import { ArrowRight } from "lucide-react";
 import { FastingTimer } from "./FastingTimer";
 import heroBg from "@/assets/hero-bg.jpg";
 import logo from "@/assets/logo.png";
+import { getDaysUntilRamadan, isCurrentlyRamadan, getRamadanDayNumber } from "@/lib/ramadan";
 
 export const HeroSection = () => {
+  const daysUntil = getDaysUntilRamadan();
+  const inRamadan = isCurrentlyRamadan();
+  const ramadanDay = inRamadan ? getRamadanDayNumber(new Date()) ?? 1 : null;
   return (
     <>
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Background image */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${heroBg})` }}
+        {/* Background image: <img> with dimensions + fetchpriority for LCP; avoids CLS from unknown-size bg */}
+        <img
+          src={heroBg}
+          alt=""
+          width={1920}
+          height={1080}
+          decoding="async"
+          fetchPriority="high"
+          className="absolute inset-0 w-full h-full object-cover object-center"
         />
         
         {/* Overlay */}
@@ -42,16 +51,21 @@ export const HeroSection = () => {
               animate={{ opacity: 1, y: 0 }}
               className="flex flex-col items-center mb-6"
             >
-              <motion.img 
-                src={logo} 
-                alt="TryRamadan" 
+              <motion.img
+                src={logo}
+                alt="TryRamadan"
+                width={112}
+                height={112}
+                decoding="async"
                 className="w-20 h-20 md:w-28 md:h-28 mb-4 drop-shadow-2xl"
                 animate={{ scale: [1, 1.03, 1] }}
                 transition={{ duration: 4, repeat: Infinity }}
               />
               <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/20 text-secondary text-sm font-medium backdrop-blur-sm">
                 <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
-                Upcoming Ramadan
+                {inRamadan && ramadanDay
+                  ? `Day ${ramadanDay} of Ramadan`
+                  : `${daysUntil} day${daysUntil === 1 ? "" : "s"} until Ramadan`}
               </span>
             </motion.div>
 
@@ -68,15 +82,24 @@ export const HeroSection = () => {
               <span className="text-primary-foreground/90 text-xl sm:text-2xl md:text-4xl">Through Cultural Immersion</span>
             </motion.h1>
 
-            {/* Subtitle */}
+            {/* Subtitle + AEO direct answer */}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="text-base md:text-lg text-primary-foreground/80 text-center max-w-2xl mx-auto mb-8"
+              className="text-base md:text-lg text-primary-foreground/80 text-center max-w-2xl mx-auto mb-4"
             >
               Fast like a Muslim for the holy month of{" "}
               <span className="text-secondary font-semibold">Ramadan</span>.
+            </motion.p>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.25 }}
+              className="text-sm md:text-base text-primary-foreground/70 text-center max-w-2xl mx-auto mb-8"
+            >
+              TryRamadan is a free app that gives you prayer times, suhoor and iftar reminders, and cultural education so you can experience Ramadan-style fasting safely. It’s for everyone—Muslims and non-Muslims alike.{" "}
+              <Link to="/faq" className="text-secondary font-medium underline underline-offset-2 hover:text-secondary/90">Learn more in our FAQ</Link>.
             </motion.p>
 
             {/* CTA Buttons - touch-friendly min height */}
@@ -95,9 +118,10 @@ export const HeroSection = () => {
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform shrink-0" />
               </Link>
               <Link 
-                to="/onboarding/welcome"
+                to="/onboarding/mode"
+                state={{ preSelectMuslim: true }}
                 className="btn-hero-outline w-full sm:w-auto flex items-center justify-center gap-2 min-h-[48px] px-6 py-3"
-                aria-label="I'm Muslim"
+                aria-label="I'm Muslim — skip to Muslim mode"
               >
                 I'm Muslim
               </Link>
@@ -113,27 +137,27 @@ export const HeroSection = () => {
               <FastingTimer />
             </motion.div>
 
-            {/* Stats */}
+            {/* Stats — dark backdrop so text stays visible in light mode on mobile (gradient fades to background) */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="grid grid-cols-3 gap-4 md:gap-8 max-w-2xl mx-auto mt-12"
+              className="grid grid-cols-3 gap-4 md:gap-8 max-w-2xl mx-auto mt-12 rounded-2xl bg-primary/95 dark:bg-primary/90 px-4 py-5 md:px-6 md:py-6 shadow-xl"
             >
               <div className="text-center">
                 <p className="text-2xl md:text-3xl mb-2" aria-hidden>👥</p>
                 <p className="text-xl md:text-2xl font-bold text-primary-foreground">1.8B+</p>
-                <p className="text-xs md:text-sm text-primary-foreground/60">Muslims • مسلمين</p>
+                <p className="text-xs md:text-sm text-primary-foreground/80">Muslims • مسلمين</p>
               </div>
               <div className="text-center">
                 <p className="text-2xl md:text-3xl mb-2" aria-hidden>📖</p>
                 <p className="text-xl md:text-2xl font-bold text-primary-foreground">30</p>
-                <p className="text-xs md:text-sm text-primary-foreground/60">Days • يوم</p>
+                <p className="text-xs md:text-sm text-primary-foreground/80">Days • يوم</p>
               </div>
               <div className="text-center">
                 <p className="text-2xl md:text-3xl mb-2" aria-hidden>❤️</p>
                 <p className="text-xl md:text-2xl font-bold text-primary-foreground">100+</p>
-                <p className="text-xs md:text-sm text-primary-foreground/60">Traditions • تقاليد</p>
+                <p className="text-xs md:text-sm text-primary-foreground/80">Traditions • تقاليد</p>
               </div>
             </motion.div>
           </div>

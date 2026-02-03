@@ -18,6 +18,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { PrayerLocationBadge } from "@/components/PrayerLocationBadge";
 import { ArabicHover } from "@/components/ArabicHover";
+import { LocationRequiredCTA } from "@/components/LocationRequiredCTA";
+import { ApiErrorRetry } from "@/components/ApiErrorRetry";
 import { PageSEO } from "@/components/PageSEO";
 import { getNowInTimezone, toLocalDateString } from "@/lib/utils";
 
@@ -40,7 +42,7 @@ const DashboardPrayers = () => {
     }));
   };
   
-  const { prayerTimes, hijriDate, loading, error: prayerError, refetch: refetchPrayers } = usePrayerTimes(
+  const { prayerTimes, hijriDate, loading, error: prayerError, refetch: refetchPrayers, isFromCache } = usePrayerTimes(
     preferences.locationCoords?.lat ?? null,
     preferences.locationCoords?.lng ?? null
   );
@@ -140,7 +142,7 @@ const DashboardPrayers = () => {
                   ...(displayTimezone && { timeZone: displayTimezone }),
                 })}
               </p>
-              {hijriDate && (
+              {hijriDate && preferences.userType === "muslim" && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <p className="text-sm opacity-80 mb-3 cursor-help border-b border-dotted border-primary-foreground/30 w-fit">
@@ -162,7 +164,7 @@ const DashboardPrayers = () => {
                 })}
               </p>
               {nextPrayer && (
-                <div className="mt-3">
+                <div className="mt-3" aria-live="polite" aria-atomic="true" role="status">
                   <p className="text-secondary">
                     Next: <span className="font-bold">{nextPrayer}</span>
                   </p>
@@ -181,27 +183,24 @@ const DashboardPrayers = () => {
           >
             {loading ? (
               <div className="text-center py-8 text-muted-foreground">Loading prayer times…</div>
-            ) : prayerError ? (
-              <div className="py-8 px-4 rounded-2xl border border-destructive/30 bg-destructive/5 text-center">
-                <p className="text-destructive font-medium mb-1">Could not load prayer times</p>
-                <p className="text-sm text-muted-foreground mb-3">{prayerError}</p>
-                <div className="flex flex-wrap items-center justify-center gap-3">
-                  <Button variant="secondary" size="sm" onClick={() => refetchPrayers()}>
-                    Try again
-                  </Button>
-                  <Link to="/settings">
-                    <Button variant="outline" size="sm">Set location</Button>
-                  </Link>
-                </div>
-              </div>
+            ) : prayerError && !isFromCache ? (
+              <ApiErrorRetry
+                title="Could not load prayer times"
+                message={prayerError}
+                onRetry={() => refetchPrayers()}
+                showSetLocation
+              />
             ) : !preferences.locationCoords?.lat && !preferences.locationCoords?.lng ? (
-              <div className="py-8 px-4 rounded-2xl border border-border bg-muted/30 text-center">
-                <p className="text-muted-foreground mb-3">Set your location for accurate prayer times.</p>
-                <Link to="/settings">
-                  <Button variant="secondary" size="sm">Set location in Settings</Button>
-                </Link>
-              </div>
-            ) : prayers.map((prayer, index) => {
+              <LocationRequiredCTA message="Set your location for accurate prayer times." />
+            ) : (
+              <>
+                {isFromCache && (
+                  <div className="mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-200 flex flex-wrap items-center justify-center gap-2">
+                    <span>Times may be outdated.</span>
+                    <Button variant="outline" size="sm" onClick={() => refetchPrayers()}>Try again</Button>
+                  </div>
+                )}
+                {prayers.map((prayer, index) => {
               const Icon = prayer.icon;
               const isNext = prayer.name === nextPrayer;
               
@@ -268,7 +267,7 @@ const DashboardPrayers = () => {
                     </div>
                     
                     <div className="text-right flex items-center gap-3 flex-wrap justify-end">
-                      {["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"].includes(prayer.name) && (
+                      {preferences.userType === "muslim" && ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"].includes(prayer.name) && (
                         <div className="flex items-center gap-2">
                           <Bell className="w-4 h-4 text-muted-foreground" />
                           <Switch
@@ -309,9 +308,12 @@ const DashboardPrayers = () => {
                 </motion.div>
               );
             })}
+              </>
+            )}
           </motion.div>
           
-          {/* Adhan: enable notification + play sound + test */}
+          {/* Adhan: enable notification + play sound + test (Muslim users only) */}
+          {preferences.userType === "muslim" && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -375,6 +377,7 @@ const DashboardPrayers = () => {
               </p>
             )}
           </motion.div>
+          )}
 
           {/* Notification note */}
           <motion.div

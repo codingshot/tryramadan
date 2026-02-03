@@ -40,32 +40,33 @@ export const guides: Guide[] = [
   {
     slug: "getting-started",
     title: "Getting Started with TryRamadan",
-    shortDescription: "Set up the app and complete onboarding.",
+    shortDescription: "Set up the app in 4 simple steps.",
     description:
-      "Step-by-step guide to getting started with TryRamadan: create an account, complete onboarding (welcome, mode, knowledge, health, location, schedule, notifications, goals), and reach your dashboard. Optimized for mobile and desktop.",
+      "Step-by-step guide to getting started with TryRamadan: open the app, start your journey, complete onboarding (welcome, mode, location, goals), and reach your dashboard. No account required. Optimized for mobile and desktop.",
     category: "onboarding",
     relatedSlugs: ["onboarding-flow", "dashboard-overview"],
     steps: [
       {
         title: "Open the app",
-        body: "Visit TryRamadan.app in your browser or open the installed PWA. The home page shows features, programs, and a clear call-to-action to start your journey.",
+        body: "Visit TryRamadan.app in your browser or open the installed PWA. The home page shows features, programs, and a live fasting timer preview. No sign-up required—everything works in your browser.",
+        image: `${ASSETS}/getting-started-home.png`,
         quickLink: { path: "/", label: "Go to Home" },
       },
       {
         title: "Start your journey",
-        body: "Tap or click “Start your journey” or “Try Ramadan” to begin. You’ll be taken to the onboarding flow.",
+        body: "Tap “Start your journey” to begin, or “I'm Muslim” for a faster path tailored to practicing Muslims. You’ll be taken to the onboarding flow—you can always change preferences later in Settings.",
         image: `${ASSETS}/getting-started-home.png`,
         quickLink: { path: "/onboarding", label: "Go to Onboarding" },
       },
       {
         title: "Complete onboarding",
-        body: "Follow the onboarding steps: Welcome, Mode (new/muslim), Knowledge, Health, Location, Schedule, Notifications, Priorities, and Goals. You can change most of these later in Settings.",
+        body: "Follow the steps: Welcome → Mode (new or Muslim) → Knowledge check → Health disclaimer → Location (for prayer times) → Schedule → Notifications → Priorities → Goals. Tip: Set your location for accurate suhoor and iftar times.",
         image: `${ASSETS}/onboarding-welcome.png`,
         quickLink: { path: "/onboarding", label: "Open Onboarding" },
       },
       {
         title: "Reach the dashboard",
-        body: "After onboarding you’ll land on the Dashboard. From here you can log fasting, see today’s timer, mark days complete, and open Today, Schedule, Prayers, Meals, Learn, and Progress.",
+        body: "After onboarding you’ll land on the Dashboard. You’ll see the fasting timer, progress ring, and quick links to Today, Schedule, Prayers, Meals, and more. If you already have location set, you may skip onboarding and go straight to the dashboard.",
         image: `${ASSETS}/dashboard-overview.png`,
         quickLink: { path: "/dashboard", label: "Open Dashboard" },
       },
@@ -74,7 +75,7 @@ export const guides: Guide[] = [
   {
     slug: "onboarding-flow",
     title: "Onboarding Flow Guide",
-    shortDescription: "Walk through each onboarding step.",
+    shortDescription: "Step-by-step walkthrough of every onboarding screen.",
     description:
       "Complete guide to the TryRamadan onboarding flow: welcome, experience mode, knowledge check, health disclaimer, location, Ramadan schedule, notifications, priorities (learning, culture, Quran, macro tracking), and pre-Ramadan goals. Includes quick links to each section.",
     category: "onboarding",
@@ -82,50 +83,56 @@ export const guides: Guide[] = [
     steps: [
       {
         title: "Welcome",
-        body: "The welcome screen introduces TryRamadan. Tap “Get started” to continue.",
+        body: "The welcome screen introduces TryRamadan. Tap “Get started” to begin. Muslim users can choose “I'm Muslim” on the home page to skip ahead with pre-selected options.",
         image: `${ASSETS}/onboarding-welcome.png`,
         quickLink: { path: "/onboarding/welcome", label: "Open Welcome" },
       },
       {
         title: "Experience mode",
-        body: "Choose whether you’re new to Ramadan or Muslim. This tailors tips and language.",
+        body: "Choose “New to Ramadan” or “Muslim”. Muslim mode tailors language (e.g. “Iftar” instead of “break fast”), offers Quran/glossary priorities, and lets you skip the knowledge quiz.",
         image: `${ASSETS}/onboarding-mode.png`,
         quickLink: { path: "/onboarding/mode", label: "Open Mode" },
       },
       {
         title: "Knowledge",
-        body: "Answer a few short questions about your familiarity with fasting. Used only to personalize content.",
+        body: "Answer a few quick questions about fasting. Used only to personalize content. Muslim users can tap “Skip — I already know this” to bypass this step.",
+        image: `${ASSETS}/onboarding-knowledge.png`,
         quickLink: { path: "/onboarding/knowledge", label: "Open Knowledge" },
       },
       {
         title: "Health",
-        body: "Read the health disclaimer. If you have medical conditions, consult a doctor before fasting.",
+        body: "Read the health disclaimer. If you have medical conditions, pregnancy, or take medication, consult a doctor before fasting. Tap “Continue” when ready.",
+        image: `${ASSETS}/onboarding-health.png`,
         quickLink: { path: "/onboarding/health", label: "Open Health" },
       },
       {
         title: "Location",
-        body: "Set your location for accurate prayer and suhoor/iftar times. You can use device location or search.",
+        body: "Set your location for accurate prayer and suhoor/iftar times. Use “Use my location” for GPS, or search for a city. Times are location-based—this step is important for the timer and calendar.",
         image: `${ASSETS}/onboarding-location.png`,
         quickLink: { path: "/onboarding/location", label: "Open Location" },
       },
       {
         title: "Schedule",
-        body: "Confirm or set your Ramadan start date. The app will use this for the 30-day countdown and calendar.",
+        body: "Confirm your Ramadan start date (or pick Full Ramadan, Sunnah fasting, etc.). The app uses this for the 30-day countdown and schedule calendar.",
+        image: `${ASSETS}/onboarding-schedule.png`,
         quickLink: { path: "/onboarding/schedule", label: "Open Schedule" },
       },
       {
         title: "Notifications",
-        body: "Optionally enable suhoor and iftar reminders. You can change times later in Settings.",
+        body: "Enable suhoor and iftar reminders if you like. Choose how many minutes before each time to be notified. You can adjust or disable these later in Settings.",
+        image: `${ASSETS}/onboarding-notifications.png`,
         quickLink: { path: "/onboarding/notifications", label: "Open Notifications" },
       },
       {
         title: "Priorities",
-        body: "Choose how much to learn, interest in culture & recipes, Quran & glossary, macro tracking, and whether to simplify by location. This prioritizes your dashboard and features.",
+        body: "Set priorities: Learning depth, Culture & recipes, Quran & glossary, macro tracking, and simplification. This shapes which dashboard cards and features you see first.",
+        image: `${ASSETS}/onboarding-priorities.png`,
         quickLink: { path: "/onboarding/priorities", label: "Open Priorities" },
       },
       {
         title: "Goals",
-        body: "Set optional pre-Ramadan goals (e.g. read about Ramadan, adjust sleep). You can manage goals from the dashboard.",
+        body: "Set optional pre-Ramadan goals (e.g. learn about Ramadan, adjust sleep, read Quran). Tap “Go to dashboard” when done. Muslim users can tap “Skip — go to dashboard” to finish quickly.",
+        image: `${ASSETS}/onboarding-goals.png`,
         quickLink: { path: "/onboarding/goals", label: "Open Goals" },
       },
     ],
@@ -318,6 +325,7 @@ export const guides: Guide[] = [
       {
         title: "Open Learn",
         body: "From the dashboard, tap “Learn”. You’ll see the glossary preview and daily hadith.",
+        image: `${ASSETS}/learn.png`,
         quickLink: { path: "/dashboard/learn", label: "Open Learn" },
       },
       {
@@ -566,13 +574,182 @@ export const guides: Guide[] = [
     ],
   },
   {
+    slug: "voluntary-fasting-programs",
+    title: "Voluntary Fasting Programs",
+    shortDescription: "Full Ramadan and Sunnah voluntary fasting options.",
+    description:
+      "Guide to TryRamadan fasting programs: Full Ramadan (dawn to sunset), Monday & Thursday, Ayyam al-Beed, Day of Arafah, Six Days of Shawwal. Browse programs, add to your journey, and set your fasting path in Settings.",
+    category: "general",
+    relatedSlugs: ["getting-started", "onboarding-flow", "settings"],
+    steps: [
+      {
+        title: "Open Programs",
+        body: "From the home page or footer, open Fasting Programs (or /programs). You'll see Full Ramadan and voluntary Sunnah options: Monday & Thursday, Ayyam al-Beed, Day of Arafah, Six Days of Shawwal.",
+        image: `${ASSETS}/programs.png`,
+        quickLink: { path: "/programs", label: "Open Programs" },
+      },
+      {
+        title: "Full Ramadan",
+        body: "The main 30-day dawn-to-sunset fast. Select this during onboarding or in Settings. You can add voluntary Sunnah fasts on top (e.g. Monday & Thursday during Ramadan).",
+        quickLink: { path: "/programs", label: "Open Programs" },
+      },
+      {
+        title: "Voluntary Sunnah fasts",
+        body: "Tap a program (e.g. Monday & Thursday) to read traditions and how to observe. Add to your journey during onboarding Schedule step or in Settings under Fasting path.",
+        quickLink: { path: "/programs/monday-thursday", label: "Monday & Thursday" },
+      },
+      {
+        title: "Set your fasting path",
+        body: "In Settings, go to Fasting path. Choose Full Ramadan and optionally enable Monday & Thursday or Ayyam al-Beed. Your schedule and dashboard will reflect your choices.",
+        quickLink: { path: "/settings", label: "Open Settings" },
+      },
+    ],
+  },
+  {
+    slug: "keyboard-shortcuts",
+    title: "Keyboard Shortcuts",
+    shortDescription: "Navigate faster with keyboard shortcuts.",
+    description:
+      "TryRamadan keyboard shortcuts: press ? to show help, g+d for Dashboard, g+t for Today, g+s for Schedule, g+p for Prayers, g+q for Quran, g+h for Home, comma for Settings. Arrow keys navigate days on Quran and Schedule. Desktop only.",
+    category: "general",
+    relatedSlugs: ["dashboard-overview", "today-fast", "quran"],
+    steps: [
+      {
+        title: "Show shortcuts",
+        body: "Press ? (question mark) anywhere in the app to open the keyboard shortcuts dialog. A floating keyboard icon appears at bottom-right on desktop; shortcuts are hidden on touch devices.",
+        quickLink: { path: "/dashboard", label: "Open Dashboard" },
+      },
+      {
+        title: "Go to pages",
+        body: "Press g then d for Dashboard, g then t for Today, g then s for Schedule, g then p for Prayers, g then q for Quran, g then h for Home. Press comma (,) to open Settings.",
+        quickLink: { path: "/dashboard", label: "Open Dashboard" },
+      },
+      {
+        title: "Navigate days",
+        body: "On the Quran or Schedule page, use left and right arrow keys to move between days. On Quran, Ctrl+Left/Right jumps to first or last day.",
+        quickLink: { path: "/dashboard/quran", label: "Open Quran" },
+      },
+    ],
+  },
+  {
+    slug: "adhan-prayer-notifications",
+    title: "Adhan & Prayer Notifications",
+    shortDescription: "Enable adhan sound and prayer reminders.",
+    description:
+      "How to enable adhan (call to prayer) sound and prayer notifications: per-prayer toggles on the Prayers page, suhoor and iftar reminders in Settings. Test adhan before enabling.",
+    category: "dashboard",
+    relatedSlugs: ["prayers", "settings"],
+    steps: [
+      {
+        title: "Open Prayers",
+        body: "Go to Dashboard → Prayers. Scroll down to see per-prayer notification toggles (Fajr, Dhuhr, Asr, Maghrib, Isha) and the Play adhan sound switch.",
+        image: `${ASSETS}/prayers.png`,
+        quickLink: { path: "/dashboard/prayers", label: "Open Prayers" },
+      },
+      {
+        title: "Enable adhan sound",
+        body: "Turn on Play adhan sound when notification fires. When a prayer time arrives and you have a notification enabled for that prayer, the adhan will play. Use Test adhan to preview the sound.",
+        quickLink: { path: "/dashboard/prayers", label: "Open Prayers" },
+      },
+      {
+        title: "Per-prayer notifications",
+        body: "Toggle each prayer (Fajr, Dhuhr, etc.) to receive a browser notification at that time. Requires notification permission. You can enable some prayers and not others.",
+        quickLink: { path: "/dashboard/prayers", label: "Open Prayers" },
+      },
+      {
+        title: "Suhoor and iftar reminders",
+        body: "In Settings → Notifications, enable suhoor and iftar reminders. Set how many minutes before each time to be notified. These fire separately from prayer notifications.",
+        quickLink: { path: "/settings", label: "Open Settings" },
+      },
+    ],
+  },
+  {
+    slug: "install-as-app",
+    title: "Install TryRamadan as an App",
+    shortDescription: "Add to home screen for quick access.",
+    description:
+      "How to install TryRamadan as a PWA (Progressive Web App) on your phone or desktop. Add to home screen for quick access to your fasting timer and prayer times. Works offline for cached content.",
+    category: "general",
+    relatedSlugs: ["getting-started", "dashboard-overview"],
+    steps: [
+      {
+        title: "Install banner",
+        body: "When you visit TryRamadan on a supported browser (Chrome, Safari, Edge), you may see an Install app banner on the dashboard. Tap Install app on home screen to add TryRamadan to your device.",
+        quickLink: { path: "/dashboard", label: "Open Dashboard" },
+      },
+      {
+        title: "Browser menu",
+        body: "If the banner does not appear, use your browser's menu: Chrome/Edge → Install app or Add to Home screen; Safari → Share → Add to Home Screen.",
+        quickLink: { path: "/dashboard", label: "Open Dashboard" },
+      },
+      {
+        title: "After install",
+        body: "TryRamadan opens like a native app. Your timer, prayer times, and progress are available offline when cached. Updates are automatic when you have connectivity.",
+        quickLink: { path: "/dashboard", label: "Open Dashboard" },
+      },
+    ],
+  },
+  {
+    slug: "goals-until-ramadan",
+    title: "Goals Until Ramadan",
+    shortDescription: "Set and track pre-Ramadan intentions.",
+    description:
+      "How to use Goals until Ramadan: add custom goals (spiritual, health, learning), mark them complete, and see the countdown to Ramadan. Access from the dashboard Goals card or the Goals page.",
+    category: "dashboard",
+    relatedSlugs: ["progress-goals", "dashboard-overview", "getting-started"],
+    steps: [
+      {
+        title: "Open Goals",
+        body: "From the dashboard, tap the Goals card or go to Dashboard → Goals. You'll see the countdown to Ramadan and your list of goals.",
+        image: `${ASSETS}/goals.png`,
+        quickLink: { path: "/dashboard/goals", label: "Open Goals" },
+      },
+      {
+        title: "Add a goal",
+        body: "Type a goal in the input (e.g. Read about Ramadan, Adjust my sleep schedule, Learn one surah) and tap Add. Goals appear in your list; tap the circle to mark complete.",
+        quickLink: { path: "/dashboard/goals", label: "Open Goals" },
+      },
+      {
+        title: "Manage goals",
+        body: "Tap the checkmark to toggle a goal complete. Use the trash icon to remove a goal. Your progress (X of Y complete) updates as you go.",
+        quickLink: { path: "/dashboard/goals", label: "Open Goals" },
+      },
+    ],
+  },
+  {
+    slug: "print-and-export",
+    title: "Print & Export",
+    shortDescription: "Print schedules, export journal and calendar.",
+    description:
+      "How to print and export data from TryRamadan: print-friendly styles for schedule and progress, export journal to download your entries, export Ramadan calendar to .ics for Google Calendar, Apple Calendar, or Outlook.",
+    category: "settings",
+    relatedSlugs: ["schedule-calendar", "journal", "settings"],
+    steps: [
+      {
+        title: "Print schedule or progress",
+        body: "Open Schedule or Progress, then use your browser's Print (Ctrl/Cmd+P). TryRamadan uses print-friendly styles: navigation and fixed elements are hidden, content is optimized for paper.",
+        quickLink: { path: "/dashboard/schedule", label: "Open Schedule" },
+      },
+      {
+        title: "Export journal",
+        body: "On the Journal page, use Export journal to download your entries. Your reflections, gratitude, and mood data are included.",
+        quickLink: { path: "/dashboard/journal", label: "Open Journal" },
+      },
+      {
+        title: "Export Ramadan calendar",
+        body: "On Schedule or the dashboard Goals card, use Export to calendar or Add Ramadan to calendar. Choose Fasting only (Suhoor + Iftar) or Full (all prayers + Taraweeh). Download .ics and import into Google Calendar, Apple Calendar, or Outlook.",
+        quickLink: { path: "/dashboard/schedule", label: "Open Schedule" },
+      },
+    ],
+  },
+  {
     slug: "faq-and-help",
     title: "FAQ & Help",
     shortDescription: "Find answers and user guides.",
     description:
       "Where to get help: FAQ for common questions (fasting, health, app usage), User Guides for step-by-step flows, Emergency for breaking fast safely, and Settings for location and notifications.",
     category: "general",
-    relatedSlugs: ["health-safety-emergency", "settings", "getting-started"],
+    relatedSlugs: ["health-safety-emergency", "settings", "getting-started", "keyboard-shortcuts", "install-as-app"],
     steps: [
       {
         title: "FAQ",

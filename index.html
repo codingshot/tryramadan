@@ -36,6 +36,12 @@
     <!-- Theme (default dark, darker green) -->
     <meta name="theme-color" content="#0d2818" />
     <meta name="msapplication-TileColor" content="#0d2818" />
+
+    <!-- Fonts: preconnect + async load to avoid blocking LCP (display=swap in URL) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Amiri:wght@400;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Amiri:wght@400;700&display=swap" /></noscript>
     <!-- iOS PWA / mobile web app -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />

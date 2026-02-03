@@ -74,7 +74,7 @@ describe("Routes", () => {
       </Routes>,
       { route: "/" }
     );
-    expect(screen.getByRole("link", { name: /tryramadan/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /try.*ramadan/i })).toBeInTheDocument();
   });
 
   it("renders Terms at /terms", () => {

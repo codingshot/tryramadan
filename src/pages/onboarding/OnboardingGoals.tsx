@@ -6,10 +6,19 @@ import { useOnboarding } from "@/contexts/OnboardingContext";
 import { useUserPreferences, getQuickActionOrderFromPriorities, persistPreferencesSync, persistQuickActionsSync } from "@/hooks/useLocalStorage";
 import { useDashboardQuickActions } from "@/hooks/useLocalStorage";
 
-const GOAL_OPTIONS: { emoji: string; label: string }[] = [
+const GOAL_OPTIONS_NON_MUSLIM: { emoji: string; label: string }[] = [
   { emoji: "📚", label: "Learn about Ramadan culture" },
   { emoji: "⏱️", label: "Try intermittent fasting safely" },
   { emoji: "🤝", label: "Support Muslim friends and family" },
+  { emoji: "🧘", label: "Spiritual reflection" },
+  { emoji: "💪", label: "Health and wellness" },
+  { emoji: "📐", label: "Build discipline" },
+];
+
+const GOAL_OPTIONS_MUSLIM: { emoji: string; label: string }[] = [
+  { emoji: "🌙", label: "Complete Ramadan with devotion" },
+  { emoji: "📖", label: "Recite Quran daily" },
+  { emoji: "💝", label: "Give charity (Sadaqah)" },
   { emoji: "🧘", label: "Spiritual reflection" },
   { emoji: "💪", label: "Health and wellness" },
   { emoji: "📐", label: "Build discipline" },
@@ -68,6 +77,12 @@ export default function OnboardingGoals() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleComplete();
+        }}
+      >
       <button
         type="button"
         onClick={() => navigate("/onboarding/priorities")}
@@ -79,9 +94,18 @@ export default function OnboardingGoals() {
       <p className="text-muted-foreground mb-6">
         Set your personal focus for this fasting journey. Optional but helps us tailor content.
       </p>
+      {state.mode === "muslim" && (
+        <button
+          type="button"
+          onClick={handleComplete}
+          className="w-full mb-6 py-2.5 px-4 rounded-xl border border-secondary/50 text-secondary font-medium text-sm hover:bg-secondary/10 transition-colors"
+        >
+          Skip — go to dashboard • الذهاب إلى لوحة التحكم
+        </button>
+      )}
 
       <div className="space-y-2 mb-6">
-        {GOAL_OPTIONS.map((g) => (
+        {(state.mode === "muslim" ? GOAL_OPTIONS_MUSLIM : GOAL_OPTIONS_NON_MUSLIM).map((g) => (
           <button
             key={g.label}
             type="button"
@@ -106,12 +130,12 @@ export default function OnboardingGoals() {
       />
 
       <button
-        type="button"
-        onClick={handleComplete}
+        type="submit"
         className="w-full mt-6 min-h-[44px] py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2 cursor-pointer"
       >
         Go to dashboard <Check className="w-5 h-5" />
       </button>
+      </form>
     </motion.div>
   );
 }

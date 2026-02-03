@@ -57,6 +57,8 @@ import NotFound from "./pages/NotFound";
 import { AdhanScheduler } from "./components/AdhanScheduler";
 import { FastingBottomBar } from "./components/FastingBottomBar";
 import { ReminderScheduler } from "./components/ReminderScheduler";
+import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
+import { KeyboardShortcutsHelp } from "./components/KeyboardShortcutsHelp";
 
 const queryClient = new QueryClient();
 
@@ -75,6 +77,11 @@ function ScrollToTop() {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     document.documentElement.scrollTo?.({ top: 0, left: 0, behavior: "auto" });
   }, [pathname]);
+  return null;
+}
+
+function KeyboardShortcutsManager() {
+  useKeyboardShortcuts();
   return null;
 }
 
@@ -111,9 +118,11 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ScrollToTop />
+        <KeyboardShortcutsManager />
         <AdhanScheduler />
         <ReminderScheduler />
         <FastingBottomBar />
+        <KeyboardShortcutsHelp />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route

@@ -52,6 +52,58 @@ function useTodayStr() {
   return todayStr;
 }
 
+const PRAYER_TIMES_CACHE_KEY = 'tryramadan-prayer-times-cache';
+
+interface PrayerTimesCacheEntry {
+  dateStr: string;
+  lat: number;
+  lng: number;
+  prayerTimes: PrayerTimes;
+  hijriDate: { day: string; month: string; monthAr: string; year: string };
+  savedAt: string;
+}
+
+function readPrayerTimesCache(dateStr: string, lat: number, lng: number): PrayerTimesCacheEntry | null {
+  try {
+    const raw = localStorage.getItem(PRAYER_TIMES_CACHE_KEY);
+    if (!raw) return null;
+    const entry = JSON.parse(raw) as PrayerTimesCacheEntry;
+    if (entry.dateStr !== dateStr || entry.lat !== lat || entry.lng !== lng) return null;
+    return entry;
+  } catch {
+    return null;
+  }
+}
+
+function writePrayerTimesCache(
+  dateStr: string,
+  lat: number,
+  lng: number,
+  prayerTimes: PrayerTimes,
+  hijriDate: { day: string; month: string; monthAr: string; year: string }
+) {
+  try {
+    const entry: PrayerTimesCacheEntry = {
+      dateStr,
+      lat,
+      lng,
+      prayerTimes,
+      hijriDate,
+      savedAt: new Date().toISOString(),
+    };
+    localStorage.setItem(PRAYER_TIMES_CACHE_KEY, JSON.stringify(entry));
+  } catch {
+    // ignore
+  }
+}
+
+/** Strip " (GMT)" or " (EAT)" etc. from API time string to get HH:mm. Aladhan can return "05:15 (EAT)". */
+function stripTimeSuffix(s: string): string {
+  if (!s) return '';
+  const i = s.indexOf(' ');
+  return i >= 0 ? s.slice(0, i).trim() : s;
+}
+
 /** Format YYYY-MM-DD or Date to DD-MM-YYYY for Aladhan API (padded). */
 function toAladhanDateStr(date: Date): string {
   const d = String(date.getDate()).padStart(2, '0');
@@ -60,17 +112,35 @@ function toAladhanDateStr(date: Date): string {
   return `${d}-${m}-${y}`;
 }
 
-export function usePrayerTimes(lat: number | null, lng: number | null) {
+/** Today's date YYYY-MM-DD in the given IANA timezone (for prayer times when location overrides system clock). */
+function getTodayStrInTimezone(timeZone: string): string {
+  return new Date().toLocaleDateString('en-CA', { timeZone });
+}
+
+export function usePrayerTimes(lat: number | null, lng: number | null, displayTimezone?: string | null) {
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
   const [hijriDate, setHijriDate] = useState<{ day: string; month: string; monthAr: string; year: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const todayStr = useTodayStr();
+  const [isFromCache, setIsFromCache] = useState(false);
+  const todayStrLocal = useTodayStr();
+  const [todayStrInTz, setTodayStrInTz] = useState(() =>
+    displayTimezone ? getTodayStrInTimezone(displayTimezone) : todayStrLocal
+  );
+  const todayStr = displayTimezone ? todayStrInTz : todayStrLocal;
+  useEffect(() => {
+    if (!displayTimezone) return;
+    const tick = () => setTodayStrInTz(getTodayStrInTimezone(displayTimezone));
+    tick();
+    const t = setInterval(tick, 60 * 1000);
+    return () => clearInterval(t);
+  }, [displayTimezone]);
 
   const fetchPrayerTimes = useCallback(async () => {
     if (!lat || !lng) return;
     setLoading(true);
     setError(null);
+    setIsFromCache(false);
     try {
       const [y, m, d] = todayStr.split('-').map(Number);
       const date = new Date(y, m - 1, d);
@@ -81,26 +151,38 @@ export function usePrayerTimes(lat: number | null, lng: number | null) {
       if (!response.ok) throw new Error('Failed to fetch prayer times');
       const data: AladhanResponse = await response.json();
       if (data.code === 200) {
-        setPrayerTimes({
-          fajr: data.data.timings.Fajr,
-          sunrise: data.data.timings.Sunrise,
-          dhuhr: data.data.timings.Dhuhr,
-          asr: data.data.timings.Asr,
-          maghrib: data.data.timings.Maghrib,
-          isha: data.data.timings.Isha,
-          imsak: data.data.timings.Imsak,
+        const t = data.data.timings;
+        const pt = {
+          fajr: stripTimeSuffix(t.Fajr ?? ''),
+          sunrise: stripTimeSuffix(t.Sunrise ?? ''),
+          dhuhr: stripTimeSuffix(t.Dhuhr ?? ''),
+          asr: stripTimeSuffix(t.Asr ?? ''),
+          maghrib: stripTimeSuffix(t.Maghrib ?? ''),
+          isha: stripTimeSuffix(t.Isha ?? ''),
+          imsak: stripTimeSuffix(t.Imsak ?? ''),
           date: data.data.date.readable,
-        });
-        setHijriDate({
+        };
+        const hd = {
           day: data.data.date.hijri.day,
           month: data.data.date.hijri.month.en,
           monthAr: data.data.date.hijri.month.ar,
           year: data.data.date.hijri.year,
-        });
+        };
+        setPrayerTimes(pt);
+        setHijriDate(hd);
+        writePrayerTimesCache(todayStr, lat, lng, pt, hd);
       }
     } catch (err) {
       console.error('Prayer times error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load prayer times');
+      const cached = lat && lng ? readPrayerTimesCache(todayStr, lat, lng) : null;
+      if (cached) {
+        setPrayerTimes(cached.prayerTimes);
+        setHijriDate(cached.hijriDate);
+        setIsFromCache(true);
+        setError('Times may be outdated. Check connection and try again.');
+      } else {
+        setError(err instanceof Error ? err.message : 'Failed to load prayer times');
+      }
     } finally {
       setLoading(false);
     }
@@ -108,10 +190,20 @@ export function usePrayerTimes(lat: number | null, lng: number | null) {
 
   useEffect(() => {
     if (!lat || !lng) return;
+    // Use cache first so we don't call API on every load when today's times are already stored
+    const cached = readPrayerTimesCache(todayStr, lat, lng);
+    if (cached) {
+      setPrayerTimes(cached.prayerTimes);
+      setHijriDate(cached.hijriDate);
+      setIsFromCache(true);
+      setLoading(false);
+      setError(null);
+      return;
+    }
     fetchPrayerTimes();
-  }, [lat, lng, fetchPrayerTimes]);
+  }, [lat, lng, todayStr, fetchPrayerTimes]);
 
-  return { prayerTimes, hijriDate, loading, error, refetch: fetchPrayerTimes };
+  return { prayerTimes, hijriDate, loading, error, refetch: fetchPrayerTimes, isFromCache };
 }
 
 /** Format YYYY-MM-DD to DD-MM-YYYY for Aladhan API */
@@ -150,14 +242,15 @@ export function usePrayerTimesForDate(
         if (!response.ok) throw new Error('Failed to fetch prayer times');
         const data: AladhanResponse = await response.json();
         if (data.code === 200) {
+          const t = data.data.timings;
           setPrayerTimes({
-            fajr: data.data.timings.Fajr,
-            sunrise: data.data.timings.Sunrise,
-            dhuhr: data.data.timings.Dhuhr,
-            asr: data.data.timings.Asr,
-            maghrib: data.data.timings.Maghrib,
-            isha: data.data.timings.Isha,
-            imsak: data.data.timings.Imsak,
+            fajr: stripTimeSuffix(t.Fajr ?? ''),
+            sunrise: stripTimeSuffix(t.Sunrise ?? ''),
+            dhuhr: stripTimeSuffix(t.Dhuhr ?? ''),
+            asr: stripTimeSuffix(t.Asr ?? ''),
+            maghrib: stripTimeSuffix(t.Maghrib ?? ''),
+            isha: stripTimeSuffix(t.Isha ?? ''),
+            imsak: stripTimeSuffix(t.Imsak ?? ''),
             date: data.data.date.readable,
           });
           setHijriDate({
@@ -179,13 +272,6 @@ export function usePrayerTimesForDate(
   }, [lat, lng, isoDate]);
 
   return { prayerTimes, hijriDate, loading, error };
-}
-
-/** Strip " (GMT)" or " (BST)" etc. from API time string to get HH:mm */
-function stripTimeSuffix(s: string): string {
-  if (!s) return '';
-  const i = s.indexOf(' ');
-  return i >= 0 ? s.slice(0, i) : s;
 }
 
 /** Aladhan calendar API: returns prayer times for each day of a month. */
@@ -252,15 +338,34 @@ interface RamadanPrayersCacheEntry {
 function getRamadanPrayersCache(): Record<string, RamadanPrayersCacheEntry> {
   try {
     const raw = window.localStorage.getItem(RAMADAN_PRAYERS_CACHE_KEY);
-    return raw ? JSON.parse(raw) : {};
+    const cache = raw ? JSON.parse(raw) : {};
+    const trimmed = trimRamadanPrayersCache(cache);
+    if (Object.keys(trimmed).length < Object.keys(cache).length) {
+      setRamadanPrayersCache(trimmed);
+    }
+    return trimmed;
   } catch {
     return {};
   }
 }
 
+/** Keep only entries for current and next Ramadan year to limit cache size. */
+function trimRamadanPrayersCache(cache: Record<string, RamadanPrayersCacheEntry>): Record<string, RamadanPrayersCacheEntry> {
+  const { year } = getRamadanDateRange();
+  const keepYears = [year, year + 1];
+  const trimmed: Record<string, RamadanPrayersCacheEntry> = {};
+  for (const [key, entry] of Object.entries(cache)) {
+    const match = key.match(/_(\d{4})$/);
+    const entryYear = match ? parseInt(match[1], 10) : year;
+    if (keepYears.includes(entryYear)) trimmed[key] = entry;
+  }
+  return trimmed;
+}
+
 function setRamadanPrayersCache(cache: Record<string, RamadanPrayersCacheEntry>) {
   try {
-    window.localStorage.setItem(RAMADAN_PRAYERS_CACHE_KEY, JSON.stringify(cache));
+    const trimmed = trimRamadanPrayersCache(cache);
+    window.localStorage.setItem(RAMADAN_PRAYERS_CACHE_KEY, JSON.stringify(trimmed));
   } catch (e) {
     console.warn('Ramadan prayers cache write failed', e);
   }

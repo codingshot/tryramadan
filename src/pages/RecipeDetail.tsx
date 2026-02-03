@@ -10,6 +10,7 @@ import {
   type MealType,
 } from "@/lib/cultureRecipes";
 import { useIftarLabel } from "@/hooks/useLocalStorage";
+import { buildRecipeSchema } from "@/lib/jsonld";
 
 export default function RecipeDetail() {
   const { mealType, id } = useParams<{ mealType: string; id: string }>();
@@ -41,15 +42,28 @@ export default function RecipeDetail() {
   const title = `${recipe.name} | ${type === "suhoor" ? "Suhoor" : iftarLabel} Recipe | TryRamadan`;
   const description =
     recipe.significance || recipe.description;
+  const recipePath = `/recipe/${type}/${recipe.id}`;
+  const recipeJsonLd = buildRecipeSchema({
+    name: recipe.name,
+    description: description.slice(0, 160),
+    url: `https://tryramadan.app${recipePath}`,
+    recipeCategory: type === "suhoor" ? "Suhoor" : iftarLabel,
+    recipeCuisine: recipe.region ?? undefined,
+    calories: recipe.nutrition?.calories,
+    protein: recipe.nutrition?.protein,
+    carbs: recipe.nutrition?.carbs,
+    fat: recipe.nutrition?.fat,
+  });
 
   return (
     <div className="min-h-screen bg-background">
       <PageSEO
         title={title}
         description={description.slice(0, 160)}
-        path={`/recipe/${type}/${recipe.id}`}
+        path={recipePath}
         type="article"
       />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(recipeJsonLd) }} />
       <Navbar />
       <main className="main-content" role="main" aria-label="Recipe">
         <div className="container mx-auto px-4 max-w-3xl min-w-0">

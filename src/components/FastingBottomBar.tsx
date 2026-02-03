@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Moon, Utensils, Clock, AlertCircle } from "lucide-react";
-import { useFastingProgress, isFastingToday } from "@/hooks/useLocalStorage";
+import { useFastingProgress, isFastingToday, useDisplayTimezone } from "@/hooks/useLocalStorage";
 import { useUserPreferences } from "@/hooks/useLocalStorage";
 import { usePrayerTimes } from "@/hooks/usePrayerTimes";
 import { useAutoLocation } from "@/hooks/useLocation";
+import { getTodayStringInTimezone, getNowSecondsSinceMidnightInTimezone, timeStringToSecondsSinceMidnight, secondsUntilTimeInTimezone } from "@/lib/utils";
 
-/** Countdown to iftar (maghrib) or "Iftar HH:MM" if past. Returns { text, isPast }. */
-function useIftarCountdown(maghrib: string | undefined) {
+/** Countdown to iftar (maghrib) or "Iftar HH:MM" if past. Uses location time when displayTimezone is set. */
+function useIftarCountdown(maghrib: string | undefined, displayTimezone: string | null | undefined) {
   const [text, setText] = useState<string>("—");
   const [isPast, setIsPast] = useState(false);
 
@@ -17,25 +18,40 @@ function useIftarCountdown(maghrib: string | undefined) {
       return;
     }
     const update = () => {
-      const now = new Date();
-      const [h, m] = maghrib.split(":").map(Number);
-      const iftar = new Date(now);
-      iftar.setHours(h, m, 0, 0);
-      if (now >= iftar) {
-        setIsPast(true);
-        setText(`Iftar ${maghrib}`);
-        return;
+      if (displayTimezone) {
+        const nowSec = getNowSecondsSinceMidnightInTimezone(displayTimezone);
+        const maghribSec = timeStringToSecondsSinceMidnight(maghrib);
+        if (nowSec >= maghribSec) {
+          setIsPast(true);
+          setText(`Iftar ${maghrib.trim().indexOf(" ") >= 0 ? maghrib.trim().slice(0, maghrib.trim().indexOf(" ")) : maghrib}`);
+          return;
+        }
+        const diff = secondsUntilTimeInTimezone(nowSec, maghribSec);
+        const hours = Math.floor(diff / 3600);
+        const minutes = Math.floor((diff % 3600) / 60);
+        setText(hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`);
+        setIsPast(false);
+      } else {
+        const now = new Date();
+        const [h, m] = maghrib.split(":").map(Number);
+        const iftar = new Date(now);
+        iftar.setHours(h, m, 0, 0);
+        if (now >= iftar) {
+          setIsPast(true);
+          setText(`Iftar ${maghrib}`);
+          return;
+        }
+        const ms = iftar.getTime() - now.getTime();
+        const hours = Math.floor(ms / (1000 * 60 * 60));
+        const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+        setText(hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`);
+        setIsPast(false);
       }
-      const ms = iftar.getTime() - now.getTime();
-      const hours = Math.floor(ms / (1000 * 60 * 60));
-      const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
-      setText(hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`);
-      setIsPast(false);
     };
     update();
-    const t = setInterval(update, 60000); // every minute
+    const t = setInterval(update, displayTimezone ? 1000 : 60000);
     return () => clearInterval(t);
-  }, [maghrib]);
+  }, [maghrib, displayTimezone]);
 
   return { text, isPast };
 }
@@ -43,11 +59,13 @@ function useIftarCountdown(maghrib: string | undefined) {
 export function FastingBottomBar() {
   const [progress] = useFastingProgress();
   const [preferences] = useUserPreferences();
+  const displayTimezone = useDisplayTimezone();
   const { location: autoLocation } = useAutoLocation();
   const coords = preferences.locationCoords || (autoLocation ? { lat: autoLocation.lat, lng: autoLocation.lng } : null);
-  const { prayerTimes } = usePrayerTimes(coords?.lat ?? null, coords?.lng ?? null);
-  const isFasting = isFastingToday(progress);
-  const { text: iftarText, isPast: iftarPast } = useIftarCountdown(prayerTimes?.maghrib);
+  const { prayerTimes } = usePrayerTimes(coords?.lat ?? null, coords?.lng ?? null, displayTimezone);
+  const todayStr = displayTimezone ? getTodayStringInTimezone(displayTimezone) : undefined;
+  const isFasting = isFastingToday(progress, todayStr);
+  const { text: iftarText, isPast: iftarPast } = useIftarCountdown(prayerTimes?.maghrib, displayTimezone);
 
   useEffect(() => {
     if (isFasting) {

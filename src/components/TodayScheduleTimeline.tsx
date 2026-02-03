@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { memo } from "react";
 import { Clock, Sunrise, Sunset, Moon } from "lucide-react";
 import type { PrayerTimes } from "@/hooks/usePrayerTimes";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -88,7 +89,7 @@ interface TodayScheduleTimelineProps {
   className?: string;
 }
 
-export function TodayScheduleTimeline({
+export const TodayScheduleTimeline = memo(function TodayScheduleTimeline({
   prayerTimes,
   iftarLabelShort = "Iftar",
   includeTaraweeh = false,
@@ -171,4 +172,4 @@ export function TodayScheduleTimeline({
       </ul>
     </motion.div>
   );
-}
+});

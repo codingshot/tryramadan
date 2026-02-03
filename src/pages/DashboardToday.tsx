@@ -18,7 +18,9 @@ import {
   useTodayData,
   useIftarLabel,
   useIftarLabelShort,
+  useDisplayTimezone,
 } from "@/hooks/useLocalStorage";
+import { getTodayStringInTimezone, getNowSecondsSinceMidnightInTimezone, timeStringToSecondsSinceMidnight, secondsUntilTimeInTimezone } from "@/lib/utils";
 import { BreakFastReasonDialog } from "@/components/BreakFastReasonDialog";
 import { usePrayerTimes } from "@/hooks/usePrayerTimes";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -60,81 +62,73 @@ const DashboardToday = () => {
   const [countdownSuhoorEnd, setCountdownSuhoorEnd] = useState({ h: 0, m: 0 });
   const [countdownIftar, setCountdownIftar] = useState({ h: 0, m: 0 });
   
+  const displayTimezone = useDisplayTimezone();
   const { prayerTimes } = usePrayerTimes(
     preferences.locationCoords?.lat || null,
-    preferences.locationCoords?.lng || null
+    preferences.locationCoords?.lng || null,
+    displayTimezone
   );
   
-  // Calculate fasting progress percentage
+  const todayStr = displayTimezone ? getTodayStringInTimezone(displayTimezone) : new Date().toISOString().split("T")[0];
+
+  // Calculate fasting progress: from Suhoor end (Imsak) to Iftar (Maghrib); use location time when timezone set
   const getFastingProgress = () => {
     if (!prayerTimes) return 50;
-    
-    const now = new Date();
-    const [fajrH, fajrM] = prayerTimes.fajr.split(':').map(Number);
-    const [maghribH, maghribM] = prayerTimes.maghrib.split(':').map(Number);
-    
-    const fajrMinutes = fajrH * 60 + fajrM;
-    const maghribMinutes = maghribH * 60 + maghribM;
-    const nowMinutes = now.getHours() * 60 + now.getMinutes();
-    
-    const totalFastMinutes = maghribMinutes - fajrMinutes;
-    const elapsedMinutes = nowMinutes - fajrMinutes;
-    
-    return Math.min(100, Math.max(0, (elapsedMinutes / totalFastMinutes) * 100));
+    const imsakSec = timeStringToSecondsSinceMidnight(prayerTimes.imsak ?? prayerTimes.fajr);
+    const maghribSec = timeStringToSecondsSinceMidnight(prayerTimes.maghrib);
+    const nowSec = displayTimezone
+      ? getNowSecondsSinceMidnightInTimezone(displayTimezone)
+      : (() => { const n = new Date(); return n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds(); })();
+    const total = maghribSec - imsakSec;
+    const elapsed = nowSec - imsakSec;
+    if (total <= 0) return 50;
+    return Math.min(100, Math.max(0, (elapsed / total) * 100));
   };
   
   const fastingProgress = getFastingProgress();
-  const todayStr = new Date().toISOString().split("T")[0];
   const todayCompleted = progress.completedDays.includes(todayStr);
   const todayBrokenEntry = progress.fastingLog?.find((e) => e.date === todayStr && e.status === "broken");
-  const todayLog = getTodayFastingLog(progress);
+  const todayLog = getTodayFastingLog(progress, todayStr);
   /** Only show "I broke my fast" when user has started fasting today and has not yet broken or marked complete */
   const fastingToday = !!todayLog && todayLog.status !== "broken" && !todayCompleted;
 
-  // Is currently in fasting window? (after Fajr, before Maghrib) — for timer target
+  const imsakStr = prayerTimes?.imsak ?? prayerTimes?.fajr;
   const isFastingWindow =
-    prayerTimes &&
+    prayerTimes && imsakStr &&
     (() => {
-      const now = new Date();
-      const [fajrH, fajrM] = prayerTimes.fajr.split(":").map(Number);
-      const [maghribH, maghribM] = prayerTimes.maghrib.split(":").map(Number);
-      const fajr = new Date();
-      fajr.setHours(fajrH, fajrM, 0);
-      const maghrib = new Date();
-      maghrib.setHours(maghribH, maghribM, 0);
-      return now >= fajr && now < maghrib;
+      const nowSec = displayTimezone
+        ? getNowSecondsSinceMidnightInTimezone(displayTimezone)
+        : (() => { const n = new Date(); return n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds(); })();
+      const imsakSec = timeStringToSecondsSinceMidnight(imsakStr);
+      const maghribSec = timeStringToSecondsSinceMidnight(prayerTimes.maghrib);
+      return nowSec >= imsakSec && nowSec < maghribSec;
     })();
 
-  // Dual countdown: Suhoor end (Fajr) and Iftar (Maghrib) — show "passed" when past
   const [suhoorPassed, setSuhoorPassed] = useState(false);
   const [iftarPassed, setIftarPassed] = useState(false);
   useEffect(() => {
     if (!prayerTimes) return;
-    const interval = setInterval(() => {
-      const now = new Date();
-      const [fajrH, fajrM] = prayerTimes.fajr.split(":").map(Number);
-      const [maghribH, maghribM] = prayerTimes.maghrib.split(":").map(Number);
-      const fajr = new Date();
-      fajr.setHours(fajrH, fajrM, 0);
-      const maghrib = new Date();
-      maghrib.setHours(maghribH, maghribM, 0);
-      setSuhoorPassed(now >= fajr);
-      setIftarPassed(now >= maghrib);
-      if (now < fajr) {
-        const d = fajr.getTime() - now.getTime();
-        setCountdownSuhoorEnd({ h: Math.floor(d / 36e5), m: Math.floor((d % 36e5) / 6e4) });
-      } else {
-        setCountdownSuhoorEnd({ h: 0, m: 0 });
-      }
-      if (now < maghrib) {
-        const d = maghrib.getTime() - now.getTime();
-        setCountdownIftar({ h: Math.floor(d / 36e5), m: Math.floor((d % 36e5) / 6e4) });
-      } else {
-        setCountdownIftar({ h: 0, m: 0 });
-      }
-    }, 1000);
+    const imsakSec = timeStringToSecondsSinceMidnight(prayerTimes.imsak ?? prayerTimes.fajr);
+    const maghribSec = timeStringToSecondsSinceMidnight(prayerTimes.maghrib);
+    const tick = () => {
+      const nowSec = displayTimezone
+        ? getNowSecondsSinceMidnightInTimezone(displayTimezone)
+        : (() => { const n = new Date(); return n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds(); })();
+      setSuhoorPassed(nowSec >= imsakSec);
+      setIftarPassed(nowSec >= maghribSec);
+      if (nowSec < imsakSec) {
+        const d = secondsUntilTimeInTimezone(nowSec, imsakSec);
+        setCountdownSuhoorEnd({ h: Math.floor(d / 3600), m: Math.floor((d % 3600) / 60) });
+      } else setCountdownSuhoorEnd({ h: 0, m: 0 });
+      if (nowSec < maghribSec) {
+        const d = secondsUntilTimeInTimezone(nowSec, maghribSec);
+        setCountdownIftar({ h: Math.floor(d / 3600), m: Math.floor((d % 3600) / 60) });
+      } else setCountdownIftar({ h: 0, m: 0 });
+    };
+    tick();
+    const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
-  }, [prayerTimes]);
+  }, [prayerTimes, displayTimezone]);
   
   const energyIcons = {
     1: BatteryLow,
@@ -232,7 +226,7 @@ const DashboardToday = () => {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      onClick={() => completeFastingToday(progress, setProgress)}
+                      onClick={() => completeFastingToday(progress, setProgress, todayStr)}
                       className="flex-1 py-3 px-4 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
                     >
                       <Moon className="w-5 h-5" />
@@ -267,7 +261,7 @@ const DashboardToday = () => {
             <BreakFastReasonDialog
               open={showBreakFastDialog}
               onOpenChange={setShowBreakFastDialog}
-              onSelectReason={(reasonId) => breakFastingToday(progress, setProgress, reasonId)}
+              onSelectReason={(reasonId) => breakFastingToday(progress, setProgress, reasonId, todayStr)}
             />
           </motion.div>
 
@@ -298,11 +292,11 @@ const DashboardToday = () => {
                   <div className="p-3 sm:p-4 rounded-2xl bg-card border border-border text-center cursor-help min-w-0">
                     <span className="text-xs text-muted-foreground block truncate">
                       {suhoorPassed ? "Suhoor ended" : "Until suhoor end"}
-                      <span className="hidden sm:inline"> (Fajr)</span>
+                      <span className="hidden sm:inline"> (eat cutoff)</span>
                     </span>
                     {suhoorPassed ? (
                       <span className="text-base sm:text-lg font-bold text-muted-foreground tabular-nums">
-                        {prayerTimes.fajr}
+                        {prayerTimes?.imsak ?? prayerTimes?.fajr}
                       </span>
                     ) : (
                       <span className="text-lg sm:text-xl font-bold text-secondary tabular-nums">
@@ -367,8 +361,8 @@ const DashboardToday = () => {
               />
             </div>
             <div className="flex justify-between mt-2 text-xs text-muted-foreground gap-2">
-              <span className="truncate min-w-0" title="Fajr (dawn)"><span className="sm:inline hidden">Fajr </span>{prayerTimes?.fajr || '05:30'}</span>
-              <span className="truncate min-w-0 shrink-0" title="Maghrib (sunset)"><span className="sm:inline hidden">Maghrib </span>{prayerTimes?.maghrib || '18:30'}</span>
+              <span className="truncate min-w-0" title="Suhoor end (eat cutoff)"><span className="sm:inline hidden">Suhoor end </span>{prayerTimes?.imsak ?? prayerTimes?.fajr ?? '05:30'}</span>
+              <span className="truncate min-w-0 shrink-0" title="Iftar (Maghrib)"><span className="sm:inline hidden">Iftar </span>{prayerTimes?.maghrib || '18:30'}</span>
             </div>
             <div className="mt-2 pt-2 border-t border-border">
               <PrayerLocationBadge />

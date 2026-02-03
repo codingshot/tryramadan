@@ -65,6 +65,7 @@ function StepContent({
             alt={`Screenshot or illustration for: ${step.title}. Mobile view.`}
             className="w-full max-w-md mx-auto block object-contain"
             loading="lazy"
+            decoding="async"
             onError={(e) => {
               const target = e.currentTarget;
               if (target.src !== "/placeholder.svg") {
@@ -152,7 +153,7 @@ const GuidePage = () => {
     } else if (stepIndex >= guide.steps.length) {
       setStepIndex(0);
     }
-  }, [guide?.slug]);
+  }, [guide, location.state, stepIndex]);
 
   useEffect(() => {
     if (guide && stepIndex >= guide.steps.length) {
@@ -174,7 +175,7 @@ const GuidePage = () => {
     return () => {
       el?.remove();
     };
-  }, [guide?.slug]);
+  }, [guide]);
 
   if (!guide) {
     return (

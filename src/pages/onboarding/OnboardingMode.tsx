@@ -1,15 +1,29 @@
+import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 
+const KNOWLEDGE_QUIZ_LENGTH = 5;
+
 export default function OnboardingMode() {
-  const { state, setMode } = useOnboarding();
+  const { state, setMode, setKnowledgeScore } = useOnboarding();
   const navigate = useNavigate();
+  const location = useLocation();
+  const preSelectMuslim = (location.state as { preSelectMuslim?: boolean } | null)?.preSelectMuslim;
+
+  useEffect(() => {
+    if (preSelectMuslim) setMode("muslim");
+  }, [preSelectMuslim, setMode]);
 
   const handleSelect = (mode: "new" | "muslim") => {
     setMode(mode);
-    navigate("/onboarding/knowledge");
+    if (mode === "muslim") {
+      setKnowledgeScore(KNOWLEDGE_QUIZ_LENGTH);
+      navigate("/onboarding/health");
+    } else {
+      navigate("/onboarding/knowledge");
+    }
   };
 
   return (

@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { memo } from "react";
 import { Link } from "react-router-dom";
 import { Target, Check, Circle, ChevronRight } from "lucide-react";
 import { useDailyMissions, type DailyMission } from "@/hooks/useLocalStorage";
@@ -14,7 +15,7 @@ const MISSION_TOOLTIPS: Record<string, string> = {
   read_hadith: "Open the Hadith page (Learn → Hadith) and read a short saying of the Prophet (peace be upon him) about fasting or Ramadan.",
 };
 
-function MissionRow({ mission }: { mission: DailyMission }) {
+const MissionRow = memo(function MissionRow({ mission }: { mission: DailyMission }) {
   const tip = MISSION_TOOLTIPS[mission.id];
   const content = (
     <span className="flex items-center gap-2 text-sm">
@@ -61,9 +62,9 @@ function MissionRow({ mission }: { mission: DailyMission }) {
       {content}
     </div>
   );
-}
+});
 
-export function DailyMissionsCard() {
+export const DailyMissionsCard = memo(function DailyMissionsCard() {
   const { missions, completedCount, totalCount } = useDailyMissions();
 
   return (
@@ -110,4 +111,4 @@ export function DailyMissionsCard() {
       </ul>
     </motion.div>
   );
-}
+});

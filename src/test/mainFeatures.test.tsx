@@ -64,11 +64,12 @@ describe("Onboarding flow", () => {
     expect(screen.getAllByText(/muslim|non-muslim|curious/i).length).toBeGreaterThan(0);
   });
 
-  it("location step shows Continue disabled until location selected", () => {
+  it("location step shows Continue disabled until location selected and has Skip option", () => {
     renderAt("/onboarding/location", <OnboardingLocation />, { withOnboarding: true });
     expect(screen.getByRole("heading", { name: /location/i })).toBeInTheDocument();
     const continueBtn = screen.getByRole("button", { name: /continue/i });
     expect(continueBtn).toBeDisabled();
+    expect(screen.getByRole("button", { name: /skip for now/i })).toBeInTheDocument();
   });
 
   it("goals step renders and has complete/skip", () => {

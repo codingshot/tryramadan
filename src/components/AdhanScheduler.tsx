@@ -34,6 +34,7 @@ export function AdhanScheduler() {
   notifiedStoreRef.current = adhanNotifiedToday;
 
   useEffect(() => {
+    if (preferences.userType !== "muslim") return; // Prayer alarms only for Muslim users
     if (!prayerTimes) return;
 
     const fireAdhan = (name: string, timeStr: string, todayStr: string) => {
@@ -97,7 +98,7 @@ export function AdhanScheduler() {
     checkAndNotify();
     const interval = setInterval(checkAndNotify, 60 * 1000);
     return () => clearInterval(interval);
-  }, [prayerTimes, prayerNotifications, adhanSoundEnabled, setAdhanNotifiedToday]);
+  }, [preferences.userType, prayerTimes, prayerNotifications, adhanSoundEnabled, setAdhanNotifiedToday]);
 
   return null;
 }

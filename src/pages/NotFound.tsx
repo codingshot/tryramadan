@@ -14,7 +14,6 @@ const NotFound = () => {
       <PageSEO
         title="404 | Page Not Found | TryRamadan.app"
         description="The page you're looking for doesn't exist. Return to TryRamadan.app to start your Ramadan fasting journey."
-        path={location.pathname}
         robots="noindex, nofollow"
       />
       <div className="text-center max-w-md">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
 import { ArrowLeft, Search, BookOpen, Volume2 } from "lucide-react";
@@ -9,6 +9,7 @@ import { QuranLink } from "@/components/QuranLink";
 import { HadithSunnahLink } from "@/components/HadithSunnahLink";
 import glossaryData from "@/data/glossary.json";
 import { PageSEO } from "@/components/PageSEO";
+import { useDebounce } from "@/hooks/useDebounce";
 
 type GlossaryEntry = {
   term: string;
@@ -25,19 +26,24 @@ const LearnGlossary = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
-  const categories = [...new Set(glossary.map(item => item.category))];
-  
   const glossary = glossaryData.glossary as GlossaryEntry[];
-  const filteredTerms = glossary.filter(item => {
-    const matchesSearch = 
-      item.term.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.arabic.includes(searchQuery) ||
-      item.definition.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesCategory = !selectedCategory || item.category === selectedCategory;
-    
-    return matchesSearch && matchesCategory;
-  });
+  const categories = useMemo(() => [...new Set(glossary.map(item => item.category))], [glossary]);
+  
+  // Debounce search for better performance
+  const debouncedSearch = useDebounce(searchQuery, 200);
+  
+  const filteredTerms = useMemo(() => {
+    return glossary.filter(item => {
+      const matchesSearch = 
+        item.term.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        item.arabic.includes(debouncedSearch) ||
+        item.definition.toLowerCase().includes(debouncedSearch.toLowerCase());
+      
+      const matchesCategory = !selectedCategory || item.category === selectedCategory;
+      
+      return matchesSearch && matchesCategory;
+    });
+  }, [glossary, debouncedSearch, selectedCategory]);
 
   return (
     <div className="min-h-screen bg-background">

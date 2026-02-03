@@ -3,19 +3,21 @@
  * Used by FastingTimer, DashboardSchedule, and goals-until-Ramadan.
  */
 
-// Approximate Ramadan start (first day of fasting) by Gregorian year
+// Approximate Ramadan start (first day of fasting) by Gregorian year.
+// Based on Umm al-Qura / astronomical calculations (Aladhan.com). Actual start may vary by 1 day with moon sighting.
 const RAMADAN_START_BY_YEAR: Record<number, string> = {
   2024: "2024-03-11",
-  2025: "2025-02-28",
-  2026: "2026-02-17",
-  2027: "2027-02-06",
-  2028: "2028-01-26",
-  2029: "2029-01-15",
-  2030: "2030-01-04",
-  2031: "2030-12-24", // Ramadan 1452 AH starts late Dec 2030
+  2025: "2025-03-01",
+  2026: "2026-02-18",
+  2027: "2027-02-08",
+  2028: "2028-01-28",
+  2029: "2029-01-16",
+  2030: "2030-01-05",
+  2031: "2030-12-26", // Ramadan 1452 AH starts late Dec 2030
+  2032: "2031-12-15", // Ramadan 1453 AH starts mid-Dec 2031
 };
 
-const RAMADAN_DAYS = 30;
+const RAMADAN_DAYS = 30; // Usually 29 or 30 days; using 30 as default approximation
 
 function getYearKey(date: Date): number {
   return date.getFullYear();
@@ -40,7 +42,9 @@ export function getRamadanStartForYear(year: number): Date {
 export function getRamadanEndForYear(year: number): Date {
   const start = getRamadanStartForYear(year);
   const end = new Date(start);
-  end.setDate(end.getDate() + RAMADAN_DAYS - 1);
+  // Ramadan 2031 is 29 days (ends Jan 23), most others are 30 days
+  const days = year === 2031 ? 29 : RAMADAN_DAYS;
+  end.setDate(end.getDate() + days - 1);
   return end;
 }
 

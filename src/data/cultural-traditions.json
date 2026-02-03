@@ -419,7 +419,7 @@
       "countries": [
         {
           "id": "indonesia",
-          "name": "Indonesia & Malaysia",
+          "name": "Indonesia",
           "flag": "🇮🇩",
           "traditions": [
             {
@@ -443,7 +443,7 @@
           ],
           "foods": ["Kolak", "Rendang", "Ketupat", "Bubur Lambuk"],
           "specialNote": "Takjil - small snacks and drinks given out for free at iftar time",
-          "muslimPopulation": "~87% (~243 million)",
+          "muslimPopulation": "~87% (~246 million)",
           "muslimPopulationNote": "World's largest Muslim-majority country by population.",
           "majorMosques": [
             { "name": "Istiqlal Mosque", "city": "Jakarta", "address": "Jl. Taman Wijaya Kusuma, Jakarta, Indonesia", "note": "Largest mosque in Southeast Asia; national mosque of Indonesia.", "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Istiqlal+Mosque+Jakarta+Indonesia", "appleMapsUrl": "https://maps.apple.com/?q=Istiqlal+Mosque+Jakarta+Indonesia" },
@@ -481,7 +481,7 @@
           ],
           "foods": ["Biryani", "Haleem", "Fruit Chaat", "Jalebi", "Kheer", "Samosas", "Pakoras"],
           "specialNote": "Dastarkhwan - large communal cloth spread on floor for iftar gatherings",
-          "muslimPopulation": "~97% (~241 million)",
+          "muslimPopulation": "~97% (~240 million)",
           "muslimPopulationNote": "Second-largest Muslim population in the world.",
           "majorMosques": [
             { "name": "Faisal Mosque", "city": "Islamabad", "address": "Shah Faisal Ave, Islamabad, Pakistan", "note": "National mosque; modern design; one of the largest in the world.", "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Faisal+Mosque+Islamabad+Pakistan", "appleMapsUrl": "https://maps.apple.com/?q=Faisal+Mosque+Islamabad+Pakistan" },
@@ -509,7 +509,7 @@
           "muslimPopulation": "~90% (~151 million)",
           "muslimPopulationNote": "Fourth-largest Muslim population globally.",
           "majorMosques": [
-            { "name": "Baitul Mukarram National Mosque", "city": "Dhaka", "note": "Largest mosque in Bangladesh; designed to resemble the Kaaba; accommodates ~40,000." }
+            { "name": "Baitul Mukarram National Mosque", "city": "Dhaka", "address": "Topkhana Road, Dhaka 1000, Bangladesh", "note": "Largest mosque in Bangladesh; designed to resemble the Kaaba; accommodates ~40,000.", "googleMapsUrl": "https://www.google.com/maps/search/?api=1&query=Baitul+Mukarram+National+Mosque+Dhaka+Bangladesh", "appleMapsUrl": "https://maps.apple.com/?q=Baitul+Mukarram+National+Mosque+Dhaka+Bangladesh" }
           ],
           "cities": [
             { "name": "Dhaka", "suhoor_meals": ["rice with curry", "paratha and dal"], "iftar_meals": ["dates and water", "biryani", "panta ilish (fermented rice with hilsa fish) for some", "piaju (lentil fritters)", "beguni (battered fried eggplant)"], "desserts_and_drinks": ["rooh afza drinks", "mishti (sweets)"], "rituals_and_traditions": ["Crowded iftar markets selling fritters and biryanis", "Strong culture of giving food to the poor during Ramadan"], "notes": "Bangladeshi iftars feature biryani, panta ilish, and various fried snacks, with a big emphasis on charity." }

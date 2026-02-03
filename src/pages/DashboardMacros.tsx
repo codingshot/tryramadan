@@ -23,6 +23,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   useDailyGoals,
+  useUserPreferences,
+  getRecommendedCaloriesFromPreferences,
   useDayPlannedItems,
   useDayFoodLog,
   getDayTotalsFromPlanned,
@@ -61,9 +63,13 @@ function MacroBar({ current, goal, label }: { current: number; goal: number; lab
 export default function DashboardMacros() {
   const todayStr = new Date().toISOString().split("T")[0];
   const [selectedDate, setSelectedDate] = useState(todayStr);
-  const [dailyGoals] = useDailyGoals();
+  const [preferences] = useUserPreferences();
+  const [dailyGoals, setDailyGoals] = useDailyGoals();
   const [planned, setPlanned] = useDayPlannedItems();
   const [foodLogs, setFoodLogs] = useDayFoodLog();
+  const recommendedCal = getRecommendedCaloriesFromPreferences(preferences);
+  const hasRecommendation = preferences.sexForCalories != null || (preferences.bodyWeightKg != null && preferences.bodyWeightKg > 0);
+  const canUseRecommended = hasRecommendation && recommendedCal !== dailyGoals.calories;
 
   const selectedPlanned = planned[selectedDate] ?? { suhoor: [], iftar: [], between: [] };
   const selectedLog = normalizeDayFoodLog(foodLogs[selectedDate]);
@@ -256,6 +262,21 @@ export default function DashboardMacros() {
               <div><span className="text-muted-foreground">Carbs</span><span className="block font-bold">{dailyGoals.carbs}g</span></div>
               <div><span className="text-muted-foreground">Fat</span><span className="block font-bold">{dailyGoals.fat}g</span></div>
             </div>
+            {hasRecommendation && (
+              <p className="text-xs text-muted-foreground mt-2">
+                From your profile (Settings → Advanced): recommended {recommendedCal} cal
+                {canUseRecommended && (
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="h-auto p-0 ml-1 text-xs text-secondary"
+                    onClick={() => setDailyGoals((g) => ({ ...g, calories: recommendedCal }))}
+                  >
+                    Use recommended
+                  </Button>
+                )}
+              </p>
+            )}
           </motion.div>
 
           {/* Add to plan form */}

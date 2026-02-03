@@ -84,6 +84,12 @@ export default function OnboardingLocation() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (hasLocation) handleContinue();
+        }}
+      >
       <Link
         to="/onboarding/health"
         className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6"
@@ -140,8 +146,7 @@ export default function OnboardingLocation() {
       </button>
 
       <button
-        type="button"
-        onClick={handleContinue}
+        type="submit"
         disabled={!hasLocation}
         className="w-full mt-6 min-h-[44px] py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary"
       >
@@ -161,6 +166,7 @@ export default function OnboardingLocation() {
           </button>
         </>
       )}
+      </form>
     </motion.div>
   );
 }

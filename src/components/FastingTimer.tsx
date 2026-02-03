@@ -3,8 +3,10 @@ import { motion } from "framer-motion";
 import { Moon, Sun, Clock, Calendar, MapPin, Loader2, Sunrise, Sunset, Bell, Utensils } from "lucide-react";
 import { usePrayerTimes, getSunnahFastingInfo } from "@/hooks/usePrayerTimes";
 import { useUserPreferences, useNotificationSettings, usePrayerNotificationPrefs, useIftarLabel, useDisplayTimezone } from "@/hooks/useLocalStorage";
+import { getNowSecondsSinceMidnightInTimezone, timeStringToSecondsSinceMidnight, secondsUntilTimeInTimezone } from "@/lib/utils";
 import { useAutoLocation } from "@/hooks/useLocation";
 import { Link } from "react-router-dom";
+import { LocationRequiredCTA } from "@/components/LocationRequiredCTA";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
 import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
@@ -50,10 +52,14 @@ export const FastingTimer = ({
   const displayLocation = preferences.location || (autoLocation ? autoLocation.displayName : null);
   const locationShort = displayLocation ? displayLocation.split(",").slice(0, 2).join(",").trim() : null;
 
-  // Get prayer times from API if location is available
-  const { prayerTimes, hijriDate, loading, error } = usePrayerTimes(
-    preferences.locationCoords?.lat || null,
-    preferences.locationCoords?.lng || null
+  // Use saved location or auto-detected — so hero timer has accurate times when location isn't saved yet
+  const effectiveLat = preferences.locationCoords?.lat ?? autoLocation?.lat ?? null;
+  const effectiveLng = preferences.locationCoords?.lng ?? autoLocation?.lng ?? null;
+
+  const { prayerTimes, hijriDate, loading, error, refetch: refetchPrayers, isFromCache } = usePrayerTimes(
+    effectiveLat,
+    effectiveLng,
+    displayTimezone
   );
   
   // Use API times if available, otherwise use props or defaults
@@ -79,53 +85,77 @@ export const FastingTimer = ({
     return () => clearInterval(t);
   }, [displayTimezone]);
 
-  // Countdown and period: eating = from iftar until suhoor end (next day); fasting = suhoor end until iftar
+  const imsakSec = timeStringToSecondsSinceMidnight(suhoorTime);
+  const maghribSec = timeStringToSecondsSinceMidnight(iftarTime);
+
   useEffect(() => {
     const interval = setInterval(() => {
-      const now = new Date();
-      const [suhoorH, suhoorM] = suhoorTime.split(':').map(Number);
-      const [iftarH, iftarM] = iftarTime.split(':').map(Number);
-
-      const imsakToday = new Date();
-      imsakToday.setHours(suhoorH, suhoorM, 0, 0);
-      const maghribToday = new Date();
-      maghribToday.setHours(iftarH, iftarM, 0, 0);
-
-      let target: Date;
-      let label: "Suhoor end" | "Iftar";
-      let eating: boolean;
-      if (now < imsakToday) {
-        // After midnight, before dawn — still eating window (until suhoor end)
-        target = imsakToday;
-        label = "Suhoor end";
-        eating = true;
-      } else if (now < maghribToday) {
-        // After dawn, before sunset — fasting
-        target = maghribToday;
-        label = "Iftar";
-        eating = false;
+      if (displayTimezone) {
+        const nowSec = getNowSecondsSinceMidnightInTimezone(displayTimezone);
+        let diff: number;
+        let label: "Suhoor end" | "Iftar";
+        let eating: boolean;
+        if (nowSec < imsakSec) {
+          diff = secondsUntilTimeInTimezone(nowSec, imsakSec);
+          label = "Suhoor end";
+          eating = true;
+        } else if (nowSec < maghribSec) {
+          diff = secondsUntilTimeInTimezone(nowSec, maghribSec);
+          label = "Iftar";
+          eating = false;
+        } else {
+          diff = secondsUntilTimeInTimezone(nowSec, imsakSec);
+          label = "Suhoor end";
+          eating = true;
+        }
+        setIsEatingPeriod(eating);
+        setNextLabel(label);
+        const [h, m] = (label === "Iftar" ? iftarTime : suhoorTime).split(":").map((x) => parseInt(x, 10));
+        setNextTimeStr(String(h ?? 0).padStart(2, "0") + ":" + String(m ?? 0).padStart(2, "0"));
+        setTimeRemaining({
+          hours: Math.floor(diff / 3600),
+          minutes: Math.floor((diff % 3600) / 60),
+          seconds: diff % 60,
+        });
       } else {
-        // After sunset — eating window (until tomorrow's suhoor end)
-        const imsakTomorrow = new Date(imsakToday);
-        imsakTomorrow.setDate(imsakTomorrow.getDate() + 1);
-        target = imsakTomorrow;
-        label = "Suhoor end";
-        eating = true;
+        const now = new Date();
+        const [suhoorH, suhoorM] = suhoorTime.split(":").map(Number);
+        const [iftarH, iftarM] = iftarTime.split(":").map(Number);
+        const imsakToday = new Date();
+        imsakToday.setHours(suhoorH, suhoorM, 0, 0);
+        const maghribToday = new Date();
+        maghribToday.setHours(iftarH, iftarM, 0, 0);
+        let target: Date;
+        let label: "Suhoor end" | "Iftar";
+        let eating: boolean;
+        if (now < imsakToday) {
+          target = imsakToday;
+          label = "Suhoor end";
+          eating = true;
+        } else if (now < maghribToday) {
+          target = maghribToday;
+          label = "Iftar";
+          eating = false;
+        } else {
+          const imsakTomorrow = new Date(imsakToday);
+          imsakTomorrow.setDate(imsakTomorrow.getDate() + 1);
+          target = imsakTomorrow;
+          label = "Suhoor end";
+          eating = true;
+        }
+        setIsEatingPeriod(eating);
+        setNextLabel(label);
+        setNextTimeStr(target.getHours().toString().padStart(2, "0") + ":" + target.getMinutes().toString().padStart(2, "0"));
+        const diff = target.getTime() - now.getTime();
+        setTimeRemaining({
+          hours: Math.max(0, Math.floor(diff / 36e5)),
+          minutes: Math.max(0, Math.floor((diff % 36e5) / 6e4)),
+          seconds: Math.max(0, Math.floor((diff % 6e4) / 1000)),
+        });
       }
-
-      setIsEatingPeriod(eating);
-      setNextLabel(label);
-      setNextTimeStr(target.getHours().toString().padStart(2, "0") + ":" + target.getMinutes().toString().padStart(2, "0"));
-
-      const diff = target.getTime() - now.getTime();
-      const hours = Math.max(0, Math.floor(diff / (1000 * 60 * 60)));
-      const minutes = Math.max(0, Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)));
-      const seconds = Math.max(0, Math.floor((diff % (1000 * 60)) / 1000));
-      setTimeRemaining({ hours, minutes, seconds });
     }, 1000);
-
     return () => clearInterval(interval);
-  }, [suhoorTime, iftarTime]);
+  }, [suhoorTime, iftarTime, displayTimezone, imsakSec, maghribSec]);
 
   const formatNumber = (num: number) => num.toString().padStart(2, '0');
 
@@ -188,8 +218,8 @@ export const FastingTimer = ({
           </motion.div>
         )}
 
-        {/* Hijri Date */}
-        {hijriDate && (
+        {/* Hijri Date (Muslim users only) */}
+        {hijriDate && preferences.userType === "muslim" && (
           <div className="text-center mb-3">
             <span className="text-sm text-primary-foreground/60">
               {hijriDate.day} {hijriDate.month} {hijriDate.year} AH
@@ -261,8 +291,13 @@ export const FastingTimer = ({
           </Tooltip>
         </div>
 
-        {/* Main timer display */}
-        <div className="flex items-center justify-center gap-2 md:gap-4 mb-4">
+        {/* Main timer display — live region for screen readers */}
+        <div
+          className="flex items-center justify-center gap-2 md:gap-4 mb-4"
+          aria-live="polite"
+          aria-atomic="true"
+          aria-label={`${timeRemaining.hours} hours ${timeRemaining.minutes} minutes ${timeRemaining.seconds} seconds until ${isEatingPeriod ? "Suhoor end" : iftarLabel}`}
+        >
           <div className="text-center">
             <motion.span 
               key={`hours-${timeRemaining.hours}`}
@@ -304,9 +339,13 @@ export const FastingTimer = ({
           </div>
         </div>
 
-        {/* Target time: next boundary — explicit "time left to eat" vs "time until break fast" */}
-        <div className="flex items-center justify-center gap-2 text-primary-foreground/70 flex-wrap">
-          <Clock className="w-4 h-4 shrink-0" />
+        {/* Target time: next boundary — live region for screen readers */}
+        <div
+          className="flex items-center justify-center gap-2 text-primary-foreground/70 flex-wrap"
+          aria-live="polite"
+          aria-label={isEatingPeriod ? `Time left to eat until Suhoor end at ${nextTimeStr || suhoorTime}` : `Time until ${iftarLabel} at ${nextTimeStr || iftarTime}`}
+        >
+          <Clock className="w-4 h-4 shrink-0" aria-hidden />
           <span className="text-sm">
             {isEatingPeriod ? (
               <>
@@ -349,14 +388,16 @@ export const FastingTimer = ({
             const suhoorAlarm = notifSettings.suhoorEnabled ? 1 : 0;
             const iftarAlarm = notifSettings.iftarEnabled ? 1 : 0;
             const dailyAlarm = notifSettings.dailyReminderEnabled ? 1 : 0;
-            const prayerAlarms = Object.entries(prayerPrefs).filter(([, on]) => on).length;
+            const prayerAlarms = preferences.userType === "muslim" ? Object.entries(prayerPrefs).filter(([, on]) => on).length : 0;
             const totalAlarms = suhoorAlarm + iftarAlarm + dailyAlarm + prayerAlarms;
             const parts: string[] = [];
             if (notifSettings.suhoorEnabled) parts.push(`Suhoor: ${notifSettings.suhoorMinutesBefore} min before`);
             if (notifSettings.iftarEnabled) parts.push(`${iftarLabel}: ${notifSettings.iftarMinutesBefore} min before`);
             if (notifSettings.dailyReminderEnabled) parts.push(`Daily: ${notifSettings.dailyReminderTime}`);
-            const enabledPrayers = Object.entries(prayerPrefs).filter(([, on]) => on).map(([p]) => p);
-            if (enabledPrayers.length) parts.push(`Prayers: ${enabledPrayers.join(", ")}`);
+            if (preferences.userType === "muslim") {
+              const enabledPrayers = Object.entries(prayerPrefs).filter(([, on]) => on).map(([p]) => p);
+              if (enabledPrayers.length) parts.push(`Prayers: ${enabledPrayers.join(", ")}`);
+            }
             const alarmTooltip = parts.length ? parts.join(" · ") : "No alarms set. Open Settings to add reminders.";
             return (
               <Tooltip>
@@ -425,10 +466,17 @@ export const FastingTimer = ({
 
         {/* Location / API status */}
         <div className="mt-3 flex justify-center">
-          {error ? (
-            <p className="text-center text-xs text-primary-foreground/50">
-              Using default times. <Link to="/settings" className="underline hover:text-primary-foreground/80">Set location</Link> for accurate prayer times.
+          {isFromCache ? (
+            <p className="text-center text-xs text-primary-foreground/80">
+              Times may be outdated. <button type="button" onClick={() => refetchPrayers()} className="underline hover:text-primary-foreground">Try again</button> · <Link to="/settings" className="underline hover:text-primary-foreground/90">Set location</Link>
             </p>
+          ) : error || (!effectiveLat || !effectiveLng) ? (
+            <LocationRequiredCTA
+              compact
+              variant="dark"
+              message={error ? "Using default times. Set your location for accurate prayer times." : "Set your location for accurate prayer times."}
+              className="text-xs"
+            />
           ) : (
             <p className="text-center text-xs text-primary-foreground/60">
               {locationShort ? `Prayer times for ${locationShort}` : "Prayer times for your location"} · <Link to="/settings" className="underline hover:text-primary-foreground/90">Update</Link>

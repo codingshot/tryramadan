@@ -33,7 +33,7 @@ export const Footer = () => {
           {/* Brand */}
           <div className="sm:col-span-2">
             <div className="flex items-center gap-3 mb-4">
-              <img src={logo} alt="TryRamadan" className="w-12 h-12" />
+              <img src={logo} alt="TryRamadan" width={48} height={48} decoding="async" className="w-12 h-12" />
               <span className="font-display font-bold text-xl">
                 Try<span className="text-secondary">Ramadan</span>
               </span>

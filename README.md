@@ -6,6 +6,21 @@
 
 ---
 
+## 📑 Features at a glance
+
+| Area | Features |
+|------|----------|
+| **Fasting** | Dawn-to-sunset timer, Suhoor/Iftar countdown, “I’m fasting” / “Break fast” with reason, mark day complete (today only), streak & total days, Sunnah (Mon/Thu) & Ayyam al-Beed indicators |
+| **Prayer & times** | Location-based prayer times (Aladhan), per-day times, Suhoor/Iftar reminders (configurable mins before), Adhan notifications (Muslim mode), timezone-aware .ics export |
+| **Dashboard** | Day selector (arrows + date), compact Ramadan/Sunnah badge, current fast status + countdown, schedule strip (Suhoor end / Iftar), FastingTimer, quick actions (Today, Schedule, Meals, Journal, Prayers, Learn), streak/total/Sunnah stats, day plan & meal fields |
+| **Schedule** | Calendar view, meal plans & notes, food log, quick-add events (Suhoor, Iftar, prayers, Taraweeh, custom), export .ics (this month / next 30 / Ramadan) |
+| **Content** | Quran reading plan (juz per day, Quran.com), Islamic glossary (Arabic + transliteration), daily hadith & Ramadan facts, fasting rules (Quran 2:183–187 + hadith links), cultural traditions by country, recipes |
+| **Onboarding** | Welcome → Mode (Muslim skips knowledge) → Knowledge → Health → Location → Schedule → Notifications → Priorities → Goals; all persisted locally |
+| **UX** | User guides (/guides), personas (/personas), keyboard shortcuts (g+d, g+t, g+q, etc.), PWA, mobile bottom bar when fasting, accessibility (skip link, aria-live, focus, axe tests) |
+| **Settings** | Location (search + auto-detect), theme, Suhoor/Iftar minutes before, prayer notifications (Muslim only), priorities (learning, culture, Quran, macros), dashboard quick actions order |
+
+---
+
 ## ✨ What's New
 
 - **User Guides (/guides)** – Step-by-step guides for every flow (onboarding, dashboard, today, schedule, prayers, meals, macros, Quran, culture, personas, settings). Quick links to app sections, arrow-key navigation, SEO & HowTo schema. Add screenshots to `public/guide-assets/`.
@@ -115,6 +130,20 @@
 
 ---
 
+## 🔧 Room for improvement
+
+Ongoing and future work (see also `improvement.md`):
+
+- **Code quality** – Resolve remaining `react-hooks/exhaustive-deps` warnings where safe; enable `strictNullChecks` in TypeScript for stronger type safety (broader changes).
+- **Content** – Use the **Islamic content authenticity** skill (`.cursor/skills/islamic-content-authenticity/`) when adding or editing Quran verses, hadith, or Arabic: verify verse refs and wording (Quran.com / api.quran.com), hadith source and grading (Sunnah.com), and Arabic/transliteration consistency (glossary, tooltips).
+- **Guides & UX** – Add real screenshots to guide-assets; expand tests for dashboard and critical paths; improve loading/error states where needed.
+- **i18n** – No full app translation yet; tooltips and glossary already support Arabic snippets.
+- **Backend** – App is fully client-side (localStorage); optional future: sync progress/settings across devices (account, API).
+- **Accessibility** – axe-core runs in tests; manual screen-reader and keyboard passes on new flows recommended.
+- **Performance** – Lazy routes and prayer-time caching in place; further code-splitting or bundle analysis if needed.
+
+---
+
 ## 🛠️ Tech Stack
 
 - **Frontend**: React 18 + TypeScript + Vite
@@ -147,6 +176,8 @@ npm run dev
 ## 📁 Project Structure
 
 ```
+.cursor/skills/
+└── islamic-content-authenticity/   # Skill: verify Quran quotes, hadith sources, Arabic translations
 src/
 ├── assets/
 ├── components/       # Navbar, Footer, FastingTimer, FastingBottomBar, ReminderScheduler, AdhanScheduler,
@@ -156,7 +187,7 @@ src/
 │                     # ramadan-info, eating-times-tooltips, guides (user flows)
 ├── hooks/            # useLocalStorage (preferences, progress, notifications, calendar, journal, goals),
 │                     # useLocation, useNotifications, usePrayerTimes (per-day refresh), usePrayerTimesForDate
-├── lib/              # utils, ramadan (date helpers), ical (build + download .ics)
+├── lib/              # utils, ramadan (date helpers), ical (build + download .ics), quran (api.quran.com)
 ├── pages/            # Index, Dashboard, DashboardToday, DashboardSchedule, Guides, GuidePage, Onboarding*, etc.
 └── index.css
 public/

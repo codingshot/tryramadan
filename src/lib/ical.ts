@@ -38,26 +38,38 @@ function uid(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}@tryramadan`;
 }
 
-/** Single VEVENT block */
+/** Single VEVENT block. When timezone (IANA) is set, DTSTART/DTEND use TZID so calendar apps show local time. */
 function eventToIcal(
   summary: string,
   dateStr: string,
   timeStr: string,
-  durationMinutes: number = 15
+  durationMinutes: number = 15,
+  timezone?: string | null
 ): string {
   const { start, end } = formatIcalDateTime(dateStr, timeStr, durationMinutes);
+  const dtStart = timezone ? `DTSTART;TZID=${timezone}:${start}` : `DTSTART:${start}`;
+  const dtEnd = timezone ? `DTEND;TZID=${timezone}:${end}` : `DTEND:${end}`;
   return [
     "BEGIN:VEVENT",
     `UID:${uid()}`,
-    `DTSTART:${start}`,
-    `DTEND:${end}`,
+    dtStart,
+    dtEnd,
     `SUMMARY:${escapeIcalText(summary)}`,
     "END:VEVENT",
   ].join("\r\n");
 }
 
-/** Prayer times for one day → event titles and times */
-function prayerTimesToEvents(_dateStr: string, pt: PrayerTimes, includeTaraweeh: boolean): Array<{ summary: string; time: string; durationMinutes: number }> {
+/** "Fasting only" = Suhoor end + Iftar; "Full" = all five prayers + Taraweeh. */
+export type ExportMode = "fasting" | "full";
+
+/** Prayer times for one day → event titles and times. When mode is "fasting", only Suhoor end and Iftar. */
+function prayerTimesToEvents(_dateStr: string, pt: PrayerTimes, includeTaraweeh: boolean, exportMode: ExportMode): Array<{ summary: string; time: string; durationMinutes: number }> {
+  if (exportMode === "fasting") {
+    return [
+      { summary: "Suhoor ends (Imsak) • سحور", time: pt.imsak, durationMinutes: 5 },
+      { summary: "Iftar (Maghrib) • إفطار", time: pt.maghrib, durationMinutes: 10 },
+    ];
+  }
   const out: Array<{ summary: string; time: string; durationMinutes: number }> = [
     { summary: "Suhoor ends (Imsak) • سحور", time: pt.imsak, durationMinutes: 5 },
     { summary: "Fajr • الفجر", time: pt.fajr, durationMinutes: 5 },
@@ -89,27 +101,32 @@ export interface ExportOptions {
   includeTaraweeh?: boolean;
   /** Include all 5 prayers + Suhoor/Iftar from API */
   includePrayers?: boolean;
+  /** IANA timezone (e.g. America/New_York) so events show in user's local time in calendar apps */
+  timezone?: string | null;
+  /** "fasting" = Suhoor end + Iftar only; "full" = all five prayers + Taraweeh (default) */
+  exportMode?: ExportMode;
 }
 
-/** Generate .ics file content */
+/** Generate .ics file content. When timezone (IANA) is provided, events use TZID so Google/Apple Calendar show local time. */
 export function buildIcalContent(options: ExportOptions): string {
-  const { prayerTimesMap, customEvents, dateRange, includeTaraweeh = true, includePrayers = true } = options;
+  const { prayerTimesMap, customEvents, dateRange, includeTaraweeh = true, includePrayers = true, timezone, exportMode = "full" } = options;
   const [startStr, endStr] = dateRange;
   const start = new Date(startStr + "T00:00:00");
   const end = new Date(endStr + "T23:59:59");
   const events: string[] = [];
+  const tz = timezone && timezone.trim() ? timezone.trim() : undefined;
 
   for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
     const dateStr = toLocalDateString(d);
     const pt = prayerTimesMap[dateStr];
     if (includePrayers && pt) {
-      prayerTimesToEvents(dateStr, pt, includeTaraweeh).forEach((e) => {
-        events.push(eventToIcal(e.summary, dateStr, e.time, e.durationMinutes));
+      prayerTimesToEvents(dateStr, pt, includeTaraweeh, exportMode).forEach((e) => {
+        events.push(eventToIcal(e.summary, dateStr, e.time, e.durationMinutes, tz));
       });
     }
     const dayEvents = customEvents[dateStr] ?? [];
     dayEvents.forEach((e) => {
-      events.push(eventToIcal(e.title, dateStr, e.time, e.durationMinutes ?? 15));
+      events.push(eventToIcal(e.title, dateStr, e.time, e.durationMinutes ?? 15, tz));
     });
   }
 

@@ -45,15 +45,64 @@ export const LocationDisplay = ({ compact = false, showTimezone = false, open: c
   
   if (compact) {
     return (
-      <button
-        onClick={() => setIsEditing(!isEditing)}
-        className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        title={preferences.location || "Set location"}
-      >
-        <MapPin className="w-3.5 h-3.5" />
-        <span className="max-w-[150px] truncate">{locationName}</span>
-        <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isEditing ? 'rotate-180' : ''}`} />
-      </button>
+      <div className="relative">
+        <button
+          onClick={() => setIsEditing(!isEditing)}
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors py-1"
+          title={preferences.location || "Set location"}
+        >
+          <MapPin className="w-3.5 h-3.5 shrink-0" />
+          <span className="max-w-[120px] sm:max-w-[150px] truncate">{locationName}</span>
+          <ChevronDown className={`w-3.5 h-3.5 shrink-0 transition-transform ${isEditing ? 'rotate-180' : ''}`} />
+        </button>
+        <AnimatePresence>
+          {isEditing && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              className="absolute top-full right-0 mt-2 p-4 bg-card rounded-2xl border border-border shadow-elevated z-50 min-w-[280px]"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-medium text-sm">Update Location</h4>
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="p-1 rounded-lg hover:bg-muted transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <LocationSearch
+                value=""
+                onSelect={handleLocationSelect}
+                placeholder="Search for your city..."
+              />
+              <div className="mt-3 pt-3 border-t border-border">
+                <button
+                  onClick={handleAutoDetect}
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-2 p-2 rounded-lg text-sm text-secondary hover:bg-secondary/10 transition-colors disabled:opacity-50"
+                >
+                  {loading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <MapPin className="w-4 h-4" />
+                  )}
+                  Auto-detect my location
+                </button>
+              </div>
+              {preferences.location && (
+                <div className="mt-3 p-2 rounded-lg bg-secondary/10 flex items-center gap-2">
+                  <Check className="w-4 h-4 text-secondary shrink-0" />
+                  <span className="text-xs text-muted-foreground truncate">
+                    Using: {preferences.location}
+                  </span>
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     );
   }
 

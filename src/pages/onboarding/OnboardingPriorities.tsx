@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, BookOpen, Utensils, BookMarked, Scale, MapPin } from "lucide-react";
@@ -32,12 +33,30 @@ export default function OnboardingPriorities() {
     simplifyByLocation: true,
   };
 
+  // Muslim-friendly defaults: more learning, culture, and Quran
+  useEffect(() => {
+    if (state.mode === "muslim" && p.learningPriority === "moderate" && p.cultureRecipesPriority === "some" && p.quranPriority === "some") {
+      setPriorities({
+        learningPriority: "deep",
+        cultureRecipesPriority: "lots",
+        quranPriority: "daily",
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run only when mode changes; adding p.*/setPriorities would cause loop
+  }, [state.mode]);
+
   const handleContinue = () => {
     navigate("/onboarding/goals");
   };
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleContinue();
+        }}
+      >
       <Link
         to="/onboarding/notifications"
         className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6"
@@ -190,12 +209,12 @@ export default function OnboardingPriorities() {
       </div>
 
       <button
-        type="button"
-        onClick={handleContinue}
+        type="submit"
         className="w-full min-h-[44px] py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2 cursor-pointer"
       >
         Continue <ArrowRight className="w-5 h-5" />
       </button>
+      </form>
     </motion.div>
   );
 }

@@ -9,12 +9,14 @@ import { buildIcalContent, downloadIcal } from "@/lib/ical";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
 import { Button } from "@/components/ui/button";
+import { LocationRequiredCTA } from "@/components/LocationRequiredCTA";
 
 export function GoalsUntilRamadanCard() {
   const [goals, setGoals] = useGoalsUntilRamadan();
   const [preferences] = useUserPreferences();
   const [showExplanation, setShowExplanation] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [exportMode, setExportMode] = useState<"fasting" | "full">("full");
   const daysUntil = getDaysUntilRamadan();
   const inRamadan = isCurrentlyRamadan();
   const completedCount = goals.filter((g) => g.completed).length;
@@ -35,8 +37,10 @@ export function GoalsUntilRamadanCard() {
         prayerTimesMap,
         customEvents: {},
         dateRange: [ramadanRange.startStr, ramadanRange.endStr],
-        includeTaraweeh: true,
+        includeTaraweeh: exportMode === "full",
         includePrayers: true,
+        timezone: preferences.timezone ?? undefined,
+        exportMode,
       });
       downloadIcal(ics, `ramadan-${ramadanRange.startStr}-to-${ramadanRange.endStr}.ics`);
     } finally {
@@ -104,8 +108,24 @@ export function GoalsUntilRamadanCard() {
               {hasLocation ? (
                 <>
                   <p className="text-muted-foreground">
-                    Add all Ramadan fasting and iftar times (Suhoor end, Maghrib, and daily prayers) for your location to Google Calendar, Apple Calendar, or Outlook.
+                    Add Ramadan times for your location to Google Calendar, Apple Calendar, or Outlook.
                   </p>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <button
+                      type="button"
+                      onClick={() => setExportMode("fasting")}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${exportMode === "fasting" ? "bg-secondary text-secondary-foreground" : "bg-muted hover:bg-muted/80"}`}
+                    >
+                      Fasting only (Suhoor + Iftar)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setExportMode("full")}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${exportMode === "full" ? "bg-secondary text-secondary-foreground" : "bg-muted hover:bg-muted/80"}`}
+                    >
+                      Full prayers
+                    </button>
+                  </div>
                   <Button
                     size="sm"
                     variant="secondary"
@@ -126,10 +146,10 @@ export function GoalsUntilRamadanCard() {
                   )}
                 </>
               ) : (
-                <p className="text-muted-foreground flex items-center gap-2">
-                  <MapPin className="w-4 h-4 shrink-0" />
-                  <Link to="/settings" className="text-secondary hover:underline font-medium">Set your location in Settings</Link> to add Ramadan times to your calendar.
-                </p>
+                <LocationRequiredCTA
+                  compact
+                  message="Set your location in Settings to add Ramadan times to your calendar."
+                />
               )}
             </div>
           )}
@@ -167,8 +187,24 @@ export function GoalsUntilRamadanCard() {
               {hasLocation ? (
                 <>
                   <p className="text-muted-foreground">
-                    Prayer times (Suhoor end / Iftar and all five daily prayers) for this Ramadan are calculated for your selected location. Add them to your calendar so you never miss a fast or prayer time.
+                    Prayer times for this Ramadan are calculated for your selected location. Add them to your calendar.
                   </p>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <button
+                      type="button"
+                      onClick={() => setExportMode("fasting")}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${exportMode === "fasting" ? "bg-secondary text-secondary-foreground" : "bg-muted hover:bg-muted/80"}`}
+                    >
+                      Fasting only (Suhoor + Iftar)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setExportMode("full")}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${exportMode === "full" ? "bg-secondary text-secondary-foreground" : "bg-muted hover:bg-muted/80"}`}
+                    >
+                      Full prayers
+                    </button>
+                  </div>
                   <Button
                     size="sm"
                     variant="secondary"
@@ -189,10 +225,10 @@ export function GoalsUntilRamadanCard() {
                   )}
                 </>
               ) : (
-                <p className="text-muted-foreground flex items-center gap-2">
-                  <MapPin className="w-4 h-4 shrink-0" />
-                  <Link to="/settings" className="text-secondary hover:underline font-medium">Set your location in Settings</Link> to add all Ramadan fasting and iftar times (Suhoor end &amp; Maghrib) for your region to your calendar.
-                </p>
+                <LocationRequiredCTA
+                  compact
+                  message="Set your location in Settings to add Ramadan fasting and iftar times (Suhoor end & Maghrib) for your region to your calendar."
+                />
               )}
             </div>
           )}

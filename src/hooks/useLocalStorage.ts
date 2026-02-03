@@ -62,6 +62,8 @@ export interface UserPreferences {
   macroTrackingEnabled: boolean;
   /** Biological sex for calorie estimate when macro tracking is on (optional). */
   sexForCalories: 'male' | 'female' | null;
+  /** Body weight in kg for calorie recommendation (optional). Used with sex for suggested daily calories. */
+  bodyWeightKg: number | null;
   /** Simplify features based on location (e.g. local times, fewer options). */
   simplifyByLocation: boolean;
   /** Daily water goal in ml; 0 = use region default from country. */
@@ -94,6 +96,7 @@ export const defaultPreferences: UserPreferences = {
   quranPriority: 'some',
   macroTrackingEnabled: false,
   sexForCalories: null,
+  bodyWeightKg: null,
   simplifyByLocation: true,
   hydrationGoalMl: 0,
   hydrationReminderEnabled: false,
@@ -136,7 +139,7 @@ export function useDisplayTimezone(): string | null {
       if (!cancelled && tz) setPreferences((prev) => ({ ...prev, timezone: tz }));
     });
     return () => { cancelled = true; };
-  }, [preferences.locationCoords?.lat, preferences.locationCoords?.lng, preferences.timezone]);
+  }, [preferences.locationCoords, preferences.timezone, setPreferences]);
   return preferences.timezone ?? null;
 }
 
@@ -238,22 +241,24 @@ export function getTodayDateString(): string {
   return toLocalDateString(new Date());
 }
 
-export function getTodayFastingLog(progress: FastingProgress): FastingLogEntry | undefined {
-  const today = getTodayDateString();
+/** When todayOverride is provided (e.g. location's today from display timezone), use it so fasting log aligns with countdowns. */
+export function getTodayFastingLog(progress: FastingProgress, todayOverride?: string): FastingLogEntry | undefined {
+  const today = todayOverride ?? getTodayDateString();
   return progress.fastingLog?.find((e) => e.date === today);
 }
 
-export function isFastingToday(progress: FastingProgress): boolean {
-  const entry = getTodayFastingLog(progress);
+export function isFastingToday(progress: FastingProgress, todayOverride?: string): boolean {
+  const entry = getTodayFastingLog(progress, todayOverride);
   return entry?.status === 'in_progress';
 }
 
-/** Start fasting today: add log entry, persist, and console.log */
+/** Start fasting today: add log entry, persist, and console.log. Pass todayOverride when using location-based "today". */
 export function startFastingToday(
   progress: FastingProgress,
-  setProgress: (value: FastingProgress | ((prev: FastingProgress) => FastingProgress)) => void
+  setProgress: (value: FastingProgress | ((prev: FastingProgress) => FastingProgress)) => void,
+  todayOverride?: string
 ): void {
-  const today = getTodayDateString();
+  const today = todayOverride ?? getTodayDateString();
   const now = new Date().toISOString();
   const existing = progress.fastingLog?.find((e) => e.date === today);
 
@@ -287,12 +292,13 @@ export function hoursBetween(startIso: string, endIso: string): number {
   return Math.round((b - a) / (1000 * 60 * 60) * 10) / 10;
 }
 
-/** Mark today's fast as completed: update log, add to completedDays, and console.log */
+/** Mark today's fast as completed: update log, add to completedDays, and console.log. Pass todayOverride when using location-based "today". */
 export function completeFastingToday(
   progress: FastingProgress,
-  setProgress: (value: FastingProgress | ((prev: FastingProgress) => FastingProgress)) => void
+  setProgress: (value: FastingProgress | ((prev: FastingProgress) => FastingProgress)) => void,
+  todayOverride?: string
 ): void {
-  const today = getTodayDateString();
+  const today = todayOverride ?? getTodayDateString();
   const now = new Date().toISOString();
   const entry = progress.fastingLog?.find((e) => e.date === today);
   const startedAt = entry?.startedAt || now;
@@ -317,13 +323,14 @@ export function completeFastingToday(
   console.log(`${LOG_PREFIX} Fast completed. ${today} logged at ${now}. Total days: ${completedDays.length}`);
 }
 
-/** Mark today's fast as broken (e.g. early break): update log, optionally remove from completedDays. Reason is a predetermined id from BROKEN_FAST_REASONS. */
+/** Mark today's fast as broken (e.g. early break): update log, optionally remove from completedDays. Reason is a predetermined id from BROKEN_FAST_REASONS. Pass todayOverride when using location-based "today". */
 export function breakFastingToday(
   progress: FastingProgress,
   setProgress: (value: FastingProgress | ((prev: FastingProgress) => FastingProgress)) => void,
-  reason?: string
+  reason?: string,
+  todayOverride?: string
 ): void {
-  const today = getTodayDateString();
+  const today = todayOverride ?? getTodayDateString();
   const now = new Date().toISOString();
   const entry = progress.fastingLog?.find((e) => e.date === today);
   const startedAt = entry?.startedAt || now;
@@ -346,12 +353,13 @@ export function breakFastingToday(
   console.log(`${LOG_PREFIX} Fast broken (${getBrokenReasonLabel(reasonId)}). ${today} at ${now}.`);
 }
 
-/** Unmark today's fast (undo complete): remove from completedDays, set log to in_progress */
+/** Unmark today's fast (undo complete): remove from completedDays, set log to in_progress. Pass todayOverride when using location-based "today". */
 export function uncompleteFastingToday(
   progress: FastingProgress,
-  setProgress: (value: FastingProgress | ((prev: FastingProgress) => FastingProgress)) => void
+  setProgress: (value: FastingProgress | ((prev: FastingProgress) => FastingProgress)) => void,
+  todayOverride?: string
 ): void {
-  const today = getTodayDateString();
+  const today = todayOverride ?? getTodayDateString();
 
   const updatedLog = (progress.fastingLog || []).map((e) =>
     e.date === today ? { ...e, completedAt: undefined, status: 'in_progress' as const } : e
@@ -611,11 +619,23 @@ export function clampCalories(value: number): number {
   return Math.round(value);
 }
 
-/** Suggested daily calories by sex (rough estimate for BMR-based goal). Clamped to reasonable range. */
-export function getSuggestedCalories(sex: 'male' | 'female' | null): number {
+/**
+ * Suggested daily calories from sex and optional body weight (rough maintenance estimate).
+ * With weight: ~28 kcal/kg (male) or ~26 kcal/kg (female). Without weight: 2200 / 1800 / 2000.
+ */
+export function getSuggestedCalories(sex: 'male' | 'female' | null, bodyWeightKg: number | null | undefined): number {
+  if (bodyWeightKg != null && bodyWeightKg > 0) {
+    const kcalPerKg = sex === 'female' ? 26 : sex === 'male' ? 28 : 27;
+    return clampCalories(Math.round(bodyWeightKg * kcalPerKg));
+  }
   if (sex === 'male') return clampCalories(2200);
   if (sex === 'female') return clampCalories(1800);
   return clampCalories(2000);
+}
+
+/** Get recommended daily calories from preferences (for display and "use recommended" in macro tracker). */
+export function getRecommendedCaloriesFromPreferences(preferences: Pick<UserPreferences, 'sexForCalories' | 'bodyWeightKg'>): number {
+  return getSuggestedCalories(preferences.sexForCalories ?? null, preferences.bodyWeightKg ?? null);
 }
 
 export function useDailyGoals() {
@@ -862,20 +882,33 @@ export function getFastingLogForDate(progress: FastingProgress, dateStr: string)
 
 /** Consecutive days of fasting ending today (same logic as Dashboard). */
 export function calculateStreak(progress: FastingProgress): number {
-  const today = getTodayDateString();
-  const completedDays = [...(progress.completedDays || [])].sort().reverse();
-  let streak = 0;
+  return getStreakDays(progress).length;
+}
+
+/** Dates that form the current streak (most recent consecutive completed days ending today). */
+export function getStreakDays(progress: FastingProgress): string[] {
+  const completedSet = new Set(progress.completedDays || []);
+  const result: string[] = [];
   const currentDate = new Date();
-  for (const day of completedDays) {
+  while (true) {
     const dayStr = toLocalDateString(currentDate);
-    if (day === dayStr) {
-      streak++;
+    if (completedSet.has(dayStr)) {
+      result.push(dayStr);
       currentDate.setDate(currentDate.getDate() - 1);
     } else {
       break;
     }
   }
-  return streak;
+  return result;
+}
+
+/** Dates when the user broke their fast (from fastingLog). */
+export function getBrokenFastDays(progress: FastingProgress): string[] {
+  return (progress.fastingLog || [])
+    .filter((e) => e.status === 'broken')
+    .map((e) => e.date)
+    .sort()
+    .reverse();
 }
 
 /** Longest consecutive streak in completedDays (computed from stored dates). */
@@ -941,17 +974,18 @@ export function useHadithViewedDates(): [string[], () => void] {
   return [dates, markToday];
 }
 
-/** Build today's daily missions and completion from progress, meal plans, food log, schedule notes, hadith viewed. */
+/** Build today's daily missions and completion from progress, meal plans, food log, schedule notes, Quran verse and hadith viewed. */
 export function getDailyMissions(params: {
   todayStr: string;
   progress: FastingProgress;
   mealPlans: Record<string, { suhoor?: string; iftar?: string }>;
   foodLog: Record<string, DayFoodLog>;
   scheduleNotes: Record<string, string>;
+  quranVerseViewedDates: string[];
   hadithViewedDates: string[];
   iftarLabelShort?: string;
 }): DailyMission[] {
-  const { todayStr, progress, mealPlans, foodLog, scheduleNotes, hadithViewedDates, iftarLabelShort = 'iftar' } = params;
+  const { todayStr, progress, mealPlans, foodLog, scheduleNotes, quranVerseViewedDates, hadithViewedDates, iftarLabelShort = 'iftar' } = params;
   const todayLog = progress.fastingLog?.find((e) => e.date === todayStr);
   const fastingToday = !!todayLog && todayLog.status !== 'broken' && !progress.completedDays.includes(todayStr);
   const todayComplete = progress.completedDays.includes(todayStr);
@@ -961,6 +995,7 @@ export function getDailyMissions(params: {
   const hasSuhoor = !!(dayMeals?.suhoor?.trim()) || (dayLog.suhoor?.length ?? 0) > 0;
   const hasIftar = !!(dayMeals?.iftar?.trim()) || (dayLog.iftar?.length ?? 0) > 0;
   const hasNote = !!(scheduleNotes[todayStr]?.trim());
+  const readQuranVerse = quranVerseViewedDates.includes(todayStr);
   const readHadith = hadithViewedDates.includes(todayStr);
 
   return [
@@ -969,16 +1004,18 @@ export function getDailyMissions(params: {
     { id: 'log_suhoor', label: 'Log Suhoor (meal plan or food log)', completed: hasSuhoor, path: '/dashboard/schedule' },
     { id: 'log_iftar', label: `Log ${iftarLabelShort} (meal plan or food log)`, completed: hasIftar, path: '/dashboard/schedule' },
     { id: 'add_note', label: 'Add a note for today', completed: hasNote, path: '/dashboard/schedule' },
+    { id: 'read_quran_verse', label: 'Read one verse (Quran)', completed: readQuranVerse, path: '/dashboard/quran' },
     { id: 'read_hadith', label: 'Read one hadith', completed: readHadith, path: '/learn/hadith' },
   ];
 }
 
-/** Hook: today's daily missions and completion count. Uses progress, meal plans, food log, schedule notes, hadith viewed. */
+/** Hook: today's daily missions and completion count. Uses progress, meal plans, food log, schedule notes, Quran verse and hadith viewed. */
 export function useDailyMissions(): { missions: DailyMission[]; completedCount: number; totalCount: number } {
   const [progress] = useFastingProgress();
   const [mealPlans] = useDayMealPlans();
   const [foodLogs] = useDayFoodLog();
   const [scheduleNotes] = useLocalStorage<Record<string, string>>(SCHEDULE_NOTES_KEY, {});
+  const [quranVerseViewedDates] = useQuranVerseViewedDates();
   const [hadithViewedDates] = useHadithViewedDates();
   const iftarLabelShort = useIftarLabelShort();
   const todayStr = getTodayDateString();
@@ -988,6 +1025,7 @@ export function useDailyMissions(): { missions: DailyMission[]; completedCount: 
     mealPlans,
     foodLog: foodLogs,
     scheduleNotes,
+    quranVerseViewedDates,
     hadithViewedDates,
     iftarLabelShort,
   });

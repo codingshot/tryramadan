@@ -25,7 +25,7 @@ const QUIZ = [
 ];
 
 export default function OnboardingKnowledge() {
-  const { setKnowledgeScore } = useOnboarding();
+  const { state, setKnowledgeScore } = useOnboarding();
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -70,8 +70,26 @@ export default function OnboardingKnowledge() {
       >
         <ArrowLeft className="w-4 h-4" /> Back
       </Link>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (selectedOption !== null) handleNext();
+        }}
+      >
       <h2 className="font-display text-2xl font-bold mb-2">Quick knowledge check</h2>
       <p className="text-muted-foreground mb-6">We'll tailor content to your level. No pressure.</p>
+      {state.mode === "muslim" && (
+        <button
+          type="button"
+          onClick={() => {
+            setKnowledgeScore(QUIZ.length);
+            navigate("/onboarding/health");
+          }}
+          className="w-full mb-6 py-2.5 px-4 rounded-xl border border-secondary/50 text-secondary font-medium text-sm hover:bg-secondary/10 transition-colors"
+        >
+          Skip — I already know this • أنا أعرف
+        </button>
+      )}
 
       <div className="mb-6">
         <div className="flex gap-1 mb-4">
@@ -138,8 +156,7 @@ export default function OnboardingKnowledge() {
               )}
             </p>
             <button
-              type="button"
-              onClick={handleNext}
+              type="submit"
               className="w-full mt-3 min-h-[44px] py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2 cursor-pointer"
             >
               {isLast ? "Continue" : "Next question"}
@@ -148,6 +165,7 @@ export default function OnboardingKnowledge() {
           </motion.div>
         )}
       </div>
+      </form>
     </motion.div>
   );
 }

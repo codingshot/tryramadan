@@ -5,6 +5,7 @@ import { ArrowLeft, ChevronDown, Search, HelpCircle } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { PageSEO } from "@/components/PageSEO";
+import { buildFAQPageSchema } from "@/lib/jsonld";
 
 const FAQ = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -111,6 +112,9 @@ const FAQ = () => {
     )
   })).filter(category => category.questions.length > 0);
 
+  const faqItems = faqs.flatMap((cat) => cat.questions.map((q) => ({ q: q.q, a: q.a })));
+  const faqPageJsonLd = buildFAQPageSchema(faqItems, "https://tryramadan.app/faq");
+
   return (
     <div className="min-h-screen bg-background">
       <PageSEO
@@ -118,6 +122,7 @@ const FAQ = () => {
         description="Frequently asked questions about Ramadan fasting, suhoor and iftar, health and safety, and how TryRamadan.app works for beginners and non-Muslims."
         path="/faq"
       />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqPageJsonLd) }} />
       <Navbar />
       
       <main className="main-content">

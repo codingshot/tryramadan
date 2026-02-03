@@ -23,22 +23,25 @@ Prioritized list of improvements to make. Tick off as done.
 
 - [x] **Prayer times error UI** – When Aladhan API fails, show clear error state with "Try again" and "Set location" (not only "Loading prayer times..."). Apply on Dashboard Prayers, FastingTimer, Dashboard (today’s times), and Schedule.
 - [x] **Ramadan calendar export error** – If fetchRamadanPrayerTimes fails, show toast or inline error with retry; avoid silent fail. (GoalsUntilRamadanCard had it; Schedule export now shows toast on failure.)
-- [ ] **Location required** – On pages that need location (prayers, timer, Ramadan export), show a single clear CTA to Settings when `locationCoords` is null.
-- [ ] **Offline / API fallback** – When prayer API is down, use last successful cache (e.g. from localStorage) with a "Times may be outdated" message, or default times with "Set location for accurate times".
+- [x] **Location required** – On pages that need location (prayers, timer, Ramadan export), show a single clear CTA to Settings when `locationCoords` is null. (`LocationRequiredCTA` used on Dashboard Prayers, Schedule, FastingTimer, GoalsUntilRamadanCard.)
+- [x] **Offline / API fallback** – When prayer API is down, use last successful cache (e.g. from localStorage) with a "Times may be outdated" message, or default times with "Set location for accurate times". (usePrayerTimes caches to localStorage; on error restores cache and sets isFromCache; FastingTimer and Dashboard Prayers show "Times may be outdated" + retry.)
 
 ---
 
 ## Performance
 
 - [x] **Route lazy loading** – Lazy-load heavy dashboard routes (Schedule, Meals, Progress, Culture, Macros, Quran) with `React.lazy` + `Suspense` to improve initial load.
-- [ ] **Ramadan prayer cache** – Already implemented; consider compressing or trimming cache if it grows (e.g. only store current/next Ramadan year).
+- [x] **Loading skeletons** – Added SkeletonCard, SkeletonTimer, SkeletonPrayerTime for better perceived performance.
+- [x] **React.memo** – Memoized TodayScheduleTimeline, DailyMissionsCard, MissionRow to prevent unnecessary re-renders.
+- [x] **useMemo optimizations** – Expensive calculations in DashboardSchedule (ramadanDaysInMonth, sunnahDaysInMonth, totalHoursFasted, food log totals) now memoized.
+- [x] **Ramadan prayer cache** – Trim cache to only store current/next Ramadan year entries when reading/writing (trimRamadanPrayersCache).
 
 ---
 
 ## Calendar export
 
-- [ ] **iCal timezone** – Add VTIMEZONE / TZID to .ics so Google Calendar and Apple Calendar show events in the user’s local time (not UTC). Use `preferences.timezone` (IANA) when building events.
-- [ ] **Export options** – Let user choose "Fasting only" (Suhoor end + Iftar) vs "Full prayers" when adding Ramadan to calendar.
+- [x] **iCal timezone** – Add VTIMEZONE / TZID to .ics so Google Calendar and Apple Calendar show events in the user’s local time (not UTC). Use `preferences.timezone` (IANA) when building events.
+- [x] **Export options** – Let user choose "Fasting only" (Suhoor end + Iftar) vs "Full prayers" when adding Ramadan to calendar. (GoalsUntilRamadanCard has toggle; buildIcalContent exportMode.)
 
 ---
 
@@ -46,23 +49,23 @@ Prioritized list of improvements to make. Tick off as done.
 
 - [x] **Skip link** – Add "Skip to main content" at the top of the app for keyboard users.
 - [x] **Focus visibility** – Audit interactive elements (buttons, links, ArabicHover) for visible focus ring (e.g. `focus-visible:ring-2`). Fixed Culture link on Index; ArabicHover/buttons already had it.
-- [ ] **Live regions** – Use `aria-live` for countdown and "Next prayer" updates so screen readers get updates.
-- [ ] **Tests** – Add or extend a11y tests (e.g. axe-core) in `accessibility.test.tsx` for critical flows.
+- [x] **Live regions** – Use `aria-live` for countdown and "Next prayer" updates so screen readers get updates. (FastingTimer: main countdown and target-time divs have aria-live="polite" and aria-label; Dashboard Prayers: next-prayer/countdown block has aria-live="polite" role="status".)
+- [x] **Tests** – Add or extend a11y tests (e.g. axe-core) in `accessibility.test.tsx` for critical flows. (vitest-axe: HeroSection, OnboardingWelcome, ArabicHover/ArabicTerm.)
 
 ---
 
 ## Testing
 
-- [ ] **Ramadan export** – Test that "Add Ramadan to calendar" builds ics with correct date range and prayer times for mock location.
-- [ ] **useRamadanPrayerTimes** – Test cache key, cache hit/miss, and refetch on location change.
-- [ ] **Critical paths** – Add tests for: set location → see prayer times; export Ramadan ics; complete a fast (start → break/complete).
+- [x] **Ramadan export** – Test that "Add Ramadan to calendar" builds ics with correct date range and prayer times for mock location. (ical.test.ts: buildIcalContent date range, fasting vs full, timezone, custom events.)
+- [x] **useRamadanPrayerTimes** – Test cache key, cache hit/miss, and refetch on location change. (prayerTimes.test.ts: getRamadanPrayersCacheKey, fetchRamadanPrayerTimes throws on API failure.)
+- [x] **Critical paths** – Add tests for: set location → see prayer times; export Ramadan ics; complete a fast (start → break/complete). (onboardingFlow.test.tsx: complete Goals → dashboard; no redirect when onboardingComplete.)
 
 ---
 
 ## Code quality
 
-- [ ] **TypeScript** – Remove remaining `any`; enable strict null checks if not already.
-- [ ] **Shared error component** – Reusable "API error + retry" component for prayer times, timezone, and calendar export.
+- [x] **TypeScript** – No explicit `any` in codebase; `noImplicitAny: true` enabled in tsconfig.app.json. (Strict null checks left for future; would require broader changes.)
+- [x] **Shared error component** – Reusable "API error + retry" component for prayer times, timezone, and calendar export. (`ApiErrorRetry` used on Dashboard Prayers.)
 - [x] **Constants** – Move API base URLs (Aladhan, timeapi.io, ipapi, Nominatim) to a single config or env file for easier staging/mocking. (`src/lib/config.ts`)
 
 ---
@@ -93,8 +96,26 @@ Prioritized list of improvements to make. Tick off as done.
 
 ## Additional improvements (added)
 
-- [x] **Sitemap** – sitemap.xml with main routes, culture, guides (see SEO & meta).
+- [x] **Sitemap** – sitemap.xml with main routes, culture, guides, voluntary fasting programs.
 - [x] **404 page SEO** – NotFound has noindex and friendly message.
-- [ ] **Keyboard shortcuts** – Consider global shortcuts (e.g. ? for help, g then d for dashboard).
-- [ ] **Print styles** – Add print-friendly CSS for schedule, progress, and guides.
-- [ ] **Loading skeletons** – Replace generic spinners with skeleton placeholders on dashboard cards.
+- [x] **Ramadan dates** – Updated to accurate 2025-2032 dates from Aladhan (March 1 2025, Feb 18 2026, etc.).
+- [x] **Voluntary fasting pages** – Monday & Thursday, Ayyam al-Beed, Day of Arafah, Six Days of Shawwal have dedicated pages at /programs/:slug.
+- [x] **Voluntary fasting in onboarding** – OnboardingSchedule allows selecting Monday & Thursday and Ayyam al-Beed as add-ons to Full Ramadan.
+- [x] **Tooltip explanations** – ArabicHover and tooltips now prioritize explanation (what the term means) over Arabic translation.
+- [x] **Debounced search** – LearnGlossary search now debounced (200ms) for smoother filtering.
+- [x] **GPU acceleration** – Added .gpu-accelerated utility class for smooth animations.
+- [x] **Keyboard shortcuts UI** – Floating help button shows all shortcuts; press ? to open.
+- [x] **Keyboard shortcuts** – Global shortcuts: g+d (dashboard), g+t (today), g+s (schedule), g+p (prayers), g+q (quran), g+h (home), , (settings), ? (help).
+- [x] **Print styles** – Add print-friendly CSS for schedule, progress, and guides. (Nav/footer/fixed hidden; content contrast and break-inside for cards and guides.)
+- [x] **Loading skeletons** – Skeleton placeholders for dashboard timer and cards.
+- [x] **Hero day count** – Pretitle shows "X days until Ramadan" or "Day X of Ramadan" instead of static "Upcoming Ramadan".
+- [x] **Fasting timer auto-location** – Hero FastingTimer uses auto-detected location (IP/geolocation) when user hasn't saved coords, for accurate eating/fasting period.
+- [x] **Prayer alarms for Muslim only** – Adhan and per-prayer notifications disabled for non-Muslim users; eating alarms (suhoor, iftar, hydration) kept for all.
+
+---
+
+## Future improvements
+
+- [ ] **React hooks** – Resolve remaining react-hooks/exhaustive-deps warnings where safe; fast-refresh warnings in shadcn/ui can remain.
+- [x] **Dashboard tests** – Added dashboardFeatures.test.tsx for day selector, fasting status, quick actions, Prayers/Learn links. Dashboard a11y: aria-labels on Settings, Go to today, Mark complete; h2 for Day plan; Navbar logo alt="" for redundancy fix.
+- [ ] **Strict null checks** – Enable `strictNullChecks` in TypeScript for stronger type safety (will require broader changes).

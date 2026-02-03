@@ -71,8 +71,13 @@ export const GENERAL_TOOLTIPS = {
   },
   ramadanMubarak: {
     title: "Ramadan Mubarak • رمضان مبارك",
-    body: "A greeting meaning 'Blessed Ramadan.' Said at the start of the month to wish others a blessed and successful fast.",
-    bodyAr: "تهنئة بقدوم رمضان",
+    body: "A greeting meaning 'Blessed Ramadan.' Said when the month of Ramadan begins to wish others a blessed and successful fast. Used throughout the month. Reply with the same or 'Ramadan Kareem' (Generous Ramadan).",
+    bodyAr: "تهنئة بقدوم رمضان — رمضان مبارك",
+  },
+  beforeRamadanGreeting: {
+    title: "Looking forward to Ramadan • استعداد لرمضان",
+    body: "Shown before the month of Ramadan begins. It means we're preparing or counting down. Once Ramadan starts, Muslims greet each other with 'Ramadan Mubarak' (Blessed Ramadan • رمضان مبارك) or 'Ramadan Kareem' (Generous Ramadan • رمضان كريم). Both express goodwill for the holy month of fasting, worship, and community.",
+    bodyAr: "استعداد لرمضان — عندما يبدأ رمضان نقول رمضان مبارك أو رمضان كريم",
   },
   ayyamAlBeed: {
     title: "Ayyam al-Beed • أيام البيض",

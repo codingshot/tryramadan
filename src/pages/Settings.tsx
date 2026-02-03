@@ -4,7 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { 
   ArrowLeft, MapPin, Bell, Moon, Sun, Trash2, Download, 
   ChevronRight, Check, Loader2, Monitor, Globe, Sunrise, Sunset,
-  BookOpen, Utensils, BookMarked, Scale, Target, Droplets
+  BookOpen, Utensils, BookMarked, Scale, Target, Droplets, Settings2
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -23,6 +23,7 @@ import {
   calculateStreak,
   getLongestStreak,
   getSuggestedCalories,
+  getRecommendedCaloriesFromPreferences,
   useDailyGoals,
   type LearningPriority,
   type CultureRecipesPriority,
@@ -366,36 +367,6 @@ const Settings = () => {
                 </button>
               </div>
 
-              {preferences.macroTrackingEnabled && (
-                <div className="pt-3 space-y-2">
-                  <p className="text-xs font-semibold text-muted-foreground">Biological sex (for calorie estimate)</p>
-                  <p className="text-xs text-muted-foreground">Used to suggest daily calorie goals. Optional.</p>
-                  <div className="flex flex-wrap gap-2">
-                    {(['male', 'female', null] as const).map((value) => {
-                      const label = value === null ? "Prefer not to say" : value === "male" ? "Male" : "Female";
-                      const isSelected = (preferences.sexForCalories ?? null) === value;
-                      return (
-                        <button
-                          key={value ?? "none"}
-                          type="button"
-                          onClick={() => {
-                            setPreferences({ ...preferences, sexForCalories: value });
-                            if (value !== null) {
-                              setDailyGoals((g) => ({ ...g, calories: getSuggestedCalories(value) }));
-                            }
-                          }}
-                          className={`min-h-[44px] px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
-                            isSelected ? "bg-secondary text-secondary-foreground border-secondary" : "bg-muted/70 hover:bg-muted border-border text-foreground"
-                          }`}
-                        >
-                          {label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
               <div className="flex flex-wrap items-center gap-4">
                 <span className="text-sm">Simplify by location</span>
                 <button
@@ -416,6 +387,74 @@ const Settings = () => {
               <Target className="w-4 h-4" />
               Apply to dashboard quick access
             </button>
+          </motion.div>
+
+          {/* Advanced: gender + body weight for calorie recommendation (macro tracker) */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.08 }}
+            className="p-6 rounded-2xl bg-card border border-border mb-6"
+          >
+            <h2 className="font-display font-bold mb-1 flex items-center gap-2 flex-wrap">
+              <Settings2 className="w-5 h-5 text-secondary flex-shrink-0" />
+              Advanced
+            </h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Used to recommend daily calories in the macro tracker. Optional.
+            </p>
+            <div className="space-y-4">
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground mb-2">Gender (for calorie estimate)</p>
+                <div className="flex flex-wrap gap-2">
+                  {(['male', 'female', null] as const).map((value) => {
+                    const label = value === null ? "Prefer not to say" : value === "male" ? "Male" : "Female";
+                    const isSelected = (preferences.sexForCalories ?? null) === value;
+                    return (
+                      <button
+                        key={value ?? "none"}
+                        type="button"
+                        onClick={() => {
+                          setPreferences({ ...preferences, sexForCalories: value });
+                          setDailyGoals((g) => ({ ...g, calories: getSuggestedCalories(value, preferences.bodyWeightKg ?? null) }));
+                        }}
+                        className={`min-h-[44px] px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
+                          isSelected ? "bg-secondary text-secondary-foreground border-secondary" : "bg-muted/70 hover:bg-muted border-border text-foreground"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <label htmlFor="settings-body-weight" className="text-xs font-semibold text-muted-foreground block mb-2">Body weight (kg)</label>
+                <input
+                  id="settings-body-weight"
+                  type="number"
+                  min={20}
+                  max={300}
+                  step={0.5}
+                  placeholder="e.g. 70"
+                  className="w-full max-w-[120px] min-h-[44px] px-3 rounded-lg border border-border bg-background text-foreground text-sm"
+                  value={preferences.bodyWeightKg != null && preferences.bodyWeightKg > 0 ? String(preferences.bodyWeightKg) : ""}
+                  onChange={(e) => {
+                    const v = e.target.value.trim();
+                    const num = v === "" ? null : parseFloat(v);
+                    const bodyWeightKg = num != null && !Number.isNaN(num) && num > 0 ? num : null;
+                    setPreferences({ ...preferences, bodyWeightKg });
+                    setDailyGoals((g) => ({ ...g, calories: getSuggestedCalories(preferences.sexForCalories ?? null, bodyWeightKg) }));
+                  }}
+                />
+                <p className="text-xs text-muted-foreground mt-1">Optional. With gender, used to suggest daily calories in the macro tracker.</p>
+              </div>
+              {((preferences.sexForCalories != null) || (preferences.bodyWeightKg != null && preferences.bodyWeightKg > 0)) && (
+                <p className="text-xs text-muted-foreground">
+                  Recommended daily calories: <strong className="text-foreground">{getRecommendedCaloriesFromPreferences(preferences)}</strong> cal (applied to your macro goal).
+                </p>
+              )}
+            </div>
           </motion.div>
           
           {/* Location Settings */}

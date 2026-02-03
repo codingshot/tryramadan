@@ -1,21 +1,40 @@
 import { motion } from 'framer-motion';
-import { Star, Moon, Calendar, ExternalLink } from 'lucide-react';
+import { Star, Moon, ExternalLink } from 'lucide-react';
 import { getSunnahFastingInfo } from '@/hooks/usePrayerTimes';
 import { EXTERNAL_LINKS } from '@/lib/config';
+import type { PrayerTimes } from '@/hooks/usePrayerTimes';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface SunnahFastingBadgeProps {
   hijriDay?: number;
+  /** Today's prayer times for user's location — shown on hover */
+  prayerTimes?: PrayerTimes | null;
+  locationLabel?: string;
 }
 
-export const SunnahFastingBadge = ({ hijriDay }: SunnahFastingBadgeProps) => {
+export const SunnahFastingBadge = ({ hijriDay, prayerTimes, locationLabel }: SunnahFastingBadgeProps) => {
   const sunnahInfo = getSunnahFastingInfo();
   
   // Check for Ayyam al-Beed (13th, 14th, 15th of lunar month)
   const isAyyamAlBeed = hijriDay && hijriDay >= 13 && hijriDay <= 15;
 
+  const todayTimesNote = prayerTimes
+    ? `Today${locationLabel ? ` (${locationLabel})` : ' (your location)'}: Suhoor end (Fajr) ${prayerTimes.fajr} · Iftar (Maghrib) ${prayerTimes.maghrib}`
+    : "Set your location in settings for today's prayer times.";
+
   if (!sunnahInfo && !isAyyamAlBeed) {
     return null;
   }
+
+  const wrapWithTooltip = (node: React.ReactNode) => (
+    <Tooltip>
+      <TooltipTrigger asChild>{node}</TooltipTrigger>
+      <TooltipContent className="max-w-xs p-3" side="top">
+        <p className="text-xs font-medium">Today&apos;s fasting times</p>
+        <p className="text-xs text-muted-foreground mt-1">{todayTimesNote}</p>
+      </TooltipContent>
+    </Tooltip>
+  );
 
   return (
     <motion.div
@@ -23,7 +42,7 @@ export const SunnahFastingBadge = ({ hijriDay }: SunnahFastingBadgeProps) => {
       animate={{ opacity: 1, scale: 1 }}
       className="flex flex-wrap items-center justify-center gap-2"
     >
-      {sunnahInfo && (
+      {sunnahInfo && wrapWithTooltip(
         <a
           href={`${EXTERNAL_LINKS.sunnah}/search?q=${encodeURIComponent("Sahih Muslim 1162 Monday Thursday fasting")}`}
           target="_blank"
@@ -39,7 +58,7 @@ export const SunnahFastingBadge = ({ hijriDay }: SunnahFastingBadgeProps) => {
         </a>
       )}
 
-      {isAyyamAlBeed && (
+      {isAyyamAlBeed && wrapWithTooltip(
         <a
           href={`${EXTERNAL_LINKS.sunnah}/search?q=${encodeURIComponent("Sahih al-Bukhari 1981 Ayyam al-Beed white days fasting")}`}
           target="_blank"

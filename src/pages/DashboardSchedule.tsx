@@ -1,6 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   ArrowLeft,
   Check,
@@ -42,6 +42,7 @@ import {
   getBrokenReasonLabel,
   hoursBetween,
   useUserPreferences,
+  getRecommendedCaloriesFromPreferences,
   useCalendarEvents,
   useDashboardQuickActions,
   DASHBOARD_QUICK_ACTIONS,
@@ -62,6 +63,7 @@ import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
 import { EXTERNAL_LINKS } from "@/lib/config";
 import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
 import { PageSEO } from "@/components/PageSEO";
+import { LocationRequiredCTA } from "@/components/LocationRequiredCTA";
 import { TodayScheduleTimeline } from "@/components/TodayScheduleTimeline";
 import { toast } from "sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -154,9 +156,24 @@ const DashboardSchedule = () => {
   const [foodLogs, setFoodLogs] = useDayFoodLog();
   const [calendarEvents, setCalendarEvents] = useCalendarEvents();
 
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [noteInput, setNoteInput] = useState("");
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const location = useLocation();
+  const todayStrForInit = toLocalDateString(new Date());
+  const initialDateFromState = (location.state as { date?: string } | null)?.date;
+  const initialDate = initialDateFromState ?? todayStrForInit;
+  const [selectedDate, setSelectedDate] = useState<string | null>(initialDate);
+  const [noteInput, setNoteInput] = useState(() => scheduleNotes[initialDate] || "");
+  const [currentMonth, setCurrentMonth] = useState(() => {
+    const d = new Date(initialDate + "T12:00:00");
+    return new Date(d.getFullYear(), d.getMonth(), 1);
+  });
+  useEffect(() => {
+    const date = (location.state as { date?: string } | null)?.date;
+    if (date) {
+      setSelectedDate(date);
+      const d = new Date(date + "T12:00:00");
+      setCurrentMonth(new Date(d.getFullYear(), d.getMonth(), 1));
+    }
+  }, [location.state]);
   const [showGoalsEditor, setShowGoalsEditor] = useState(false);
   const [showQuickActionsEditor, setShowQuickActionsEditor] = useState(false);
   const [quickActionOrder, setQuickActionOrder] = useDashboardQuickActions();
@@ -221,10 +238,12 @@ const DashboardSchedule = () => {
   };
 
   const goToToday = useCallback(() => {
-    setCurrentMonth(new Date(today.getFullYear(), today.getMonth(), 1));
-    setSelectedDate(todayStr);
-    setNoteInput(scheduleNotes[todayStr] || "");
-  }, [todayStr, scheduleNotes]);
+    const now = new Date();
+    const str = toLocalDateString(now);
+    setCurrentMonth(new Date(now.getFullYear(), now.getMonth(), 1));
+    setSelectedDate(str);
+    setNoteInput(scheduleNotes[str] || "");
+  }, [scheduleNotes]);
 
   const goToRamadan = useCallback(() => {
     const start = getCurrentRamadanStart();
@@ -251,29 +270,47 @@ const DashboardSchedule = () => {
   const firstDay = getFirstDayOfMonth(currentMonth);
   const monthName = currentMonth.toLocaleDateString("en", { month: "long", year: "numeric" });
   const completedCount = progress.completedDays.length;
-  const ramadanDaysInMonth = Array.from({ length: daysInMonth }, (_, i) => {
-    const d = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i + 1);
-    return isRamadanDay(d) ? 1 : 0;
-  }).reduce((a, b) => a + b, 0);
-  const sunnahDaysInMonth = Array.from({ length: daysInMonth }, (_, i) => {
-    const d = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i + 1);
-    return isSunnahDay(d) && !isRamadanDay(d) ? 1 : 0;
-  }).reduce((a, b) => a + b, 0);
-  const totalHoursFasted = (progress.fastingLog ?? []).reduce((sum, e) => sum + (e.hoursFasted ?? (e.startedAt && e.completedAt ? hoursBetween(e.startedAt, e.completedAt) : 0)), 0);
+  
+  // Memoize expensive month calculations
+  const ramadanDaysInMonth = useMemo(() => {
+    return Array.from({ length: daysInMonth }, (_, i) => {
+      const d = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i + 1);
+      return isRamadanDay(d) ? 1 : 0;
+    }).reduce((a, b) => a + b, 0);
+  }, [currentMonth, daysInMonth]);
+  
+  const sunnahDaysInMonth = useMemo(() => {
+    return Array.from({ length: daysInMonth }, (_, i) => {
+      const d = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i + 1);
+      return isSunnahDay(d) && !isRamadanDay(d) ? 1 : 0;
+    }).reduce((a, b) => a + b, 0);
+  }, [currentMonth, daysInMonth]);
+  
+  const totalHoursFasted = useMemo(() => {
+    return (progress.fastingLog ?? []).reduce((sum, e) => sum + (e.hoursFasted ?? (e.startedAt && e.completedAt ? hoursBetween(e.startedAt, e.completedAt) : 0)), 0);
+  }, [progress.fastingLog]);
 
   const selectedDayMeals = selectedDate ? mealPlans[selectedDate] : undefined;
   const selectedDayNutrition = selectedDate ? nutrition[selectedDate] : undefined;
-  const selectedDayFoodLog = selectedDate ? normalizeDayFoodLog(foodLogs[selectedDate]) : undefined;
-  const selectedDayTotalsFromFood = getDayTotalsFromFoodLog(selectedDayFoodLog);
+  const selectedDayFoodLog = useMemo(() => 
+    selectedDate ? normalizeDayFoodLog(foodLogs[selectedDate]) : undefined,
+    [selectedDate, foodLogs]
+  );
+  const selectedDayTotalsFromFood = useMemo(() => 
+    getDayTotalsFromFoodLog(selectedDayFoodLog),
+    [selectedDayFoodLog]
+  );
   // Effective totals: manual nutrition if any set, otherwise food log totals (for goal comparison)
-  const effectiveDayTotals = selectedDate
+  const effectiveDayTotals = useMemo(() => selectedDate
     ? {
         calories: selectedDayNutrition?.calories ?? selectedDayTotalsFromFood.calories ?? 0,
         protein: selectedDayNutrition?.protein ?? selectedDayTotalsFromFood.protein ?? 0,
         carbs: selectedDayNutrition?.carbs ?? selectedDayTotalsFromFood.carbs ?? 0,
         fat: selectedDayNutrition?.fat ?? selectedDayTotalsFromFood.fat ?? 0,
       }
-    : { calories: 0, protein: 0, carbs: 0, fat: 0 };
+    : { calories: 0, protein: 0, carbs: 0, fat: 0 },
+    [selectedDate, selectedDayNutrition, selectedDayTotalsFromFood]
+  );
   const hasEffectiveTotals =
     effectiveDayTotals.calories > 0 ||
     effectiveDayTotals.protein > 0 ||
@@ -467,6 +504,7 @@ const DashboardSchedule = () => {
         dateRange: [startStr, endStr],
         includeTaraweeh: true,
         includePrayers: true,
+        timezone: preferences.timezone ?? undefined,
       });
       downloadIcal(ics, `tryramadan-${startStr}-to-${endStr}.ics`);
       toast.success("Calendar exported successfully");
@@ -606,6 +644,24 @@ const DashboardSchedule = () => {
                       />
                     </div>
                   </div>
+                  {(preferences.sexForCalories != null || (preferences.bodyWeightKg != null && preferences.bodyWeightKg > 0)) && (
+                    <div className="mt-3 pt-3 border-t border-border flex flex-wrap items-center gap-2">
+                      <span className="text-xs text-muted-foreground">
+                        From your profile (Settings → Advanced): recommended {getRecommendedCaloriesFromPreferences(preferences)} cal
+                      </span>
+                      {getRecommendedCaloriesFromPreferences(preferences) !== dailyGoals.calories && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-8 text-xs"
+                          onClick={() => setDailyGoals((g) => ({ ...g, calories: getRecommendedCaloriesFromPreferences(preferences) }))}
+                        >
+                          Use recommended
+                        </Button>
+                      )}
+                    </div>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -772,7 +828,11 @@ const DashboardSchedule = () => {
               </Button>
             </div>
             {(!lat || !lng) && (
-              <p className="text-xs text-muted-foreground mt-2">Set your location in Settings to include prayer times.</p>
+              <LocationRequiredCTA
+                compact
+                message="Set your location in Settings to include prayer times in the export."
+                className="mt-2"
+              />
             )}
           </motion.div>
 
@@ -1051,17 +1111,18 @@ const DashboardSchedule = () => {
                                 ? "Started fasting (not completed)"
                                 : "No fast logged"}
                           {selectedFastingLog && selectedDayPrayerTimes && (() => {
-                            const fajrTime = new Date((selectedDate ?? "") + "T" + (selectedDayPrayerTimes.fajr?.length === 5 ? selectedDayPrayerTimes.fajr + ":00" : selectedDayPrayerTimes.fajr)).getTime();
+                            const imsakStr = selectedDayPrayerTimes.imsak ?? selectedDayPrayerTimes.fajr;
+                            const imsakTime = new Date((selectedDate ?? "") + "T" + (imsakStr?.length === 5 ? imsakStr + ":00" : imsakStr ?? "05:00")).getTime();
                             const maghribTime = new Date((selectedDate ?? "") + "T" + (selectedDayPrayerTimes.maghrib?.length === 5 ? selectedDayPrayerTimes.maghrib + ":00" : selectedDayPrayerTimes.maghrib)).getTime();
                             const started = selectedFastingLog.startedAt ? new Date(selectedFastingLog.startedAt).getTime() : 0;
                             const completed = selectedFastingLog.completedAt ? new Date(selectedFastingLog.completedAt).getTime() : 0;
                             const parts: string[] = [];
-                            if (started && started < fajrTime) parts.push("started before Fajr (suhoor window)");
-                            else if (started && started < maghribTime) parts.push("started after Fajr (fasting)");
-                            else if (started) parts.push("started after Maghrib (eating window)");
+                            if (started && started < imsakTime) parts.push("started before Suhoor end (eating window)");
+                            else if (started && started < maghribTime) parts.push("started after Suhoor end (fasting)");
+                            else if (started) parts.push("started after Iftar (eating window)");
                             if (completed && selectedFastingLog.status === "broken") {
-                              if (completed < maghribTime) parts.push("broke before Maghrib");
-                              else parts.push("broke at/after Maghrib");
+                              if (completed < maghribTime) parts.push("broke before Iftar");
+                              else parts.push("broke at/after Iftar");
                             }
                             return parts.length > 0 ? " · " + parts.join("; ") : null;
                           })()}

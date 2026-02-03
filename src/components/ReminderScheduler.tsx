@@ -71,8 +71,8 @@ export function ReminderScheduler() {
         markReminderSent(todayStr, type);
       };
 
-      // Sunnah day (Mon/Thu) notification: once per day when today is a Sunnah fasting day and not Ramadan
-      if (!sent.includes("sunnah-day")) {
+      // Sunnah day (Mon/Thu) notification: Muslim users only, once per day when today is a Sunnah fasting day and not Ramadan
+      if (preferences.userType === "muslim" && !sent.includes("sunnah-day")) {
         const sunnahInfo = getSunnahFastingInfo();
         const todayDate = new Date();
         todayDate.setHours(0, 0, 0, 0);
@@ -150,7 +150,7 @@ export function ReminderScheduler() {
     checkAndNotify();
     const interval = setInterval(checkAndNotify, 60 * 1000);
     return () => clearInterval(interval);
-  }, [prayerTimes, notifSettings.suhoorEnabled, notifSettings.iftarEnabled, notifSettings.suhoorMinutesBefore, notifSettings.iftarMinutesBefore, preferences.hydrationReminderEnabled, preferences.hydrationReminderTimes, iftarLabel, iftarLabelShort]);
+  }, [preferences.userType, prayerTimes, notifSettings.suhoorEnabled, notifSettings.iftarEnabled, notifSettings.suhoorMinutesBefore, notifSettings.iftarMinutesBefore, preferences.hydrationReminderEnabled, preferences.hydrationReminderTimes, iftarLabel, iftarLabelShort]);
 
   return null;
 }

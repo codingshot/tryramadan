@@ -53,8 +53,8 @@ const Guides = () => {
               User Guides
             </h1>
             <p className="text-muted-foreground text-lg max-w-2xl">
-              Step-by-step guides for every flow in TryRamadan. Use quick links
-              to jump to the right screen. Optimized for mobile and desktop.
+              Step-by-step guides with screenshots for every flow. Use quick links
+              to jump to the right screen. Use arrow keys to move between steps.
             </p>
           </motion.header>
 
@@ -94,26 +94,40 @@ const Guides = () => {
                   {CATEGORY_LABELS[category]}
                 </h2>
                 <ul className="space-y-4">
-                  {list.map((guide) => (
-                    <li key={guide.slug}>
-                      <Link
-                        to={`/guides/${guide.slug}`}
-                        className="block p-4 rounded-2xl border border-border bg-card hover:bg-muted/30 hover:border-primary/30 transition-colors group"
-                      >
-                        <div className="flex items-start justify-between gap-4">
-                          <div>
-                            <h3 className="font-semibold text-foreground group-hover:text-secondary transition-colors">
-                              {guide.title}
-                            </h3>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {guide.shortDescription}
-                            </p>
+                  {list.map((guide) => {
+                    const thumb = guide.steps[0]?.image ?? guide.steps[0]?.gif;
+                    return (
+                      <li key={guide.slug}>
+                        <Link
+                          to={`/guides/${guide.slug}`}
+                          className="block p-4 rounded-2xl border border-border bg-card hover:bg-muted/30 hover:border-primary/30 transition-colors group"
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            {thumb && (
+                              <div className="w-16 h-24 shrink-0 hidden sm:block">
+                                <img
+                                  src={thumb}
+                                  alt=""
+                                  className="w-full h-full object-cover rounded-lg"
+                                  loading="lazy"
+                                  onError={(e) => { e.currentTarget.parentElement!.style.display = "none"; }}
+                                />
+                              </div>
+                            )}
+                            <div className="min-w-0 flex-1">
+                              <h3 className="font-semibold text-foreground group-hover:text-secondary transition-colors">
+                                {guide.title}
+                              </h3>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {guide.shortDescription}
+                              </p>
+                            </div>
+                            <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-secondary shrink-0 mt-0.5" />
                           </div>
-                          <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-secondary shrink-0 mt-0.5" />
-                        </div>
-                      </Link>
-                    </li>
-                  ))}
+                        </Link>
+                      </li>
+                    );
+                  })}
                 </ul>
               </motion.section>
             );

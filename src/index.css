@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Amiri:wght@400;700&display=swap');
+/* Fonts loaded async via <link rel="preload"> in index.html to avoid render-blocking (CWV/LCP). */
 
 @tailwind base;
 @tailwind components;
@@ -91,6 +91,12 @@
   /* Responsive text: avoid oversized headings on very small screens */
   .text-balance {
     text-wrap: balance;
+  }
+  /* GPU acceleration for smooth animations */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
   }
 }
 
@@ -444,4 +450,70 @@
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
+}
+
+/* Print-friendly styles for schedule, progress, guides */
+@media print {
+  /* Hide chrome */
+  .no-print,
+  nav,
+  header[role="banner"],
+  footer,
+  [data-skip-link],
+  .keyboard-shortcuts-help-trigger,
+  .btn-hero,
+  .btn-hero-outline,
+  button:not(.print-show),
+  [role="dialog"],
+  .toaster,
+  .fixed,
+  .sticky {
+    display: none !important;
+  }
+  /* Reset backgrounds for readability */
+  body {
+    background: #fff;
+    color: #111;
+  }
+  a[href]::after {
+    content: none;
+  }
+  /* Main content full width, no padding from layout */
+  .main-content,
+  [role="main"],
+  .container {
+    max-width: none;
+    padding: 0;
+  }
+  /* Cards and sections: borders and contrast */
+  .card-cultural,
+  .rounded-2xl,
+  [class*="bg-card"],
+  [class*="bg-muted"] {
+    background: #fafafa !important;
+    border: 1px solid #ddd !important;
+    box-shadow: none !important;
+  }
+  /* Avoid breaking inside cards and list items */
+  .rounded-2xl,
+  li,
+  .flex.gap-4 {
+    break-inside: avoid;
+  }
+  /* Guide steps: keep steps together when possible */
+  [data-guide-step] {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  /* Schedule table / timeline */
+  table,
+  .today-schedule-timeline {
+    break-inside: avoid;
+  }
+  /* Progress: ring and stats */
+  .progress-ring,
+  [class*="ProgressRing"] {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
 }

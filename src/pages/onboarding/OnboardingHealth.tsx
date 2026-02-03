@@ -39,6 +39,12 @@ export default function OnboardingHealth() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleContinue();
+        }}
+      >
       <Link
         to="/onboarding/knowledge"
         className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6"
@@ -81,12 +87,12 @@ export default function OnboardingHealth() {
       )}
 
       <button
-        type="button"
-        onClick={handleContinue}
+        type="submit"
         className="w-full min-h-[44px] py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2 cursor-pointer"
       >
         Continue <ArrowRight className="w-5 h-5" />
       </button>
+      </form>
     </motion.div>
   );
 }
