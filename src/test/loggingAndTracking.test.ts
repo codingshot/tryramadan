@@ -6,6 +6,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import {
   defaultProgress,
   calculateStreak,
+  getStreakDays,
   getTotalHoursFasted,
   getTodayFastingLog,
   isFastingToday,
@@ -43,6 +44,37 @@ describe("Fasting progress edge cases", () => {
     expect(calculateStreak(progress)).toBe(2);
   });
 
+  it("calculateStreak does not break on excused day (illness, travel, etc.)", () => {
+    const today = new Date().toISOString().split("T")[0];
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    const yesterday = d.toISOString().split("T")[0];
+    d.setDate(d.getDate() - 1);
+    const twoDaysAgo = d.toISOString().split("T")[0];
+    // Today completed, yesterday broken with excused reason, twoDaysAgo completed → streak = 3
+    const progress: FastingProgress = {
+      ...defaultProgress,
+      completedDays: [today, twoDaysAgo].sort(),
+      fastingLog: [
+        { date: today, startedAt: `${today}T05:00:00Z`, status: "completed", hoursFasted: 14 },
+        { date: yesterday, startedAt: `${yesterday}T05:00:00Z`, completedAt: `${yesterday}T12:00:00Z`, status: "broken", brokenReason: "illness", hoursFasted: 7 },
+        { date: twoDaysAgo, startedAt: `${twoDaysAgo}T05:00:00Z`, status: "completed", hoursFasted: 14 },
+      ],
+    };
+    expect(calculateStreak(progress)).toBe(3);
+  });
+
+  it("calculateStreak with todayOverride uses given date as streak end (e.g. display timezone)", () => {
+    const progress: FastingProgress = {
+      ...defaultProgress,
+      completedDays: ["2025-03-14", "2025-03-15", "2025-03-16"],
+      fastingLog: [],
+    };
+    expect(calculateStreak(progress)).toBe(0);
+    expect(calculateStreak(progress, "2025-03-16")).toBe(3);
+    expect(calculateStreak(progress, "2025-03-15")).toBe(2);
+  });
+
   it("getTotalHoursFasted returns 0 for empty fastingLog", () => {
     const progress: FastingProgress = { ...defaultProgress, fastingLog: [] };
     expect(getTotalHoursFasted(progress)).toBe(0);
@@ -70,6 +102,35 @@ describe("Fasting progress edge cases", () => {
   it("isFastingToday returns false when no today log", () => {
     const progress: FastingProgress = { ...defaultProgress, fastingLog: [] };
     expect(isFastingToday(progress)).toBe(false);
+  });
+});
+
+/**
+ * Regression tests derived from bug reports. Naming: Regression: BUG-<area>-<id>.
+ * See docs/QA-BUG-REPORT-FORMAT-AND-CHECKLIST.md § Bug-derived test naming.
+ */
+describe("Regression: BUG-STRK-001 (streak 0 after Settings / display timezone)", () => {
+  const progressWithRun: FastingProgress = {
+    ...defaultProgress,
+    completedDays: ["2025-03-14", "2025-03-15", "2025-03-16"],
+    fastingLog: [],
+  };
+
+  it("BUG-STRK-001.1: streak uses todayOverride so display-timezone today matches Dashboard", () => {
+    expect(calculateStreak(progressWithRun)).toBe(0);
+    expect(calculateStreak(progressWithRun, "2025-03-16")).toBe(3);
+  });
+
+  it("BUG-STRK-001.2: getStreakDays length equals calculateStreak for same todayOverride", () => {
+    expect(getStreakDays(progressWithRun, "2025-03-16").length).toBe(calculateStreak(progressWithRun, "2025-03-16"));
+    expect(getStreakDays(progressWithRun, "2025-03-15").length).toBe(calculateStreak(progressWithRun, "2025-03-15"));
+  });
+
+  it("BUG-STRK-001.3: getStreakDays with todayOverride returns consecutive dates ending on override day", () => {
+    const days = getStreakDays(progressWithRun, "2025-03-16");
+    expect(days).toEqual(["2025-03-16", "2025-03-15", "2025-03-14"]);
+    const daysEnd15 = getStreakDays(progressWithRun, "2025-03-15");
+    expect(daysEnd15).toEqual(["2025-03-15", "2025-03-14"]);
   });
 });
 

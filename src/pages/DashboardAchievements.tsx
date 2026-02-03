@@ -3,32 +3,20 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Trophy, ChevronRight } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { useFastingProgress, useLocalStorage } from "@/hooks/useLocalStorage";
+import { useFastingProgress, useLocalStorage, calculateStreak, useDisplayTimezone } from "@/hooks/useLocalStorage";
+import { getTodayStringInTimezone } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { PageSEO } from "@/components/PageSEO";
 
 export default function DashboardAchievements() {
   const [progress] = useFastingProgress();
   const [learnRead] = useLocalStorage<string[]>("tryramadan-learn-read", []);
+  const displayTimezone = useDisplayTimezone();
+  const todayStr = displayTimezone ? getTodayStringInTimezone(displayTimezone) : undefined;
   const completedDays = progress.completedDays.length;
   const totalDays = 30;
   const eagerLearnerUnlocked = learnRead.length >= 10;
-
-  const calculateStreak = () => {
-    const today = new Date();
-    const sortedDays = [...progress.completedDays].sort().reverse();
-    let streak = 0;
-    const currentDate = new Date();
-    for (const day of sortedDays) {
-      const dayStr = currentDate.toISOString().split("T")[0];
-      if (day === dayStr) {
-        streak++;
-        currentDate.setDate(currentDate.getDate() - 1);
-      } else break;
-    }
-    return streak;
-  };
-  const currentStreak = calculateStreak();
+  const currentStreak = calculateStreak(progress, todayStr);
 
   const badges = [
     { id: "first-fast", name: "First Fast", desc: "Complete your first fast", icon: "🌙", unlocked: completedDays >= 1 },

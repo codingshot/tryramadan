@@ -10,5 +10,11 @@ Project-scoped skills for improving and maintaining the app. Use when the task m
 | **tryramadan-accessibility** | Adding or changing UI; skip link, focus, aria-live, RTL/Arabic, axe tests. |
 | **data-and-config** | Adding APIs, env, or editing hadiths/glossary/cultural data, guides, config. |
 | **local-storage-and-persistence** | Adding or changing stored state, onboarding completion, persist before navigation, cache keys. |
+| **ramadan-calendar-and-fasting-logic** | Editing Ramadan dates (ramadan.ts), fasting states (completed/skipped/broken), streak, todayOverride, state transitions. |
+| **qa-bug-reports-and-regression-tests** | Writing or rewriting bug reports; converting bugs into regression tests; BUG-&lt;AREA&gt;-&lt;ID&gt; naming. |
+| **onboarding-and-re-onboarding** | Changing onboarding steps, completion logic, redirect to dashboard, draft vs final preferences. |
+| **offline-and-degraded-network** | Adding/changing API usage, caching, or behavior when prayer times/location/timezone APIs fail or are offline. |
+| **performance-cwv** | Changing critical path, images, fonts, or layout; LCP, INP, CLS. |
+| **streaks-stats-gamification** | Changing streak calculation, excused days, badges, showStreakAndAchievements, non-fasting achievements. |
 
-Each skill lives in its own folder with a `SKILL.md` (and optional reference files). Descriptions are in the YAML frontmatter for agent discovery.
+Each skill lives in its own folder with a `SKILL.md` (and optional reference files). Descriptions are in the YAML frontmatter for agent discovery. Docs referenced in skills live in **`docs/`** (e.g. QA-BUG-REPORT-FORMAT-AND-CHECKLIST.md, STATE-TRANSITION-TESTING-FASTING.md, PERFORMANCE.md).

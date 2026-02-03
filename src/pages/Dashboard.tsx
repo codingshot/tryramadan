@@ -295,7 +295,7 @@ const Dashboard = () => {
   const fastingToday = isFastingToday(progress, todayStr);
   const todayLog = getTodayFastingLog(progress, todayStr);
   const recentLog = (progress.fastingLog || []).slice(-7).reverse();
-  const streak = calculateStreak(progress);
+  const streak = calculateStreak(progress, todayStr);
   const totalDays = 30;
   const ramadanCompletionPct = Math.round((progress.completedDays.length / totalDays) * 100);
   const factDay = Math.min(30, Math.max(1, (new Date().getDate() % 30) || 30));
@@ -909,7 +909,7 @@ const Dashboard = () => {
           
           {/* Quick Actions Grid — Streak, Total, Sunnah, Broken (click to see days) */}
           {(() => {
-            const streakDaysList = getStreakDays(progress);
+            const streakDaysList = getStreakDays(progress, todayStr);
             const totalDaysList = [...progress.completedDays].sort().reverse();
             const sunnahDaysList = progress.completedDays.filter((d) => {
               const day = new Date(d + "T12:00:00").getDay();
@@ -954,28 +954,30 @@ const Dashboard = () => {
                 transition={{ delay: 0.2 }}
                 className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8"
               >
-                {/* Streak */}
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      onClick={() => streak > 0 && setStatsDialog("streak")}
-                      className="p-3 sm:p-4 rounded-2xl bg-card border border-border min-h-[100px] sm:min-h-0 flex flex-col items-center justify-center hover:border-secondary/50 transition-colors text-left w-full"
-                    >
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="w-10 h-10 rounded-full bg-gradient-gold flex items-center justify-center">
-                          <Flame className="w-5 h-5 text-foreground" />
+                {/* Streak — hidden when showStreakAndAchievements is off */}
+                {preferences.showStreakAndAchievements !== false && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={() => streak > 0 && setStatsDialog("streak")}
+                        className="p-3 sm:p-4 rounded-2xl bg-card border border-border min-h-[100px] sm:min-h-0 flex flex-col items-center justify-center hover:border-secondary/50 transition-colors text-left w-full"
+                      >
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="w-10 h-10 rounded-full bg-gradient-gold flex items-center justify-center">
+                            <Flame className="w-5 h-5 text-foreground" />
+                          </div>
+                          <span className="text-xl sm:text-2xl font-bold text-secondary">{streak}</span>
+                          <span className="text-xs text-muted-foreground">Day Streak</span>
                         </div>
-                        <span className="text-xl sm:text-2xl font-bold text-secondary">{streak}</span>
-                        <span className="text-xs text-muted-foreground">Day Streak</span>
-                      </div>
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-xs p-3">
-                    <p>Streak = consecutive days you completed the full fast. Skipped or broken days reset it — that&apos;s okay.</p>
-                    <p className="text-xs text-muted-foreground mt-1">{streak > 0 ? "Click to see which days" : "You've completed 0 consecutive days so far."}</p>
-                  </TooltipContent>
-                </Tooltip>
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-xs p-3">
+                      <p>Consecutive days you completed the full fast or had an excused break (e.g. illness, travel). Excused days don&apos;t reset your streak — that&apos;s okay.</p>
+                      <p className="text-xs text-muted-foreground mt-1">{streak > 0 ? "Click to see which days" : "Skipped or non-excused broken days reset the streak."}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
 
                 {/* Total Days */}
                 <Tooltip>
@@ -1397,8 +1399,8 @@ const Dashboard = () => {
               )}
             </div>
 
-          {/* Streak celebration for milestones */}
-          {[7, 15, 30].includes(streak) && (
+          {/* Streak celebration for milestones — hidden when showStreakAndAchievements is off */}
+          {preferences.showStreakAndAchievements !== false && [7, 15, 30].includes(streak) && (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}

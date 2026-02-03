@@ -4,7 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { 
   ArrowLeft, MapPin, Bell, Moon, Sun, Trash2, Download, 
   ChevronRight, Check, Loader2, Monitor, Globe, Sunrise, Sunset,
-  BookOpen, Utensils, BookMarked, Scale, Target, Droplets, Settings2
+  BookOpen, Utensils, BookMarked, Scale, Target, Droplets, Settings2, Trophy
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -31,7 +31,9 @@ import {
   type QuranPriority,
   useIftarLabel,
   useIftarLabelShort,
+  useDisplayTimezone,
 } from "@/hooks/useLocalStorage";
+import { getTodayStringInTimezone } from "@/lib/utils";
 import { useNotifications } from "@/hooks/useNotifications";
 import { PageSEO } from "@/components/PageSEO";
 import {
@@ -51,6 +53,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { LANGUAGE_OPTIONS, COUNTRY_OPTIONS } from "@/data/languages-and-countries";
 import { getDefaultHydrationGoalMl, getHydrationUnit, ML_PER_US_CUP } from "@/lib/hydration";
 import { getRamadanDayNumber, isRamadanDay } from "@/lib/ramadan";
@@ -59,6 +62,8 @@ const Settings = () => {
   const location = useLocation();
   const [preferences, setPreferences] = useUserPreferences();
   const [progress, setProgress] = useFastingProgress();
+  const displayTimezone = useDisplayTimezone();
+  const todayStr = displayTimezone ? getTodayStringInTimezone(displayTimezone) : undefined;
   const [notifSettings, setNotifSettings] = useNotificationSettings();
   const [journalEntries] = useLocalStorage<Array<{ date: string; prompt?: string; content: string; gratitude?: string; mood?: number; createdAt?: string; updatedAt?: string }>>("tryramadan-journal", []);
   const iftarLabel = useIftarLabel();
@@ -798,6 +803,30 @@ const Settings = () => {
             </div>
           </motion.div>
           
+          {/* Progress & achievements */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="p-6 rounded-2xl bg-card border border-border mb-6"
+          >
+            <h2 className="font-display font-bold mb-4 flex items-center gap-2 flex-wrap">
+              <Trophy className="w-5 h-5 text-secondary flex-shrink-0" />
+              Progress & achievements
+            </h2>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="font-medium text-sm">Show streak and achievements</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Show streak counter and achievement badges. Turn off for a simpler view.</p>
+              </div>
+              <Switch
+                checked={preferences.showStreakAndAchievements !== false}
+                onCheckedChange={(checked) => setPreferences({ ...preferences, showStreakAndAchievements: checked })}
+                aria-label="Show streak and achievements"
+              />
+            </div>
+          </motion.div>
+          
           {/* Data Management */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -845,7 +874,7 @@ const Settings = () => {
                   <ul className="space-y-1 text-muted-foreground">
                     <li>Completed days: <span className="font-medium text-foreground">{progress.completedDays?.length ?? 0}</span></li>
                     <li>Current day: <span className="font-medium text-foreground">{isRamadanDay(new Date()) ? getRamadanDayNumber(new Date()) ?? progress.currentDay ?? 1 : progress.currentDay ?? 1}</span> of {progress.totalDays ?? 30}</li>
-                    <li>Current streak: <span className="font-medium text-foreground">{calculateStreak(progress)}</span> days</li>
+                    <li>Current streak: <span className="font-medium text-foreground">{calculateStreak(progress, todayStr)}</span> days</li>
                     <li>Longest streak: <span className="font-medium text-foreground">{getLongestStreak(progress)}</span> days</li>
                     <li>Total hours fasted: <span className="font-medium text-foreground">{getTotalHoursFasted(progress).toFixed(1)}</span>h</li>
                     <li>Sunnah days completed: <span className="font-medium text-foreground">{progress.sunnahDaysCompleted ?? 0}</span></li>

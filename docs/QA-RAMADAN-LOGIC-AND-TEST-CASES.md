@@ -1,6 +1,6 @@
 # QA: Ramadan logic, state model & test cases
 
-QA summary for Ramadan-specific logic: calendar/dates, fasting states, meal & journal behaviour. Includes logic gaps with suggestions and test cases suitable for automation.
+QA summary for Ramadan-specific logic: calendar/dates, fasting states, meal & journal behaviour. Includes logic gaps with suggestions and test cases suitable for automation. For **state-transition testing** of a single day (states, events, valid/invalid transitions, UI block/warn), see **`STATE-TRANSITION-TESTING-FASTING.md`**.
 
 ---
 

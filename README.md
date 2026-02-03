@@ -137,6 +137,7 @@ Ongoing and future work (see also `improvement.md`):
 - **Code quality** – Resolve remaining `react-hooks/exhaustive-deps` warnings where safe; enable `strictNullChecks` in TypeScript for stronger type safety (broader changes).
 - **Content** – Use the **Islamic content authenticity** skill (`.cursor/skills/islamic-content-authenticity/`) when adding or editing Quran verses, hadith, or Arabic: verify verse refs and wording (Quran.com / api.quran.com), hadith source and grading (Sunnah.com), and Arabic/transliteration consistency (glossary, tooltips).
 - **Guides & UX** – Add real screenshots to guide-assets; expand tests for dashboard and critical paths; improve loading/error states where needed.
+- **QA strategy** – See **`docs/QA-TESTING-STRATEGY-AND-LEARNING-PLAN.md`** for testing layers (unit, integration, E2E, exploratory, a11y, performance), coverage model (must-have vs sampled), and a 30‑day learning plan to own quality.
 - **i18n** – No full app translation yet; tooltips and glossary already support Arabic snippets.
 - **Backend** – App is fully client-side (localStorage); optional future: sync progress/settings across devices (account, API).
 - **Accessibility** – axe-core runs in tests; manual screen-reader and keyboard passes on new flows recommended.

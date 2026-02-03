@@ -2,7 +2,7 @@
 
 Design document for QA: edge cases across **fast tracking**, **meals**, **journal**, and **stats**, with inputs, steps, expected outcomes, and failure modes. Tables are suitable for later automation (e.g. test IDs, parameterised runs).
 
-**Related:** **`HISTORICAL-DATA-AND-DELETION-FLOWS.md`** (history, deletion, undo, new device). **`OFFLINE-AND-DEGRADED-NETWORK-FLOWS.md`** (offline, cache, first open no network, API failure/timeout, logging fast without location).
+**Related:** **`HISTORICAL-DATA-AND-DELETION-FLOWS.md`** (history, deletion, undo, new device). **`OFFLINE-AND-DEGRADED-NETWORK-FLOWS.md`** (offline, cache, first open no network, API failure/timeout, logging fast without location). **`STATE-TRANSITION-TESTING-FASTING.md`** (states, events, transition table, invalid transitions, UI block/warn). **`BUG-HUNTER-WEIRD-FLOWS-AND-TEST-CASES.md`** (20 weird flows, data/UI/crash risk, top 10 structured test cases).
 
 ---
 

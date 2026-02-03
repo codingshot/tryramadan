@@ -939,17 +939,19 @@ export function getFastingLogForDate(progress: FastingProgress, dateStr: string)
   return progress.fastingLog?.find((e) => e.date === dateStr);
 }
 
-/** Consecutive days ending today where each day is completed or excused (excused days do not break the streak). */
-export function calculateStreak(progress: FastingProgress): number {
-  return getStreakDays(progress).length;
+/** Consecutive days ending on the given date where each day is completed or excused (excused days do not break the streak). Pass todayOverride when using location-based "today" so streak matches Dashboard. */
+export function calculateStreak(progress: FastingProgress, todayOverride?: string): number {
+  return getStreakDays(progress, todayOverride).length;
 }
 
-/** Dates that form the current streak: most recent consecutive days ending today where each day is completed OR excused (illness, travel, etc.). Excused days do not reset the streak. */
-export function getStreakDays(progress: FastingProgress): string[] {
+/** Dates that form the current streak: most recent consecutive days ending on the given date where each day is completed OR excused. Pass todayOverride so streak uses the same "today" as the rest of the app (e.g. display timezone). */
+export function getStreakDays(progress: FastingProgress, todayOverride?: string): string[] {
   const completedSet = new Set(progress.completedDays || []);
   const excusedSet = new Set(getExcusedFastDays(progress));
   const result: string[] = [];
-  const currentDate = new Date();
+  const endDate = todayOverride ?? toLocalDateString(new Date());
+  const [y, m, d] = endDate.split('-').map(Number);
+  const currentDate = new Date(y, m - 1, d);
   while (true) {
     const dayStr = toLocalDateString(currentDate);
     if (completedSet.has(dayStr) || excusedSet.has(dayStr)) {
