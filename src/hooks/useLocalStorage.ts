@@ -171,6 +171,29 @@ export function useIftarLabelShort(): string {
   return getIftarLabelShort(preferences.userType);
 }
 
+/**
+ * Returns the user-facing label for "Suhoor" based on onboarding: Muslims see "Suhoor";
+ * non-Muslim users see "Suhoor (pre-dawn meal)" for clarity.
+ */
+export function getSuhoorLabel(userType: UserTypeForLabel): string {
+  return userType === 'muslim' ? 'Suhoor' : 'Suhoor (pre-dawn meal)';
+}
+
+/** Short form for tabs/prose (e.g. "Log Suhoor" vs "Log pre-dawn meal (Suhoor)"). */
+export function getSuhoorLabelShort(userType: UserTypeForLabel): string {
+  return userType === 'muslim' ? 'Suhoor' : 'pre-dawn meal (Suhoor)';
+}
+
+export function useSuhoorLabel(): string {
+  const [preferences] = useUserPreferences();
+  return getSuhoorLabel(preferences.userType);
+}
+
+export function useSuhoorLabelShort(): string {
+  const [preferences] = useUserPreferences();
+  return getSuhoorLabelShort(preferences.userType);
+}
+
 /** Predetermined reasons for breaking a fast (stored by id). */
 export const BROKEN_FAST_REASONS = [
   { id: 'mistake', label: 'Ate or drank by mistake' },
@@ -206,6 +229,8 @@ export interface FastingProgress {
   currentDay: number;
   totalDays: number;
   completedDays: string[]; // ISO date strings
+  /** Days user explicitly marked as "I didn't fast" (illness, travel, etc.). */
+  skippedDays?: string[];
   sunnahDaysCompleted: number;
   currentStreak: number;
   longestStreak: number;
@@ -217,6 +242,7 @@ export const defaultProgress: FastingProgress = {
   currentDay: 1,
   totalDays: 30,
   completedDays: [],
+  skippedDays: [],
   sunnahDaysCompleted: 0,
   currentStreak: 0,
   longestStreak: 0,
@@ -226,9 +252,13 @@ export const defaultProgress: FastingProgress = {
 
 export function useFastingProgress() {
   const [stored, setStored] = useLocalStorage<FastingProgress>('tryramadan-progress', defaultProgress);
-  // Migrate old progress objects that don't have fastingLog
-  const progress: FastingProgress =
-    Array.isArray(stored.fastingLog) ? stored : { ...defaultProgress, ...stored, fastingLog: [] };
+  // Migrate old progress: ensure fastingLog and skippedDays exist
+  const progress: FastingProgress = {
+    ...defaultProgress,
+    ...stored,
+    fastingLog: Array.isArray(stored.fastingLog) ? stored.fastingLog : [],
+    skippedDays: Array.isArray(stored.skippedDays) ? stored.skippedDays : [],
+  };
   return [progress, setStored] as const;
 }
 
@@ -387,6 +417,25 @@ export function setDayCompleted(
   } else if (!completed && has) {
     setProgress({ ...progress, completedDays: progress.completedDays.filter((d) => d !== dateStr) });
   }
+}
+
+/** Mark today (or dateStr) as "I didn't fast" (skipped). Removes any in_progress log for that day and adds to skippedDays. */
+export function setDaySkipped(
+  progress: FastingProgress,
+  setProgress: (value: FastingProgress | ((prev: FastingProgress) => FastingProgress)) => void,
+  todayOverride?: string
+): void {
+  const today = todayOverride ?? getTodayDateString();
+  const skippedDays = progress.skippedDays ?? [];
+  if (skippedDays.includes(today)) return;
+  const updatedLog = (progress.fastingLog ?? []).filter((e) => e.date !== today);
+  setProgress({
+    ...progress,
+    fastingLog: updatedLog,
+    completedDays: progress.completedDays.filter((d) => d !== today),
+    skippedDays: [...skippedDays, today].sort(),
+  });
+  console.log(`${LOG_PREFIX} Day skipped (didn't fast). ${today}`);
 }
 
 // Notification settings
@@ -974,6 +1023,19 @@ export function useHadithViewedDates(): [string[], () => void] {
   return [dates, markToday];
 }
 
+const QURAN_VERSE_VIEWED_DATES_KEY = 'tryramadan-quran-verse-viewed-dates';
+const QURAN_VERSE_VIEWED_MAX_DAYS = 60;
+
+export function useQuranVerseViewedDates(): [string[], (date?: string) => void] {
+  const [dates, setDates] = useLocalStorage<string[]>(QURAN_VERSE_VIEWED_DATES_KEY, []);
+  const markToday = useCallback((date?: string) => {
+    const today = date ?? getTodayDateString();
+    if (dates.includes(today)) return;
+    setDates((prev) => [...prev, today].slice(-QURAN_VERSE_VIEWED_MAX_DAYS));
+  }, [dates, setDates]);
+  return [dates, markToday];
+}
+
 /** Build today's daily missions and completion from progress, meal plans, food log, schedule notes, Quran verse and hadith viewed. */
 export function getDailyMissions(params: {
   todayStr: string;
@@ -984,12 +1046,14 @@ export function getDailyMissions(params: {
   quranVerseViewedDates: string[];
   hadithViewedDates: string[];
   iftarLabelShort?: string;
+  suhoorLabelShort?: string;
 }): DailyMission[] {
-  const { todayStr, progress, mealPlans, foodLog, scheduleNotes, quranVerseViewedDates, hadithViewedDates, iftarLabelShort = 'iftar' } = params;
+  const { todayStr, progress, mealPlans, foodLog, scheduleNotes, quranVerseViewedDates, hadithViewedDates, iftarLabelShort = 'iftar', suhoorLabelShort = 'Suhoor' } = params;
   const todayLog = progress.fastingLog?.find((e) => e.date === todayStr);
-  const fastingToday = !!todayLog && todayLog.status !== 'broken' && !progress.completedDays.includes(todayStr);
+  const todaySkipped = (progress.skippedDays ?? []).includes(todayStr);
+  const fastingToday = !!todayLog && todayLog.status !== 'broken' && !progress.completedDays.includes(todayStr) && !todaySkipped;
   const todayComplete = progress.completedDays.includes(todayStr);
-  const fastCompleteOrBroken = todayComplete || (todayLog?.status === 'broken');
+  const fastCompleteOrBroken = todayComplete || (todayLog?.status === 'broken') || todaySkipped;
   const dayMeals = mealPlans[todayStr];
   const dayLog = normalizeDayFoodLog(foodLog[todayStr]);
   const hasSuhoor = !!(dayMeals?.suhoor?.trim()) || (dayLog.suhoor?.length ?? 0) > 0;
@@ -999,9 +1063,9 @@ export function getDailyMissions(params: {
   const readHadith = hadithViewedDates.includes(todayStr);
 
   return [
-    { id: 'start_fasting', label: "Start fasting (tap I'm fasting)", completed: fastingToday || todayComplete, path: undefined },
+    { id: 'start_fasting', label: "Start fasting (tap I'm fasting)", completed: fastingToday || todayComplete || todaySkipped, path: undefined },
     { id: 'complete_fast', label: `Complete or break your fast at ${iftarLabelShort}`, completed: fastCompleteOrBroken, path: undefined },
-    { id: 'log_suhoor', label: 'Log Suhoor (meal plan or food log)', completed: hasSuhoor, path: '/dashboard/schedule' },
+    { id: 'log_suhoor', label: `Log ${suhoorLabelShort} (meal plan or food log)`, completed: hasSuhoor, path: '/dashboard/schedule' },
     { id: 'log_iftar', label: `Log ${iftarLabelShort} (meal plan or food log)`, completed: hasIftar, path: '/dashboard/schedule' },
     { id: 'add_note', label: 'Add a note for today', completed: hasNote, path: '/dashboard/schedule' },
     { id: 'read_quran_verse', label: 'Read one verse (Quran)', completed: readQuranVerse, path: '/dashboard/quran' },
@@ -1018,6 +1082,7 @@ export function useDailyMissions(): { missions: DailyMission[]; completedCount: 
   const [quranVerseViewedDates] = useQuranVerseViewedDates();
   const [hadithViewedDates] = useHadithViewedDates();
   const iftarLabelShort = useIftarLabelShort();
+  const suhoorLabelShort = useSuhoorLabelShort();
   const todayStr = getTodayDateString();
   const missions = getDailyMissions({
     todayStr,
@@ -1028,6 +1093,7 @@ export function useDailyMissions(): { missions: DailyMission[]; completedCount: 
     quranVerseViewedDates,
     hadithViewedDates,
     iftarLabelShort,
+    suhoorLabelShort,
   });
   const completedCount = missions.filter((m) => m.completed).length;
   const totalCount = missions.length;

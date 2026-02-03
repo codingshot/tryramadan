@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Clock, Check, Star } from "lucide-react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 /** Only Ramadan-based option; other fasting plans hidden for now. */
 const PROGRAMS = [
@@ -79,10 +80,19 @@ export default function OnboardingSchedule() {
         ))}
       </div>
 
-      <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
-        <Star className="w-4 h-4 text-primary" />
-        Add voluntary Sunnah fasting (optional)
-      </h3>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <h3 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2 cursor-help border-b border-dotted border-transparent hover:border-muted-foreground/40 w-fit">
+            <Star className="w-4 h-4 text-primary" />
+            Add voluntary Sunnah fasting (optional)
+          </h3>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" className="max-w-xs">
+          {state.mode === "new"
+            ? "Extra voluntary fasts (e.g. Monday & Thursday) that many Muslims do in addition to Ramadan."
+            : "These can be combined with Full Ramadan. Tap to add or remove."}
+        </TooltipContent>
+      </Tooltip>
       <p className="text-xs text-muted-foreground mb-3">
         These can be combined with Full Ramadan. Tap to add or remove.
       </p>

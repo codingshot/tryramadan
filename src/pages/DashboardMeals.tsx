@@ -9,7 +9,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import recipesData from "@/data/recipes.json";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useRecipeFavorites, useRecentRecipes, useDayMealPlans, useDayFoodLog, clampCalories } from "@/hooks/useLocalStorage";
+import { useRecipeFavorites, useRecentRecipes, useDayMealPlans, useDayFoodLog, clampCalories, useSuhoorLabel, useIftarLabel, useUserPreferences } from "@/hooks/useLocalStorage";
 import { parseNutrient } from "@/lib/cultureRecipes";
 import { toast } from "sonner";
 import {
@@ -46,6 +46,9 @@ const allRegions = [...new Set([...allSuhoor.map(r => r.region), ...allIftar.map
 const dietaryOptions = ["vegetarian", "vegan-option", "halal"] as const;
 
 const DashboardMeals = () => {
+  const [preferences] = useUserPreferences();
+  const suhoorLabel = useSuhoorLabel();
+  const iftarLabel = useIftarLabel();
   const [activeTab, setActiveTab] = useState<MealType>("suhoor");
   const [selectedRecipes, setSelectedRecipes] = useState<number[]>([]);
   const [favorites, setFavorites] = useRecipeFavorites();
@@ -226,7 +229,7 @@ const DashboardMeals = () => {
       />
       <Navbar />
       
-      <main className="main-content">
+      <main id="main-content" className="main-content">
         <div className="container mx-auto px-4 max-w-4xl min-w-0">
           <Link 
             to="/dashboard" 
@@ -245,7 +248,7 @@ const DashboardMeals = () => {
               Meal Planning
             </h1>
             <p className="text-muted-foreground mt-2">
-              Suhoor (pre-dawn) and Iftar (evening break-fast) recipes from around the world. Pick recipes to add to today’s schedule; open any for full ingredients and step-by-step instructions.
+              {suhoorLabel} and {iftarLabel} recipes from around the world. Pick recipes to add to today’s schedule; open any for full ingredients and step-by-step instructions.
             </p>
             <p className="mt-2 text-sm">
               <Link to="/recipes" className="text-secondary hover:underline font-medium">
@@ -268,11 +271,11 @@ const DashboardMeals = () => {
                   ? 'border-secondary bg-secondary/10' 
                   : 'border-border hover:border-secondary/50'
               }`}
-              aria-label="Suhoor — morning meal"
+              aria-label={preferences?.userType === "muslim" ? "Suhoor — morning meal" : "Suhoor — pre-dawn meal"}
             >
               <Sunrise className="w-5 h-5 shrink-0" aria-hidden />
               <div className="text-left">
-                <span className="font-bold block">Suhoor</span>
+                <span className="font-bold block">{suhoorLabel}</span>
                 <span className="text-xs text-muted-foreground">Morning</span>
               </div>
             </button>
@@ -283,11 +286,11 @@ const DashboardMeals = () => {
                   ? 'border-secondary bg-secondary/10' 
                   : 'border-border hover:border-secondary/50'
               }`}
-              aria-label="Iftar — evening meal"
+              aria-label={`${iftarLabel} — evening meal`}
             >
               <Sunset className="w-5 h-5 shrink-0" aria-hidden />
               <div className="text-left">
-                <span className="font-bold block">Iftar</span>
+                <span className="font-bold block">{iftarLabel}</span>
                 <span className="text-xs text-muted-foreground">Evening</span>
               </div>
             </button>

@@ -2,21 +2,27 @@ import { motion } from "framer-motion";
 import { memo } from "react";
 import { Link } from "react-router-dom";
 import { Target, Check, Circle, ChevronRight } from "lucide-react";
-import { useDailyMissions, type DailyMission } from "@/hooks/useLocalStorage";
+import { useDailyMissions, useUserPreferences, type DailyMission } from "@/hooks/useLocalStorage";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
 
-const MISSION_TOOLTIPS: Record<string, string> = {
-  start_fasting: "Tap \"I'm fasting\" on the dashboard after suhoor to mark that you've started today's fast.",
-  complete_fast: "When you break your fast at Maghrib (or earlier), use the dashboard to log it. Mark the day complete if you fasted dawn to sunset.",
-  log_suhoor: "On the Schedule page, add a meal plan note or food log entry for your pre-dawn meal (suhoor).",
-  log_iftar: "On the Schedule page, add a meal plan note or food log entry for your break-fast meal (iftar).",
-  add_note: "On the Schedule page, click a day and add a note in the Note field—e.g. how you felt or what you ate.",
-  read_hadith: "Open the Hadith page (Learn → Hadith) and read a short saying of the Prophet (peace be upon him) about fasting or Ramadan.",
-};
+function getMissionTooltip(missionId: string, userType?: string): string | undefined {
+  const tips: Record<string, string> = {
+    start_fasting:
+      userType === "muslim"
+        ? "Tap \"I'm fasting\" on the dashboard after suhoor to mark that you've started today's fast."
+        : "Tap \"I'm fasting\" on the dashboard after your pre-dawn meal (suhoor) to mark that you've started today's fast.",
+    complete_fast: "When you break your fast at Maghrib (or earlier), use the dashboard to log it. Mark the day complete if you fasted dawn to sunset.",
+    log_suhoor: "On the Schedule page, add a meal plan note or food log entry for your pre-dawn meal (suhoor).",
+    log_iftar: "On the Schedule page, add a meal plan note or food log entry for your break-fast meal (iftar).",
+    add_note: "On the Schedule page, click a day and add a note in the Note field—e.g. how you felt or what you ate.",
+    read_hadith: "Open the Hadith page (Learn → Hadith) and read a short saying of the Prophet (peace be upon him) about fasting or Ramadan.",
+  };
+  return tips[missionId];
+}
 
-const MissionRow = memo(function MissionRow({ mission }: { mission: DailyMission }) {
-  const tip = MISSION_TOOLTIPS[mission.id];
+const MissionRow = memo(function MissionRow({ mission, userType }: { mission: DailyMission; userType?: string }) {
+  const tip = getMissionTooltip(mission.id, userType);
   const content = (
     <span className="flex items-center gap-2 text-sm">
       {mission.completed ? (
@@ -65,6 +71,7 @@ const MissionRow = memo(function MissionRow({ mission }: { mission: DailyMission
 });
 
 export const DailyMissionsCard = memo(function DailyMissionsCard() {
+  const [preferences] = useUserPreferences();
   const { missions, completedCount, totalCount } = useDailyMissions();
 
   return (
@@ -105,7 +112,7 @@ export const DailyMissionsCard = memo(function DailyMissionsCard() {
       <ul className="space-y-0.5">
         {missions.map((m) => (
           <li key={m.id}>
-            <MissionRow mission={m} />
+            <MissionRow mission={m} userType={preferences?.userType} />
           </li>
         ))}
       </ul>

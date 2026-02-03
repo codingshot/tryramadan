@@ -2,9 +2,11 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { FastingTimer } from "./FastingTimer";
-import heroBg from "@/assets/hero-bg.jpg";
 import logo from "@/assets/logo.png";
-import { getDaysUntilRamadan, isCurrentlyRamadan, getRamadanDayNumber } from "@/lib/ramadan";
+
+// Hero image served from public/ so index.html can preload it for LCP (see docs/PERFORMANCE.md)
+const HERO_BG_URL = "/hero-bg.jpg";
+import { getDaysUntilRamadan, isCurrentlyRamadan, getRamadanDayNumber, isLastDayOfRamadan } from "@/lib/ramadan";
 
 export const HeroSection = () => {
   const daysUntil = getDaysUntilRamadan();
@@ -15,7 +17,7 @@ export const HeroSection = () => {
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Background image: <img> with dimensions + fetchpriority for LCP; avoids CLS from unknown-size bg */}
         <img
-          src={heroBg}
+          src={HERO_BG_URL}
           alt=""
           width={1920}
           height={1080}
@@ -51,22 +53,33 @@ export const HeroSection = () => {
               animate={{ opacity: 1, y: 0 }}
               className="flex flex-col items-center mb-6"
             >
-              <motion.img
-                src={logo}
-                alt="TryRamadan"
-                width={112}
-                height={112}
-                decoding="async"
-                className="w-20 h-20 md:w-28 md:h-28 mb-4 drop-shadow-2xl"
+              <motion.picture
+                className="block mb-4"
                 animate={{ scale: [1, 1.03, 1] }}
                 transition={{ duration: 4, repeat: Infinity }}
-              />
+              >
+                <source srcSet="/logo.webp" type="image/webp" />
+                <img
+                  src={logo}
+                  alt="TryRamadan"
+                  width={112}
+                  height={112}
+                  decoding="async"
+                  fetchPriority="low"
+                  className="w-20 h-20 md:w-28 md:h-28 drop-shadow-2xl"
+                />
+              </motion.picture>
               <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/20 text-secondary text-sm font-medium backdrop-blur-sm">
                 <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
                 {inRamadan && ramadanDay
-                  ? `Day ${ramadanDay} of Ramadan`
+                  ? isLastDayOfRamadan(new Date())
+                    ? "Last day of Ramadan"
+                    : `Day ${ramadanDay} of Ramadan`
                   : `${daysUntil} day${daysUntil === 1 ? "" : "s"} until Ramadan`}
               </span>
+              <p className="text-xs text-primary-foreground/70 mt-2 text-center">
+                New? Start your journey below
+              </p>
             </motion.div>
 
             {/* Main headline - responsive for mobile */}
@@ -127,12 +140,12 @@ export const HeroSection = () => {
               </Link>
             </motion.div>
 
-            {/* Timer preview */}
+            {/* Timer preview — min-height reserves space to avoid CLS while timer loads */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.4 }}
-              className="max-w-xl mx-auto"
+              className="max-w-xl mx-auto min-h-[300px]"
             >
               <FastingTimer />
             </motion.div>

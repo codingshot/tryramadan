@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "guides:screenshots": "node scripts/capture-guide-screenshots.mjs",
+    "generate:webp": "node scripts/generate-webp.mjs",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",

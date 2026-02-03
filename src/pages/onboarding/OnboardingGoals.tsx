@@ -129,6 +129,9 @@ export default function OnboardingGoals() {
         className="w-full p-4 rounded-xl border border-border bg-background min-h-[80px] text-sm resize-none focus:ring-2 focus:ring-secondary focus:border-secondary outline-none"
       />
 
+      <p className="mt-4 mb-2 text-sm text-muted-foreground">
+        You&apos;re all set. When Ramadan begins, you&apos;ll see your dashboard with a countdown, daily tasks, and fasting timer.
+      </p>
       <button
         type="submit"
         className="w-full mt-6 min-h-[44px] py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2 cursor-pointer"

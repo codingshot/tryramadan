@@ -61,7 +61,7 @@ const Index = () => {
         path="/"
       />
       <Navbar />
-      
+      <main id="main-content">
       {/* Hero Section */}
       <HeroSection />
 
@@ -299,6 +299,7 @@ const Index = () => {
 
       {/* CTA Section */}
       <CTASection />
+      </main>
 
       {/* Footer */}
       <Footer />

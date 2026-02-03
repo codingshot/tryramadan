@@ -149,8 +149,16 @@ export function useAutoLocation() {
     return null;
   }, []);
 
+  // Defer location detection until after first paint to improve INP (avoids blocking main thread on load)
   useEffect(() => {
-    detectLocation();
+    const id =
+      typeof requestIdleCallback !== 'undefined'
+        ? requestIdleCallback(() => detectLocation(), { timeout: 500 })
+        : setTimeout(detectLocation, 0);
+    return () => {
+      if (typeof cancelIdleCallback !== 'undefined') cancelIdleCallback(id as number);
+      else clearTimeout(id as number);
+    };
   }, [detectLocation]);
 
   return { ...state, detectLocation };

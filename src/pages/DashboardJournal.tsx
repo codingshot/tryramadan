@@ -11,9 +11,10 @@ import {
   Calendar as CalendarIcon,
   Smile,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useLocalStorage, useUserPreferences } from "@/hooks/useLocalStorage";
 import { Calendar } from "@/components/ui/calendar";
 import { PageSEO } from "@/components/PageSEO";
 
@@ -23,11 +24,25 @@ export interface JournalEntry {
   content: string;
   gratitude?: string;
   mood?: number; // 1-5
+  /** Set on first save (QA doc: timeline / last edited) */
+  createdAt?: string;
+  /** Set on every save */
+  updatedAt?: string;
 }
 
-const PROMPTS = [
+const PROMPTS_MUSLIM = [
   "What did you learn about yourself today while fasting?",
   "How did you feel at suhoor vs iftar?",
+  "One thing you're grateful for today.",
+  "A small act of kindness you gave or received.",
+  "What would you tell someone new to fasting?",
+  "How did today's fast change your perspective?",
+  "What intention will you carry into tomorrow?",
+];
+
+const PROMPTS_NON_MUSLIM = [
+  "What did you learn about yourself today while fasting?",
+  "How did you feel in the morning (before the fast) vs when you broke your fast?",
   "One thing you're grateful for today.",
   "A small act of kindness you gave or received.",
   "What would you tell someone new to fasting?",
@@ -38,12 +53,14 @@ const PROMPTS = [
 const MOOD_LABELS = ["Low", "Okay", "Good", "Great", "Amazing"];
 const MOOD_EMOJI = ["😢", "😐", "🙂", "😊", "😄"];
 
-function getPromptForDate(isoDate: string): string {
+function getPromptForDate(isoDate: string, userType?: string): string {
   const day = parseInt(isoDate.slice(8, 10), 10) || 1;
-  return PROMPTS[(day - 1) % PROMPTS.length];
+  const prompts = userType === "muslim" ? PROMPTS_MUSLIM : PROMPTS_NON_MUSLIM;
+  return prompts[(day - 1) % prompts.length];
 }
 
 export default function DashboardJournal() {
+  const [preferences] = useUserPreferences();
   const [entries, setEntries] = useLocalStorage<JournalEntry[]>("tryramadan-journal", []);
   const today = new Date().toISOString().split("T")[0];
 
@@ -53,7 +70,7 @@ export default function DashboardJournal() {
   const [mood, setMood] = useState<number | undefined>(undefined);
 
   const existingForWriteDate = entries.find((e) => e.date === writeDate);
-  const prompt = getPromptForDate(writeDate);
+  const prompt = getPromptForDate(writeDate, preferences.userType);
   const hasTodayEntry = entries.some((e) => e.date === today);
   const isFutureDate = writeDate > today;
   const showWriteTodayPrompt = isFutureDate && !hasTodayEntry;
@@ -66,18 +83,26 @@ export default function DashboardJournal() {
   }, [writeDate, entries]);
 
   const handleSave = () => {
-    if (!content.trim()) return;
+    if (!content.trim()) {
+      toast.error("Write something before saving. A few words are enough.");
+      return;
+    }
+    const now = new Date().toISOString();
+    const existing = entries.find((e) => e.date === writeDate);
     const newEntry: JournalEntry = {
       date: writeDate,
       prompt,
       content: content.trim(),
       gratitude: gratitude.trim() || undefined,
       mood,
+      createdAt: existing?.createdAt ?? now,
+      updatedAt: now,
     };
     setEntries((prev) => {
       const rest = prev.filter((e) => e.date !== writeDate);
       return [...rest, newEntry].sort((a, b) => b.date.localeCompare(a.date));
     });
+    toast.success("Entry saved");
   };
 
   const handleSelectDate = (date: Date | undefined) => {
@@ -93,7 +118,7 @@ export default function DashboardJournal() {
     if (content.trim() && hasDirtyContent) {
       const newEntry: JournalEntry = {
         date: writeDate,
-        prompt: getPromptForDate(writeDate),
+        prompt: getPromptForDate(writeDate, preferences.userType),
         content: content.trim(),
         gratitude: gratitude.trim() || undefined,
         mood,
@@ -167,7 +192,7 @@ export default function DashboardJournal() {
         path="/dashboard/journal"
       />
       <Navbar />
-      <main className="main-content">
+      <main id="main-content" className="main-content">
         <div className="container mx-auto px-4 max-w-2xl min-w-0">
           <Link
             to="/dashboard"

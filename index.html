@@ -37,6 +37,8 @@
     <meta name="theme-color" content="#0d2818" />
     <meta name="msapplication-TileColor" content="#0d2818" />
 
+    <!-- LCP: preload hero image so browser discovers it early (see docs/PERFORMANCE.md) -->
+    <link rel="preload" href="/hero-bg.jpg" as="image" />
     <!-- Fonts: preconnect + async load to avoid blocking LCP (display=swap in URL) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

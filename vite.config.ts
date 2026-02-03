@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["favicon.png", "favicon.ico", "og-image.jpg"],
+      includeAssets: ["favicon.png", "favicon.ico", "og-image.jpg", "hero-bg.jpg"],
       manifest: {
         name: "TryRamadan.app",
         short_name: "TryRamadan",
@@ -91,6 +91,33 @@ export default defineConfig(({ mode }) => ({
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
               },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/nominatim\.openstreetmap\.org\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "nominatim-cache",
+              expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 }, // 24h
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/ipapi\.co\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "ipapi-cache",
+              expiration: { maxEntries: 5, maxAgeSeconds: 60 * 60 * 24 }, // 24h
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/timeapi\.io\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "timeapi-cache",
+              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 7 }, // 7 days
+              cacheableResponse: { statuses: [0, 200] },
             },
           },
         ],

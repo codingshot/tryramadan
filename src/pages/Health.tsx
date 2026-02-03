@@ -19,6 +19,7 @@ import {
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { PageSEO } from "@/components/PageSEO";
+import { useUserPreferences } from "@/hooks/useLocalStorage";
 import ramadanInfo from "@/data/ramadan-info.json";
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -59,6 +60,7 @@ const HEALTH_TITLE = "Ramadan Fasting Health Guide | Benefits, Safety & When to 
 const HEALTH_DESCRIPTION = "Ramadan fasting health guide: evidence-based benefits (metabolic, cardiovascular, brain), who should not fast, hydration and nutrition tips, when to break a fast, and safe fasting guidelines. Educational resource for Muslims and non-Muslims.";
 
 export default function Health() {
+  const [preferences] = useUserPreferences();
   return (
     <div className="min-h-screen bg-background">
       <PageSEO
@@ -85,7 +87,7 @@ export default function Health() {
       />
       <Navbar />
 
-      <main className="main-content" role="main">
+      <main id="main-content" className="main-content">
         <div className="container mx-auto px-4 max-w-4xl min-w-0">
           <Link
             to="/"
@@ -224,7 +226,9 @@ export default function Health() {
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
-                  Break fast with dates and water (following the Sunnah), then a light meal.
+                  {preferences?.userType === "non-muslim"
+                    ? "Traditionally, Muslims break fast with dates and water (Sunnah), then a light meal."
+                    : "Break fast with dates and water (following the Sunnah), then a light meal."}
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />

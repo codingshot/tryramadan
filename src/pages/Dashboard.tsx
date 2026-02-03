@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import { 
@@ -28,6 +28,7 @@ import {
   getBrokenReasonLabel,
   isFastingToday,
   setDayCompleted,
+  setDaySkipped,
   useDayMealPlans,
   useDayNutrition,
   useDailyGoals,
@@ -38,6 +39,7 @@ import {
   useLocalStorage,
   useIftarLabel,
   useIftarLabelShort,
+  useSuhoorLabelShort,
   calculateStreak,
   getStreakDays,
   getBrokenFastDays,
@@ -50,7 +52,7 @@ import {
 import { toLocalDateString, getTodayStringInTimezone, getNowSecondsSinceMidnightInTimezone, timeStringToSecondsSinceMidnight, secondsUntilTimeInTimezone } from "@/lib/utils";
 import { BreakFastReasonDialog } from "@/components/BreakFastReasonDialog";
 import { usePrayerTimes, usePrayerTimesForDate, getSunnahFastingInfo, checkAyyamAlBeed } from "@/hooks/usePrayerTimes";
-import { getDaysUntilRamadan, isCurrentlyRamadan, getRamadanDayNumber, getCurrentRamadanStart } from "@/lib/ramadan";
+import { getDaysUntilRamadan, isCurrentlyRamadan, getRamadanDayNumber, getCurrentRamadanStart, isLastDayOfRamadan } from "@/lib/ramadan";
 import { useAutoLocation } from "@/hooks/useLocation";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -82,7 +84,10 @@ const Dashboard = () => {
   const [addFoodInputs, setAddFoodInputs] = useState({ name: "", cal: "", portions: "1" });
   const [notifSettings] = useNotificationSettings();
   const [prayerPrefs] = usePrayerNotificationPrefs();
-  
+  const [locationBannerDismissed, setLocationBannerDismissed] = useState(() =>
+    typeof window !== "undefined" && window.localStorage.getItem("tryramadan-dismissed-location-banner") === "1"
+  );
+
   // Auto-detect location if not set
   const { location: autoLocation, loading: locationLoading } = useAutoLocation();
   
@@ -125,6 +130,7 @@ const Dashboard = () => {
   const [journalEntries] = useLocalStorage<{ date: string; prompt?: string; content: string; gratitude?: string }[]>("tryramadan-journal", []);
   const iftarLabel = useIftarLabel();
   const iftarLabelShort = useIftarLabelShort();
+  const suhoorLabelShort = useSuhoorLabelShort();
   
   const sunnahInfo = getSunnahFastingInfo();
   
@@ -238,7 +244,7 @@ const Dashboard = () => {
   }, [tickFastingAndCountdown]);
 
   useEffect(() => {
-    const t = setInterval(tickFastingAndCountdown, 1000);
+    const t = setInterval(tickFastingAndCountdown, 2000); // Throttle for INP (was 1s)
     return () => clearInterval(t);
   }, [tickFastingAndCountdown]);
   
@@ -280,6 +286,7 @@ const Dashboard = () => {
   };
 
   const todayComplete = progress.completedDays.includes(todayStr);
+  const todaySkipped = (progress.skippedDays ?? []).includes(todayStr);
   const fastingToday = isFastingToday(progress, todayStr);
   const todayLog = getTodayFastingLog(progress, todayStr);
   const recentLog = (progress.fastingLog || []).slice(-7).reverse();
@@ -316,7 +323,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <PageSEO
         title="Dashboard | TryRamadan.app"
-        description={`Your Ramadan fasting dashboard: timer, prayer times, daily goals, and progress. Track suhoor and ${iftarLabelShort}, log fasting days, and stay on track.`}
+        description={`Your Ramadan fasting dashboard: timer, prayer times, daily goals, and progress. Track ${suhoorLabelShort} and ${iftarLabelShort}, log fasting days, and stay on track.`}
         path="/dashboard"
       />
       <Navbar />
@@ -404,6 +411,36 @@ const Dashboard = () => {
             {/* PWA install prompt (when installable and not dismissed) */}
             <PWAInstallBanner />
 
+            {/* Dismissible location reminder when user hasn't saved location (UX-FLOWS 4.6) */}
+            {preferences.onboardingComplete && !preferences.locationCoords && !locationBannerDismissed && (
+              <div className="mt-2 flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-muted/60 border border-border">
+                <p className="text-sm text-muted-foreground">
+                  Set your location in Settings for accurate prayer and fasting times.
+                </p>
+                <div className="flex items-center gap-1 shrink-0">
+                  <Link
+                    to="/settings"
+                    className="text-sm font-medium text-primary hover:underline"
+                  >
+                    Settings
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      try {
+                        window.localStorage.setItem("tryramadan-dismissed-location-banner", "1");
+                      } catch {}
+                      setLocationBannerDismissed(true);
+                    }}
+                    className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground"
+                    aria-label="Dismiss"
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Compact Ramadan / Sunnah badge at top */}
             {(() => {
               const daysUntil = getDaysUntilRamadan();
@@ -433,11 +470,12 @@ const Dashboard = () => {
                 );
               }
               if (inRamadan && ramadanDay) {
+                const lastDay = isLastDayOfRamadan(new Date());
                 return (
                   <div className="mt-2 flex items-center gap-2">
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/15 border border-primary/30 text-xs font-medium">
                       <Moon className="w-3.5 h-3.5" aria-hidden />
-                      Day {ramadanDay} of Ramadan
+                      {lastDay ? "Last day of Ramadan" : `Day ${ramadanDay} of Ramadan`}
                     </span>
                   </div>
                 );
@@ -564,11 +602,18 @@ const Dashboard = () => {
                         {isFasting ? GENERAL_TOOLTIPS.fastingPeriod.title : "Not fasting"}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {isFasting ? GENERAL_TOOLTIPS.fastingPeriod.body : "You're in the eating window—between sunset (Maghrib) and the next dawn (Fajr). You can eat and drink. The timer below shows time until Suhoor end (cut-off)."}
+                        {isFasting ? GENERAL_TOOLTIPS.fastingPeriod.body : preferences.userType === "non-muslim"
+                                ? `You're in the eating window—between sunset (Maghrib) and the next dawn (Fajr). You can eat and drink. The timer shows time until suhoor end (suhoor = last meal before dawn; after that, fasting starts).`
+                                : `You're in the eating window—between sunset (Maghrib) and the next dawn (Fajr). You can eat and drink. The timer below shows time until ${suhoorLabelShort} end (cut-off).`}
                       </p>
                     </TooltipContent>
                   </Tooltip>
-                  {isSelectedToday && (
+                  {isSelectedToday && todaySkipped && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted/80 text-muted-foreground border border-border">
+                      Skipped
+                    </span>
+                  )}
+                  {isSelectedToday && !todaySkipped && (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <button
@@ -599,7 +644,7 @@ const Dashboard = () => {
                   </div>
                 ) : (
                   <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <span className="text-sm text-muted-foreground">Next: Suhoor —</span>
+                    <span className="text-sm text-muted-foreground">Next: {suhoorLabelShort} —</span>
                     <span className="text-lg font-bold tabular-nums" aria-live="polite">
                       {String(countdownToSuhoor.h).padStart(2, "0")}:{String(countdownToSuhoor.m).padStart(2, "0")}:{String(countdownToSuhoor.s).padStart(2, "0")}
                     </span>
@@ -609,7 +654,13 @@ const Dashboard = () => {
             </div>
           </motion.div>
 
-          {/* Suhoor/Iftar strip — always visible; I'm fasting / Break fast under it; then collapsible schedule */}
+          {/* Suhoor/Iftar strip — reserve min-height when loading to avoid CLS */}
+          {!prayerTimes && (timesLoading || locationLoading) && (
+            <div className="mb-4 space-y-3 min-h-[140px]" aria-hidden>
+              <div className="p-3 sm:p-4 rounded-2xl bg-card border border-border min-h-[72px] animate-pulse bg-muted/30" />
+              <div className="flex gap-2 h-10 w-48 rounded-xl bg-muted/30 animate-pulse" />
+            </div>
+          )}
           {prayerTimes && (() => {
             const majorPrayers: { name: string; time: string }[] = [
               { name: "Fajr", time: prayerTimes.fajr },
@@ -642,13 +693,22 @@ const Dashboard = () => {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div className="cursor-help">
-                        <span className="text-xs text-muted-foreground block">Suhoor end<span className="sm:hidden"> (Fajr)</span></span>
+                        <span className="text-xs text-muted-foreground block">{suhoorLabelShort} end<span className="sm:hidden"> (Fajr)</span></span>
                         <span className="font-bold text-secondary">{prayerTimes.fajr}</span>
                       </div>
                     </TooltipTrigger>
                     <TooltipContent className="max-w-xs p-3">
-                      <p className="text-sm text-foreground">{EATING_TIME_TOOLTIPS.suhoorEnds.body}</p>
-                      <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{(EATING_TIME_TOOLTIPS.suhoorEnds as { bodyAr?: string }).bodyAr}</span></p>
+                      {preferences.userType === "non-muslim" ? (
+                        <>
+                          <p className="text-sm text-foreground">Suhoor = last meal before dawn (after this time, fasting starts).</p>
+                          <p className="text-xs text-muted-foreground mt-1">This is Fajr (dawn) prayer time—the cutoff for eating and drinking.</p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-sm text-foreground">{EATING_TIME_TOOLTIPS.suhoorEnds.body}</p>
+                          <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{(EATING_TIME_TOOLTIPS.suhoorEnds as { bodyAr?: string }).bodyAr}</span></p>
+                        </>
+                      )}
                     </TooltipContent>
                   </Tooltip>
                   <Tooltip>
@@ -689,23 +749,49 @@ const Dashboard = () => {
                   </Tooltip>
                 </Link>
                 <div className="flex flex-wrap items-center gap-2">
-                  {!fastingToday && !todayComplete && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          type="button"
-                          onClick={() => startFastingToday(progress, setProgress, todayStr)}
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90"
-                        >
-                          <Sunrise className="w-4 h-4 shrink-0" aria-hidden />
-                          I&apos;m fasting
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom" className="max-w-xs p-3">
-                        <p className="font-semibold text-sm">I&apos;m fasting (after suhoor)</p>
-                        <p className="text-xs text-muted-foreground mt-1">Tap when you&apos;ve finished suhoor and started your fast.</p>
-                      </TooltipContent>
-                    </Tooltip>
+                  {todaySkipped && (
+                    <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-muted text-muted-foreground border border-border">
+                      I didn&apos;t fast today
+                    </span>
+                  )}
+                  {!todaySkipped && !fastingToday && !todayComplete && (
+                    <>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            onClick={() => startFastingToday(progress, setProgress, todayStr)}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90"
+                          >
+                            <Sunrise className="w-4 h-4 shrink-0" aria-hidden />
+                            I&apos;m fasting
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="max-w-xs p-3">
+                          <p className="font-semibold text-sm">I&apos;m fasting (after {suhoorLabelShort})</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {preferences.userType === "non-muslim"
+                              ? "Tap after your pre-dawn meal (suhoor) when the fast has started."
+                              : "Tap when you've finished your pre-dawn meal and started your fast."}
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            onClick={() => setDaySkipped(progress, setProgress, todayStr)}
+                            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border border-border hover:bg-muted/50"
+                          >
+                            I didn&apos;t fast today
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="max-w-xs p-3">
+                          <p className="font-semibold text-sm">I didn&apos;t fast today</p>
+                          <p className="text-xs text-muted-foreground mt-1">Mark that you didn&apos;t fast (e.g. travel, illness). Won&apos;t count as a broken fast.</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </>
                   )}
                   {fastingToday && (
                     <Tooltip>
@@ -808,6 +894,7 @@ const Dashboard = () => {
               open={showBreakFastDialog}
               onOpenChange={setShowBreakFastDialog}
               onSelectReason={(reasonId) => breakFastingToday(progress, setProgress, reasonId, todayStr)}
+              userType={preferences.userType}
             />
             <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
               <DailyMissionsCard />
@@ -878,7 +965,8 @@ const Dashboard = () => {
                     </button>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs p-3">
-                    <p>{streak > 0 ? "Click to see which days" : "You've completed 0 consecutive days so far."}</p>
+                    <p>Streak = consecutive days you completed the full fast. Skipped or broken days reset it — that&apos;s okay.</p>
+                    <p className="text-xs text-muted-foreground mt-1">{streak > 0 ? "Click to see which days" : "You've completed 0 consecutive days so far."}</p>
                   </TooltipContent>
                 </Tooltip>
 
@@ -948,6 +1036,9 @@ const Dashboard = () => {
                   </TooltipContent>
                 </Tooltip>
               </motion.div>
+              <p className="text-xs text-muted-foreground text-center mb-4 -mt-2">
+                Completed: {progress.completedDays.length} · Broken: {brokenDaysList.length} · Skipped: {(progress.skippedDays ?? []).length}
+              </p>
                 <DaysListDialog title="Day streak — days fasted" dates={streakDaysList} open={statsDialog === "streak"} onOpenChange={(v) => !v && setStatsDialog(null)} />
                 <DaysListDialog title="Total days fasted" dates={totalDaysList} open={statsDialog === "total"} onOpenChange={(v) => !v && setStatsDialog(null)} />
                 <DaysListDialog title="Sunnah days fasted" dates={sunnahDaysList} open={statsDialog === "sunnah"} onOpenChange={(v) => !v && setStatsDialog(null)} />
@@ -972,7 +1063,7 @@ const Dashboard = () => {
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs">
                   <p className="font-medium">Log what you ate and optional daily totals</p>
-                  <p className="text-xs mt-1">Use + to add items for Suhoor and {iftarLabel}. View all items and totals on the Schedule page. Optionally enter calories and macros below.</p>
+                  <p className="text-xs mt-1">Use + to add items for {suhoorLabelShort} and {iftarLabel}. View all items and totals on the Schedule page. Optionally enter calories and macros below.</p>
                   <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">وجبات السحور والإفطار • السحور والإفطار</p>
                 </TooltipContent>
               </Tooltip>
@@ -989,7 +1080,7 @@ const Dashboard = () => {
               {selectedDayPrayerTimes && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 p-3 rounded-xl bg-muted/50">
                   <div>
-                    <span className="text-xs text-muted-foreground block">Suhoor ends (Fajr)</span>
+                    <span className="text-xs text-muted-foreground block">{suhoorLabelShort} ends (Fajr)</span>
                     <span className="font-bold text-secondary">{selectedDayPrayerTimes.fajr}</span>
                   </div>
                   <div>
@@ -1021,7 +1112,7 @@ const Dashboard = () => {
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <span className="text-xs font-medium text-muted-foreground block cursor-help border-b border-dotted border-transparent hover:border-muted-foreground/40 w-fit">
-                                {meal === "suhoor" ? "Suhoor" : iftarLabel}
+                                {meal === "suhoor" ? suhoorLabelShort : iftarLabel}
                               </span>
                             </TooltipTrigger>
                             <TooltipContent className="max-w-xs">
@@ -1037,13 +1128,13 @@ const Dashboard = () => {
                               type="button"
                               onClick={() => setAddFoodMeal(meal)}
                               className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-                              aria-label={`Add food for ${meal === "suhoor" ? "Suhoor" : iftarLabel}`}
+                              aria-label={`Add food for ${meal === "suhoor" ? suhoorLabelShort : iftarLabel}`}
                             >
                               <Plus className="w-5 h-5" />
                             </button>
                           </TooltipTrigger>
                           <TooltipContent side="left">
-                            <p>Add item to {meal === "suhoor" ? "Suhoor" : iftarLabel}</p>
+                            <p>Add item to {meal === "suhoor" ? suhoorLabelShort : iftarLabel}</p>
                           </TooltipContent>
                         </Tooltip>
                       </div>
@@ -1055,7 +1146,7 @@ const Dashboard = () => {
               {/* Add food dialog */}
               <Dialog open={addFoodMeal != null} onOpenChange={(open) => !open && setAddFoodMeal(null)}>
                 <DialogContent className="max-w-sm">
-                  <DialogTitle>Add to {addFoodMeal === "suhoor" ? "Suhoor" : iftarLabel}</DialogTitle>
+                  <DialogTitle>Add to {addFoodMeal === "suhoor" ? suhoorLabelShort : iftarLabel}</DialogTitle>
                   <p className="text-xs text-muted-foreground">What did you eat? Add name and optional calories.</p>
                   <div className="grid gap-2 pt-2">
                     <Input
@@ -1104,7 +1195,7 @@ const Dashboard = () => {
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs">
                     <p className="font-medium">How to track</p>
-                    <p className="text-xs mt-1">Use the + buttons above to log what you ate for Suhoor and Iftar; items and totals appear on the Schedule page. Or enter manual daily totals here.</p>
+                    <p className="text-xs mt-1">Use the + buttons above to log what you ate for {suhoorLabelShort} and Iftar; items and totals appear on the Schedule page. Or enter manual daily totals here.</p>
                   </TooltipContent>
                 </Tooltip>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -1245,16 +1336,18 @@ const Dashboard = () => {
                 )}
               </div>
 
-              {/* Mark day complete — only for today */}
+              {/* Mark day complete — today or selected past day (make-up); see USABILITY-TEST-TASKS Task 4 */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-3 border-t border-border">
                 <span className="text-sm text-muted-foreground">
-                  {!isSelectedToday
-                    ? "Log fasting on today's date only"
-                    : selectedDayComplete
-                      ? "Logged: you fasted this day (dawn to sunset)"
-                      : "Did you fast this day from dawn to sunset?"}
+                  {selectedDate > todayStr
+                    ? "You can only log fasting for today or a past date."
+                    : !isSelectedToday
+                      ? "Mark this day as completed if you fasted it (e.g. make-up day)."
+                      : selectedDayComplete
+                        ? "Logged: you fasted this day (dawn to sunset)"
+                        : "Did you fast this day from dawn to sunset?"}
                 </span>
-                {isSelectedToday ? (
+                {selectedDate <= todayStr ? (
                   <button
                     type="button"
                     onClick={() => setDayCompleted(progress, setProgress, selectedDate, !selectedDayComplete)}

@@ -139,6 +139,17 @@ export function isCurrentlyRamadan(): boolean {
   return today >= start && today <= end;
 }
 
+/** Whether the given date is the last day of the current Ramadan (for "Last day" badge). */
+export function isLastDayOfRamadan(date: Date): boolean {
+  if (!isRamadanDay(date)) return false;
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  const start = getCurrentRamadanStart();
+  const end = getRamadanEndForYear(start.getFullYear());
+  end.setHours(0, 0, 0, 0);
+  return d.getTime() === end.getTime();
+}
+
 /** Date range for the next (or current) Ramadan as YYYY-MM-DD and Date. For calendar export and prayer fetch. */
 export function getRamadanDateRange(): {
   startStr: string;

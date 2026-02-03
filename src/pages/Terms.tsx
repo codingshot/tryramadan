@@ -14,7 +14,7 @@ export default function Terms() {
     <div className="min-h-screen bg-background">
       <PageSEO title={TERMS_TITLE} description={TERMS_DESCRIPTION} path="/terms" />
       <Navbar />
-      <main className="main-content">
+      <main id="main-content" className="main-content">
         <div className="container mx-auto px-4 max-w-3xl min-w-0">
           <Link
             to="/"

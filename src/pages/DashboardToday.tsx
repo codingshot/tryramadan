@@ -13,11 +13,13 @@ import {
   useFastingProgress,
   completeFastingToday,
   breakFastingToday,
+  setDaySkipped,
   getTodayFastingLog,
   getBrokenReasonLabel,
   useTodayData,
   useIftarLabel,
   useIftarLabelShort,
+  useSuhoorLabelShort,
   useDisplayTimezone,
 } from "@/hooks/useLocalStorage";
 import { getTodayStringInTimezone, getNowSecondsSinceMidnightInTimezone, timeStringToSecondsSinceMidnight, secondsUntilTimeInTimezone } from "@/lib/utils";
@@ -40,6 +42,7 @@ const DashboardToday = () => {
   const [preferences] = useUserPreferences();
   const iftarLabel = useIftarLabel();
   const iftarLabelShort = useIftarLabelShort();
+  const suhoorLabelShort = useSuhoorLabelShort();
   const [progress, setProgress] = useFastingProgress();
   const {
     intention,
@@ -87,10 +90,11 @@ const DashboardToday = () => {
   
   const fastingProgress = getFastingProgress();
   const todayCompleted = progress.completedDays.includes(todayStr);
+  const todaySkipped = (progress.skippedDays ?? []).includes(todayStr);
   const todayBrokenEntry = progress.fastingLog?.find((e) => e.date === todayStr && e.status === "broken");
   const todayLog = getTodayFastingLog(progress, todayStr);
   /** Only show "I broke my fast" when user has started fasting today and has not yet broken or marked complete */
-  const fastingToday = !!todayLog && todayLog.status !== "broken" && !todayCompleted;
+  const fastingToday = !!todayLog && todayLog.status !== "broken" && !todayCompleted && !todaySkipped;
 
   const imsakStr = prayerTimes?.imsak ?? prayerTimes?.fajr;
   const isFastingWindow =
@@ -126,7 +130,7 @@ const DashboardToday = () => {
       } else setCountdownIftar({ h: 0, m: 0 });
     };
     tick();
-    const interval = setInterval(tick, 1000);
+    const interval = setInterval(tick, 2000); // Throttle for INP (was 1s)
     return () => clearInterval(interval);
   }, [prayerTimes, displayTimezone]);
   
@@ -149,7 +153,7 @@ const DashboardToday = () => {
       />
       <Navbar />
       
-      <main className="main-content">
+      <main id="main-content" className="main-content">
         <div className="container mx-auto px-4 max-w-4xl min-w-0">
           {/* Back link */}
           <Link 
@@ -204,6 +208,11 @@ const DashboardToday = () => {
                   </TooltipContent>
                 </Tooltip>
               </div>
+            ) : todaySkipped ? (
+              <div className="py-3 px-4 rounded-xl bg-muted/50 border border-border text-center">
+                <span className="font-medium text-muted-foreground">You didn&apos;t fast today</span>
+                <p className="text-xs text-muted-foreground mt-1">You marked today as not fasting (e.g. travel or illness). It won&apos;t count as a broken fast.</p>
+              </div>
             ) : todayBrokenEntry ? (
               <div className="py-3 px-4 rounded-xl border border-destructive/40 bg-destructive/10 text-center text-sm">
                 <Tooltip>
@@ -222,14 +231,14 @@ const DashboardToday = () => {
                 )}
               </div>
             ) : (
-              <div className={`flex flex-col sm:flex-row gap-2 ${fastingToday ? "" : "max-w-md"}`}>
+              <div className={`flex flex-col sm:flex-row flex-wrap gap-2 ${fastingToday ? "" : "max-w-md"}`}>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
                       onClick={() => completeFastingToday(progress, setProgress, todayStr)}
-                      className="flex-1 py-3 px-4 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                      className="flex-1 min-w-0 py-3 px-4 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
                     >
-                      <Moon className="w-5 h-5" />
+                      <Moon className="w-5 h-5 shrink-0" />
                       I fasted today — mark complete
                     </button>
                   </TooltipTrigger>
@@ -244,9 +253,9 @@ const DashboardToday = () => {
                       <button
                         type="button"
                         onClick={() => setShowBreakFastDialog(true)}
-                        className="flex-1 py-3 px-4 rounded-xl border border-destructive/40 bg-destructive/10 text-destructive font-medium hover:bg-destructive/20 transition-colors flex items-center justify-center gap-2"
+                        className="flex-1 min-w-0 py-3 px-4 rounded-xl border border-destructive/40 bg-destructive/10 text-destructive font-medium hover:bg-destructive/20 transition-colors flex items-center justify-center gap-2"
                       >
-                        <AlertTriangle className="w-5 h-5" />
+                        <AlertTriangle className="w-5 h-5 shrink-0" />
                         I broke my fast
                       </button>
                     </TooltipTrigger>
@@ -256,12 +265,30 @@ const DashboardToday = () => {
                     </TooltipContent>
                   </Tooltip>
                 )}
+                {!fastingToday && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={() => setDaySkipped(progress, setProgress, todayStr)}
+                        className="flex-1 min-w-0 py-3 px-4 rounded-xl border border-border bg-muted/30 font-medium hover:bg-muted/50 transition-colors"
+                      >
+                        I didn&apos;t fast today
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="font-medium">I didn&apos;t fast today</p>
+                      <p className="text-xs mt-1 text-muted-foreground">Mark that you didn&apos;t fast (e.g. travel, illness). Won&apos;t count as a broken fast.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
               </div>
             )}
             <BreakFastReasonDialog
               open={showBreakFastDialog}
               onOpenChange={setShowBreakFastDialog}
               onSelectReason={(reasonId) => breakFastingToday(progress, setProgress, reasonId, todayStr)}
+              userType={preferences.userType}
             />
           </motion.div>
 
@@ -291,7 +318,7 @@ const DashboardToday = () => {
                 <TooltipTrigger asChild>
                   <div className="p-3 sm:p-4 rounded-2xl bg-card border border-border text-center cursor-help min-w-0">
                     <span className="text-xs text-muted-foreground block truncate">
-                      {suhoorPassed ? "Suhoor ended" : "Until suhoor end"}
+                      {suhoorPassed ? `${suhoorLabelShort} ended` : `Until ${suhoorLabelShort} end`}
                       <span className="hidden sm:inline"> (eat cutoff)</span>
                     </span>
                     {suhoorPassed ? (
@@ -307,9 +334,18 @@ const DashboardToday = () => {
                   </div>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="max-w-xs p-3">
-                  <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.suhoorEnds.title}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.suhoorEnds.body}</p>
-                  <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{EATING_TIME_TOOLTIPS.suhoorEnds.bodyAr}</p>
+                  {preferences.userType === "non-muslim" ? (
+                    <>
+                      <p className="font-semibold text-sm">Until suhoor end</p>
+                      <p className="text-xs text-muted-foreground mt-1">Suhoor = last meal before dawn (after this time, fasting starts). This is Fajr (dawn)—the cutoff for eating and drinking.</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.suhoorEnds.title}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.suhoorEnds.body}</p>
+                      <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{EATING_TIME_TOOLTIPS.suhoorEnds.bodyAr}</p>
+                    </>
+                  )}
                 </TooltipContent>
               </Tooltip>
               <Tooltip>
@@ -361,7 +397,7 @@ const DashboardToday = () => {
               />
             </div>
             <div className="flex justify-between mt-2 text-xs text-muted-foreground gap-2">
-              <span className="truncate min-w-0" title="Suhoor end (eat cutoff)"><span className="sm:inline hidden">Suhoor end </span>{prayerTimes?.imsak ?? prayerTimes?.fajr ?? '05:30'}</span>
+              <span className="truncate min-w-0" title={`${suhoorLabelShort} end (eat cutoff)`}><span className="sm:inline hidden">{suhoorLabelShort} end </span>{prayerTimes?.imsak ?? prayerTimes?.fajr ?? '05:30'}</span>
               <span className="truncate min-w-0 shrink-0" title="Iftar (Maghrib)"><span className="sm:inline hidden">Iftar </span>{prayerTimes?.maghrib || '18:30'}</span>
             </div>
             <div className="mt-2 pt-2 border-t border-border">

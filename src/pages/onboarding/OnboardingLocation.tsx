@@ -117,9 +117,16 @@ export default function OnboardingLocation() {
           <span className="text-sm text-muted-foreground">Detecting location from IP...</span>
         </div>
       ) : (
-        <p className="text-sm text-muted-foreground mb-4">
-          Type a city name below to set your location, or use the button to detect from IP.
-        </p>
+        <>
+          {initialTried && !hasLocation && (
+            <p className="text-sm text-amber-600 dark:text-amber-400 mb-2">
+              We couldn&apos;t detect your location. Search for your city for accurate prayer times.
+            </p>
+          )}
+          <p className="text-sm text-muted-foreground mb-4">
+            Or search for your city below. You can also use the button to detect from IP.
+          </p>
+        </>
       )}
 
       <LocationSearch

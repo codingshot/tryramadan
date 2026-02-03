@@ -49,7 +49,7 @@ function useIftarCountdown(maghrib: string | undefined, displayTimezone: string 
       }
     };
     update();
-    const t = setInterval(update, displayTimezone ? 1000 : 60000);
+    const t = setInterval(update, displayTimezone ? 2000 : 60000); // Throttle for INP when timezone set
     return () => clearInterval(t);
   }, [maghrib, displayTimezone]);
 

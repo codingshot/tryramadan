@@ -43,7 +43,7 @@ export default function CultureCountry() {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main className="main-content container mx-auto px-4 max-w-4xl min-w-0">
+        <main id="main-content" className="main-content container mx-auto px-4 max-w-4xl min-w-0">
           <h1 className="text-2xl font-display font-bold">Country not found</h1>
           <p className="text-muted-foreground mt-2">This culture or country page doesn't exist.</p>
           <Link to="/culture" className="mt-4 inline-block text-secondary hover:underline">
@@ -103,7 +103,7 @@ export default function CultureCountry() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Navbar />
-      <main className="main-content" role="main" aria-label={`Ramadan traditions in ${country.name}`}>
+      <main id="main-content" className="main-content" aria-label={`Ramadan traditions in ${country.name}`}>
         <div className="container mx-auto px-4 max-w-4xl min-w-0">
           <Link
             to="/culture"

@@ -48,7 +48,7 @@ const DashboardPrayers = () => {
   );
   
   useEffect(() => {
-    const interval = setInterval(() => setCurrentTime(new Date()), 1000);
+    const interval = setInterval(() => setCurrentTime(new Date()), 2000); // Throttle for INP
     return () => clearInterval(interval);
   }, []);
   
@@ -174,12 +174,12 @@ const DashboardPrayers = () => {
             </div>
           </motion.div>
           
-          {/* Prayer times list */}
+          {/* Prayer times list — min-height reserves space to avoid CLS when times load */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="space-y-3"
+            className={`space-y-3 ${loading ? "min-h-[420px] flex flex-col justify-center" : ""}`}
           >
             {loading ? (
               <div className="text-center py-8 text-muted-foreground">Loading prayer times…</div>
@@ -196,8 +196,14 @@ const DashboardPrayers = () => {
               <>
                 {isFromCache && (
                   <div className="mb-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-800 dark:text-amber-200 flex flex-wrap items-center justify-center gap-2">
-                    <span>Times may be outdated.</span>
-                    <Button variant="outline" size="sm" onClick={() => refetchPrayers()}>Try again</Button>
+                    <span>
+                      {typeof navigator !== "undefined" && !navigator.onLine
+                        ? "Showing cached prayer times. You're offline."
+                        : "Times may be outdated."}
+                    </span>
+                    {typeof navigator !== "undefined" && navigator.onLine && (
+                      <Button variant="outline" size="sm" onClick={() => refetchPrayers()}>Try again</Button>
+                    )}
                   </div>
                 )}
                 {prayers.map((prayer, index) => {

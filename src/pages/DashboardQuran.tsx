@@ -97,7 +97,7 @@ const DashboardQuran = () => {
         path="/dashboard/quran"
       />
       <Navbar />
-      <main className="main-content" role="main" aria-label="Quran reading plan">
+      <main id="main-content" className="main-content" aria-label="Quran reading plan">
         <div className="container mx-auto px-4 max-w-3xl min-w-0">
           <Link
             to="/dashboard"

@@ -4,6 +4,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { BROKEN_FAST_REASONS } from "@/hooks/useLocalStorage";
 import { cn } from "@/lib/utils";
 
@@ -13,13 +14,18 @@ interface BreakFastReasonDialogProps {
   onSelectReason: (reasonId: string) => void;
   /** Optional title override */
   title?: string;
+  /** When non-Muslim, show tooltip on Travel reason (COPY-AUDIT) */
+  userType?: "muslim" | "non-muslim";
 }
+
+const TRAVEL_TOOLTIP_NON_MUSLIM = "Travelers may be exempt from fasting; make up days later.";
 
 export function BreakFastReasonDialog({
   open,
   onOpenChange,
   onSelectReason,
   title = "Why did you break your fast?",
+  userType,
 }: BreakFastReasonDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -31,8 +37,9 @@ export function BreakFastReasonDialog({
           Choose a reason so you can track it. No judgment — your intention matters.
         </p>
         <ul className="space-y-2 mt-2">
-          {BROKEN_FAST_REASONS.map(({ id, label }) => (
-            <li key={id}>
+          {BROKEN_FAST_REASONS.map(({ id, label }) => {
+            const isTravelNonMuslim = id === "travel" && userType === "non-muslim";
+            const button = (
               <button
                 type="button"
                 onClick={() => {
@@ -48,8 +55,22 @@ export function BreakFastReasonDialog({
               >
                 {label}
               </button>
-            </li>
-          ))}
+            );
+            return (
+              <li key={id}>
+                {isTravelNonMuslim ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>{button}</TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-xs">
+                      {TRAVEL_TOOLTIP_NON_MUSLIM}
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  button
+                )}
+              </li>
+            );
+          })}
         </ul>
       </DialogContent>
     </Dialog>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Loader2, Navigation, X } from 'lucide-react';
 import { searchLocations, LocationResult, getLocationFromIP } from '@/hooks/useLocation';
@@ -10,7 +10,8 @@ interface LocationSearchProps {
   placeholder?: string;
 }
 
-export const LocationSearch = ({ value, onSelect, placeholder = "Search city..." }: LocationSearchProps) => {
+/** Memoized to avoid unnecessary re-renders when parent updates (e.g. theme); keeps INP low on type. */
+export const LocationSearch = memo(function LocationSearch({ value, onSelect, placeholder = "Search city..." }: LocationSearchProps) {
   const [query, setQuery] = useState(value);
   const [results, setResults] = useState<LocationResult[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -126,12 +127,13 @@ export const LocationSearch = ({ value, onSelect, placeholder = "Search city..."
         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
         <input
           ref={inputRef}
+          id="location-search"
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => results.length > 0 && setIsOpen(true)}
           placeholder={placeholder}
-          className="w-full min-h-[44px] pl-10 pr-20 py-3 rounded-xl border border-border bg-background focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all text-foreground placeholder:text-muted-foreground"
+          className="w-full min-h-[44px] pl-10 pr-20 py-3 rounded-xl border border-border bg-background focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           aria-label="Search for a city"
           autoComplete="off"
         />
@@ -198,4 +200,4 @@ export const LocationSearch = ({ value, onSelect, placeholder = "Search city..."
       </AnimatePresence>
     </div>
   );
-};
+});

@@ -44,7 +44,7 @@ const PersonaPage = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main className="main-content container mx-auto px-4 py-16 text-center">
+        <main id="main-content" className="main-content container mx-auto px-4 py-16 text-center">
           <h1 className="text-2xl font-bold mb-2">Persona not found</h1>
           <p className="text-muted-foreground mb-4">
             No persona with slug &quot;{slug}&quot;.
@@ -71,7 +71,7 @@ const PersonaPage = () => {
       />
       <Navbar />
 
-      <main className="main-content">
+      <main id="main-content" className="main-content">
         <div className="container mx-auto px-4 max-w-3xl min-w-0 py-8 sm:py-12">
           <Link
             to="/personas"

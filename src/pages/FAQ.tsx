@@ -125,7 +125,7 @@ const FAQ = () => {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqPageJsonLd) }} />
       <Navbar />
       
-      <main className="main-content">
+      <main id="main-content" className="main-content">
         <div className="container mx-auto px-4 max-w-4xl min-w-0">
           <Link 
             to="/" 

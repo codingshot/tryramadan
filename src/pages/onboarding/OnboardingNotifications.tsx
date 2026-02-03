@@ -11,6 +11,8 @@ export default function OnboardingNotifications() {
   const { permission, requestPermission, supported } = useNotifications();
   const iftarLabelShort = useIftarLabelShort();
   const [loading, setLoading] = useState(false);
+  const suhoorText = state.mode === "new" ? "pre-dawn meal (Suhoor)" : "suhoor";
+  const iftarText = state.mode === "new" ? "breaking fast" : iftarLabelShort;
   const navigate = useNavigate();
 
   const handleEnable = async () => {
@@ -44,7 +46,7 @@ export default function OnboardingNotifications() {
         </div>
         <h2 className="font-display text-2xl font-bold mb-2">Notifications</h2>
         <p className="text-muted-foreground">
-          Get suhoor and {iftarLabelShort} reminders so you never miss a meal.
+          Get {suhoorText} and {iftarText} reminders so you never miss a meal.
         </p>
       </div>
 
@@ -52,7 +54,7 @@ export default function OnboardingNotifications() {
         permission === "granted" ? (
           <div className="p-4 rounded-xl bg-secondary/10 border border-secondary/30 mb-6">
             <p className="text-sm font-medium text-secondary">Notifications enabled</p>
-            <p className="text-xs text-muted-foreground mt-1">You'll receive suhoor and {iftarLabelShort} reminders.</p>
+            <p className="text-xs text-muted-foreground mt-1">You'll receive {suhoorText} and {iftarText} reminders.</p>
           </div>
         ) : (
           <button

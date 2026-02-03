@@ -14,6 +14,7 @@ import {
   useUserPreferences, 
   useFastingProgress, 
   useNotificationSettings,
+  useLocalStorage,
   getQuickActionOrderFromPriorities,
   useDashboardQuickActions,
   defaultPreferences,
@@ -41,6 +42,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Select,
   SelectContent,
@@ -58,6 +60,7 @@ const Settings = () => {
   const [preferences, setPreferences] = useUserPreferences();
   const [progress, setProgress] = useFastingProgress();
   const [notifSettings, setNotifSettings] = useNotificationSettings();
+  const [journalEntries] = useLocalStorage<Array<{ date: string; prompt?: string; content: string; gratitude?: string; mood?: number; createdAt?: string; updatedAt?: string }>>("tryramadan-journal", []);
   const iftarLabel = useIftarLabel();
   const iftarLabelShort = useIftarLabelShort();
   const [, setQuickActionOrder] = useDashboardQuickActions();
@@ -135,6 +138,7 @@ const Settings = () => {
   const getExportData = () => ({
     preferences,
     progress,
+    journal: journalEntries,
     notificationSettings: notifSettings,
     exportedAt: new Date().toISOString(),
   });
@@ -165,7 +169,7 @@ const Settings = () => {
       />
       <Navbar />
       
-      <main className="main-content">
+      <main id="main-content" className="main-content">
         <div className="container mx-auto px-4 max-w-2xl min-w-0">
           <Link 
             to="/dashboard" 
@@ -201,17 +205,18 @@ const Settings = () => {
               Choose how you&apos;re using the app. This affects labels (e.g. &quot;Iftar&quot; vs &quot;Breaking Fast&quot;) and content tone.
             </p>
             <div className="space-y-4">
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">Mode</label>
+              <fieldset className="space-y-2 border-0 p-0 m-0">
+                <legend className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">Mode</legend>
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
                     onClick={() => setPreferences({ ...preferences, userType: "new" })}
-                    className={`min-h-[44px] flex-1 min-w-[120px] sm:min-w-0 px-4 py-3 rounded-xl border-2 text-left transition-all ${
+                    className={`min-h-[44px] flex-1 min-w-[120px] sm:min-w-0 px-4 py-3 rounded-xl border-2 text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                       (preferences.userType ?? null) === "new"
                         ? "border-secondary bg-secondary/10 text-secondary"
                         : "border-border hover:border-secondary/50"
                     }`}
+                    aria-pressed={(preferences.userType ?? null) === "new"}
                   >
                     <span className="font-semibold block">Non-Muslim</span>
                     <span className="text-xs text-muted-foreground">Learning & trying fasting</span>
@@ -219,28 +224,36 @@ const Settings = () => {
                   <button
                     type="button"
                     onClick={() => setPreferences({ ...preferences, userType: "muslim" })}
-                    className={`min-h-[44px] flex-1 min-w-[120px] sm:min-w-0 px-4 py-3 rounded-xl border-2 text-left transition-all ${
+                    className={`min-h-[44px] flex-1 min-w-[120px] sm:min-w-0 px-4 py-3 rounded-xl border-2 text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                       preferences.userType === "muslim"
                         ? "border-secondary bg-secondary/10 text-secondary"
                         : "border-border hover:border-secondary/50"
                     }`}
+                    aria-pressed={preferences.userType === "muslim"}
                   >
                     <span className="font-semibold block">Muslim</span>
                     <span className="text-xs text-muted-foreground">Full religious observance</span>
                   </button>
                 </div>
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground mb-2 block">Program</label>
+              </fieldset>
+              <fieldset className="space-y-2 border-0 p-0 m-0">
+                <legend className="text-xs font-semibold text-muted-foreground mb-2 block">Program</legend>
                 <div className="p-3 rounded-xl bg-muted/50 border border-border">
                   <span className="font-medium">Full Ramadan Fast</span>
                   <span className="text-muted-foreground text-sm ml-2">(dawn to sunset)</span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">This is the only program available right now.</p>
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground mb-2 block">Voluntary Sunnah fasting</label>
-                <p className="text-xs text-muted-foreground mb-2">Add optional Sunnah fasts (can be combined with Ramadan).</p>
+              </fieldset>
+              <fieldset className="space-y-2 border-0 p-0 m-0">
+                <legend className="text-xs font-semibold text-muted-foreground mb-2 block">Voluntary Sunnah fasting</legend>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <p className="text-xs text-muted-foreground mb-2 cursor-help border-b border-dotted border-transparent hover:border-muted-foreground/40 w-fit">Add optional Sunnah fasts (can be combined with Ramadan).</p>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-xs">
+                    Sunnah = voluntary fasts recommended by the Prophet (e.g. Monday & Thursday).
+                  </TooltipContent>
+                </Tooltip>
                 <div className="space-y-2">
                   {[
                     { id: "monday-thursday", name: "Monday & Thursday", freq: "Weekly" },
@@ -256,9 +269,10 @@ const Settings = () => {
                           const next = selected ? curr.filter((x) => x !== opt.id) : [...curr, opt.id];
                           setPreferences({ ...preferences, voluntaryFasting: next });
                         }}
-                        className={`w-full min-h-[44px] p-3 rounded-xl border-2 text-left transition-all flex items-center justify-between ${
+                        className={`w-full min-h-[44px] p-3 rounded-xl border-2 text-left transition-all flex items-center justify-between focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                           selected ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
                         }`}
+                        aria-pressed={selected}
                       >
                         <span className="text-sm font-medium">{opt.name}</span>
                         <span className="text-xs text-muted-foreground">{opt.freq}</span>
@@ -269,7 +283,7 @@ const Settings = () => {
                 <Link to="/programs" className="text-xs text-secondary hover:underline mt-2 inline-block">
                   Learn more about voluntary fasting →
                 </Link>
-              </div>
+              </fieldset>
             </div>
           </motion.div>
 
@@ -289,68 +303,74 @@ const Settings = () => {
             </p>
 
             <div className="space-y-4">
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
-                  <BookOpen className="w-3.5 h-3.5" /> Learning
-                </label>
+              <fieldset className="space-y-2 border-0 p-0 m-0">
+                <legend className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
+                  <BookOpen className="w-3.5 h-3.5" aria-hidden /> Learning
+                </legend>
                 <div className="flex flex-wrap gap-2">
                   {(["minimal", "moderate", "deep"] as LearningPriority[]).map((v) => (
                     <button
                       key={v}
+                      type="button"
                       onClick={() => setPreferences({ ...preferences, learningPriority: v })}
-                      className={`min-h-[44px] px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors border ${
+                      className={`min-h-[44px] px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors border focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                         (preferences.learningPriority ?? "moderate") === v
                           ? "bg-secondary text-secondary-foreground border-secondary"
                           : "bg-muted/70 hover:bg-muted border-border text-foreground"
                       }`}
+                      aria-pressed={(preferences.learningPriority ?? "moderate") === v}
                     >
                       {v}
                     </button>
                   ))}
                 </div>
-              </div>
+              </fieldset>
 
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
-                  <Utensils className="w-3.5 h-3.5" /> Culture & recipes
-                </label>
+              <fieldset className="space-y-2 border-0 p-0 m-0">
+                <legend className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
+                  <Utensils className="w-3.5 h-3.5" aria-hidden /> Culture & recipes
+                </legend>
                 <div className="flex flex-wrap gap-2">
                   {(["none", "some", "lots"] as CultureRecipesPriority[]).map((v) => (
                     <button
                       key={v}
+                      type="button"
                       onClick={() => setPreferences({ ...preferences, cultureRecipesPriority: v })}
-                      className={`min-h-[44px] px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors border ${
+                      className={`min-h-[44px] px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors border focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                         (preferences.cultureRecipesPriority ?? "some") === v
                           ? "bg-secondary text-secondary-foreground border-secondary"
                           : "bg-muted/70 hover:bg-muted border-border text-foreground"
                       }`}
+                      aria-pressed={(preferences.cultureRecipesPriority ?? "some") === v}
                     >
                       {v}
                     </button>
                   ))}
                 </div>
-              </div>
+              </fieldset>
 
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
-                  <BookMarked className="w-3.5 h-3.5" /> Quran & glossary
-                </label>
+              <fieldset className="space-y-2 border-0 p-0 m-0">
+                <legend className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-2">
+                  <BookMarked className="w-3.5 h-3.5" aria-hidden /> Quran & glossary
+                </legend>
                 <div className="flex flex-wrap gap-2">
                   {(["none", "some", "daily"] as QuranPriority[]).map((v) => (
                     <button
                       key={v}
+                      type="button"
                       onClick={() => setPreferences({ ...preferences, quranPriority: v })}
-                      className={`min-h-[44px] px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors border ${
+                      className={`min-h-[44px] px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-colors border focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                         (preferences.quranPriority ?? "some") === v
                           ? "bg-secondary text-secondary-foreground border-secondary"
                           : "bg-muted/70 hover:bg-muted border-border text-foreground"
                       }`}
+                      aria-pressed={(preferences.quranPriority ?? "some") === v}
                     >
                       {v}
                     </button>
                   ))}
                 </div>
-              </div>
+              </fieldset>
 
               <div className="flex flex-wrap items-center gap-4 pt-2">
                 <div className="flex items-center gap-2">
@@ -470,7 +490,7 @@ const Settings = () => {
             </h2>
             
             <p className="text-sm text-muted-foreground mb-4">
-              Your location is used to calculate accurate prayer and fasting times.
+              Your location is used to calculate accurate prayer and fasting times. Changing location updates prayer and iftar times everywhere in the app.
             </p>
 
             <p className="text-xs font-semibold text-muted-foreground mb-2">Current location</p>
@@ -488,7 +508,9 @@ const Settings = () => {
                 No location set. Search below or use Auto-detect.
               </p>
             )}
-            
+            <label htmlFor="location-search" className="sr-only">
+              Search for a city to set prayer times location
+            </label>
             <LocationSearch
               value=""
               onSelect={handleLocationSelect}

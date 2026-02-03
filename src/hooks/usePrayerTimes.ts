@@ -190,7 +190,7 @@ export function usePrayerTimes(lat: number | null, lng: number | null, displayTi
 
   useEffect(() => {
     if (!lat || !lng) return;
-    // Use cache first so we don't call API on every load when today's times are already stored
+    // Use cache first (sync) so we don't block; defer API fetch until after first paint when no cache
     const cached = readPrayerTimesCache(todayStr, lat, lng);
     if (cached) {
       setPrayerTimes(cached.prayerTimes);
@@ -200,7 +200,14 @@ export function usePrayerTimes(lat: number | null, lng: number | null, displayTi
       setError(null);
       return;
     }
-    fetchPrayerTimes();
+    const id =
+      typeof requestIdleCallback !== 'undefined'
+        ? requestIdleCallback(() => fetchPrayerTimes(), { timeout: 800 })
+        : setTimeout(fetchPrayerTimes, 0);
+    return () => {
+      if (typeof cancelIdleCallback !== 'undefined') cancelIdleCallback(id as number);
+      else clearTimeout(id as number);
+    };
   }, [lat, lng, todayStr, fetchPrayerTimes]);
 
   return { prayerTimes, hijriDate, loading, error, refetch: fetchPrayerTimes, isFromCache };

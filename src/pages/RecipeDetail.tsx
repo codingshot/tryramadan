@@ -26,7 +26,7 @@ export default function RecipeDetail() {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main className="main-content container mx-auto px-4 max-w-4xl min-w-0">
+        <main id="main-content" className="main-content container mx-auto px-4 max-w-4xl min-w-0">
           <h1 className="text-2xl font-display font-bold">Recipe not found</h1>
           <p className="text-muted-foreground mt-2">The recipe you're looking for doesn't exist or was removed.</p>
           <Link to="/recipes" className="mt-4 inline-block text-secondary hover:underline">
@@ -65,7 +65,7 @@ export default function RecipeDetail() {
       />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(recipeJsonLd) }} />
       <Navbar />
-      <main className="main-content" role="main" aria-label="Recipe">
+      <main id="main-content" className="main-content" aria-label="Recipe">
         <div className="container mx-auto px-4 max-w-3xl min-w-0">
           <Link
             to="/recipes"

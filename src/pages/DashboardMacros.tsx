@@ -199,7 +199,7 @@ export default function DashboardMacros() {
         path="/dashboard/macros"
       />
       <Navbar />
-      <main className="main-content">
+      <main id="main-content" className="main-content">
         <div className="container mx-auto px-4 max-w-3xl min-w-0">
           <Link
             to="/dashboard"

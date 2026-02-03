@@ -32,7 +32,7 @@ export const Navbar = () => {
       );
     };
     formatTime();
-    const interval = setInterval(formatTime, 1000);
+    const interval = setInterval(formatTime, 2000); // Throttle for INP (was 1s)
     return () => clearInterval(interval);
   }, [displayTimezone]);
 
@@ -70,7 +70,10 @@ export const Navbar = () => {
             {/* Logo + fasting tag when fasting */}
             <div className="flex items-center gap-2 min-w-0">
               <Link to="/" onClick={scrollToTop} className="flex items-center gap-2 md:gap-3 shrink-0">
-                <img src={logo} alt="" width={44} height={44} decoding="async" className="w-9 h-9 md:w-11 md:h-11" aria-hidden />
+                <picture className="w-9 h-9 md:w-11 md:h-11 shrink-0 block">
+                  <source srcSet="/logo.webp" type="image/webp" />
+                  <img src={logo} alt="" width={44} height={44} decoding="async" className="w-full h-full" aria-hidden />
+                </picture>
                 <span className="font-display font-bold text-base md:text-lg leading-tight text-foreground">
                   Try<span className="text-primary-contrast">Ramadan</span>
                 </span>

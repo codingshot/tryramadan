@@ -15,7 +15,7 @@ const Culture = () => {
         path="/culture"
       />
       <Navbar />
-      <main className="main-content">
+      <main id="main-content" className="main-content">
         <div className="container mx-auto px-4 sm:px-6 max-w-5xl min-w-0">
           <Link
             to="/"

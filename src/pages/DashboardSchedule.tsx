@@ -49,6 +49,7 @@ import {
   DASHBOARD_QUICK_ACTION_IDS,
   useIftarLabel,
   useIftarLabelShort,
+  useSuhoorLabel,
   type FoodLogEntry,
   type CalendarEvent,
   type CalendarEventType,
@@ -146,6 +147,7 @@ const DashboardSchedule = () => {
   const [progress, setProgress] = useFastingProgress();
   const iftarLabel = useIftarLabel();
   const iftarLabelShort = useIftarLabelShort();
+  const suhoorLabel = useSuhoorLabel();
   const [scheduleNotes, setScheduleNotes] = useLocalStorage<Record<string, string>>(
     "tryramadan-schedule-notes",
     {}
@@ -524,7 +526,7 @@ const DashboardSchedule = () => {
       />
       <Navbar />
 
-      <main className="main-content">
+      <main id="main-content" className="main-content">
         <div className="container mx-auto px-4 max-w-4xl min-w-0">
           <Link
             to="/dashboard"
@@ -1210,7 +1212,7 @@ const DashboardSchedule = () => {
                         Add to calendar (export .ics above)
                       </Label>
                       <p className="text-xs text-muted-foreground mb-2">
-                        Quick-add Suhoor, {iftarLabel}, prayers, Taraweeh, get food. These plus your custom events are included when you export.
+                        Quick-add {suhoorLabel}, {iftarLabel}, prayers, Taraweeh, get food. These plus your custom events are included when you export.
                       </p>
                       <div className="flex flex-wrap gap-1.5 mb-2">
                         {QUICK_ADD_TEMPLATES.map((t) => (
@@ -1222,7 +1224,7 @@ const DashboardSchedule = () => {
                             className="text-xs h-8"
                             onClick={() => quickAddCalendarEvent(t.type, t)}
                           >
-                            {t.type === "iftar" ? iftarLabel : t.title}
+                            {t.type === "suhoor" ? `${suhoorLabel} (eat before)` : t.type === "iftar" ? iftarLabel : t.title}
                           </Button>
                         ))}
                       </div>

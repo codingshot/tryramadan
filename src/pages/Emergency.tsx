@@ -6,13 +6,14 @@ import {
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { useFastingProgress, breakFastingToday } from "@/hooks/useLocalStorage";
+import { useFastingProgress, useUserPreferences, breakFastingToday } from "@/hooks/useLocalStorage";
 import { BreakFastReasonDialog } from "@/components/BreakFastReasonDialog";
 import { PageSEO } from "@/components/PageSEO";
 import { useState } from "react";
 
 const Emergency = () => {
   const navigate = useNavigate();
+  const [preferences] = useUserPreferences();
   const [progress, setProgress] = useFastingProgress();
   const [showReasonDialog, setShowReasonDialog] = useState(false);
 
@@ -36,7 +37,7 @@ const Emergency = () => {
       />
       <Navbar />
       
-      <main className="main-content">
+      <main id="main-content" className="main-content">
         <div className="container mx-auto px-4 max-w-2xl min-w-0">
           <Link 
             to="/dashboard" 
@@ -187,6 +188,7 @@ const Emergency = () => {
               onOpenChange={setShowReasonDialog}
               onSelectReason={handleBreakFastWithReason}
               title="Why did you break your fast?"
+              userType={preferences?.userType}
             />
             
             <button

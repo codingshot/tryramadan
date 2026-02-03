@@ -16,7 +16,7 @@ const NotFound = () => {
         description="The page you're looking for doesn't exist. Return to TryRamadan.app to start your Ramadan fasting journey."
         robots="noindex, nofollow"
       />
-      <div className="text-center max-w-md">
+      <main id="main-content" className="text-center max-w-md">
         <h1 className="mb-4 text-3xl sm:text-4xl font-bold">404</h1>
         <p className="mb-6 text-lg sm:text-xl text-muted-foreground">Oops! Page not found</p>
         <a
@@ -25,7 +25,7 @@ const NotFound = () => {
         >
           Return to Home
         </a>
-      </div>
+      </main>
     </div>
   );
 };

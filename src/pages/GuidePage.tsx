@@ -181,7 +181,7 @@ const GuidePage = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main className="main-content container mx-auto px-4 max-w-2xl">
+        <main id="main-content" className="main-content container mx-auto px-4 max-w-2xl">
           <h1 className="text-2xl font-display font-bold mb-4">Guide not found</h1>
           <Link to="/guides" className="text-primary-contrast hover:underline">
             Back to all guides
@@ -204,7 +204,7 @@ const GuidePage = () => {
       />
       <Navbar />
 
-      <main className="main-content">
+      <main id="main-content" className="main-content">
         <div className="container mx-auto px-4 max-w-3xl min-w-0">
           <Link
             to="/guides"

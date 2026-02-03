@@ -91,16 +91,17 @@ describe("Break fast reasons", () => {
 describe("Daily missions edge cases", () => {
   const todayStr = new Date().toISOString().split("T")[0];
 
-  it("getDailyMissions returns 6 missions with empty state", () => {
+  it("getDailyMissions returns 7 missions with empty state", () => {
     const missions = getDailyMissions({
       todayStr,
       progress: defaultProgress,
       mealPlans: {},
       foodLog: {},
       scheduleNotes: {},
+      quranVerseViewedDates: [],
       hadithViewedDates: [],
     });
-    expect(missions).toHaveLength(6);
+    expect(missions).toHaveLength(7);
     expect(missions.every((m) => m.id && m.label && typeof m.completed === "boolean")).toBe(true);
   });
 
@@ -111,6 +112,7 @@ describe("Daily missions edge cases", () => {
       mealPlans: {},
       foodLog: {},
       scheduleNotes: {},
+      quranVerseViewedDates: [],
       hadithViewedDates: [todayStr],
     });
     const readHadith = missions.find((m) => m.id === "read_hadith");

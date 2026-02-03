@@ -49,6 +49,8 @@ export const FastingTimer = ({
   const [preferences] = useUserPreferences();
   const displayTimezone = useDisplayTimezone();
   const { location: autoLocation } = useAutoLocation();
+  // Throttle interval for INP: 2s for countdown/local time instead of 1s
+  const TICK_MS = 2000;
   const displayLocation = preferences.location || (autoLocation ? autoLocation.displayName : null);
   const locationShort = displayLocation ? displayLocation.split(",").slice(0, 2).join(",").trim() : null;
 
@@ -81,9 +83,9 @@ export const FastingTimer = ({
       );
     };
     formatLocalTime();
-    const t = setInterval(formatLocalTime, 1000);
+    const t = setInterval(formatLocalTime, TICK_MS);
     return () => clearInterval(t);
-  }, [displayTimezone]);
+  }, [displayTimezone, TICK_MS]);
 
   const imsakSec = timeStringToSecondsSinceMidnight(suhoorTime);
   const maghribSec = timeStringToSecondsSinceMidnight(iftarTime);
@@ -153,18 +155,19 @@ export const FastingTimer = ({
           seconds: Math.max(0, Math.floor((diff % 6e4) / 1000)),
         });
       }
-    }, 1000);
+    }, TICK_MS);
     return () => clearInterval(interval);
-  }, [suhoorTime, iftarTime, displayTimezone, imsakSec, maghribSec]);
+  }, [suhoorTime, iftarTime, displayTimezone, imsakSec, maghribSec, TICK_MS]);
 
   const formatNumber = (num: number) => num.toString().padStart(2, '0');
 
   return (
     <motion.div 
-      className="timer-display relative overflow-hidden"
+      className="timer-display relative overflow-hidden min-h-[300px]"
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5 }}
+      style={{ contain: "layout" }}
     >
       <div className="absolute inset-0 pattern-islamic opacity-10" />
       
@@ -183,7 +186,12 @@ export const FastingTimer = ({
               role="button"
               tabIndex={0}
               onDoubleClick={() => setRamadanInfoOpen(true)}
-              onKeyDown={(e) => e.key === "Enter" && setRamadanInfoOpen(true)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setRamadanInfoOpen(true);
+                }
+              }}
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               className="flex items-center justify-center gap-2 mb-2 px-4 py-2 rounded-full bg-secondary/20 mx-auto w-fit cursor-pointer select-none hover:bg-secondary/25 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
@@ -468,7 +476,9 @@ export const FastingTimer = ({
         <div className="mt-3 flex justify-center">
           {isFromCache ? (
             <p className="text-center text-xs text-primary-foreground/80">
-              Times may be outdated. <button type="button" onClick={() => refetchPrayers()} className="underline hover:text-primary-foreground">Try again</button> · <Link to="/settings" className="underline hover:text-primary-foreground/90">Set location</Link>
+              {typeof navigator !== "undefined" && !navigator.onLine
+                ? "Cached times · You're offline."
+                : <>Times may be outdated. <button type="button" onClick={() => refetchPrayers()} className="underline hover:text-primary-foreground">Try again</button> · <Link to="/settings" className="underline hover:text-primary-foreground/90">Set location</Link></>}
             </p>
           ) : error || (!effectiveLat || !effectiveLng) ? (
             <LocationRequiredCTA
