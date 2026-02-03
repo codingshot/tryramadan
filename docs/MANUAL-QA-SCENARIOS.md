@@ -287,4 +287,4 @@
 - **E2E conversion:** Map steps to actions (e.g. `visit`, `click`, `fill`, `selectOption`); assert DOM text, `localStorage`, and (if possible) downloaded file content; use fixed dates/locations or fixtures for repeatability.
 - **Regression:** Re-run Scenario 1 (onboarding + first fast), Scenario 3 (break fast + resume), and Scenario 10 (last day + export) after major changes.
 
-**Reference:** Routes and flows are documented in `docs/UX-FLOWS-AND-FRICTION.md`; logic and test-case IDs in `docs/QA-RAMADAN-LOGIC-AND-TEST-CASES.md`.
+**Reference:** Routes and flows in `docs/UX-FLOWS-AND-FRICTION.md`; logic and test-case IDs in `docs/QA-RAMADAN-LOGIC-AND-TEST-CASES.md`; **personas, flows, and page-by-page test prompts** in `docs/USER-FLOWS-AND-TEST-PROMPTS.md`.

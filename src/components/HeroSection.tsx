@@ -139,6 +139,9 @@ export const HeroSection = () => {
                 I'm Muslim
               </Link>
             </motion.div>
+            <p className="text-xs text-primary-foreground/60 text-center -mt-8 mb-4">
+              Both paths set your location for accurate times.
+            </p>
 
             {/* Timer preview — min-height reserves space to avoid CLS while timer loads */}
             <motion.div

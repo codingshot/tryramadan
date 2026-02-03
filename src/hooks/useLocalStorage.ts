@@ -74,6 +74,8 @@ export interface UserPreferences {
   hydrationReminderTimes: string[];
   /** Voluntary Sunnah fasting IDs: monday-thursday, ayyam-al-beed, etc. */
   voluntaryFasting: string[];
+  /** Show streak counter and achievement badges. When false, simpler progress view. */
+  showStreakAndAchievements: boolean;
 }
 
 export const defaultPreferences: UserPreferences = {
@@ -102,6 +104,7 @@ export const defaultPreferences: UserPreferences = {
   hydrationReminderEnabled: false,
   hydrationReminderTimes: ['12:00', '15:00', '19:00'],
   voluntaryFasting: [],
+  showStreakAndAchievements: true,
 };
 
 const PREFERENCES_KEY = 'tryramadan-preferences';
@@ -272,9 +275,11 @@ export function getTodayDateString(): string {
 }
 
 /** When todayOverride is provided (e.g. location's today from display timezone), use it so fasting log aligns with countdowns. */
+/** Get the fasting log entry for a given date. If multiple entries exist for the same date (legacy/bug), returns the last one so behaviour is defined (EC-OV-8). */
 export function getTodayFastingLog(progress: FastingProgress, todayOverride?: string): FastingLogEntry | undefined {
   const today = todayOverride ?? getTodayDateString();
-  return progress.fastingLog?.find((e) => e.date === today);
+  const matches = (progress.fastingLog || []).filter((e) => e.date === today);
+  return matches.length > 0 ? matches[matches.length - 1] : undefined;
 }
 
 export function isFastingToday(progress: FastingProgress, todayOverride?: string): boolean {
@@ -307,9 +312,14 @@ export function startFastingToday(
     ? [...progress.fastingLog.filter((e) => e.date !== today), newEntry]
     : [newEntry];
 
+  // When starting a fast, clear "skipped" for this day so we don't have both skipped and in_progress (EC-SKIP-2).
+  const skippedDays = progress.skippedDays ?? [];
+  const newSkippedDays = skippedDays.includes(today) ? skippedDays.filter((d) => d !== today) : skippedDays;
+
   setProgress({
     ...progress,
     fastingLog: updatedLog,
+    ...(skippedDays.includes(today) ? { skippedDays: newSkippedDays } : {}),
   });
 
   console.log(`${LOG_PREFIX} You are fasting. Started at ${now} (${today}).`);
@@ -929,19 +939,20 @@ export function getFastingLogForDate(progress: FastingProgress, dateStr: string)
   return progress.fastingLog?.find((e) => e.date === dateStr);
 }
 
-/** Consecutive days of fasting ending today (same logic as Dashboard). */
+/** Consecutive days ending today where each day is completed or excused (excused days do not break the streak). */
 export function calculateStreak(progress: FastingProgress): number {
   return getStreakDays(progress).length;
 }
 
-/** Dates that form the current streak (most recent consecutive completed days ending today). */
+/** Dates that form the current streak: most recent consecutive days ending today where each day is completed OR excused (illness, travel, etc.). Excused days do not reset the streak. */
 export function getStreakDays(progress: FastingProgress): string[] {
   const completedSet = new Set(progress.completedDays || []);
+  const excusedSet = new Set(getExcusedFastDays(progress));
   const result: string[] = [];
   const currentDate = new Date();
   while (true) {
     const dayStr = toLocalDateString(currentDate);
-    if (completedSet.has(dayStr)) {
+    if (completedSet.has(dayStr) || excusedSet.has(dayStr)) {
       result.push(dayStr);
       currentDate.setDate(currentDate.getDate() - 1);
     } else {
@@ -950,6 +961,9 @@ export function getStreakDays(progress: FastingProgress): string[] {
   }
   return result;
 }
+
+/** Reason ids that count as "excused" (illness, travel, menstruation, medical) for stats. */
+const EXCUSED_BROKEN_REASON_IDS = ['illness', 'travel', 'menstruation', 'medical'] as const;
 
 /** Dates when the user broke their fast (from fastingLog). */
 export function getBrokenFastDays(progress: FastingProgress): string[] {
@@ -960,15 +974,25 @@ export function getBrokenFastDays(progress: FastingProgress): string[] {
     .reverse();
 }
 
-/** Longest consecutive streak in completedDays (computed from stored dates). */
+/** Dates when the user broke their fast with an excused reason (illness, travel, menstruation, medical). Subset of broken for stats. */
+export function getExcusedFastDays(progress: FastingProgress): string[] {
+  return (progress.fastingLog || [])
+    .filter((e) => e.status === 'broken' && e.brokenReason && (EXCUSED_BROKEN_REASON_IDS as readonly string[]).includes(e.brokenReason))
+    .map((e) => e.date)
+    .sort()
+    .reverse();
+}
+
+/** Longest consecutive streak: longest run of calendar days where each day is completed or excused. */
 export function getLongestStreak(progress: FastingProgress): number {
-  const sorted = [...(progress.completedDays || [])].sort();
-  if (sorted.length === 0) return 0;
+  const excusedSet = new Set(getExcusedFastDays(progress));
+  const combined = [...new Set([...(progress.completedDays || []), ...excusedSet])].sort();
+  if (combined.length === 0) return 0;
   let longest = 1;
   let current = 1;
-  for (let i = 1; i < sorted.length; i++) {
-    const prev = new Date(sorted[i - 1] + 'T12:00:00').getTime();
-    const curr = new Date(sorted[i] + 'T12:00:00').getTime();
+  for (let i = 1; i < combined.length; i++) {
+    const prev = new Date(combined[i - 1] + 'T12:00:00').getTime();
+    const curr = new Date(combined[i] + 'T12:00:00').getTime();
     const diffDays = Math.round((curr - prev) / (1000 * 60 * 60 * 24));
     if (diffDays === 1) {
       current++;
@@ -984,6 +1008,46 @@ export function getLongestStreak(progress: FastingProgress): number {
 export function getTotalHoursFasted(progress: FastingProgress): number {
   const log = progress.fastingLog || [];
   return log.reduce((sum, e) => sum + (e.hoursFasted ?? (e.startedAt && e.completedAt ? hoursBetween(e.startedAt, e.completedAt) : 0)), 0);
+}
+
+/** Consecutive days ending today with at least one journal entry. For non-fasting achievements. */
+export function getJournalStreak(entries: { date: string }[]): number {
+  const entryDates = new Set(entries.map((e) => e.date));
+  let count = 0;
+  const d = new Date();
+  while (true) {
+    const dayStr = toLocalDateString(d);
+    if (entryDates.has(dayStr)) {
+      count++;
+      d.setDate(d.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  return count;
+}
+
+/** Consecutive days ending today with both suhoor and iftar logged (meal plan or food log). For mindful-eating achievement. */
+export function getMindfulEatingStreak(
+  foodLog: Record<string, DayFoodLog>,
+  mealPlans: Record<string, DayMealPlan>
+): number {
+  let count = 0;
+  const d = new Date();
+  while (true) {
+    const dayStr = toLocalDateString(d);
+    const plan = mealPlans[dayStr];
+    const log = normalizeDayFoodLog(foodLog[dayStr]);
+    const hasSuhoor = !!(plan?.suhoor?.trim()) || (log.suhoor?.length ?? 0) > 0;
+    const hasIftar = !!(plan?.iftar?.trim()) || (log.iftar?.length ?? 0) > 0;
+    if (hasSuhoor && hasIftar) {
+      count++;
+      d.setDate(d.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  return count;
 }
 
 // --- Daily missions (today's actionable tasks) ---

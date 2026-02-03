@@ -162,3 +162,15 @@ QA summary for Ramadan-specific logic: calendar/dates, fasting states, meal & jo
 - DST and timezone-boundary tests and any small in-app notes.
 
 Use the test case IDs (CAL-*, FS-*, ML-*, J-*, E2E-*) when adding unit tests (e.g. in `ramadan.test.ts`, `loggingAndTracking.test.ts`, or new `journal.test.ts` / `meals.test.ts`) and when writing E2E or integration tests.
+
+---
+
+## 6. Implementation status
+
+Implemented in app:
+
+- **1.2 Missing year in RAMADAN_START_BY_YEAR:** `getRamadanStartForYear` uses fallback (~11 days earlier from 2025); in development, `console.warn` logs when fallback is used so missing years are visible.
+- **2.3 Explicit "I didn't fast today":** `skippedDays` and `setDaySkipped`; UI on Dashboard and DashboardToday ("I didn't fast today" button). Progress shows Completed / Broken / Skipped.
+- **2.3 Excused vs unintentional break:** `getExcusedFastDays(progress)` returns broken days with reason illness, travel, menstruation, or medical. Dashboard Progress breakdown shows "Broken: Y (Z excused)" when Z > 0; Broken fast card tooltip mentions excused when applicable.
+- **3.2 Link meal to fast status:** On Meals page, when user has an in-progress fast today, a note is shown: "Logging food here doesn't break your fast; use 'Break fast' on the Dashboard if you ate."
+- **3.4 Journal timestamps:** Journal entries have optional `createdAt` / `updatedAt` (ISO string) on save.

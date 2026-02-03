@@ -43,6 +43,7 @@ import {
   calculateStreak,
   getStreakDays,
   getBrokenFastDays,
+  getExcusedFastDays,
   useNotificationSettings,
   usePrayerNotificationPrefs,
   useDayFoodLog,
@@ -64,6 +65,7 @@ import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
 import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
 import { Footer } from "@/components/Footer";
 import { PageSEO } from "@/components/PageSEO";
+import { toast } from "sonner";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -263,7 +265,10 @@ const Dashboard = () => {
     const name = addFoodInputs.name.trim();
     const cal = parseInt(addFoodInputs.cal, 10) || 0;
     const portions = Math.max(0.1, parseFloat(addFoodInputs.portions) || 1);
-    if (!name && cal <= 0) return;
+    if (!name && cal <= 0) {
+      toast.error("Add a name or at least one calorie so we can save this item.");
+      return;
+    }
     const day = normalizeDayFoodLog(foodLogs[selectedDate]);
     const entry = {
       id: `custom-${Date.now()}`,
@@ -791,6 +796,7 @@ const Dashboard = () => {
                           <p className="text-xs text-muted-foreground mt-1">Mark that you didn&apos;t fast (e.g. travel, illness). Won&apos;t count as a broken fast.</p>
                         </TooltipContent>
                       </Tooltip>
+                      <p className="text-xs text-muted-foreground mt-1 w-full basis-full">&quot;I&apos;m fasting&quot; = you started today&apos;s fast; &quot;I didn&apos;t fast today&quot; = you&apos;re not fasting (e.g. travel, illness).</p>
                     </>
                   )}
                   {fastingToday && (
@@ -910,6 +916,7 @@ const Dashboard = () => {
               return day === 1 || day === 4;
             }).sort().reverse();
             const brokenDaysList = getBrokenFastDays(progress);
+            const excusedDaysList = getExcusedFastDays(progress);
 
             const DaysListDialog = ({ title, dates, open, onOpenChange }: { title: string; dates: string[]; open: boolean; onOpenChange: (v: boolean) => void }) => (
               <Dialog open={open} onOpenChange={onOpenChange}>
@@ -1033,11 +1040,15 @@ const Dashboard = () => {
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs p-3">
                     <p>{brokenDaysList.length > 0 ? "Click to see which days" : "Days you broke fast early."}</p>
+                    {excusedDaysList.length > 0 && (
+                      <p className="text-xs text-muted-foreground mt-1">{excusedDaysList.length} of these are excused (e.g. illness, travel).</p>
+                    )}
                   </TooltipContent>
                 </Tooltip>
               </motion.div>
               <p className="text-xs text-muted-foreground text-center mb-4 -mt-2">
-                Completed: {progress.completedDays.length} · Broken: {brokenDaysList.length} · Skipped: {(progress.skippedDays ?? []).length}
+                Completed: {progress.completedDays.length} · Broken: {brokenDaysList.length}
+                {excusedDaysList.length > 0 ? ` (${excusedDaysList.length} excused)` : ""} · Skipped: {(progress.skippedDays ?? []).length}
               </p>
                 <DaysListDialog title="Day streak — days fasted" dates={streakDaysList} open={statsDialog === "streak"} onOpenChange={(v) => !v && setStatsDialog(null)} />
                 <DaysListDialog title="Total days fasted" dates={totalDaysList} open={statsDialog === "total"} onOpenChange={(v) => !v && setStatsDialog(null)} />

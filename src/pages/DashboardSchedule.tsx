@@ -370,7 +370,10 @@ const DashboardSchedule = () => {
     const protein = parseFloat(addFoodCustomInputs.protein) || 0;
     const carbs = parseFloat(addFoodCustomInputs.carbs) || 0;
     const fat = parseFloat(addFoodCustomInputs.fat) || 0;
-    if (!name && cal <= 0) return;
+    if (!name && cal <= 0) {
+      toast.error("Add a name or at least one calorie so we can save this item.");
+      return;
+    }
     const entry: FoodLogEntry = {
       id: `custom-${Date.now()}`,
       type: "custom",

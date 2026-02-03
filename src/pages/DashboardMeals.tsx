@@ -9,7 +9,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import recipesData from "@/data/recipes.json";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useRecipeFavorites, useRecentRecipes, useDayMealPlans, useDayFoodLog, clampCalories, useSuhoorLabel, useIftarLabel, useUserPreferences } from "@/hooks/useLocalStorage";
+import { useRecipeFavorites, useRecentRecipes, useDayMealPlans, useDayFoodLog, clampCalories, useSuhoorLabel, useIftarLabel, useUserPreferences, useFastingProgress, isFastingToday } from "@/hooks/useLocalStorage";
 import { parseNutrient } from "@/lib/cultureRecipes";
 import { toast } from "sonner";
 import {
@@ -68,6 +68,8 @@ const DashboardMeals = () => {
     portions: "1",
   });
   const today = new Date().toISOString().split("T")[0];
+  const [progress] = useFastingProgress();
+  const fastingToday = isFastingToday(progress, today);
 
   const baseRecipes = activeTab === "suhoor" ? allSuhoor : allIftar;
   const recipes = useMemo(() => {
@@ -255,6 +257,11 @@ const DashboardMeals = () => {
                 Browse all recipes by culture →
               </Link>
             </p>
+            {fastingToday && (
+              <p className="mt-3 text-sm text-muted-foreground rounded-lg bg-muted/50 border border-border px-3 py-2">
+                Logging food here doesn&apos;t break your fast; use &quot;Break fast&quot; on the Dashboard if you ate.
+              </p>
+            )}
           </motion.div>
           
           {/* Tab switcher */}

@@ -2,6 +2,8 @@
 
 Design document for QA: edge cases across **fast tracking**, **meals**, **journal**, and **stats**, with inputs, steps, expected outcomes, and failure modes. Tables are suitable for later automation (e.g. test IDs, parameterised runs).
 
+**Related:** **`HISTORICAL-DATA-AND-DELETION-FLOWS.md`** (history, deletion, undo, new device). **`OFFLINE-AND-DEGRADED-NETWORK-FLOWS.md`** (offline, cache, first open no network, API failure/timeout, logging fast without location).
+
 ---
 
 ## 1. Calendar & Ramadan boundaries
@@ -187,3 +189,14 @@ Condensed table for test automation (ID, area, one-line scenario, priority).
 - **E2E / manual:** Use EC-TZ-*, EC-CAL-1/2, EC-SKIP-1/3, EC-OV-3, EC-OV-7 with real browser and (optionally) mocked time/location.
 
 Each row’s **Steps** and **Expected outcome** can be turned into `Given/When/Then` or `arrange/act/assert`; **What could break** helps choose assertions and failure messages.
+
+---
+
+## Implementation status (app robustness)
+
+Implemented in app to match expected outcomes:
+
+- **EC-OV-8 (Duplicate fastingLog same date):** `getTodayFastingLog` returns the **last** entry for the given date when multiple exist; no duplicate in `completedDays`.
+- **EC-SKIP-2 (Skipped then start fast):** `startFastingToday` removes the day from `skippedDays` when adding in_progress so state is consistent.
+- **EC-J-5 (Export zero entries):** Journal export with zero entries shows toast and produces valid JSON `{ exportedAt, entries: [] }`; no crash.
+- **EC-M-4, EC-S-3:** `normalizeDayFoodLog` sets `between ?? []`; `getTotalHoursFasted` skips in_progress (no NaN).

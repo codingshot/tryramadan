@@ -82,9 +82,15 @@ export default function DashboardJournal() {
     setMood(entry?.mood);
   }, [writeDate, entries]);
 
+  const JOURNAL_CONTENT_MAX_LENGTH = 10000;
+
   const handleSave = () => {
     if (!content.trim()) {
       toast.error("Write something before saving. A few words are enough.");
+      return;
+    }
+    if (content.trim().length > JOURNAL_CONTENT_MAX_LENGTH) {
+      toast.error("Entry is too long. Consider shortening or splitting into multiple days.");
       return;
     }
     const now = new Date().toISOString();
@@ -136,6 +142,9 @@ export default function DashboardJournal() {
   };
 
   const handleExport = () => {
+    if (entries.length === 0) {
+      toast.info("No entries to export.");
+    }
     const data = {
       exportedAt: new Date().toISOString(),
       entries: entries.map((e) => ({
@@ -312,8 +321,15 @@ export default function DashboardJournal() {
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="Write a few lines..."
+              maxLength={JOURNAL_CONTENT_MAX_LENGTH}
               className="w-full p-4 rounded-xl border border-border bg-background min-h-[100px] text-sm resize-none focus:ring-2 focus:ring-secondary outline-none"
+              aria-describedby="journal-char-hint"
             />
+            {content.length > JOURNAL_CONTENT_MAX_LENGTH * 0.9 && (
+              <p id="journal-char-hint" className="text-xs text-muted-foreground mt-1">
+                {content.length.toLocaleString()} / {JOURNAL_CONTENT_MAX_LENGTH.toLocaleString()} characters
+              </p>
+            )}
             <label className="block text-sm font-medium mt-3 mb-1 flex items-center gap-2">
               <Smile className="w-4 h-4 text-secondary" />
               How was your day? (optional)

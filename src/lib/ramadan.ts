@@ -27,7 +27,10 @@ function getYearKey(date: Date): number {
 export function getRamadanStartForYear(year: number): Date {
   const iso = RAMADAN_START_BY_YEAR[year];
   if (iso) return new Date(iso + "T12:00:00"); // noon to avoid UTC date shift in western tz
-  // Approximate: assume ~11 days earlier each year from 2025
+  // Fallback: approximate ~11 days earlier each year from 2025 (for years not in RAMADAN_START_BY_YEAR)
+  if (typeof import.meta !== "undefined" && import.meta.env?.DEV) {
+    console.warn(`[ramadan] Year ${year} not in RAMADAN_START_BY_YEAR; using approximate fallback.`);
+  }
   const refYear = 2025;
   const refIso = RAMADAN_START_BY_YEAR[refYear];
   if (!refIso) return new Date(year, 2, 1);

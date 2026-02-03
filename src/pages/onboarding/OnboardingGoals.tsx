@@ -132,6 +132,9 @@ export default function OnboardingGoals() {
       <p className="mt-4 mb-2 text-sm text-muted-foreground">
         You&apos;re all set. When Ramadan begins, you&apos;ll see your dashboard with a countdown, daily tasks, and fasting timer.
       </p>
+      <p className="mt-2 mb-2 text-xs text-muted-foreground">
+        You can change prayer-time method and more in Settings after setup.
+      </p>
       <button
         type="submit"
         className="w-full mt-6 min-h-[44px] py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2 cursor-pointer"
