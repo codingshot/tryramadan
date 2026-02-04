@@ -10,6 +10,7 @@ import {
   Download,
   Calendar as CalendarIcon,
   Smile,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Navbar } from "@/components/Navbar";
@@ -155,6 +156,16 @@ export default function DashboardJournal() {
     setContent(existing?.content ?? "");
     setGratitude(existing?.gratitude ?? "");
     setMood(existing?.mood);
+  };
+
+  const handleDeleteEntry = () => {
+    if (!existingForWriteDate) return;
+    if (typeof window !== "undefined" && !window.confirm("Delete this entry? This cannot be undone.")) return;
+    setEntries((prev) => prev.filter((e) => e.date !== writeDate));
+    setContent("");
+    setGratitude("");
+    setMood(undefined);
+    toast.success("Entry deleted");
   };
 
   const handleExport = () => {
@@ -347,16 +358,29 @@ export default function DashboardJournal() {
                     ? `Entry for ${writeDate} (future)`
                     : `Entry for ${writeDate}`}
               </h3>
-              <label className="text-sm text-muted-foreground flex items-center gap-2">
-                Date
-                <input
-                  type="date"
-                  value={writeDate}
-                  onChange={(e) => handleSelectDate(new Date(e.target.value + "T12:00:00"))}
-                  className="px-2 py-1 rounded-lg border border-border bg-background text-sm"
-                  title="Pick any date — past, today, or future"
-                />
-              </label>
+              <div className="flex items-center gap-2">
+                {existingForWriteDate && (
+                  <button
+                    type="button"
+                    onClick={handleDeleteEntry}
+                    className="inline-flex items-center gap-1.5 py-1.5 px-3 rounded-lg border border-destructive/30 bg-destructive/10 text-destructive text-sm font-medium hover:bg-destructive/20 transition-colors"
+                    aria-label="Delete this entry"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete this entry
+                  </button>
+                )}
+                <label className="text-sm text-muted-foreground flex items-center gap-2">
+                  Date
+                  <input
+                    type="date"
+                    value={writeDate}
+                    onChange={(e) => handleSelectDate(new Date(e.target.value + "T12:00:00"))}
+                    className="px-2 py-1 rounded-lg border border-border bg-background text-sm"
+                    title="Pick any date — past, today, or future"
+                  />
+                </label>
+              </div>
             </div>
             <p className="text-sm text-muted-foreground mb-4">{prompt}</p>
             <textarea

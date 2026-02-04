@@ -540,6 +540,54 @@ export function setDaySkipped(
   console.log(`${LOG_PREFIX} Day skipped (didn't fast). ${today}`);
 }
 
+/** Update the broken reason for an existing broken log entry (E8). */
+export function updateBrokenReason(
+  progress: FastingProgress,
+  setProgress: (value: FastingProgress | ((prev: FastingProgress) => FastingProgress)) => void,
+  dateStr: string,
+  reasonId: string
+): void {
+  const reason = BROKEN_FAST_REASONS.some((r) => r.id === reasonId) ? reasonId : "other";
+  const updatedLog = (progress.fastingLog ?? []).map((e) =>
+    e.date === dateStr && e.status === "broken" ? { ...e, brokenReason: reason } : e
+  );
+  setProgress({ ...progress, fastingLog: updatedLog });
+  console.log(`${LOG_PREFIX} Broken reason updated for ${dateStr}: ${getBrokenReasonLabel(reason)}`);
+}
+
+/** Change a broken day to completed (B→C). Adds to completedDays, removes from skippedDays, updates log to completed. */
+export function setBrokenDayToCompleted(
+  progress: FastingProgress,
+  setProgress: (value: FastingProgress | ((prev: FastingProgress) => FastingProgress)) => void,
+  dateStr: string
+): void {
+  const completedAt = progress.fastingLog?.find((e) => e.date === dateStr && e.status === "broken")?.completedAt ?? new Date(dateStr + "T23:59:59Z").toISOString();
+  const updatedLog = (progress.fastingLog ?? []).map((e) =>
+    e.date === dateStr && e.status === "broken"
+      ? { ...e, status: "completed" as const, completedAt }
+      : e
+  );
+  const completedDays = progress.completedDays.includes(dateStr) ? progress.completedDays : [...progress.completedDays, dateStr].sort();
+  const skippedDays = (progress.skippedDays ?? []).filter((d) => d !== dateStr);
+  setProgress({ ...progress, fastingLog: updatedLog, completedDays, skippedDays });
+  console.log(`${LOG_PREFIX} Broken day ${dateStr} marked as completed.`);
+}
+
+/** Change a broken day back to in-progress (B→I). Updates log only. */
+export function setBrokenDayToInProgress(
+  progress: FastingProgress,
+  setProgress: (value: FastingProgress | ((prev: FastingProgress) => FastingProgress)) => void,
+  dateStr: string
+): void {
+  const updatedLog = (progress.fastingLog ?? []).map((e) =>
+    e.date === dateStr && e.status === "broken"
+      ? { ...e, status: "in_progress" as const, completedAt: undefined }
+      : e
+  );
+  setProgress({ ...progress, fastingLog: updatedLog });
+  console.log(`${LOG_PREFIX} Broken day ${dateStr} set back to in progress.`);
+}
+
 // Notification settings
 export interface NotificationSettings {
   suhoorEnabled: boolean;

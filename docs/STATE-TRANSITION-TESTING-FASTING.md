@@ -141,8 +141,10 @@ Use the table for automated or manual tests:
 ## 8. Implementation notes (current app)
 
 - **Today:** Start fast, Mark complete, Break fast, I didn't fast, Uncomplete (when completed) are all available. "I'm fasting" is hidden when already completed or skipped; "Break fast" only when in_progress.
-- **Past day:** setDayCompleted(dateStr, true/false) and (when implemented) setDaySkipped(..., dateStr) support make-up and "didn't fast this day." Schedule/Dashboard show "I fasted this day — mark complete" for past days.
+- **Past day:** setDayCompleted(dateStr, true/false) and setDaySkipped(..., dateStr) support make-up and "didn't fast this day." Schedule/Dashboard show "I fasted this day — mark complete" for past days.
 - **Completed → Skipped:** setDaySkipped removes the day from completedDays and clears fastingLog; so C → S is **possible** if the UI allows "I didn't fast this day" for an already-completed day. Recommendation: block or warn as in §5.
-- **B → C / B → I:** Not implemented; UI does not offer "Mark complete" or "I'm fasting" for a broken day.
+- **E8 Edit broken reason:** Implemented. On Dashboard Schedule, when the selected day is broken, "Edit reason" opens BreakFastReasonDialog; `updateBrokenReason(progress, setProgress, dateStr, reasonId)` updates the log entry.
+- **B → C (broken → completed):** Implemented. Schedule shows "Mark as completed anyway?" for a broken day; confirmation then calls `setBrokenDayToCompleted(progress, setProgress, dateStr)` (adds to completedDays, updates log to completed, removes from skippedDays if present).
+- **B → I (broken → in-progress):** Implemented. Schedule shows "Start fast again" for a broken day; confirmation then calls `setBrokenDayToInProgress(progress, setProgress, dateStr)` (sets log entry to in_progress).
 
 This document defines the state machine for a single day's fasting record and the expected behavior for valid and invalid transitions.

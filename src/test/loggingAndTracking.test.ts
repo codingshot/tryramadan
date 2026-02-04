@@ -17,6 +17,9 @@ import {
   normalizeDayFoodLog,
   getDayTotalsFromFoodLog,
   hoursBetween,
+  updateBrokenReason,
+  setBrokenDayToCompleted,
+  setBrokenDayToInProgress,
   type FastingProgress,
   type DayFoodLog,
 } from "@/hooks/useLocalStorage";
@@ -216,5 +219,61 @@ describe("hoursBetween", () => {
   it("handles same time", () => {
     const t = "2025-01-01T12:00:00Z";
     expect(hoursBetween(t, t)).toBe(0);
+  });
+});
+
+describe("State transition: broken day (E8, B→C, B→I)", () => {
+  const dateStr = "2025-03-15";
+
+  it("updateBrokenReason updates brokenReason for existing broken entry", () => {
+    const progress: FastingProgress = {
+      ...defaultProgress,
+      fastingLog: [
+        { date: dateStr, startedAt: `${dateStr}T05:00:00Z`, completedAt: `${dateStr}T12:00:00Z`, status: "broken", brokenReason: "other", hoursFasted: 7 },
+      ],
+    };
+    let next: FastingProgress = progress;
+    const setProgress = (v: FastingProgress | ((p: FastingProgress) => FastingProgress)) => {
+      next = typeof v === "function" ? v(next) : v;
+    };
+    updateBrokenReason(next, setProgress, dateStr, "illness");
+    const entry = next.fastingLog?.find((e) => e.date === dateStr);
+    expect(entry?.status).toBe("broken");
+    expect(entry?.brokenReason).toBe("illness");
+  });
+
+  it("setBrokenDayToCompleted adds to completedDays and sets log to completed", () => {
+    const progress: FastingProgress = {
+      ...defaultProgress,
+      completedDays: [],
+      fastingLog: [
+        { date: dateStr, startedAt: `${dateStr}T05:00:00Z`, completedAt: `${dateStr}T12:00:00Z`, status: "broken", brokenReason: "other", hoursFasted: 7 },
+      ],
+    };
+    let next: FastingProgress = progress;
+    const setProgress = (v: FastingProgress | ((p: FastingProgress) => FastingProgress)) => {
+      next = typeof v === "function" ? v(next) : v;
+    };
+    setBrokenDayToCompleted(next, setProgress, dateStr);
+    expect(next.completedDays).toContain(dateStr);
+    const entry = next.fastingLog?.find((e) => e.date === dateStr);
+    expect(entry?.status).toBe("completed");
+  });
+
+  it("setBrokenDayToInProgress sets log to in_progress", () => {
+    const progress: FastingProgress = {
+      ...defaultProgress,
+      fastingLog: [
+        { date: dateStr, startedAt: `${dateStr}T05:00:00Z`, completedAt: `${dateStr}T12:00:00Z`, status: "broken", brokenReason: "other", hoursFasted: 7 },
+      ],
+    };
+    let next: FastingProgress = progress;
+    const setProgress = (v: FastingProgress | ((p: FastingProgress) => FastingProgress)) => {
+      next = typeof v === "function" ? v(next) : v;
+    };
+    setBrokenDayToInProgress(next, setProgress, dateStr);
+    const entry = next.fastingLog?.find((e) => e.date === dateStr);
+    expect(entry?.status).toBe("in_progress");
+    expect(entry?.completedAt).toBeUndefined();
   });
 });

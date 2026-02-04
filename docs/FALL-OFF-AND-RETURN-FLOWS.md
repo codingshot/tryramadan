@@ -137,7 +137,7 @@ Design document for **realistic behavior when users stop logging and come back**
 |------|--------|--------|
 | Show today on return; no guilt copy | ✅ (no negative copy today) | Add optional "Add past days?" or "You have X days logged" if desired. |
 | Mark **past** day complete | ✅ | Dashboard + Schedule. |
-| Mark **past** day as "I didn’t fast" | ⚠️ Partial | Data: `setDaySkipped(..., dateStr)`. UI: only "today" on Dashboard. Add Schedule (and optionally Dashboard when past day selected) button "I didn’t fast this day" calling `setDaySkipped(progress, setProgress, selectedDate)`. |
+| Mark **past** day as "I didn’t fast" | ✅ Done | Data: `setDaySkipped(..., dateStr)`. UI: Dashboard + Today for today; Schedule has "I didn't fast this day" for selected day. Add Schedule (and optionally Dashboard when past day selected) button "I didn’t fast this day" calling `setDaySkipped(progress, setProgress, selectedDate)`. |
 | Leave days untracked | ✅ | No action needed; empty is valid. |
 | Backfill journal/meals for past days | ✅ | Journal calendar + Schedule/Meals per day. |
 | Normalize same-day conflict (completed vs skipped vs broken) | ⚠️ Recommend | On load or before save: ensure each date in at most one of completed/skipped/broken; define precedence if legacy data has duplicates. |

@@ -41,6 +41,10 @@ import {
   getFastingLogForDate,
   getBrokenReasonLabel,
   hoursBetween,
+  setDaySkipped,
+  updateBrokenReason,
+  setBrokenDayToCompleted,
+  setBrokenDayToInProgress,
   useUserPreferences,
   getRecommendedCaloriesFromPreferences,
   useCalendarEvents,
@@ -78,6 +82,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { BreakFastReasonDialog } from "@/components/BreakFastReasonDialog";
 
 const allRecipesForPicker = getRecipes();
 
@@ -185,6 +200,9 @@ const DashboardSchedule = () => {
   const [exportLoading, setExportLoading] = useState(false);
   const [customEventTitle, setCustomEventTitle] = useState("");
   const [customEventTime, setCustomEventTime] = useState("18:00");
+  const [editReasonOpen, setEditReasonOpen] = useState(false);
+  const [confirmCompleteOpen, setConfirmCompleteOpen] = useState(false);
+  const [confirmInProgressOpen, setConfirmInProgressOpen] = useState(false);
 
   const [journalEntries] = useLocalStorage<{ date: string; content?: string; gratitude?: string }[]>("tryramadan-journal", []);
   const journalDates = new Set(journalEntries.map((e) => e.date));
@@ -325,6 +343,7 @@ const DashboardSchedule = () => {
   const selectedRamadanDay = selectedDateObj ? ramadanRange.getRamadanDayNumber(selectedDateObj) : null;
   const selectedIsSunnah = selectedDateObj ? isSunnahDay(selectedDateObj) : false;
   const selectedCompleted = selectedDate ? progress.completedDays.includes(selectedDate) : false;
+  const selectedSkipped = selectedDate ? (progress.skippedDays ?? []).includes(selectedDate) : false;
   /** Meal planning is for today and future days only; past days show what was planned (read-only). */
   const isSelectedPastDay = selectedDate ? selectedDate < todayStr : false;
   const canEditMealPlan = selectedDate ? selectedDate >= todayStr : false;
@@ -1145,20 +1164,123 @@ const DashboardSchedule = () => {
                       </div>
                     )}
 
-                    {/* Mark complete = log that you fasted this day (dawn to sunset) */}
-                    {(selectedIsRamadan || selectedIsSunnah) && (
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant={selectedCompleted ? "secondary" : "outline"}
-                          size="sm"
-                          onClick={() => toggleCompleted(selectedDate)}
-                          className="gap-2"
-                        >
-                          <Check className="w-4 h-4" />
-                          {selectedCompleted ? "Yes, logged ✓" : "I fasted this day — mark complete"}
-                        </Button>
+                    {/* Mark complete / I didn't fast this day (FALL-OFF-AND-RETURN-FLOWS); broken day: Edit reason, B→C, B→I (STATE-TRANSITION-TESTING-FASTING) */}
+                    {(selectedIsRamadan || selectedIsSunnah) && selectedDate && (
+                      <div className="flex flex-wrap items-center gap-2">
+                        {selectedFastingLog?.status === "broken" ? (
+                          <>
+                            <Button variant="outline" size="sm" onClick={() => setEditReasonOpen(true)} className="gap-2">
+                              <PenLine className="w-4 h-4" />
+                              Edit reason
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={() => setConfirmCompleteOpen(true)} className="gap-2">
+                              <Check className="w-4 h-4" />
+                              Mark as completed anyway?
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={() => setConfirmInProgressOpen(true)} className="gap-2">
+                              <Clock className="w-4 h-4" />
+                              Start fast again
+                            </Button>
+                            {!selectedSkipped && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setDaySkipped(progress, setProgress, selectedDate)}
+                                className="gap-2 text-muted-foreground"
+                              >
+                                I didn&apos;t fast this day
+                              </Button>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <Button
+                              variant={selectedCompleted ? "secondary" : "outline"}
+                              size="sm"
+                              onClick={() => toggleCompleted(selectedDate)}
+                              className="gap-2"
+                            >
+                              <Check className="w-4 h-4" />
+                              {selectedCompleted ? "Yes, logged ✓" : "I fasted this day — mark complete"}
+                            </Button>
+                            {!selectedSkipped && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setDaySkipped(progress, setProgress, selectedDate)}
+                                className="gap-2 text-muted-foreground"
+                              >
+                                I didn&apos;t fast this day
+                              </Button>
+                            )}
+                          </>
+                        )}
                       </div>
                     )}
+                    {/* Edit broken reason (E8) */}
+                    {selectedDate && (
+                      <BreakFastReasonDialog
+                        open={editReasonOpen}
+                        onOpenChange={setEditReasonOpen}
+                        title="Change reason for breaking fast"
+                        onSelectReason={(reasonId) => {
+                          updateBrokenReason(progress, setProgress, selectedDate, reasonId);
+                          setEditReasonOpen(false);
+                          toast.success("Reason updated");
+                        }}
+                        userType={preferences?.userType}
+                      />
+                    )}
+                    {/* B→C: Mark broken day as completed (with confirmation) */}
+                    <AlertDialog open={confirmCompleteOpen} onOpenChange={setConfirmCompleteOpen}>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Mark this day as completed?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This day is currently marked as broken. Do you want to change it to completed? (For example, if you made up the fast later or logged it by mistake.)
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => {
+                              if (selectedDate) {
+                                setBrokenDayToCompleted(progress, setProgress, selectedDate);
+                                toast.success("Day marked as completed");
+                              }
+                              setConfirmCompleteOpen(false);
+                            }}
+                          >
+                            Yes, mark complete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                    {/* B→I: Set broken day back to in-progress (with confirmation) */}
+                    <AlertDialog open={confirmInProgressOpen} onOpenChange={setConfirmInProgressOpen}>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Start fast again for this day?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will change the day from &quot;broken&quot; back to &quot;in progress&quot;. Use this if you broke the fast by mistake or want to log again.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => {
+                              if (selectedDate) {
+                                setBrokenDayToInProgress(progress, setProgress, selectedDate);
+                                toast.success("Day set to in progress");
+                              }
+                              setConfirmInProgressOpen(false);
+                            }}
+                          >
+                            Start fast again
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
 
                     {/* Hours fasted (if logged) */}
                     {(selectedFastingLog?.hoursFasted != null ||

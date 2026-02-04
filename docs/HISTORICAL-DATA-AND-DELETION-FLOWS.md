@@ -108,7 +108,7 @@ Design document for **viewing history**, **comparing Ramadan years**, **export/r
 | Compare to last year | Not implemented | Add "Last Ramadan" stats when data exists in previous year's range; optional comparison UI. |
 | Export journal | Yes (Journal page + Settings export includes journal) | Ensure Settings export also includes meal plans + food log for full backup. |
 | Delete fasting day | Uncomplete supported | Document; optionally "Clear skipped" for a day. |
-| Delete single journal entry | Not in UI | Add "Delete this entry" with confirm; update data model (remove from array). |
+| Delete single journal entry | Done | "Delete this entry" on Journal when viewing an existing entry; confirm then remove from array. |
 | Delete single meal item | Schedule may allow; verify | Confirm in Schedule/Meals; document behaviour. |
 | Reset all | Resets progress only; label says "Reset all progress" | Rename to "Reset fasting progress" or add full reset with clear copy and "Export first" CTA. |
 | Undo delete / reset | Not implemented | Add optional undo toast (single-step backup) for uncomplete and reset. |

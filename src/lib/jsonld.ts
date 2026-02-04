@@ -79,6 +79,23 @@ export function buildFAQPageSchema(
   };
 }
 
+/** Build Recipe schema for recipe detail pages. Used by RecipeDetail for structured data. */
+export function buildRecipeSchema(params: {
+  name: string;
+  description: string;
+  url: string;
+  recipeCategory: string;
+}): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Recipe",
+    name: params.name,
+    description: params.description,
+    url: params.url,
+    recipeCategory: params.recipeCategory,
+  };
+}
+
 /** Inject JSON-LD script tags into document.head. Call once from main.tsx. */
 export function injectJsonLd(): void {
   if (typeof document === "undefined") return;
