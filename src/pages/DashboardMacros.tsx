@@ -262,6 +262,15 @@ export default function DashboardMacros() {
               <div><span className="text-muted-foreground">Carbs</span><span className="block font-bold">{dailyGoals.carbs}g</span></div>
               <div><span className="text-muted-foreground">Fat</span><span className="block font-bold">{dailyGoals.fat}g</span></div>
             </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Suggested calories are estimates only—not medical or nutrition advice.
+            </p>
+            {dailyGoals.calories > 0 && dailyGoals.calories < 1200 && (
+              <p className="text-xs text-amber-600 dark:text-amber-400 mt-1 flex items-center gap-1">
+                Very low calorie goals may not be enough during fasting. Consider consulting a nutritionist.{" "}
+                <Link to="/health" className="text-secondary hover:underline">Health guide →</Link>
+              </p>
+            )}
             {hasRecommendation && (
               <p className="text-xs text-muted-foreground mt-2">
                 From your profile (Settings → Advanced): recommended {recommendedCal} cal
@@ -351,7 +360,7 @@ export default function DashboardMacros() {
               Meal prep plan (planned)
             </h2>
             {selectedPlanned.suhoor.length === 0 && selectedPlanned.iftar.length === 0 && (selectedPlanned.between?.length ?? 0) === 0 ? (
-              <p className="text-sm text-muted-foreground">No planned items for this day. Use the form above to add.</p>
+              <p className="text-sm text-muted-foreground">No plan for this day yet. Plan suhoor and iftar above if you want to hit calorie targets — or skip and just log what you eat.</p>
             ) : (
               <>
                 {(["suhoor", "iftar", "between"] as const).map((mealType) => {
@@ -445,7 +454,7 @@ export default function DashboardMacros() {
             )}
 
             {selectedLog.suhoor.length === 0 && selectedLog.iftar.length === 0 && (selectedLog.between?.length ?? 0) === 0 ? (
-              <p className="text-sm text-muted-foreground">No items logged for this day. Use quick add above.</p>
+              <p className="text-sm text-muted-foreground">Nothing logged for this day yet. Quick-add what you ate for suhoor, iftar, or in between — rough estimates are fine.</p>
             ) : (
               <>
                 {(["suhoor", "iftar", "between"] as const).map((mealType) => {

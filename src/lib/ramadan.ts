@@ -153,18 +153,125 @@ export function isLastDayOfRamadan(date: Date): boolean {
   return d.getTime() === end.getTime();
 }
 
-/** Date range for the next (or current) Ramadan as YYYY-MM-DD and Date. For calendar export and prayer fetch. */
-export function getRamadanDateRange(): {
+/** Date range for the next (or current) Ramadan as YYYY-MM-DD and Date. For calendar export and prayer fetch. Pass overrides from preferences to use effective range. */
+export function getRamadanDateRange(overrides?: RamadanOverrideInput | null): {
   startStr: string;
   endStr: string;
   startDate: Date;
   endDate: Date;
   year: number;
 } {
+  const effective = getEffectiveRamadanRange(overrides ?? undefined);
+  return {
+    startStr: effective.startStr,
+    endStr: effective.endStr,
+    startDate: new Date(effective.start),
+    endDate: new Date(effective.end),
+    year: effective.year,
+  };
+}
+
+export type RamadanOverrideInput = {
+  ramadanStartOverride: string | null;
+  ramadanEndOverride: string | null;
+};
+
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+function parseIsoToDate(iso: string): Date {
+  return new Date(iso + "T12:00:00");
+}
+
+/** Effective Ramadan range: from overrides if set and valid, else app calendar for current/next Ramadan. */
+export function getEffectiveRamadanRange(overrides?: RamadanOverrideInput | null): {
+  start: Date;
+  end: Date;
+  startStr: string;
+  endStr: string;
+  year: number;
+  fromOverride: boolean;
+} {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  const toStr = (d: Date) =>
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+  if (
+    overrides?.ramadanStartOverride &&
+    overrides?.ramadanEndOverride &&
+    ISO_DATE.test(overrides.ramadanStartOverride) &&
+    ISO_DATE.test(overrides.ramadanEndOverride)
+  ) {
+    const start = parseIsoToDate(overrides.ramadanStartOverride);
+    const end = parseIsoToDate(overrides.ramadanEndOverride);
+    start.setHours(0, 0, 0, 0);
+    end.setHours(0, 0, 0, 0);
+    if (start.getTime() < end.getTime()) {
+      if (today <= end) {
+        return {
+          start,
+          end,
+          startStr: overrides.ramadanStartOverride,
+          endStr: overrides.ramadanEndOverride,
+          year: start.getFullYear(),
+          fromOverride: true,
+        };
+      }
+    }
+  }
+
   const start = getCurrentRamadanStart();
   const end = getRamadanEndForYear(start.getFullYear());
-  const pad = (n: number) => n.toString().padStart(2, "0");
-  const startStr = `${start.getFullYear()}-${pad(start.getMonth() + 1)}-${pad(start.getDate())}`;
-  const endStr = `${end.getFullYear()}-${pad(end.getMonth() + 1)}-${pad(end.getDate())}`;
-  return { startStr, endStr, startDate: new Date(start), endDate: new Date(end), year: start.getFullYear() };
+  start.setHours(0, 0, 0, 0);
+  end.setHours(0, 0, 0, 0);
+  return {
+    start,
+    end,
+    startStr: toStr(start),
+    endStr: toStr(end),
+    year: start.getFullYear(),
+    fromOverride: false,
+  };
+}
+
+/** Whether date is within the given range (inclusive). */
+export function isRamadanDayInRange(date: Date, start: Date, end: Date): boolean {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  const s = new Date(start);
+  const e = new Date(end);
+  s.setHours(0, 0, 0, 0);
+  e.setHours(0, 0, 0, 0);
+  return d >= s && d <= e;
+}
+
+/** Day number (1–N) within range, or null if outside. */
+export function getRamadanDayNumberInRange(date: Date, start: Date, end: Date): number | null {
+  if (!isRamadanDayInRange(date, start, end)) return null;
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  const s = new Date(start);
+  s.setHours(0, 0, 0, 0);
+  const diffTime = d.getTime() - s.getTime();
+  const dayNum = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+  return Math.max(1, dayNum);
+}
+
+/** Whether date is the last day of the given range. */
+export function isLastDayOfRamadanInRange(date: Date, start: Date, end: Date): boolean {
+  if (!isRamadanDayInRange(date, start, end)) return false;
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  const e = new Date(end);
+  e.setHours(0, 0, 0, 0);
+  return d.getTime() === e.getTime();
+}
+
+/** Number of days in range (inclusive). */
+export function getRamadanRangeLength(start: Date, end: Date): number {
+  const s = new Date(start);
+  s.setHours(0, 0, 0, 0);
+  const e = new Date(end);
+  e.setHours(0, 0, 0, 0);
+  return Math.floor((e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 }

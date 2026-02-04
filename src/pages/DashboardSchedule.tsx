@@ -54,7 +54,7 @@ import {
   type CalendarEvent,
   type CalendarEventType,
 } from "@/hooks/useLocalStorage";
-import { isRamadanDay, getRamadanDayNumber, getCurrentRamadanStart, getRamadanEndForYear } from "@/lib/ramadan";
+import { useRamadanRange } from "@/hooks/useRamadanRange";
 import { toLocalDateString } from "@/lib/utils";
 import { usePrayerTimesForDate } from "@/hooks/usePrayerTimes";
 import { buildIcalContent, downloadIcal } from "@/lib/ical";
@@ -145,6 +145,7 @@ const QUICK_ADD_TEMPLATES: { type: CalendarEventType; title: string; timeKey: ke
 const DashboardSchedule = () => {
   const [preferences] = useUserPreferences();
   const [progress, setProgress] = useFastingProgress();
+  const ramadanRange = useRamadanRange();
   const iftarLabel = useIftarLabel();
   const iftarLabelShort = useIftarLabelShort();
   const suhoorLabel = useSuhoorLabel();
@@ -202,7 +203,7 @@ const DashboardSchedule = () => {
   const getFirstDayOfMonth = (date: Date) =>
     new Date(date.getFullYear(), date.getMonth(), 1).getDay();
   const isLaylatAlQadrNight = (date: Date) => {
-    const day = getRamadanDayNumber(date);
+    const day = ramadanRange.getRamadanDayNumber(date);
     return day !== null && [21, 23, 25, 27, 29].includes(day);
   };
   const getMoonPhase = (ramadanDay: number | null): string => {
@@ -248,12 +249,12 @@ const DashboardSchedule = () => {
   }, [scheduleNotes]);
 
   const goToRamadan = useCallback(() => {
-    const start = getCurrentRamadanStart();
+    const start = ramadanRange.start;
     setCurrentMonth(new Date(start.getFullYear(), start.getMonth(), 1));
     const startStr = toLocalDateString(start);
     setSelectedDate(startStr);
     setNoteInput(scheduleNotes[startStr] || "");
-  }, [scheduleNotes]);
+  }, [scheduleNotes, ramadanRange.start]);
 
   const selectDay = useCallback(
     (dateStr: string) => {
@@ -277,16 +278,16 @@ const DashboardSchedule = () => {
   const ramadanDaysInMonth = useMemo(() => {
     return Array.from({ length: daysInMonth }, (_, i) => {
       const d = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i + 1);
-      return isRamadanDay(d) ? 1 : 0;
+      return ramadanRange.isRamadanDay(d) ? 1 : 0;
     }).reduce((a, b) => a + b, 0);
-  }, [currentMonth, daysInMonth]);
+  }, [currentMonth, daysInMonth, ramadanRange]);
   
   const sunnahDaysInMonth = useMemo(() => {
     return Array.from({ length: daysInMonth }, (_, i) => {
       const d = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), i + 1);
-      return isSunnahDay(d) && !isRamadanDay(d) ? 1 : 0;
+      return isSunnahDay(d) && !ramadanRange.isRamadanDay(d) ? 1 : 0;
     }).reduce((a, b) => a + b, 0);
-  }, [currentMonth, daysInMonth]);
+  }, [currentMonth, daysInMonth, ramadanRange]);
   
   const totalHoursFasted = useMemo(() => {
     return (progress.fastingLog ?? []).reduce((sum, e) => sum + (e.hoursFasted ?? (e.startedAt && e.completedAt ? hoursBetween(e.startedAt, e.completedAt) : 0)), 0);
@@ -320,8 +321,8 @@ const DashboardSchedule = () => {
     effectiveDayTotals.fat > 0;
   const selectedFastingLog = selectedDate ? getFastingLogForDate(progress, selectedDate) : undefined;
   const selectedDateObj = selectedDate ? new Date(selectedDate + "T12:00:00") : null;
-  const selectedIsRamadan = selectedDateObj ? isRamadanDay(selectedDateObj) : false;
-  const selectedRamadanDay = selectedDateObj ? getRamadanDayNumber(selectedDateObj) : null;
+  const selectedIsRamadan = selectedDateObj ? ramadanRange.isRamadanDay(selectedDateObj) : false;
+  const selectedRamadanDay = selectedDateObj ? ramadanRange.getRamadanDayNumber(selectedDateObj) : null;
   const selectedIsSunnah = selectedDateObj ? isSunnahDay(selectedDateObj) : false;
   const selectedCompleted = selectedDate ? progress.completedDays.includes(selectedDate) : false;
   /** Meal planning is for today and future days only; past days show what was planned (read-only). */
@@ -484,10 +485,8 @@ const DashboardSchedule = () => {
         end = new Date(now);
         end.setDate(end.getDate() + 29);
       } else {
-        const ramadanStart = getCurrentRamadanStart();
-        const ramadanEnd = getRamadanEndForYear(ramadanStart.getFullYear());
-        start = new Date(ramadanStart.getFullYear(), ramadanStart.getMonth(), ramadanStart.getDate());
-        end = new Date(ramadanEnd.getFullYear(), ramadanEnd.getMonth(), ramadanEnd.getDate());
+        start = new Date(ramadanRange.start.getFullYear(), ramadanRange.start.getMonth(), ramadanRange.start.getDate());
+        end = new Date(ramadanRange.end.getFullYear(), ramadanRange.end.getMonth(), ramadanRange.end.getDate());
       }
       const startStr = toLocalDateString(start);
       const endStr = toLocalDateString(end);
@@ -549,7 +548,7 @@ const DashboardSchedule = () => {
           </motion.div>
 
           {/* Today is Sunnah fasting day (Mon/Thu) — clear notice, clickable to hadith */}
-          {isSunnahDay(today) && !isRamadanDay(today) && (
+          {isSunnahDay(today) && !ramadanRange.isRamadanDay(today) && (
             <motion.a
               href={`${EXTERNAL_LINKS.sunnah}/search?q=${encodeURIComponent("Sahih Muslim 1162 Monday Thursday fasting")}`}
               target="_blank"
@@ -956,8 +955,8 @@ const DashboardSchedule = () => {
                   i + 1
                 );
                 const dateStr = toLocalDateString(date);
-                const isRamadan = isRamadanDay(date);
-                const ramadanDay = getRamadanDayNumber(date);
+                const isRamadan = ramadanRange.isRamadanDay(date);
+                const ramadanDay = ramadanRange.getRamadanDayNumber(date);
                 const completed = isCompleted(date);
                 const isSunnah = isSunnahDay(date);
                 const isToday = date.toDateString() === today.toDateString();

@@ -56,18 +56,20 @@ export default defineConfig(({ mode }) => ({
       },
       workbox: {
         globPatterns: ["**/*.{js,css,html,ico,png,svg,jpg,jpeg,webp,woff,woff2}"],
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/api\.aladhan\.com\/.*/i,
-            handler: "CacheFirst",
+            handler: "NetworkFirst",
             options: {
               cacheName: "prayer-times-cache",
+              networkTimeoutSeconds: 10,
               expiration: {
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60 * 24, // 24 hours
               },
               cacheableResponse: {
-                statuses: [0, 200],
+                statuses: [200],
               },
             },
           },
@@ -99,7 +101,7 @@ export default defineConfig(({ mode }) => ({
             options: {
               cacheName: "nominatim-cache",
               expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 }, // 24h
-              cacheableResponse: { statuses: [0, 200] },
+              cacheableResponse: { statuses: [200] },
             },
           },
           {
@@ -108,7 +110,7 @@ export default defineConfig(({ mode }) => ({
             options: {
               cacheName: "ipapi-cache",
               expiration: { maxEntries: 5, maxAgeSeconds: 60 * 60 * 24 }, // 24h
-              cacheableResponse: { statuses: [0, 200] },
+              cacheableResponse: { statuses: [200] },
             },
           },
           {
@@ -117,7 +119,16 @@ export default defineConfig(({ mode }) => ({
             options: {
               cacheName: "timeapi-cache",
               expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 7 }, // 7 days
-              cacheableResponse: { statuses: [0, 200] },
+              cacheableResponse: { statuses: [200] },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/api\.quran\.com\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "api-quran-cache",
+              expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 * 7 }, // 7 days
+              cacheableResponse: { statuses: [200] },
             },
           },
         ],

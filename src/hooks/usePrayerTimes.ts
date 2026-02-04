@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { toLocalDateString } from '@/lib/utils';
-import { getRamadanDateRange } from '@/lib/ramadan';
+import { getRamadanDateRange, type RamadanOverrideInput } from '@/lib/ramadan';
 import { API_CONFIG } from '@/lib/config';
+import { useUserPreferences } from '@/hooks/useLocalStorage';
 
 export interface PrayerTimes {
   fajr: string;
@@ -219,7 +220,51 @@ function toAladhanDate(isoDate: string): string {
   return `${d}-${m}-${y}`;
 }
 
-/** Fetch prayer times for a specific date (ISO YYYY-MM-DD). Used for day view / click-through days. */
+const PRAYER_TIMES_FOR_DATE_CACHE_KEY = 'tryramadan-prayer-times-for-date-cache';
+const MAX_FOR_DATE_CACHE_ENTRIES = 30;
+
+interface ForDateCacheEntry {
+  prayerTimes: PrayerTimes;
+  hijriDate: { day: string; month: string; monthAr: string; year: string };
+  savedAt: string;
+}
+
+function readForDateCache(isoDate: string, lat: number, lng: number): ForDateCacheEntry | null {
+  try {
+    const raw = localStorage.getItem(PRAYER_TIMES_FOR_DATE_CACHE_KEY);
+    if (!raw) return null;
+    const map = JSON.parse(raw) as Record<string, ForDateCacheEntry>;
+    const key = `${isoDate}_${lat}_${lng}`;
+    return map[key] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function writeForDateCache(
+  isoDate: string,
+  lat: number,
+  lng: number,
+  prayerTimes: PrayerTimes,
+  hijriDate: { day: string; month: string; monthAr: string; year: string }
+) {
+  try {
+    const raw = localStorage.getItem(PRAYER_TIMES_FOR_DATE_CACHE_KEY);
+    const map: Record<string, ForDateCacheEntry> = raw ? JSON.parse(raw) : {};
+    const key = `${isoDate}_${lat}_${lng}`;
+    map[key] = { prayerTimes, hijriDate, savedAt: new Date().toISOString() };
+    const keys = Object.keys(map);
+    if (keys.length > MAX_FOR_DATE_CACHE_ENTRIES) {
+      const byTime = keys.sort((a, b) => (map[a].savedAt > map[b].savedAt ? 1 : -1));
+      byTime.slice(0, keys.length - MAX_FOR_DATE_CACHE_ENTRIES).forEach((k) => delete map[k]);
+    }
+    localStorage.setItem(PRAYER_TIMES_FOR_DATE_CACHE_KEY, JSON.stringify(map));
+  } catch {
+    // ignore
+  }
+}
+
+/** Fetch prayer times for a specific date (ISO YYYY-MM-DD). Used for day view / click-through days. Cached in localStorage for offline. */
 export function usePrayerTimesForDate(
   lat: number | null,
   lng: number | null,
@@ -237,6 +282,15 @@ export function usePrayerTimesForDate(
       return;
     }
 
+    const cached = readForDateCache(isoDate, lat, lng);
+    if (cached) {
+      setPrayerTimes(cached.prayerTimes);
+      setHijriDate(cached.hijriDate);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
     const dateStr = toAladhanDate(isoDate);
 
     const fetchPrayerTimes = async () => {
@@ -250,7 +304,7 @@ export function usePrayerTimesForDate(
         const data: AladhanResponse = await response.json();
         if (data.code === 200) {
           const t = data.data.timings;
-          setPrayerTimes({
+          const times: PrayerTimes = {
             fajr: stripTimeSuffix(t.Fajr ?? ''),
             sunrise: stripTimeSuffix(t.Sunrise ?? ''),
             dhuhr: stripTimeSuffix(t.Dhuhr ?? ''),
@@ -259,13 +313,16 @@ export function usePrayerTimesForDate(
             isha: stripTimeSuffix(t.Isha ?? ''),
             imsak: stripTimeSuffix(t.Imsak ?? ''),
             date: data.data.date.readable,
-          });
-          setHijriDate({
+          };
+          const hijri = {
             day: data.data.date.hijri.day,
             month: data.data.date.hijri.month.en,
             monthAr: data.data.date.hijri.month.ar,
             year: data.data.date.hijri.year,
-          });
+          };
+          setPrayerTimes(times);
+          setHijriDate(hijri);
+          writeForDateCache(isoDate, lat, lng, times, hijri);
         }
       } catch (err) {
         console.error('Prayer times for date error:', err);
@@ -357,33 +414,34 @@ function getRamadanPrayersCache(): Record<string, RamadanPrayersCacheEntry> {
 }
 
 /** Keep only entries for current and next Ramadan year to limit cache size. */
-function trimRamadanPrayersCache(cache: Record<string, RamadanPrayersCacheEntry>): Record<string, RamadanPrayersCacheEntry> {
-  const { year } = getRamadanDateRange();
-  const keepYears = [year, year + 1];
+function trimRamadanPrayersCache(cache: Record<string, RamadanPrayersCacheEntry>, year?: number): Record<string, RamadanPrayersCacheEntry> {
+  const y = year ?? getRamadanDateRange().year;
+  const keepYears = [y, y + 1];
   const trimmed: Record<string, RamadanPrayersCacheEntry> = {};
   for (const [key, entry] of Object.entries(cache)) {
     const match = key.match(/_(\d{4})$/);
-    const entryYear = match ? parseInt(match[1], 10) : year;
+    const entryYear = match ? parseInt(match[1], 10) : y;
     if (keepYears.includes(entryYear)) trimmed[key] = entry;
   }
   return trimmed;
 }
 
-function setRamadanPrayersCache(cache: Record<string, RamadanPrayersCacheEntry>) {
+function setRamadanPrayersCache(cache: Record<string, RamadanPrayersCacheEntry>, year?: number) {
   try {
-    const trimmed = trimRamadanPrayersCache(cache);
+    const trimmed = trimRamadanPrayersCache(cache, year);
     window.localStorage.setItem(RAMADAN_PRAYERS_CACHE_KEY, JSON.stringify(trimmed));
   } catch (e) {
     console.warn('Ramadan prayers cache write failed', e);
   }
 }
 
-/** Fetch prayer times for the full Ramadan month (current/next). Covers Ramadan spanning two Gregorian months. */
+/** Fetch prayer times for the full Ramadan month (current/next). Covers Ramadan spanning two Gregorian months. Pass overrides from preferences for effective range. */
 export async function fetchRamadanPrayerTimes(
   lat: number,
-  lng: number
+  lng: number,
+  overrides?: RamadanOverrideInput | null
 ): Promise<Record<string, PrayerTimes>> {
-  const { startStr, endStr, startDate, endDate, year } = getRamadanDateRange();
+  const { startStr, endStr, startDate, endDate, year } = getRamadanDateRange(overrides);
   const out: Record<string, PrayerTimes> = {};
   const startYear = startDate.getFullYear();
   const endYear = endDate.getFullYear();
@@ -404,13 +462,15 @@ export function getRamadanPrayersCacheKey(lat: number, lng: number, ramadanYear:
   return `${lat.toFixed(4)}_${lng.toFixed(4)}_${ramadanYear}`;
 }
 
-/** Hook: Ramadan prayer times for the full month. Caches in localStorage by location + Ramadan year. */
+/** Hook: Ramadan prayer times for the full month. Caches in localStorage by location + Ramadan year. Uses effective range from preferences when set. */
 export function useRamadanPrayerTimes(lat: number | null, lng: number | null) {
+  const [preferences] = useUserPreferences();
   const [prayerTimesMap, setPrayerTimesMap] = useState<Record<string, PrayerTimes>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { startStr, endStr, year } = getRamadanDateRange();
+  const range = getRamadanDateRange(preferences);
+  const { startStr, endStr, year } = range;
   const cacheKey = lat != null && lng != null ? getRamadanPrayersCacheKey(lat, lng, year) : null;
 
   const fetchAndCache = useCallback(async () => {
@@ -418,17 +478,17 @@ export function useRamadanPrayerTimes(lat: number | null, lng: number | null) {
     setLoading(true);
     setError(null);
     try {
-      const map = await fetchRamadanPrayerTimes(lat, lng);
+      const map = await fetchRamadanPrayerTimes(lat, lng, preferences);
       setPrayerTimesMap(map);
       const cache = getRamadanPrayersCache();
       cache[cacheKey!] = { prayerTimesMap: map, fetchedAt: Date.now() };
-      setRamadanPrayersCache(cache);
+      setRamadanPrayersCache(cache, year);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load Ramadan prayer times');
     } finally {
       setLoading(false);
     }
-  }, [lat, lng, cacheKey]);
+  }, [lat, lng, cacheKey, preferences, year]);
 
   useEffect(() => {
     if (lat == null || lng == null) {

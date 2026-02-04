@@ -19,12 +19,13 @@ import {
   type QuranVerse,
   type VersesByJuzResponse,
 } from "@/lib/quran";
-import { getRamadanDayNumber, isRamadanDay } from "@/lib/ramadan";
+import { useRamadanRange } from "@/hooks/useRamadanRange";
 import { Button } from "@/components/ui/button";
 
 const DashboardQuran = () => {
   const today = new Date();
-  const ramadanDay = isRamadanDay(today) ? getRamadanDayNumber(today) : null;
+  const ramadanRange = useRamadanRange();
+  const ramadanDay = ramadanRange.isRamadanDay(today) ? ramadanRange.getRamadanDayNumber(today) : null;
 
   const [planDay, setPlanDay] = useState<number>(ramadanDay ?? 1);
   const [data, setData] = useState<VersesByJuzResponse | null>(null);

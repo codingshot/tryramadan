@@ -145,12 +145,12 @@ Already covered in §2.2: user can log the “extra” day (community Day 1) as 
 
 | Item | Status | Notes |
 |------|--------|--------|
-| Disclaimer (moon sighting) | Optional | One line on Dashboard or Settings: “Start may vary by locality (moon sighting).” |
-| `ramadanStartOverride` / `ramadanEndOverride` | Not implemented | Add to preferences; null = use app calendar. |
-| `getEffectiveRamadanRange()` or `useRamadanRange()` | Not implemented | Returns start/end from override or fallback. |
-| Use effective range in `isRamadanDay`, `getRamadanDayNumber`, “Day N” badge, “Last day” | Not implemented | Pass effective start/end or get from context. |
-| Settings UI: “Ramadan dates” with date pickers | Not implemented | “Match my community” + start/end. |
-| Ramadan-scoped stats (X/30) use effective range | Not implemented | Count completedDays in [effectiveStart, effectiveEnd]. |
+| Disclaimer (moon sighting) | Done | One line on Dashboard or Settings: “Start may vary by locality (moon sighting).” |
+| `ramadanStartOverride` / `ramadanEndOverride` | Done | Add to preferences; null = use app calendar. |
+| `getEffectiveRamadanRange()` or `useRamadanRange()` | Done | Returns start/end from override or fallback. |
+| Use effective range in `isRamadanDay`, `getRamadanDayNumber`, “Day N” badge, “Last day” | Done | Dashboard, HeroSection, Schedule, Health, Quran, Index, ReminderScheduler use `useRamadanRange()`. |
+| Settings UI: “Ramadan dates” with date pickers | Done | “Use app's calendar” / “Match my community” + Start/End date inputs. |
+| Ramadan-scoped stats (X/30) use effective range | Done | Count completedDays in [effectiveStart, effectiveEnd]. |
 | Allow logging any date (before/after range) | Already supported | Schedule/Dashboard: select date, mark complete/skip. |
 
 ---

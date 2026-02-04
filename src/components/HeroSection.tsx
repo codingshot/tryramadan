@@ -3,22 +3,31 @@ import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { FastingTimer } from "./FastingTimer";
 import logo from "@/assets/logo.png";
+import { useUserPreferences } from "@/hooks/useLocalStorage";
+import { useAutoLocation } from "@/hooks/useLocation";
 
 // Hero image served from public/ so index.html can preload it for LCP (see docs/PERFORMANCE.md)
 const HERO_BG_URL = "/hero-bg.jpg";
-import { getDaysUntilRamadan, isCurrentlyRamadan, getRamadanDayNumber, isLastDayOfRamadan } from "@/lib/ramadan";
+import { getDaysUntilRamadan } from "@/lib/ramadan";
+import { useRamadanRange } from "@/hooks/useRamadanRange";
 
 export const HeroSection = () => {
-  const daysUntil = getDaysUntilRamadan();
-  const inRamadan = isCurrentlyRamadan();
-  const ramadanDay = inRamadan ? getRamadanDayNumber(new Date()) ?? 1 : null;
+  const [preferences] = useUserPreferences();
+  const { location: autoLocation } = useAutoLocation();
+  const ramadanRange = useRamadanRange();
+  const hasLocation = !!(preferences.locationCoords || (autoLocation?.lat != null && autoLocation?.lng != null));
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const inRamadan = ramadanRange.isRamadanDay(today);
+  const ramadanDay = inRamadan ? ramadanRange.getRamadanDayNumber(today) ?? 1 : null;
+  const daysUntil = inRamadan ? 0 : today < ramadanRange.start ? Math.ceil((ramadanRange.start.getTime() - today.getTime()) / 86400000) : getDaysUntilRamadan();
   return (
     <>
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* Background image: <img> with dimensions + fetchpriority for LCP; avoids CLS from unknown-size bg */}
         <img
           src={HERO_BG_URL}
-          alt=""
+          alt="Peaceful Ramadan atmosphere - mosque silhouettes at dusk, TryRamadan fasting app hero"
           width={1920}
           height={1080}
           decoding="async"
@@ -58,10 +67,9 @@ export const HeroSection = () => {
                 animate={{ scale: [1, 1.03, 1] }}
                 transition={{ duration: 4, repeat: Infinity }}
               >
-                <source srcSet="/logo.webp" type="image/webp" />
                 <img
                   src={logo}
-                  alt="TryRamadan"
+                  alt="TryRamadan app logo - experience Ramadan fasting, prayer times, suhoor and iftar"
                   width={112}
                   height={112}
                   decoding="async"
@@ -72,7 +80,7 @@ export const HeroSection = () => {
               <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/20 text-secondary text-sm font-medium backdrop-blur-sm">
                 <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
                 {inRamadan && ramadanDay
-                  ? isLastDayOfRamadan(new Date())
+                  ? ramadanRange.isLastDayOfRamadan(new Date())
                     ? "Last day of Ramadan"
                     : `Day ${ramadanDay} of Ramadan`
                   : `${daysUntil} day${daysUntil === 1 ? "" : "s"} until Ramadan`}
@@ -139,9 +147,11 @@ export const HeroSection = () => {
                 I'm Muslim
               </Link>
             </motion.div>
-            <p className="text-xs text-primary-foreground/60 text-center -mt-8 mb-4">
-              Both paths set your location for accurate times.
-            </p>
+            {!hasLocation && (
+              <p className="text-xs text-primary-foreground/60 text-center -mt-8 mb-4">
+                Both paths set your location for accurate times.
+              </p>
+            )}
 
             {/* Timer preview — min-height reserves space to avoid CLS while timer loads */}
             <motion.div

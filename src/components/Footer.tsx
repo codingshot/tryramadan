@@ -34,8 +34,7 @@ export const Footer = () => {
           <div className="sm:col-span-2">
             <div className="flex items-center gap-3 mb-4">
               <picture className="w-12 h-12 block">
-                <source srcSet="/logo.webp" type="image/webp" />
-                <img src={logo} alt="TryRamadan" width={48} height={48} decoding="async" loading="lazy" className="w-full h-full" />
+                <img src={logo} alt="TryRamadan app logo - Ramadan fasting, prayer times, suhoor and iftar" width={48} height={48} decoding="async" loading="lazy" className="w-full h-full" />
               </picture>
               <span className="font-display font-bold text-xl">
                 Try<span className="text-secondary">Ramadan</span>

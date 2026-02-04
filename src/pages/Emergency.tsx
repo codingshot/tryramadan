@@ -72,6 +72,12 @@ const Emergency = () => {
               Taking care of your body is an act of worship. 
               <strong className="block mt-2">You are not a failure.</strong>
             </p>
+            <p className="text-sm text-muted-foreground text-center mt-4">
+              This app does not replace emergency services or medical advice.
+            </p>
+            <p className="text-sm text-muted-foreground text-center mt-2">
+              For religious exemptions and rulings (e.g. Qada, Fidya), consult a qualified scholar or imam.
+            </p>
           </motion.div>
           
           {/* Quick steps */}

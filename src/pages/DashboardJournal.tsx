@@ -82,6 +82,19 @@ export default function DashboardJournal() {
     setMood(entry?.mood);
   }, [writeDate, entries]);
 
+  // Optional journal retention: auto-delete entries older than N days (see docs/DATA-LIFECYCLE-POLICIES.md)
+  useEffect(() => {
+    const days = preferences.journalRetentionDays ?? null;
+    if (days == null || days <= 0 || entries.length === 0) return;
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+    const cutoffStr = cutoff.toISOString().split("T")[0];
+    const kept = entries.filter((e) => e.date >= cutoffStr);
+    if (kept.length < entries.length) {
+      setEntries(kept);
+    }
+  }, [preferences.journalRetentionDays, entries, setEntries]);
+
   const JOURNAL_CONTENT_MAX_LENGTH = 10000;
 
   const handleSave = () => {
@@ -109,6 +122,9 @@ export default function DashboardJournal() {
       return [...rest, newEntry].sort((a, b) => b.date.localeCompare(a.date));
     });
     toast.success("Entry saved");
+    if (typeof window !== "undefined" && !window.localStorage.getItem(JOURNAL_NOTICE_KEY)) {
+      setShowStorageNotice(true);
+    }
   };
 
   const handleSelectDate = (date: Date | undefined) => {
@@ -164,6 +180,10 @@ export default function DashboardJournal() {
     URL.revokeObjectURL(url);
   };
 
+  const JOURNAL_NOTICE_KEY = "tryramadan-journal-notice-dismissed";
+  const [showStorageNotice, setShowStorageNotice] = useState(() =>
+    typeof window !== "undefined" ? !window.localStorage.getItem(JOURNAL_NOTICE_KEY) : false
+  );
   const [expandedDate, setExpandedDate] = useState<string | null>(null);
   const INITIAL_SHOW = 14;
   const [showCount, setShowCount] = useState(INITIAL_SHOW);
@@ -274,13 +294,35 @@ export default function DashboardJournal() {
             transition={{ delay: 0.1 }}
             className="mb-8 p-6 rounded-2xl bg-card border border-border"
           >
+            {showStorageNotice && entries.length > 0 && (
+              <div className="mb-4 p-4 rounded-xl bg-muted/50 border border-border flex items-start justify-between gap-3">
+                <p className="text-sm text-muted-foreground">
+                  Your journal is stored only on this device. Anyone with access to this device (or browser extensions) could read it. Avoid sensitive details on shared devices.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    try {
+                      window.localStorage.setItem(JOURNAL_NOTICE_KEY, "1");
+                    } catch {
+                      // ignore
+                    }
+                    setShowStorageNotice(false);
+                  }}
+                  className="shrink-0 text-sm font-medium text-muted-foreground hover:text-foreground"
+                  aria-label="Dismiss notice"
+                >
+                  Dismiss
+                </button>
+              </div>
+            )}
             {showWriteTodayPrompt && (
               <div className="mb-4 p-4 rounded-xl border-2 border-secondary/40 bg-secondary/5">
                 <p className="text-sm font-medium text-foreground mb-1">
-                  You're writing for a future date but haven't written for today yet.
+                  Want to start with today?
                 </p>
                 <p className="text-sm text-muted-foreground mb-3">
-                  We recommend writing today's entry first so you don't miss it.
+                  Writing today first helps you keep a steady habit; you can add or edit any date anytime.
                 </p>
                 <button
                   type="button"
@@ -397,7 +439,7 @@ export default function DashboardJournal() {
               Past entries
             </h3>
             {displayEntries.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No entries yet. Pick a date above and write.</p>
+              <p className="text-sm text-muted-foreground">Your journal is ready for you. Write whenever it helps — a line or two about your day, mood, or gratitude is enough. Pick a date above to get started.</p>
             ) : (
               <ul className="space-y-3">
                 {displayEntries.map((entry) => {

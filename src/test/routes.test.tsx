@@ -55,6 +55,7 @@ export const ROUTES = [
   "/onboarding/mode",
   "/onboarding/knowledge",
   "/onboarding/health",
+  "/onboarding/gender",
   "/onboarding/location",
   "/onboarding/schedule",
   "/onboarding/notifications",

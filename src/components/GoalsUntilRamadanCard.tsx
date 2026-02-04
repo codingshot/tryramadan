@@ -25,7 +25,7 @@ export function GoalsUntilRamadanCard() {
   const lat = coords?.lat ?? null;
   const lng = coords?.lng ?? null;
   const { prayerTimesMap, loading: prayersLoading, error: prayersError, refetch } = useRamadanPrayerTimes(lat, lng);
-  const ramadanRange = getRamadanDateRange();
+  const ramadanRange = getRamadanDateRange(preferences);
   const hasLocation = lat != null && lng != null;
   const hasPrayerData = Object.keys(prayerTimesMap).length > 0;
 
@@ -237,7 +237,7 @@ export function GoalsUntilRamadanCard() {
       {goals.length === 0 ? (
         <>
           <p className="text-sm text-muted-foreground mb-2">
-            Set intentions before Ramadan: read Quran, give charity, prepare spiritually.
+            Optional: set a few intentions. Before or during Ramadan, you can add goals like reading Quran or giving charity — or skip and just track your fasts.
           </p>
           <Link
             to="/dashboard/goals"

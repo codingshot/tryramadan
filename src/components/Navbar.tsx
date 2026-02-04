@@ -71,8 +71,7 @@ export const Navbar = () => {
             <div className="flex items-center gap-2 min-w-0">
               <Link to="/" onClick={scrollToTop} className="flex items-center gap-2 md:gap-3 shrink-0">
                 <picture className="w-9 h-9 md:w-11 md:h-11 shrink-0 block">
-                  <source srcSet="/logo.webp" type="image/webp" />
-                  <img src={logo} alt="" width={44} height={44} decoding="async" className="w-full h-full" aria-hidden />
+                  <img src={logo} alt="TryRamadan logo - Ramadan fasting app" width={44} height={44} decoding="async" className="w-full h-full" />
                 </picture>
                 <span className="font-display font-bold text-base md:text-lg leading-tight text-foreground">
                   Try<span className="text-primary-contrast">Ramadan</span>

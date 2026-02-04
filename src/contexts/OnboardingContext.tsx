@@ -15,11 +15,14 @@ export interface OnboardingPriorities {
   simplifyByLocation: boolean;
 }
 
+export type OnboardingGender = 'male' | 'female' | 'prefer-not-to-say' | null;
+
 export interface OnboardingState {
   mode: OnboardingMode;
   experience: string;
   knowledgeScore: number; // 0-5 from quiz
   healthWarnings: string[]; // e.g. ["diabetes", "pregnancy"]
+  gender: OnboardingGender;
   location: LocationResult | null;
   selectedProgram: string; // beginner | intermediate | traditional
   voluntaryFasting: string[]; // monday-thursday, ayyam-al-beed, etc.
@@ -48,6 +51,7 @@ const defaultState: OnboardingState = {
   experience: "",
   knowledgeScore: 0,
   healthWarnings: [],
+  gender: null,
   location: null,
   selectedProgram: "traditional",
   voluntaryFasting: [],
@@ -69,6 +73,7 @@ type OnboardingContextValue = {
   setExperience: (exp: string) => void;
   setKnowledgeScore: (score: number) => void;
   setHealthWarnings: (warnings: string[] | ((prev: string[]) => string[])) => void;
+  setGender: (g: OnboardingGender) => void;
   setLocation: (loc: LocationResult | null) => void;
   setSelectedProgram: (id: string) => void;
   setVoluntaryFasting: (ids: string[] | ((prev: string[]) => string[])) => void;
@@ -88,9 +93,11 @@ function loadDraft(): OnboardingState | null {
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<OnboardingState>;
     if (!parsed || typeof parsed !== "object" || !(parsed.mode === null || parsed.mode === "new" || parsed.mode === "muslim")) return null;
+    const validGender = parsed.gender === 'male' || parsed.gender === 'female' || parsed.gender === 'prefer-not-to-say' ? parsed.gender : defaultState.gender;
     return {
       ...defaultState,
       ...parsed,
+      gender: validGender,
       healthWarnings: Array.isArray(parsed.healthWarnings) ? parsed.healthWarnings : defaultState.healthWarnings,
       voluntaryFasting: Array.isArray(parsed.voluntaryFasting) ? parsed.voluntaryFasting : defaultState.voluntaryFasting,
       priorities: parsed.priorities && typeof parsed.priorities === "object"
@@ -141,6 +148,9 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       healthWarnings: typeof healthWarnings === "function" ? healthWarnings(s.healthWarnings) : healthWarnings,
     }));
   }, []);
+  const setGender = useCallback((gender: OnboardingGender) => {
+    setState((s) => ({ ...s, gender }));
+  }, []);
   const setLocation = useCallback((location: LocationResult | null) => {
     setState((s) => ({ ...s, location }));
   }, []);
@@ -177,6 +187,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
     setExperience,
     setKnowledgeScore,
     setHealthWarnings,
+    setGender,
     setLocation,
     setSelectedProgram,
     setVoluntaryFasting,

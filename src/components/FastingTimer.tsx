@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Moon, Sun, Clock, Calendar, MapPin, Loader2, Sunrise, Sunset, Bell, Utensils } from "lucide-react";
-import { usePrayerTimes, getSunnahFastingInfo } from "@/hooks/usePrayerTimes";
+import { usePrayerTimes, usePrayerTimesForDate, getSunnahFastingInfo } from "@/hooks/usePrayerTimes";
 import { useUserPreferences, useNotificationSettings, usePrayerNotificationPrefs, useIftarLabel, useDisplayTimezone } from "@/hooks/useLocalStorage";
-import { getNowSecondsSinceMidnightInTimezone, timeStringToSecondsSinceMidnight, secondsUntilTimeInTimezone } from "@/lib/utils";
+import { getNowSecondsSinceMidnightInTimezone, getTodayStringInTimezone, timeStringToSecondsSinceMidnight, secondsUntilTimeInTimezone, toLocalDateString } from "@/lib/utils";
 import { useAutoLocation } from "@/hooks/useLocation";
 import { Link } from "react-router-dom";
 import { LocationRequiredCTA } from "@/components/LocationRequiredCTA";
@@ -63,11 +63,26 @@ export const FastingTimer = ({
     effectiveLng,
     displayTimezone
   );
-  
+
+  // Tomorrow's date (same timezone as today) for post-iftar suhoor countdown
+  const todayStr = displayTimezone
+    ? getTodayStringInTimezone(displayTimezone)
+    : toLocalDateString(new Date());
+  const tomorrowDate = new Date(todayStr + "T12:00:00");
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  const tomorrowStr = toLocalDateString(tomorrowDate);
+  const { prayerTimes: tomorrowPrayerTimes } = usePrayerTimesForDate(
+    effectiveLat,
+    effectiveLng,
+    tomorrowStr
+  );
+  // Use tomorrow's imsak when past iftar (suhoor/imsak change day by day)
+  const suhoorTomorrowTime = tomorrowPrayerTimes?.imsak ?? prayerTimes?.imsak ?? propSuhoorTime ?? "05:23";
+
   // Use API times if available, otherwise use props or defaults
   const suhoorTime = prayerTimes?.imsak || propSuhoorTime || "05:23";
   const iftarTime = prayerTimes?.maghrib || propIftarTime || "18:47";
-  
+
   // Get Sunnah fasting info
   const sunnahInfo = getSunnahFastingInfo();
 
@@ -89,6 +104,7 @@ export const FastingTimer = ({
 
   const imsakSec = timeStringToSecondsSinceMidnight(suhoorTime);
   const maghribSec = timeStringToSecondsSinceMidnight(iftarTime);
+  const imsakTomorrowSec = timeStringToSecondsSinceMidnight(suhoorTomorrowTime);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -97,22 +113,27 @@ export const FastingTimer = ({
         let diff: number;
         let label: "Suhoor end" | "Iftar";
         let eating: boolean;
+        let displayTime: string;
         if (nowSec < imsakSec) {
           diff = secondsUntilTimeInTimezone(nowSec, imsakSec);
           label = "Suhoor end";
           eating = true;
+          displayTime = suhoorTime;
         } else if (nowSec < maghribSec) {
           diff = secondsUntilTimeInTimezone(nowSec, maghribSec);
           label = "Iftar";
           eating = false;
+          displayTime = iftarTime;
         } else {
-          diff = secondsUntilTimeInTimezone(nowSec, imsakSec);
+          // Past iftar: count down to tomorrow's suhoor end (imsak changes day by day)
+          diff = secondsUntilTimeInTimezone(nowSec, imsakTomorrowSec);
           label = "Suhoor end";
           eating = true;
+          displayTime = suhoorTomorrowTime;
         }
         setIsEatingPeriod(eating);
         setNextLabel(label);
-        const [h, m] = (label === "Iftar" ? iftarTime : suhoorTime).split(":").map((x) => parseInt(x, 10));
+        const [h, m] = displayTime.split(":").map((x) => parseInt(x, 10));
         setNextTimeStr(String(h ?? 0).padStart(2, "0") + ":" + String(m ?? 0).padStart(2, "0"));
         setTimeRemaining({
           hours: Math.floor(diff / 3600),
@@ -122,11 +143,15 @@ export const FastingTimer = ({
       } else {
         const now = new Date();
         const [suhoorH, suhoorM] = suhoorTime.split(":").map(Number);
+        const [suhoorTomorrowH, suhoorTomorrowM] = suhoorTomorrowTime.split(":").map(Number);
         const [iftarH, iftarM] = iftarTime.split(":").map(Number);
         const imsakToday = new Date();
         imsakToday.setHours(suhoorH, suhoorM, 0, 0);
         const maghribToday = new Date();
         maghribToday.setHours(iftarH, iftarM, 0, 0);
+        const imsakTomorrow = new Date();
+        imsakTomorrow.setDate(imsakTomorrow.getDate() + 1);
+        imsakTomorrow.setHours(suhoorTomorrowH, suhoorTomorrowM, 0, 0);
         let target: Date;
         let label: "Suhoor end" | "Iftar";
         let eating: boolean;
@@ -139,8 +164,6 @@ export const FastingTimer = ({
           label = "Iftar";
           eating = false;
         } else {
-          const imsakTomorrow = new Date(imsakToday);
-          imsakTomorrow.setDate(imsakTomorrow.getDate() + 1);
           target = imsakTomorrow;
           label = "Suhoor end";
           eating = true;
@@ -157,7 +180,7 @@ export const FastingTimer = ({
       }
     }, TICK_MS);
     return () => clearInterval(interval);
-  }, [suhoorTime, iftarTime, displayTimezone, imsakSec, maghribSec, TICK_MS]);
+  }, [suhoorTime, suhoorTomorrowTime, iftarTime, displayTimezone, imsakSec, imsakTomorrowSec, maghribSec, TICK_MS]);
 
   const formatNumber = (num: number) => num.toString().padStart(2, '0');
 
@@ -478,7 +501,7 @@ export const FastingTimer = ({
             <p className="text-center text-xs text-primary-foreground/80">
               {typeof navigator !== "undefined" && !navigator.onLine
                 ? "Cached times · You're offline."
-                : <>Times may be outdated. <button type="button" onClick={() => refetchPrayers()} className="underline hover:text-primary-foreground">Try again</button> · <Link to="/settings" className="underline hover:text-primary-foreground/90">Set location</Link></>}
+                : <>Times may be outdated. <button type="button" onClick={() => refetchPrayers()} className="underline hover:text-primary-foreground">Try again</button> · <Link to="/settings" className="underline hover:text-primary-foreground/90">Update</Link></>}
             </p>
           ) : error || (!effectiveLat || !effectiveLng) ? (
             <LocationRequiredCTA

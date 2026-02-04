@@ -62,7 +62,7 @@ function StepContent({
         <figure className="rounded-2xl border border-border overflow-hidden bg-muted/30">
           <img
             src={imgSrc}
-            alt={`Screenshot or illustration for: ${step.title}. Mobile view.`}
+            alt={`${step.title} - TryRamadan app screenshot, mobile view`}
             className="w-full max-w-md mx-auto block object-contain"
             loading="lazy"
             decoding="async"

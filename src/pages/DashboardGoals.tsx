@@ -144,7 +144,7 @@ export default function DashboardGoals() {
             </h3>
             {goals.length === 0 ? (
               <p className="text-sm text-muted-foreground py-4">
-                No goals yet. Add one above to get started.
+                Set intentions that matter to you. Goals are optional — add one or two if you&apos;d like a focus (e.g. read Quran, give charity, try new recipes).
               </p>
             ) : (
               <ul className="space-y-2">

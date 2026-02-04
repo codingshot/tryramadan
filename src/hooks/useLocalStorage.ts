@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import * as React from 'react';
 import { toLocalDateString } from '@/lib/utils';
 import { getTimezoneFromCoords } from '@/hooks/useLocation';
+import { getRamadanStartForYear, getRamadanEndForYear } from '@/lib/ramadan';
 
 export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T | ((prev: T) => T)) => void] {
   // Get stored value or use initial
-  const [storedValue, setStoredValue] = useState<T>(() => {
+  const [storedValue, setStoredValue] = React.useState<T>(() => {
     try {
       const item = window.localStorage.getItem(key);
       return item ? JSON.parse(item) : initialValue;
@@ -15,7 +16,7 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T 
   });
 
   // Update localStorage when state changes
-  useEffect(() => {
+  React.useEffect(() => {
     try {
       window.localStorage.setItem(key, JSON.stringify(storedValue));
     } catch (error) {
@@ -76,6 +77,28 @@ export interface UserPreferences {
   voluntaryFasting: string[];
   /** Show streak counter and achievement badges. When false, simpler progress view. */
   showStreakAndAchievements: boolean;
+  /** Gender for personalization; female enables menstruation tracking. */
+  gender: 'male' | 'female' | 'prefer-not-to-say' | null;
+  /** Enable menstruation pattern tracking to mark excused fasting days. Only relevant when gender is female. */
+  menstruationTrackingEnabled: boolean;
+  /** Average cycle length in days (e.g. 28). Used for prediction. */
+  menstruationCycleDays: number;
+  /** Average period length in days (e.g. 5). */
+  menstruationPeriodDays: number;
+  /** Last period start date (ISO YYYY-MM-DD). Used to predict next excused days. */
+  menstruationLastStartDate: string | null;
+  /** Health considerations from onboarding (e.g. diabetes, pregnancy). Used for contextual reminders. */
+  healthWarnings: string[];
+  /** Auto-delete journal entries older than this many days. null = keep forever. */
+  journalRetentionDays: number | null;
+  /** Auto-delete wellness entries older than this many days. null = keep forever. */
+  wellnessRetentionDays: number | null;
+  /** Auto-delete symptom entries older than this many days. null = keep forever. */
+  symptomRetentionDays: number | null;
+  /** Custom Ramadan start (YYYY-MM-DD) to match community; null = use app calendar. */
+  ramadanStartOverride: string | null;
+  /** Custom Ramadan end (YYYY-MM-DD); null = use app calendar. */
+  ramadanEndOverride: string | null;
 }
 
 export const defaultPreferences: UserPreferences = {
@@ -105,6 +128,17 @@ export const defaultPreferences: UserPreferences = {
   hydrationReminderTimes: ['12:00', '15:00', '19:00'],
   voluntaryFasting: [],
   showStreakAndAchievements: true,
+  gender: null,
+  menstruationTrackingEnabled: false,
+  menstruationCycleDays: 28,
+  menstruationPeriodDays: 5,
+  menstruationLastStartDate: null,
+  healthWarnings: [],
+  journalRetentionDays: null,
+  wellnessRetentionDays: null,
+  symptomRetentionDays: null,
+  ramadanStartOverride: null,
+  ramadanEndOverride: null,
 };
 
 const PREFERENCES_KEY = 'tryramadan-preferences';
@@ -134,7 +168,7 @@ export function useUserPreferences() {
  */
 export function useDisplayTimezone(): string | null {
   const [preferences, setPreferences] = useUserPreferences();
-  useEffect(() => {
+  React.useEffect(() => {
     const coords = preferences.locationCoords;
     if (!coords || preferences.timezone != null) return;
     let cancelled = false;
@@ -195,6 +229,64 @@ export function useSuhoorLabel(): string {
 export function useSuhoorLabelShort(): string {
   const [preferences] = useUserPreferences();
   return getSuhoorLabelShort(preferences.userType);
+}
+
+/** Whether user has menstruation tracking enabled (female + tracking on). */
+export function useMenstruationTrackingEnabled(): boolean {
+  const [preferences] = useUserPreferences();
+  return preferences.gender === 'female' && (preferences.menstruationTrackingEnabled ?? false);
+}
+
+/** Predicted menstruation dates for Ramadan (excused fasting days). Returns ISO date strings. */
+export function getPredictedMenstruationDates(
+  lastStart: string | null,
+  cycleDays: number,
+  periodDays: number,
+  ramadanStartIso: string,
+  ramadanEndIso: string
+): string[] {
+  if (!lastStart) return [];
+  const dates: string[] = [];
+  const start = new Date(ramadanStartIso + 'T12:00:00').getTime();
+  const end = new Date(ramadanEndIso + 'T12:00:00').getTime();
+  let cursor = new Date(lastStart + 'T12:00:00').getTime();
+  const dayMs = 24 * 60 * 60 * 1000;
+  while (cursor <= end + cycleDays * dayMs) {
+    if (cursor >= start && cursor <= end) {
+      for (let d = 0; d < periodDays; d++) {
+        const t = cursor + d * dayMs;
+        const str = new Date(t).toISOString().split('T')[0];
+        if (str >= ramadanStartIso && str <= ramadanEndIso && !dates.includes(str)) {
+          dates.push(str);
+        }
+      }
+    }
+    cursor += cycleDays * dayMs;
+  }
+  return [...new Set(dates)].sort();
+}
+
+/** Check if a date is a predicted menstruation day (excused). */
+export function isPredictedMenstruationDay(
+  date: string,
+  preferences: Pick<UserPreferences, 'gender' | 'menstruationTrackingEnabled' | 'menstruationLastStartDate' | 'menstruationCycleDays' | 'menstruationPeriodDays'>
+): boolean {
+  if (preferences.gender !== 'female' || !preferences.menstruationTrackingEnabled || !preferences.menstruationLastStartDate) {
+    return false;
+  }
+  const year = new Date(date + 'T12:00:00').getFullYear();
+  const ramadanStart = getRamadanStartForYear(year);
+  const ramadanEnd = getRamadanEndForYear(year);
+  const ramadanStartIso = toLocalDateString(ramadanStart);
+  const ramadanEndIso = toLocalDateString(ramadanEnd);
+  const predicted = getPredictedMenstruationDates(
+    preferences.menstruationLastStartDate,
+    preferences.menstruationCycleDays ?? 28,
+    preferences.menstruationPeriodDays ?? 5,
+    ramadanStartIso,
+    ramadanEndIso
+  );
+  return predicted.includes(date);
 }
 
 /** Predetermined reasons for breaking a fast (stored by id). */
@@ -536,15 +628,15 @@ export function useTodayData() {
     energyEntries: [],
   };
 
-  const setIntention = useCallback((intention: string) => {
+  const setIntention = React.useCallback((intention: string) => {
     setStore((prev) => ({ ...prev, [today]: { ...(prev[today] || {}), intention } }));
   }, [today, setStore]);
 
-  const setHydrationGlasses = useCallback((glasses: number) => {
+  const setHydrationGlasses = React.useCallback((glasses: number) => {
     setStore((prev) => ({ ...prev, [today]: { ...(prev[today] || {}), hydrationGlasses: Math.max(0, glasses) } }));
   }, [today, setStore]);
 
-  const addHydrationEntry = useCallback((amountMl: number) => {
+  const addHydrationEntry = React.useCallback((amountMl: number) => {
     const entry: HydrationEntry = { time: new Date().toISOString(), amountMl };
     setStore((prev) => ({
       ...prev,
@@ -555,7 +647,7 @@ export function useTodayData() {
     }));
   }, [today, setStore]);
 
-  const addEnergyEntry = useCallback((level: 1 | 2 | 3 | 4 | 5) => {
+  const addEnergyEntry = React.useCallback((level: 1 | 2 | 3 | 4 | 5) => {
     const entry: EnergyEntry = { time: new Date().toISOString(), level };
     setStore((prev) => ({
       ...prev,
@@ -699,11 +791,11 @@ export function getRecommendedCaloriesFromPreferences(preferences: Pick<UserPref
 
 export function useDailyGoals() {
   const [goals, setGoals] = useLocalStorage<DailyGoals>('tryramadan-daily-goals', defaultDailyGoals);
-  const clampedGoals = useMemo(
+  const clampedGoals = React.useMemo(
     () => ({ ...goals, calories: clampCalories(goals.calories) }),
     [goals]
   );
-  const setDailyGoals = useCallback(
+  const setDailyGoals = React.useCallback(
     (updater: DailyGoals | ((prev: DailyGoals) => DailyGoals)) => {
       setGoals((prev) => {
         const next = typeof updater === 'function' ? updater(prev) : updater;
@@ -721,7 +813,7 @@ const RECENT_RECIPES_MAX = 20;
 
 export function useRecentRecipes() {
   const [recent, setRecent] = useLocalStorage<string[]>(RECENT_RECIPES_KEY, []);
-  const addRecent = useCallback((recipeKey: string) => {
+  const addRecent = React.useCallback((recipeKey: string) => {
     setRecent((prev) => {
       const next = [recipeKey, ...prev.filter((k) => k !== recipeKey)].slice(0, RECENT_RECIPES_MAX);
       return next;
@@ -1081,7 +1173,7 @@ export function markHadithViewedToday(): void {
 
 export function useHadithViewedDates(): [string[], () => void] {
   const [dates, setDates] = useLocalStorage<string[]>(HADITH_VIEWED_DATES_KEY, []);
-  const markToday = useCallback(() => {
+  const markToday = React.useCallback(() => {
     const today = getTodayDateString();
     if (dates.includes(today)) return;
     setDates((prev) => [...prev, today].slice(-HADITH_VIEWED_MAX_DAYS));
@@ -1094,7 +1186,7 @@ const QURAN_VERSE_VIEWED_MAX_DAYS = 60;
 
 export function useQuranVerseViewedDates(): [string[], (date?: string) => void] {
   const [dates, setDates] = useLocalStorage<string[]>(QURAN_VERSE_VIEWED_DATES_KEY, []);
-  const markToday = useCallback((date?: string) => {
+  const markToday = React.useCallback((date?: string) => {
     const today = date ?? getTodayDateString();
     if (dates.includes(today)) return;
     setDates((prev) => [...prev, today].slice(-QURAN_VERSE_VIEWED_MAX_DAYS));

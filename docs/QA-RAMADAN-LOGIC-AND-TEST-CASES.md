@@ -174,3 +174,4 @@ Implemented in app:
 - **2.3 Excused vs unintentional break:** `getExcusedFastDays(progress)` returns broken days with reason illness, travel, menstruation, or medical. Dashboard Progress breakdown shows "Broken: Y (Z excused)" when Z > 0; Broken fast card tooltip mentions excused when applicable.
 - **3.2 Link meal to fast status:** On Meals page, when user has an in-progress fast today, a note is shown: "Logging food here doesn't break your fast; use 'Break fast' on the Dashboard if you ate."
 - **3.4 Journal timestamps:** Journal entries have optional `createdAt` / `updatedAt` (ISO string) on save.
+- **User override (Ramadan dates):** Optional `ramadanStartOverride` / `ramadanEndOverride` in preferences; Settings "Ramadan dates" ("Match my community"); `useRamadanRange()`, `getEffectiveRamadanRange()`; all "Day N", stats, and prayer/ical use effective range. See `RAMADAN-CALENDAR-ROBUSTNESS-AND-OVERRIDE.md`. Unit tests in `src/test/ramadan.test.ts`.

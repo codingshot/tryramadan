@@ -30,6 +30,7 @@ const OnboardingWelcome = lazy(() => import("./pages/onboarding/OnboardingWelcom
 const OnboardingMode = lazy(() => import("./pages/onboarding/OnboardingMode").then((m) => ({ default: m.default })));
 const OnboardingKnowledge = lazy(() => import("./pages/onboarding/OnboardingKnowledge").then((m) => ({ default: m.default })));
 const OnboardingHealth = lazy(() => import("./pages/onboarding/OnboardingHealth").then((m) => ({ default: m.default })));
+const OnboardingGender = lazy(() => import("./pages/onboarding/OnboardingGender").then((m) => ({ default: m.default })));
 const OnboardingLocation = lazy(() => import("./pages/onboarding/OnboardingLocation").then((m) => ({ default: m.default })));
 const OnboardingSchedule = lazy(() => import("./pages/onboarding/OnboardingSchedule").then((m) => ({ default: m.default })));
 const OnboardingNotifications = lazy(() => import("./pages/onboarding/OnboardingNotifications").then((m) => ({ default: m.default })));
@@ -162,12 +163,18 @@ const App = () => (
             <Route path="mode" element={<Suspense fallback={<PageFallback />}><OnboardingMode /></Suspense>} />
             <Route path="knowledge" element={<Suspense fallback={<PageFallback />}><OnboardingKnowledge /></Suspense>} />
             <Route path="health" element={<Suspense fallback={<PageFallback />}><OnboardingHealth /></Suspense>} />
+            <Route path="gender" element={<Suspense fallback={<PageFallback />}><OnboardingGender /></Suspense>} />
             <Route path="location" element={<Suspense fallback={<PageFallback />}><OnboardingLocation /></Suspense>} />
             <Route path="schedule" element={<Suspense fallback={<PageFallback />}><OnboardingSchedule /></Suspense>} />
             <Route path="notifications" element={<Suspense fallback={<PageFallback />}><OnboardingNotifications /></Suspense>} />
             <Route path="priorities" element={<Suspense fallback={<PageFallback />}><OnboardingPriorities /></Suspense>} />
             <Route path="goals" element={<Suspense fallback={<PageFallback />}><OnboardingGoals /></Suspense>} />
           </Route>
+          {/* Old-path redirects for backward compatibility (see docs/QA-404-AND-INVALID-URLS.md) */}
+          <Route path="/today" element={<Navigate to="/dashboard/today" replace />} />
+          <Route path="/schedule" element={<Navigate to="/dashboard/schedule" replace />} />
+          <Route path="/journal" element={<Navigate to="/dashboard/journal" replace />} />
+          <Route path="/prayers" element={<Navigate to="/dashboard/prayers" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/today" element={<Suspense fallback={<PageFallback />}><DashboardToday /></Suspense>} />
           <Route

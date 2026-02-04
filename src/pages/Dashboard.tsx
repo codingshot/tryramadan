@@ -53,7 +53,8 @@ import {
 import { toLocalDateString, getTodayStringInTimezone, getNowSecondsSinceMidnightInTimezone, timeStringToSecondsSinceMidnight, secondsUntilTimeInTimezone } from "@/lib/utils";
 import { BreakFastReasonDialog } from "@/components/BreakFastReasonDialog";
 import { usePrayerTimes, usePrayerTimesForDate, getSunnahFastingInfo, checkAyyamAlBeed } from "@/hooks/usePrayerTimes";
-import { getDaysUntilRamadan, isCurrentlyRamadan, getRamadanDayNumber, getCurrentRamadanStart, isLastDayOfRamadan } from "@/lib/ramadan";
+import { getDaysUntilRamadan, getCurrentRamadanStart } from "@/lib/ramadan";
+import { useRamadanRange } from "@/hooks/useRamadanRange";
 import { useAutoLocation } from "@/hooks/useLocation";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -71,6 +72,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [preferences, setPreferences] = useUserPreferences();
   const [progress, setProgress] = useFastingProgress();
+  const ramadanRange = useRamadanRange();
 
   const [isFasting, setIsFasting] = useState(true);
   const [countdownToIftar, setCountdownToIftar] = useState({ h: 0, m: 0, s: 0 });
@@ -123,6 +125,17 @@ const Dashboard = () => {
     locationCoords?.lng || null,
     selectedDate
   );
+
+  // Tomorrow's date for suhoor countdown when past iftar (imsak changes day by day)
+  const tomorrowDate = new Date(todayStr + "T12:00:00");
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  const tomorrowStr = toLocalDateString(tomorrowDate);
+  const { prayerTimes: tomorrowPrayerTimes } = usePrayerTimesForDate(
+    locationCoords?.lat || null,
+    locationCoords?.lng || null,
+    tomorrowStr
+  );
+  const imsakTomorrow = tomorrowPrayerTimes?.imsak ?? prayerTimes?.imsak;
   
   const [mealPlans, setMealPlans] = useDayMealPlans();
   const [foodLogs, setFoodLogs] = useDayFoodLog();
@@ -188,9 +201,11 @@ const Dashboard = () => {
 
   const tickFastingAndCountdown = useCallback(() => {
     if (!prayerTimes?.imsak || !prayerTimes?.maghrib) return;
+    const suhoorForTomorrow = imsakTomorrow ?? prayerTimes.imsak;
     if (displayTimezone) {
       const nowSeconds = getNowSecondsSinceMidnightInTimezone(displayTimezone);
       const imsakSeconds = timeStringToSecondsSinceMidnight(prayerTimes.imsak);
+      const imsakTomorrowSeconds = timeStringToSecondsSinceMidnight(suhoorForTomorrow);
       const maghribSeconds = timeStringToSecondsSinceMidnight(prayerTimes.maghrib);
       const fasting = nowSeconds >= imsakSeconds && nowSeconds < maghribSeconds;
       setIsFasting(fasting);
@@ -202,7 +217,8 @@ const Dashboard = () => {
           s: diff % 60,
         });
       } else {
-        const diff = secondsUntilTimeInTimezone(nowSeconds, imsakSeconds);
+        // Past iftar: count down to tomorrow's suhoor (imsak changes day by day)
+        const diff = secondsUntilTimeInTimezone(nowSeconds, imsakTomorrowSeconds);
         setCountdownToSuhoor({
           h: Math.floor(diff / 3600),
           m: Math.floor((diff % 3600) / 60),
@@ -212,6 +228,7 @@ const Dashboard = () => {
     } else {
       const now = new Date();
       const imsakTime = parseTimeToToday(prayerTimes.imsak);
+      const imsakTomorrowTime = parseTimeToToday(suhoorForTomorrow);
       const maghribTime = parseTimeToToday(prayerTimes.maghrib);
       const maghribSameDay = maghribTime.getTime() > imsakTime.getTime();
       const maghribTarget = maghribSameDay ? maghribTime : (() => {
@@ -229,8 +246,9 @@ const Dashboard = () => {
           s: Math.floor((diff % 6e4) / 1000),
         });
       } else {
-        let imsakTarget = new Date(imsakTime);
-        if (now >= imsakTarget) imsakTarget.setDate(imsakTarget.getDate() + 1);
+        // Past iftar: use tomorrow's imsak (changes day by day)
+        const imsakTarget = new Date(imsakTomorrowTime);
+        imsakTarget.setDate(imsakTarget.getDate() + 1);
         const diff = imsakTarget.getTime() - now.getTime();
         if (diff > 0) setCountdownToSuhoor({
           h: Math.floor(diff / 36e5),
@@ -239,7 +257,7 @@ const Dashboard = () => {
         });
       }
     }
-  }, [prayerTimes, displayTimezone, parseTimeToToday]);
+  }, [prayerTimes, imsakTomorrow, displayTimezone, parseTimeToToday]);
 
   useEffect(() => {
     tickFastingAndCountdown();
@@ -296,16 +314,17 @@ const Dashboard = () => {
   const todayLog = getTodayFastingLog(progress, todayStr);
   const recentLog = (progress.fastingLog || []).slice(-7).reverse();
   const streak = calculateStreak(progress, todayStr);
-  const totalDays = 30;
-  const ramadanCompletionPct = Math.round((progress.completedDays.length / totalDays) * 100);
+  const totalDays = ramadanRange.totalDays;
+  const completedInRange = progress.completedDays.filter((d) => d >= ramadanRange.startStr && d <= ramadanRange.endStr);
+  const ramadanCompletionPct = totalDays > 0 ? Math.round((completedInRange.length / totalDays) * 100) : 0;
   const factDay = Math.min(30, Math.max(1, (new Date().getDate() % 30) || 30));
   const dailyFact = dailyFactsData.facts.find((f) => f.day === factDay) || dailyFactsData.facts[0];
   const badgeList = [
     { id: "first-fast", name: "First Fast", icon: "🌙", unlocked: progress.completedDays.length >= 1 },
-    { id: "week-one", name: "Week One", icon: "⭐", unlocked: progress.completedDays.length >= 7 },
-    { id: "halfway", name: "Halfway", icon: "🏅", unlocked: progress.completedDays.length >= 15 },
+    { id: "week-one", name: "Week One", icon: "⭐", unlocked: completedInRange.length >= 7 },
+    { id: "halfway", name: "Halfway", icon: "🏅", unlocked: completedInRange.length >= 15 },
     { id: "streak-5", name: "5-day streak", icon: "🔥", unlocked: streak >= 5 },
-    { id: "full-month", name: "Ramadan Champion", icon: "🏆", unlocked: progress.completedDays.length >= 30 },
+    { id: "full-month", name: "Ramadan Champion", icon: "🏆", unlocked: completedInRange.length >= totalDays && totalDays > 0 },
   ];
   const recentAchievements = badgeList.filter((b) => b.unlocked).slice(-3).reverse();
 
@@ -344,7 +363,7 @@ const Dashboard = () => {
             <div className="flex items-center justify-between gap-2 mb-4">
               <h1 className="text-2xl md:text-3xl font-display font-bold truncate min-w-0">
                 {preferences.userType === "muslim" ? (
-                  isCurrentlyRamadan() ? (
+                  ramadanRange.isRamadanDay(new Date()) ? (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <span className="cursor-help border-b border-dotted border-transparent hover:border-muted-foreground/50">
@@ -448,9 +467,11 @@ const Dashboard = () => {
 
             {/* Compact Ramadan / Sunnah badge at top */}
             {(() => {
-              const daysUntil = getDaysUntilRamadan();
-              const inRamadan = isCurrentlyRamadan();
-              const ramadanDay = inRamadan ? getRamadanDayNumber(new Date()) ?? 1 : null;
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              const inRamadan = ramadanRange.isRamadanDay(today);
+              const ramadanDay = inRamadan ? ramadanRange.getRamadanDayNumber(today) ?? 1 : null;
+              const daysUntil = inRamadan ? 0 : today < ramadanRange.start ? Math.ceil((ramadanRange.start.getTime() - today.getTime()) / 86400000) : getDaysUntilRamadan();
               const sunnahInfo = getSunnahFastingInfo();
               const isSunnahDay = sunnahInfo && !inRamadan;
               if (isSunnahDay) {
@@ -475,7 +496,7 @@ const Dashboard = () => {
                 );
               }
               if (inRamadan && ramadanDay) {
-                const lastDay = isLastDayOfRamadan(new Date());
+                const lastDay = ramadanRange.isLastDayOfRamadan(new Date());
                 return (
                   <div className="mt-2 flex items-center gap-2">
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/15 border border-primary/30 text-xs font-medium">
@@ -486,7 +507,7 @@ const Dashboard = () => {
                 );
               }
               if (daysUntil > 0) {
-                const ramadanStartStr = getCurrentRamadanStart().toLocaleDateString("en", { weekday: "short", month: "long", day: "numeric", year: "numeric" });
+                const ramadanStartStr = (today < ramadanRange.start ? ramadanRange.start : getCurrentRamadanStart()).toLocaleDateString("en", { weekday: "short", month: "long", day: "numeric", year: "numeric" });
                 return (
                   <div className="mt-2 flex items-center gap-2">
                     <Tooltip>
@@ -918,13 +939,13 @@ const Dashboard = () => {
             const brokenDaysList = getBrokenFastDays(progress);
             const excusedDaysList = getExcusedFastDays(progress);
 
-            const DaysListDialog = ({ title, dates, open, onOpenChange }: { title: string; dates: string[]; open: boolean; onOpenChange: (v: boolean) => void }) => (
+            const DaysListDialog = ({ title, dates, open, onOpenChange, emptyMessage }: { title: string; dates: string[]; open: boolean; onOpenChange: (v: boolean) => void; emptyMessage?: string }) => (
               <Dialog open={open} onOpenChange={onOpenChange}>
                 <DialogContent className="max-w-sm max-h-[70vh] flex flex-col">
                   <DialogTitle>{title}</DialogTitle>
                   <div className="overflow-auto flex-1 min-h-0">
                     {dates.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">No days yet.</p>
+                      <p className="text-sm text-muted-foreground">{emptyMessage ?? "You're all set to start. Log your first fast from the Dashboard or Today page to see it here."}</p>
                     ) : (
                       <ul className="space-y-1">
                         {dates.map((dateStr) => (
@@ -1052,10 +1073,10 @@ const Dashboard = () => {
                 Completed: {progress.completedDays.length} · Broken: {brokenDaysList.length}
                 {excusedDaysList.length > 0 ? ` (${excusedDaysList.length} excused)` : ""} · Skipped: {(progress.skippedDays ?? []).length}
               </p>
-                <DaysListDialog title="Day streak — days fasted" dates={streakDaysList} open={statsDialog === "streak"} onOpenChange={(v) => !v && setStatsDialog(null)} />
-                <DaysListDialog title="Total days fasted" dates={totalDaysList} open={statsDialog === "total"} onOpenChange={(v) => !v && setStatsDialog(null)} />
-                <DaysListDialog title="Sunnah days fasted" dates={sunnahDaysList} open={statsDialog === "sunnah"} onOpenChange={(v) => !v && setStatsDialog(null)} />
-                <DaysListDialog title="Broken fast days" dates={brokenDaysList} open={statsDialog === "broken"} onOpenChange={(v) => !v && setStatsDialog(null)} />
+                <DaysListDialog title="Day streak — days fasted" dates={streakDaysList} open={statsDialog === "streak"} onOpenChange={(v) => !v && setStatsDialog(null)} emptyMessage="Your streak will build as you log consecutive days. Start with today." />
+                <DaysListDialog title="Total days fasted" dates={totalDaysList} open={statsDialog === "total"} onOpenChange={(v) => !v && setStatsDialog(null)} emptyMessage="Completed days will appear here once you mark days complete from the Dashboard or Schedule." />
+                <DaysListDialog title="Sunnah days fasted" dates={sunnahDaysList} open={statsDialog === "sunnah"} onOpenChange={(v) => !v && setStatsDialog(null)} emptyMessage="Sunnah fasts (e.g. Monday & Thursday) will show here when you log them." />
+                <DaysListDialog title="Broken fast days" dates={brokenDaysList} open={statsDialog === "broken"} onOpenChange={(v) => !v && setStatsDialog(null)} emptyMessage="If you ever break a fast early, you can log it with a reason — it'll show here. No judgment." />
               </>
             );
           })()}
@@ -1344,7 +1365,7 @@ const Dashboard = () => {
                     className="block p-3 rounded-xl border border-dashed border-border hover:border-secondary/50 text-sm text-muted-foreground hover:text-foreground"
                   >
                     <PenLine className="w-4 h-4 inline mr-2" />
-                    No entry for this day — Add in Journal
+                    No entry for this day — add a note or reflection whenever you're ready
                   </Link>
                 )}
               </div>
@@ -1389,10 +1410,15 @@ const Dashboard = () => {
                 value={ramadanCompletionPct}
                 size={80}
                 strokeWidth={8}
-                centerLabel={progress.completedDays.length}
+                centerLabel={completedInRange.length}
                 sublabel={`of ${totalDays} days`}
               />
-              {getDaysUntilRamadan() > 0 && (
+              {!ramadanRange.isRamadanDay(new Date()) && ramadanRange.start > new Date() && (
+                <p className="text-xs text-muted-foreground mt-2 text-center">
+                  Ramadan doesn&apos;t start until {ramadanRange.start.toLocaleDateString("en", { weekday: "short", month: "long", day: "numeric", year: "numeric" })}
+                </p>
+              )}
+              {!ramadanRange.isRamadanDay(new Date()) && ramadanRange.start <= new Date() && getDaysUntilRamadan() > 0 && (
                 <p className="text-xs text-muted-foreground mt-2 text-center">
                   Ramadan doesn&apos;t start until {getCurrentRamadanStart().toLocaleDateString("en", { weekday: "short", month: "long", day: "numeric", year: "numeric" })}
                 </p>

@@ -111,9 +111,6 @@ Prioritized list of improvements to make. Tick off as done.
 - [x] **Hero day count** – Pretitle shows "X days until Ramadan" or "Day X of Ramadan" instead of static "Upcoming Ramadan".
 - [x] **Fasting timer auto-location** – Hero FastingTimer uses auto-detected location (IP/geolocation) when user hasn't saved coords, for accurate eating/fasting period.
 - [x] **Prayer alarms for Muslim only** – Adhan and per-prayer notifications disabled for non-Muslim users; eating alarms (suhoor, iftar, hydration) kept for all.
-- [x] **Dashboard location banner** – Dismissible "Set your location in Settings…" banner when no saved location (UX-FLOWS 4.6); localStorage once-per-session dismiss.
-- [x] **Journal timestamps** – JournalEntry has `createdAt` and `updatedAt` (QA doc); set on save for timeline and "last edited" (future UI).
-- [x] **Copy for non-Muslims** – Daily missions "start fasting" tooltip says "pre-dawn meal (suhoor)" for non-Muslim; Break-fast reason "Travel" has tooltip "Travelers may be exempt; make up days later" (COPY-AUDIT).
 
 ---
 
@@ -122,4 +119,4 @@ Prioritized list of improvements to make. Tick off as done.
 - [ ] **React hooks** – Resolve remaining react-hooks/exhaustive-deps warnings where safe; fast-refresh warnings in shadcn/ui can remain.
 - [x] **Dashboard tests** – Added dashboardFeatures.test.tsx for day selector, fasting status, quick actions, Prayers/Learn links. Dashboard a11y: aria-labels on Settings, Go to today, Mark complete; h2 for Day plan; Navbar logo alt="" for redundancy fix.
 - [ ] **Strict null checks** – Enable `strictNullChecks` in TypeScript for stronger type safety (will require broader changes).
-- [ ] **Ramadan logic QA** – See `docs/QA-RAMADAN-LOGIC-AND-TEST-CASES.md`: skipped state and "I didn't fast today" implemented; journal `createdAt`/`updatedAt` implemented. Remaining: excused vs broken in stats, makeup (Qada) flag, calendar/DST/timezone tests.
+- [ ] **Ramadan logic QA** – See `docs/QA-RAMADAN-LOGIC-AND-TEST-CASES.md`: optional state model (skipped, excused, makeup), calendar/DST/timezone tests, journal timestamps; prioritised there.

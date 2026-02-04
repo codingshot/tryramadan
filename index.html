@@ -21,6 +21,7 @@
     <meta property="og:title" content="TryRamadan.app | Fast Like a Muslim for the Holy Month of Ramadan" />
     <meta property="og:description" content="Fast like a Muslim for the holy month of Ramadan. Free app: prayer times, suhoor & iftar, cultural education, and progressive fasting." />
     <meta property="og:image" content="https://tryramadan.app/og-image.jpg" />
+    <meta property="og:image:alt" content="TryRamadan.app — Fast like a Muslim for the holy month of Ramadan. Prayer times, suhoor &amp; iftar, cultural education." />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:site_name" content="TryRamadan.app" />
@@ -42,77 +43,13 @@
     <!-- Fonts: preconnect + async load to avoid blocking LCP (display=swap in URL) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Amiri:wght@400;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <!-- Fonts loaded via main.tsx (CSP-safe, no inline handlers) -->
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Amiri:wght@400;700&display=swap" /></noscript>
     <!-- iOS PWA / mobile web app -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="format-detection" content="telephone=no" />
-    
-    <!-- Structured Data -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "TryRamadan.app",
-      "url": "https://tryramadan.app",
-      "description": "Fast like a Muslim for the holy month of Ramadan. A free app with prayer times, suhoor & iftar, cultural education, and progressive fasting for everyone.",
-      "applicationCategory": "HealthApplication",
-      "operatingSystem": "Web",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      },
-      "creator": {
-        "@type": "Organization",
-        "name": "ummah.build",
-        "url": "https://ummah.build"
-      },
-      "featureList": [
-        "Progressive fasting programs",
-        "Cultural education about Ramadan",
-        "Smart fasting timer with suhoor and iftar times",
-        "Health and safety features",
-        "Daily hadith and Islamic wisdom",
-        "Meal planning suggestions"
-      ]
-    }
-    </script>
-
-    <!-- FAQ Schema -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What is TryRamadan.app?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "TryRamadan.app lets you fast like a Muslim for the holy month of Ramadan. It's a free app with prayer times, suhoor and iftar reminders, cultural education, and progressive fasting programs for everyone."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Is TryRamadan.app free?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes, TryRamadan.app is completely free to use. There are no hidden costs or subscriptions required."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Can Muslims use TryRamadan.app?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Absolutely! Muslims can use TryRamadan.app to track their fasting, learn more about Ramadan traditions, and access prayer times and daily hadith."
-          }
-        }
-      ]
-    }
-    </script>
+    <!-- JSON-LD injected by main.tsx (CSP: script-src 'self' only) -->
   </head>
   <body>
     <div id="root"></div>

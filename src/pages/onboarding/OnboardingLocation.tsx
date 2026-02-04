@@ -91,7 +91,7 @@ export default function OnboardingLocation() {
         }}
       >
       <Link
-        to="/onboarding/health"
+        to="/onboarding/gender"
         className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6"
       >
         <ArrowLeft className="w-4 h-4" /> Back

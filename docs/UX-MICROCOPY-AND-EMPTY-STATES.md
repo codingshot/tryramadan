@@ -1,5 +1,7 @@
 # UX: Microcopy and Empty States
 
+> **Implementation status:** Done. All major empty states updated: stats dialogs, day detail, Journal (past, future-date prompt), Goals, GoalsUntilRamadanCard, Progress fasting tracker, Macros (planned/logged).
+
 UX writer review of empty states across the Ramadan fasting/journal/meal dashboard. For each important empty state: **concise reassuring headline**, **one-sentence explanation in plain language**, and **primary CTA** into the main flow. Tone is **supportive and non-judgmental**, especially around missed fasts or gaps in tracking.
 
 ---

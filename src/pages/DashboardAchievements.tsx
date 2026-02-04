@@ -4,17 +4,19 @@ import { ArrowLeft, Trophy, ChevronRight } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useFastingProgress, useLocalStorage, calculateStreak, useDisplayTimezone } from "@/hooks/useLocalStorage";
+import { useRamadanRange } from "@/hooks/useRamadanRange";
 import { getTodayStringInTimezone } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { PageSEO } from "@/components/PageSEO";
 
 export default function DashboardAchievements() {
   const [progress] = useFastingProgress();
+  const ramadanRange = useRamadanRange();
   const [learnRead] = useLocalStorage<string[]>("tryramadan-learn-read", []);
   const displayTimezone = useDisplayTimezone();
   const todayStr = displayTimezone ? getTodayStringInTimezone(displayTimezone) : undefined;
-  const completedDays = progress.completedDays.length;
-  const totalDays = 30;
+  const completedDays = progress.completedDays.filter((d) => d >= ramadanRange.startStr && d <= ramadanRange.endStr).length;
+  const totalDays = ramadanRange.totalDays;
   const eagerLearnerUnlocked = learnRead.length >= 10;
   const currentStreak = calculateStreak(progress, todayStr);
 
@@ -24,7 +26,7 @@ export default function DashboardAchievements() {
     { id: "halfway", name: "Halfway There", desc: "Complete 15 days", icon: "🏅", unlocked: completedDays >= 15 },
     { id: "streak-5", name: "Consistent", desc: "5-day streak", icon: "🔥", unlocked: currentStreak >= 5 },
     { id: "streak-10", name: "Dedicated", desc: "10-day streak", icon: "💪", unlocked: currentStreak >= 10 },
-    { id: "full-month", name: "Ramadan Champion", desc: "Complete all 30 days", icon: "🏆", unlocked: completedDays >= 30 },
+    { id: "full-month", name: "Ramadan Champion", desc: `Complete all ${totalDays} days`, icon: "🏆", unlocked: totalDays > 0 && completedDays >= totalDays },
     { id: "learner", name: "Eager Learner", desc: "Read 10 educational articles", icon: "📚", unlocked: eagerLearnerUnlocked },
   ];
 

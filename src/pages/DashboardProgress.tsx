@@ -8,6 +8,7 @@ import {
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useFastingProgress, getTodayFastingLog, getBrokenReasonLabel, isFastingToday, useLocalStorage, calculateStreak, getLongestStreak, getJournalStreak, getMindfulEatingStreak, useDayMealPlans, useDayFoodLog, useUserPreferences, useDisplayTimezone } from "@/hooks/useLocalStorage";
+import { useRamadanRange } from "@/hooks/useRamadanRange";
 import { getTodayStringInTimezone } from "@/lib/utils";
 import type { EnergyEntry } from "@/hooks/useLocalStorage";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -19,6 +20,7 @@ type TodayStore = Record<string, { energyEntries?: EnergyEntry[] }>;
 const DashboardProgress = () => {
   const [preferences] = useUserPreferences();
   const [progress] = useFastingProgress();
+  const ramadanRange = useRamadanRange();
   const [todayStore] = useLocalStorage<TodayStore>("tryramadan-today", {});
   const [journalEntries] = useLocalStorage<{ date: string }[]>("tryramadan-journal", []);
   const [mealPlans] = useDayMealPlans();
@@ -30,8 +32,9 @@ const DashboardProgress = () => {
   const mindfulEatingStreak = getMindfulEatingStreak(foodLogs, mealPlans);
 
   const exportCsv = useCallback(() => {
-    const totalDays = 30;
-    const completedDays = progress.completedDays.length;
+    const totalDays = ramadanRange.totalDays;
+    const completedInRange = progress.completedDays.filter((d) => d >= ramadanRange.startStr && d <= ramadanRange.endStr);
+    const completedDays = completedInRange.length;
     const completionRate = Math.round((completedDays / totalDays) * 100);
     const rows = [
       ["TryRamadan Progress Report", ""],
@@ -61,7 +64,7 @@ const DashboardProgress = () => {
     a.download = `tryramadan-progress-${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [progress]);
+  }, [progress, ramadanRange]);
   const fastingToday = isFastingToday(progress);
   const todayLog = getTodayFastingLog(progress);
   const recentLog = (progress.fastingLog || []).slice(-14).reverse();
@@ -80,10 +83,10 @@ const DashboardProgress = () => {
     });
   })();
 
-  // Calculate stats
-  const totalDays = 30;
-  const completedDays = progress.completedDays.length;
-  const completionRate = Math.round((completedDays / totalDays) * 100);
+  // Calculate stats (Ramadan-scoped from effective range)
+  const totalDays = ramadanRange.totalDays;
+  const completedDays = progress.completedDays.filter((d) => d >= ramadanRange.startStr && d <= ramadanRange.endStr).length;
+  const completionRate = totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0;
   
   const currentStreak = calculateStreak(progress, todayStr);
   const longestStreak = getLongestStreak(progress);
@@ -138,6 +141,23 @@ const DashboardProgress = () => {
               Track your fasting journey and celebrate your achievements
             </p>
           </motion.div>
+
+          {completedDays === 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 }}
+              className="mb-6 p-4 rounded-xl bg-secondary/10 border border-secondary/30"
+            >
+              <p className="text-sm font-medium mb-1">Your progress starts with your first log</p>
+              <p className="text-sm text-muted-foreground mb-3">
+                Once you log a fast (start and complete, or break with a reason), your stats and streak will fill in here. Every day you log counts.
+              </p>
+              <Link to="/dashboard" className="text-sm font-medium text-secondary hover:underline">
+                Go to Dashboard →
+              </Link>
+            </motion.div>
+          )}
           
           {/* Stats overview */}
           <motion.div
@@ -297,7 +317,9 @@ const DashboardProgress = () => {
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-muted-foreground">Log your fasts from the Dashboard or Today page.</p>
+              <p className="text-sm text-muted-foreground">
+                Your fasting log will show up here. When you start a fast, break early, or mark a day complete on the Dashboard or Today page, it&apos;ll appear here.
+              </p>
             )}
           </motion.div>
           
@@ -333,10 +355,15 @@ const DashboardProgress = () => {
                 </div>
               )}
               <div>
-                <h3 className="font-display font-bold mb-4 flex items-center gap-2">
+                <h3 className="font-display font-bold mb-2 flex items-center gap-2">
                   <span className="opacity-50">🔒</span>
                   Upcoming Badges • الشارات القادمة
                 </h3>
+                {unlockedBadges.length === 0 && (
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Badges unlock as you go. Your first fast, first streak, and other milestones will earn badges here — no rush.
+                  </p>
+                )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                   {lockedBadges.map((badge) => (
                     <Tooltip key={badge.id}>

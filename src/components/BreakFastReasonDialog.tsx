@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -35,6 +36,12 @@ export function BreakFastReasonDialog({
         </DialogHeader>
         <p className="text-sm text-muted-foreground -mt-2">
           Choose a reason so you can track it. No judgment — your intention matters.
+        </p>
+        <p className="text-xs text-muted-foreground mt-2">
+          Need medical resources?{" "}
+          <Link to="/health-safety" className="text-secondary hover:underline">
+            Health & Safety →
+          </Link>
         </p>
         <ul className="space-y-2 mt-2">
           {BROKEN_FAST_REASONS.map(({ id, label }) => {

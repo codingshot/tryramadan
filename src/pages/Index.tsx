@@ -15,23 +15,24 @@ import { Footer } from "@/components/Footer";
 import { ArabicTerm } from "@/components/ArabicTerm";
 import { useFastingProgress, useIftarLabelShort, useUserPreferences, calculateStreak, getTotalHoursFasted } from "@/hooks/useLocalStorage";
 import { PageSEO } from "@/components/PageSEO";
-import { getRamadanDayNumber } from "@/lib/ramadan";
+import { useRamadanRange } from "@/hooks/useRamadanRange";
 import { ChevronRight } from "lucide-react";
-
-const TOTAL_DAYS = 30;
 
 const Index = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [progress] = useFastingProgress();
   const [preferences] = useUserPreferences();
+  const ramadanRange = useRamadanRange();
   const iftarLabelShort = useIftarLabelShort();
   const today = new Date();
-  const todayRamadanDay = getRamadanDayNumber(today);
+  const todayRamadanDay = ramadanRange.getRamadanDayNumber(today);
   const currentDay = todayRamadanDay ?? progress.currentDay ?? 1;
-  const completedDayNumbers = progress.completedDays
-    .map((d) => getRamadanDayNumber(new Date(d + "T12:00:00")))
+  const completedInRange = progress.completedDays.filter((d) => d >= ramadanRange.startStr && d <= ramadanRange.endStr);
+  const completedDayNumbers = completedInRange
+    .map((d) => ramadanRange.getRamadanDayNumber(new Date(d + "T12:00:00")))
     .filter((n): n is number => n != null);
+  const TOTAL_DAYS = ramadanRange.totalDays;
   const streak = calculateStreak(progress);
   const totalHoursFasted = getTotalHoursFasted(progress);
   const onboardingComplete = preferences.onboardingComplete ?? false;

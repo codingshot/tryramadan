@@ -8,6 +8,11 @@ import {
   getRamadanDayNumber,
   getDaysUntilRamadan,
   isCurrentlyRamadan,
+  getEffectiveRamadanRange,
+  isRamadanDayInRange,
+  getRamadanDayNumberInRange,
+  getRamadanRangeLength,
+  getRamadanDateRange,
 } from "@/lib/ramadan";
 
 describe("ramadan.ts", () => {
@@ -78,5 +83,44 @@ describe("ramadan.ts", () => {
   it("isCurrentlyRamadan returns boolean", () => {
     const result = isCurrentlyRamadan();
     expect(typeof result).toBe("boolean");
+  });
+
+  describe("effective range and override", () => {
+    it("getEffectiveRamadanRange with no overrides returns app calendar", () => {
+      const r = getEffectiveRamadanRange(null);
+      expect(r.fromOverride).toBe(false);
+      expect(r.startStr).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      expect(r.endStr).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      expect(getRamadanRangeLength(r.start, r.end)).toBeGreaterThanOrEqual(29);
+      expect(getRamadanRangeLength(r.start, r.end)).toBeLessThanOrEqual(30);
+    });
+    it("getEffectiveRamadanRange with valid override returns override range", () => {
+      const r = getEffectiveRamadanRange({
+        ramadanStartOverride: "2030-01-05",
+        ramadanEndOverride: "2030-02-03",
+      });
+      expect(r.fromOverride).toBe(true);
+      expect(r.startStr).toBe("2030-01-05");
+      expect(r.endStr).toBe("2030-02-03");
+      expect(getRamadanRangeLength(r.start, r.end)).toBe(30);
+    });
+    it("isRamadanDayInRange and getRamadanDayNumberInRange respect range", () => {
+      const start = new Date(2025, 2, 2);
+      const end = new Date(2025, 2, 31);
+      const inside = new Date(2025, 2, 15);
+      const outside = new Date(2025, 2, 1);
+      expect(isRamadanDayInRange(inside, start, end)).toBe(true);
+      expect(isRamadanDayInRange(outside, start, end)).toBe(false);
+      const dayNum = getRamadanDayNumberInRange(inside, start, end);
+      expect(dayNum).toBeGreaterThanOrEqual(1);
+      expect(dayNum).toBeLessThanOrEqual(30);
+      expect(getRamadanDayNumberInRange(outside, start, end)).toBe(null);
+    });
+    it("getRamadanDateRange() with no args returns same shape as getEffectiveRamadanRange", () => {
+      const range = getRamadanDateRange();
+      expect(range.startStr).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      expect(range.endStr).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      expect(range.year).toBeGreaterThanOrEqual(2024);
+    });
   });
 });

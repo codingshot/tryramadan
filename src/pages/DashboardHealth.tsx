@@ -1,10 +1,11 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Heart, Droplets, AlertTriangle, Sun, Moon, Stethoscope, TrendingUp } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { useWellnessLog, useSymptomLog, useTodayData } from "@/hooks/useLocalStorage";
+import { useWellnessLog, useSymptomLog, useTodayData, useUserPreferences } from "@/hooks/useLocalStorage";
+import { useRamadanRange } from "@/hooks/useRamadanRange";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -15,10 +16,14 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { PageSEO } from "@/components/PageSEO";
+import { toast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 
 const SYMPTOM_OPTIONS = ["Headache", "Dizziness", "Fatigue", "Nausea", "Low energy", "Other"];
 
 export default function DashboardHealth() {
+  const [preferences] = useUserPreferences();
+  const ramadanRange = useRamadanRange();
   const today = new Date().toISOString().split("T")[0];
   const [wellnessLog, setWellnessLog] = useWellnessLog();
   const [symptomLog, setSymptomLog] = useSymptomLog();
@@ -50,6 +55,45 @@ export default function DashboardHealth() {
   const todayWellness = wellnessLog[today] || [];
   const todaySymptoms = symptomLog[today] || [];
 
+  const ramadanDay = ramadanRange.isRamadanDay(new Date()) ? ramadanRange.getRamadanDayNumber(new Date()) : null;
+  const isRecurringCheckInDay = ramadanDay !== null && [7, 15, 21].includes(ramadanDay);
+
+  // Low mood (1–2) for 3+ consecutive days? (UX-HEALTH-GUARDRAILS)
+  const hasLowMoodThreePlusDays = (() => {
+    const datesWithLowMood = Object.entries(wellnessLog)
+      .filter(([, entries]) => entries.some((e) => e.mood === 1 || e.mood === 2))
+      .map(([date]) => date)
+      .sort();
+    if (datesWithLowMood.length < 3) return false;
+    let run = 1;
+    for (let i = 1; i < datesWithLowMood.length; i++) {
+      const prev = new Date(datesWithLowMood[i - 1] + "T12:00:00").getTime();
+      const curr = new Date(datesWithLowMood[i] + "T12:00:00").getTime();
+      if (curr - prev === 86400000) run++;
+      else run = 1;
+      if (run >= 3) return true;
+    }
+    return false;
+  })();
+
+  // Optional retention: trim wellness/symptom entries older than N days (see DATA-LIFECYCLE-POLICIES.md)
+  const wellnessDays = preferences.wellnessRetentionDays ?? null;
+  const symptomDays = preferences.symptomRetentionDays ?? null;
+  const cutoffWellness = wellnessDays != null && wellnessDays > 0 ? (() => { const d = new Date(); d.setDate(d.getDate() - wellnessDays); return d.toISOString().split("T")[0]; })() : null;
+  const cutoffSymptom = symptomDays != null && symptomDays > 0 ? (() => { const d = new Date(); d.setDate(d.getDate() - symptomDays); return d.toISOString().split("T")[0]; })() : null;
+  useEffect(() => {
+    if (cutoffWellness) {
+      const next = Object.fromEntries(Object.entries(wellnessLog).filter(([date]) => date >= cutoffWellness));
+      if (Object.keys(next).length < Object.keys(wellnessLog).length) setWellnessLog(next);
+    }
+  }, [cutoffWellness, wellnessLog, setWellnessLog]);
+  useEffect(() => {
+    if (cutoffSymptom) {
+      const next = Object.fromEntries(Object.entries(symptomLog).filter(([date]) => date >= cutoffSymptom));
+      if (Object.keys(next).length < Object.keys(symptomLog).length) setSymptomLog(next);
+    }
+  }, [cutoffSymptom, symptomLog, setSymptomLog]);
+
   const addWellness = useCallback(() => {
     const entry = {
       timeOfDay: wellnessTime,
@@ -74,6 +118,14 @@ export default function DashboardHealth() {
       ...prev,
       [today]: [...(prev[today] || []), entry],
     }));
+    if (symptomSeverity >= 4) {
+      toast({
+        title: "Symptom logged",
+        description: "If symptoms persist or worsen, consider breaking your fast.",
+        variant: "default",
+        action: <ToastAction altText="Emergency" asChild><Link to="/emergency">Emergency →</Link></ToastAction>,
+      });
+    }
   }, [today, symptomType, symptomSeverity, setSymptomLog]);
 
   return (
@@ -105,6 +157,75 @@ export default function DashboardHealth() {
               Daily wellness check-ins, energy levels, and hydration. Pause or adjust fasting when needed.
             </p>
           </motion.div>
+
+          {Array.isArray(preferences.healthWarnings) && preferences.healthWarnings.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.03 }}
+              className="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex gap-4"
+            >
+              <AlertTriangle className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium mb-1">You indicated health considerations</p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Remember: consult your doctor before fasting.
+                </p>
+                <Link
+                  to="/health-safety"
+                  className="text-sm font-medium text-secondary hover:underline"
+                >
+                  Health & Safety →
+                </Link>
+              </div>
+            </motion.div>
+          )}
+
+          {isRecurringCheckInDay && ramadanDay && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.04 }}
+              className="mb-6 p-4 rounded-xl bg-secondary/10 border border-secondary/30 flex gap-4"
+            >
+              <Heart className="w-6 h-6 text-secondary flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium mb-1">Day {ramadanDay} check-in</p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  How&apos;s fasting going? It&apos;s okay to adjust goals or take a break if you need to. Your health comes first.
+                </p>
+                <Link
+                  to="/health-safety"
+                  className="text-sm font-medium text-secondary hover:underline"
+                >
+                  Health & Safety →
+                </Link>
+              </div>
+            </motion.div>
+          )}
+
+          {hasLowMoodThreePlusDays && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 }}
+              className="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex gap-4"
+            >
+              <AlertTriangle className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium mb-1">You&apos;ve logged low energy recently</p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  It&apos;s okay to adjust or pause. Your health comes first.
+                </p>
+                <Link
+                  to="/health-safety"
+                  className="text-sm font-medium text-secondary hover:underline"
+                >
+                  Health & Safety →
+                </Link>
+              </div>
+            </motion.div>
+          )}
 
           {/* Wellness check-in */}
           <motion.div
@@ -326,6 +447,10 @@ export default function DashboardHealth() {
               I need to break my fast — open emergency resources
             </Link>
           </motion.div>
+
+          <p className="text-xs text-muted-foreground mt-8 mb-4 text-center max-w-xl mx-auto">
+            TryRamadan is for tracking and education only. It does not replace medical, religious, or nutritional advice.
+          </p>
         </div>
       </main>
       <Footer />

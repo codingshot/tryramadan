@@ -32,7 +32,7 @@ export default function OnboardingHealth() {
   };
 
   const handleContinue = () => {
-    navigate("/onboarding/location");
+    navigate("/onboarding/gender");
   };
 
   const hasWarning = sel.some((id) => id !== "none" && HEALTH_OPTIONS.find((o) => o.id === id)?.safe === false);
@@ -85,6 +85,13 @@ export default function OnboardingHealth() {
           </p>
         </div>
       )}
+
+      <p className="text-sm text-muted-foreground mb-2">
+        This app does not replace your doctor. Always consult a healthcare professional before fasting.
+      </p>
+      <p className="text-sm text-muted-foreground mb-4">
+        By continuing, you understand this app is not medical advice and you should consult your doctor if you have health concerns.
+      </p>
 
       <button
         type="submit"

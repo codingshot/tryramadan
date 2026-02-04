@@ -107,10 +107,15 @@ const Guides = () => {
                               <div className="w-16 h-24 shrink-0 hidden sm:block">
                                 <img
                                   src={thumb}
-                                  alt=""
+                                  alt={`Thumbnail for ${guide.title} - TryRamadan user guide`}
                                   className="w-full h-full object-cover rounded-lg"
                                   loading="lazy"
-                                  onError={(e) => { e.currentTarget.parentElement!.style.display = "none"; }}
+                                  decoding="async"
+                                  onError={(e) => {
+                                    const el = e.currentTarget;
+                                    el.onerror = null;
+                                    el.src = "/placeholder.svg";
+                                  }}
                                 />
                               </div>
                             )}

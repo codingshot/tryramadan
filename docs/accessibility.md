@@ -1,5 +1,7 @@
 # Accessibility (WCAG 2.2 AA)
 
+> **Implementation status:** Definition of done checklist applied. Structure, labels, focus, dialogs follow patterns. Manual keyboard and screen reader testing recommended per PR.
+
 Patterns, shared UI map, and definition of done for TryRamadan. Target: **WCAG 2.2 Level AA**.
 
 ---
@@ -71,6 +73,13 @@ Before merging UI changes, confirm:
 - [x] **Dialogs/menus:** Dialog has title and optional description; focus is trapped and restored; close is keyboard operable. Menus are keyboard navigable.
 - [x] **ARIA:** No redundant or incorrect ARIA; minimal ARIA on complex components (tabs, dialog, live regions). Decorative icons use `aria-hidden`.
 - [ ] **Testing:** Manual test with keyboard only (Tab, Enter, Space, Escape); optional screen reader spot-check (e.g. VoiceOver, NVDA).
+
+### Manual testing checklist (before release or major PR)
+
+1. **Keyboard only:** Tab through Settings, Dashboard, Journal; activate buttons with Enter/Space; close dialogs with Escape; use arrow keys in selects/menus.
+2. **Screen reader (optional):** Spot-check Home, Dashboard, one onboarding step; confirm headings and landmarks are announced (e.g. VoiceOver on macOS: VO keys + navigate by headings).
+3. **Focus visible:** No focusable element should have zero visible focus indicator when focused via keyboard.
+4. **E2E:** Run `npm run test:e2e` (happy-path + 404) after `npx playwright install`; add offline/routing specs as needed (see `docs/QA-OFFLINE-AND-FLAKY-NETWORK.md`, `docs/QA-ROUTING-GUARDS-AND-TEST-CASES.md`).
 
 ---
 

@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useUserPreferences, useIftarLabel, useIftarLabelShort } from "@/hooks/useLocalStorage";
 import { useNotificationSettings } from "@/hooks/useLocalStorage";
 import { usePrayerTimes, getSunnahFastingInfo } from "@/hooks/usePrayerTimes";
-import { isRamadanDay } from "@/lib/ramadan";
+import { useRamadanRange } from "@/hooks/useRamadanRange";
 
 const REMINDERS_SENT_KEY = "tryramadan-reminders-sent";
 
@@ -45,6 +45,7 @@ function timeToMinutes(timeStr: string): number {
 export function ReminderScheduler() {
   const [preferences] = useUserPreferences();
   const [notifSettings] = useNotificationSettings();
+  const ramadanRange = useRamadanRange();
   const iftarLabel = useIftarLabel();
   const iftarLabelShort = useIftarLabelShort();
   const { prayerTimes } = usePrayerTimes(
@@ -76,7 +77,7 @@ export function ReminderScheduler() {
         const sunnahInfo = getSunnahFastingInfo();
         const todayDate = new Date();
         todayDate.setHours(0, 0, 0, 0);
-        if (sunnahInfo && !isRamadanDay(todayDate)) {
+        if (sunnahInfo && !ramadanRange.isRamadanDay(todayDate)) {
           addSent("sunnah-day");
           new Notification("Sunnah fasting day • يوم صيام سنة", {
             body: `Today is ${sunnahInfo.reason}. Voluntary fasting is recommended.`,

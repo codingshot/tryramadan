@@ -49,16 +49,20 @@ export default function OnboardingGoals() {
       simplifyByLocation: true,
     };
     const voluntaryFasting = Array.isArray(state.voluntaryFasting) ? state.voluntaryFasting : [];
+    const genderPref = state.gender === 'prefer-not-to-say' ? null : state.gender;
+    const healthWarnings = Array.isArray(state.healthWarnings) ? state.healthWarnings.filter((id) => id && id !== "none") : [];
     const newPrefs = {
       ...preferences,
       userType: state.mode,
       experience: state.experience,
+      gender: genderPref,
       location: state.location?.displayName ?? "",
       locationCoords: state.location ? { lat: state.location.lat, lng: state.location.lng } : null,
       timezone: state.location?.timezone ?? null,
       fastingGoal: state.selectedProgram === "traditional" ? "full" : state.selectedProgram,
       selectedProgram: state.selectedProgram,
       voluntaryFasting,
+      healthWarnings,
       onboardingComplete: true,
       notificationsEnabled: state.notifications.suhoor || state.notifications.iftar,
       learningPriority: priorities.learningPriority,

@@ -121,6 +121,9 @@ export const ProgressTracker = ({
             {displayStreak > 0 ? `${displayStreak} Day Streak!` : "No streak yet"}
           </span>
         </motion.div>
+        {displayStreak === 0 && (
+          <p className="text-xs text-muted-foreground w-full text-center mt-1">Log your first fast to start</p>
+        )}
         {showHoursFasted && (
           <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted text-foreground text-sm font-medium">
             <span aria-hidden>⏱</span>

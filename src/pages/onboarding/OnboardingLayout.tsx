@@ -11,6 +11,7 @@ const STEPS = [
   { path: "mode", label: "Mode" },
   { path: "knowledge", label: "Knowledge" },
   { path: "health", label: "Health" },
+  { path: "gender", label: "Gender" },
   { path: "location", label: "Location" },
   { path: "schedule", label: "Schedule" },
   { path: "notifications", label: "Notifications" },
@@ -40,10 +41,12 @@ export default function OnboardingLayout() {
         simplifyByLocation: true,
       };
       const voluntaryFasting = Array.isArray(state.voluntaryFasting) ? state.voluntaryFasting : [];
+      const genderPref = state.gender === 'prefer-not-to-say' ? null : state.gender;
       const newPrefs = {
         ...preferences,
         userType: state.mode,
         experience: state.experience,
+        gender: genderPref,
         location: state.location?.displayName ?? "",
         locationCoords: state.location ? { lat: state.location.lat, lng: state.location.lng } : null,
         timezone: state.location?.timezone ?? null,
