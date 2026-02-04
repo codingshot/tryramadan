@@ -7,6 +7,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter, Routes, Route } from "react-router-dom";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { toLocalDateString } from "@/lib/utils";
 import Dashboard from "@/pages/Dashboard";
 import DashboardToday from "@/pages/DashboardToday";
 import { PREFS_WITH_LOCATION, PREFS_NON_MUSLIM, MOCK_PRAYER_TIMES } from "./testHelpers";
@@ -101,7 +102,7 @@ describe("Daily card and fasting", () => {
       const progressRaw = localStorage.getItem("tryramadan-progress");
       expect(progressRaw).toBeTruthy();
       const progress = JSON.parse(progressRaw!);
-      const today = new Date().toISOString().split("T")[0];
+      const today = toLocalDateString(new Date());
       const todayEntry = progress.fastingLog?.find((e: { date: string }) => e.date === today);
       expect(todayEntry).toBeDefined();
       expect(todayEntry.status).toBe("in_progress");
@@ -121,7 +122,7 @@ describe("Daily card and fasting", () => {
           startDate: null,
           fastingLog: [
             {
-              date: new Date().toISOString().split("T")[0],
+              date: toLocalDateString(new Date()),
               startedAt: new Date().toISOString(),
               status: "in_progress",
             },
@@ -132,7 +133,7 @@ describe("Daily card and fasting", () => {
       const markComplete = screen.getByRole("button", { name: /mark complete|fasted today|mark today as fasted/i });
       fireEvent.click(markComplete);
       const progress = JSON.parse(localStorage.getItem("tryramadan-progress")!);
-      const today = new Date().toISOString().split("T")[0];
+      const today = toLocalDateString(new Date());
       expect(progress.completedDays).toContain(today);
       const entry = progress.fastingLog?.find((e: { date: string }) => e.date === today);
       expect(entry?.status).toBe("completed");
@@ -141,7 +142,7 @@ describe("Daily card and fasting", () => {
 
   describe("Marking fast as broken or excused after it started", () => {
     it("opening Break fast and choosing a reason updates log to broken and removes from completedDays", () => {
-      const today = new Date().toISOString().split("T")[0];
+      const today = toLocalDateString(new Date());
       localStorage.setItem(
         "tryramadan-progress",
         JSON.stringify({
@@ -196,7 +197,7 @@ describe("Daily card and fasting", () => {
     });
 
     it("shows I fasted today — mark complete and I broke my fast when fasting in progress", () => {
-      const today = new Date().toISOString().split("T")[0];
+      const today = toLocalDateString(new Date());
       localStorage.setItem(
         "tryramadan-progress",
         JSON.stringify({
@@ -218,7 +219,7 @@ describe("Daily card and fasting", () => {
     });
 
     it("breaking fast from Today page opens reason dialog and persists broken reason", () => {
-      const today = new Date().toISOString().split("T")[0];
+      const today = toLocalDateString(new Date());
       localStorage.setItem(
         "tryramadan-progress",
         JSON.stringify({

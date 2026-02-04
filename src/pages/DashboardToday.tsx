@@ -21,10 +21,11 @@ import {
   useIftarLabelShort,
   useSuhoorLabelShort,
   useDisplayTimezone,
+  isPredictedMenstruationDay,
 } from "@/hooks/useLocalStorage";
-import { getTodayStringInTimezone, getNowSecondsSinceMidnightInTimezone, timeStringToSecondsSinceMidnight, secondsUntilTimeInTimezone } from "@/lib/utils";
+import { getTodayStringInTimezone, getNowSecondsSinceMidnightInTimezone, timeStringToSecondsSinceMidnight, secondsUntilTimeInTimezone, toLocalDateString } from "@/lib/utils";
 import { BreakFastReasonDialog } from "@/components/BreakFastReasonDialog";
-import { usePrayerTimes } from "@/hooks/usePrayerTimes";
+import { usePrayerTimes, usePrayerTimesForDate } from "@/hooks/usePrayerTimes";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
 import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
@@ -71,8 +72,16 @@ const DashboardToday = () => {
     preferences.locationCoords?.lng || null,
     displayTimezone
   );
-  
-  const todayStr = displayTimezone ? getTodayStringInTimezone(displayTimezone) : new Date().toISOString().split("T")[0];
+  const todayStr = displayTimezone ? getTodayStringInTimezone(displayTimezone) : toLocalDateString(new Date());
+  const tomorrowDate = new Date(todayStr + "T12:00:00");
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  const tomorrowStr = toLocalDateString(tomorrowDate);
+  const { prayerTimes: tomorrowPrayerTimes } = usePrayerTimesForDate(
+    preferences.locationCoords?.lat || null,
+    preferences.locationCoords?.lng || null,
+    tomorrowStr
+  );
+  const imsakTomorrow = tomorrowPrayerTimes?.imsak ?? prayerTimes?.imsak;
 
   // Calculate fasting progress: from Suhoor end (Imsak) to Iftar (Maghrib); use location time when timezone set
   const getFastingProgress = () => {
@@ -95,6 +104,7 @@ const DashboardToday = () => {
   const todayLog = getTodayFastingLog(progress, todayStr);
   /** Only show "I broke my fast" when user has started fasting today and has not yet broken or marked complete */
   const fastingToday = !!todayLog && todayLog.status !== "broken" && !todayCompleted && !todaySkipped;
+  const isPredictedPeriodDay = isPredictedMenstruationDay(todayStr, preferences);
 
   const imsakStr = prayerTimes?.imsak ?? prayerTimes?.fajr;
   const isFastingWindow =
@@ -113,6 +123,7 @@ const DashboardToday = () => {
   useEffect(() => {
     if (!prayerTimes) return;
     const imsakSec = timeStringToSecondsSinceMidnight(prayerTimes.imsak ?? prayerTimes.fajr);
+    const imsakTomorrowSec = timeStringToSecondsSinceMidnight(imsakTomorrow ?? prayerTimes.imsak ?? prayerTimes.fajr);
     const maghribSec = timeStringToSecondsSinceMidnight(prayerTimes.maghrib);
     const tick = () => {
       const nowSec = displayTimezone
@@ -123,6 +134,10 @@ const DashboardToday = () => {
       if (nowSec < imsakSec) {
         const d = secondsUntilTimeInTimezone(nowSec, imsakSec);
         setCountdownSuhoorEnd({ h: Math.floor(d / 3600), m: Math.floor((d % 3600) / 60) });
+      } else if (nowSec >= maghribSec) {
+        // Past iftar: count down to tomorrow's suhoor (imsak changes day by day)
+        const d = secondsUntilTimeInTimezone(nowSec, imsakTomorrowSec);
+        setCountdownSuhoorEnd({ h: Math.floor(d / 3600), m: Math.floor((d % 3600) / 60) });
       } else setCountdownSuhoorEnd({ h: 0, m: 0 });
       if (nowSec < maghribSec) {
         const d = secondsUntilTimeInTimezone(nowSec, maghribSec);
@@ -132,7 +147,7 @@ const DashboardToday = () => {
     tick();
     const interval = setInterval(tick, 2000); // Throttle for INP (was 1s)
     return () => clearInterval(interval);
-  }, [prayerTimes, displayTimezone]);
+  }, [prayerTimes, imsakTomorrow, displayTimezone]);
   
   const energyIcons = {
     1: BatteryLow,
@@ -212,6 +227,18 @@ const DashboardToday = () => {
               <div className="py-3 px-4 rounded-xl bg-muted/50 border border-border text-center">
                 <span className="font-medium text-muted-foreground">You didn&apos;t fast today</span>
                 <p className="text-xs text-muted-foreground mt-1">You marked today as not fasting (e.g. travel or illness). It won&apos;t count as a broken fast.</p>
+              </div>
+            ) : isPredictedPeriodDay && !todayCompleted && !todaySkipped && !todayBrokenEntry && !fastingToday ? (
+              <div className="py-3 px-4 rounded-xl bg-secondary/10 border border-secondary/30 text-center">
+                <span className="font-medium text-secondary">Predicted excused day</span>
+                <p className="text-xs text-muted-foreground mt-1">Based on your pattern, today may be an excused fasting day. Tap below to mark it—no guilt. Tradition recognises this.</p>
+                <button
+                  type="button"
+                  onClick={() => setDaySkipped(progress, setProgress, todayStr)}
+                  className="mt-3 min-h-[44px] px-4 py-2 rounded-xl border border-secondary/50 text-secondary font-medium text-sm hover:bg-secondary/10 transition-colors"
+                >
+                  I didn&apos;t fast today (excused)
+                </button>
               </div>
             ) : todayBrokenEntry ? (
               <div className="py-3 px-4 rounded-xl border border-destructive/40 bg-destructive/10 text-center text-sm">

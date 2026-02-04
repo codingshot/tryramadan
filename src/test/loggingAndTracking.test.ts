@@ -3,6 +3,7 @@
  * Covers: fasting progress, completed days, streak, break-fast reasons, daily missions, empty state.
  */
 import { describe, it, expect, beforeEach } from "vitest";
+import { toLocalDateString } from "@/lib/utils";
 import {
   defaultProgress,
   calculateStreak,
@@ -35,8 +36,9 @@ describe("Fasting progress edge cases", () => {
   });
 
   it("calculateStreak counts consecutive days ending today", () => {
-    const today = new Date().toISOString().split("T")[0];
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
+    const now = new Date();
+    const today = toLocalDateString(now);
+    const yesterday = toLocalDateString(new Date(now.getTime() - 86400000));
     const progress: FastingProgress = {
       ...defaultProgress,
       completedDays: [today, yesterday].sort(),
@@ -45,12 +47,13 @@ describe("Fasting progress edge cases", () => {
   });
 
   it("calculateStreak does not break on excused day (illness, travel, etc.)", () => {
-    const today = new Date().toISOString().split("T")[0];
-    const d = new Date();
+    const now = new Date();
+    const today = toLocalDateString(now);
+    const d = new Date(now);
     d.setDate(d.getDate() - 1);
-    const yesterday = d.toISOString().split("T")[0];
+    const yesterday = toLocalDateString(d);
     d.setDate(d.getDate() - 1);
-    const twoDaysAgo = d.toISOString().split("T")[0];
+    const twoDaysAgo = toLocalDateString(d);
     // Today completed, yesterday broken with excused reason, twoDaysAgo completed → streak = 3
     const progress: FastingProgress = {
       ...defaultProgress,
