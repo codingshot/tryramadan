@@ -971,7 +971,7 @@ const Dashboard = () => {
                       <button
                         type="button"
                         onClick={() => streak > 0 && setStatsDialog("streak")}
-                        className="p-3 sm:p-4 rounded-2xl bg-card border border-border min-h-[100px] sm:min-h-0 flex flex-col items-center justify-center hover:border-secondary/50 transition-colors text-left w-full"
+                        className={`p-3 sm:p-4 rounded-2xl bg-card border border-border min-h-[100px] sm:min-h-0 flex flex-col items-center justify-center transition-colors text-left w-full ${streak > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
                       >
                         <div className="flex flex-col items-center gap-2">
                           <div className="w-10 h-10 rounded-full bg-gradient-gold flex items-center justify-center">
@@ -995,7 +995,7 @@ const Dashboard = () => {
                     <button
                       type="button"
                       onClick={() => progress.completedDays.length > 0 && setStatsDialog("total")}
-                      className="p-3 sm:p-4 rounded-2xl bg-card border border-border min-h-[100px] sm:min-h-0 flex flex-col items-center justify-center hover:border-secondary/50 transition-colors text-left w-full"
+                      className={`p-3 sm:p-4 rounded-2xl bg-card border border-border min-h-[100px] sm:min-h-0 flex flex-col items-center justify-center transition-colors text-left w-full ${progress.completedDays.length > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
                     >
                       <div className="flex flex-col items-center gap-2">
                         <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
@@ -1017,7 +1017,7 @@ const Dashboard = () => {
                     <button
                       type="button"
                       onClick={() => progress.sunnahDaysCompleted > 0 && setStatsDialog("sunnah")}
-                      className="p-3 sm:p-4 rounded-2xl bg-card border border-border min-h-[100px] sm:min-h-0 flex flex-col items-center justify-center hover:border-secondary/50 transition-colors text-left w-full"
+                      className={`p-3 sm:p-4 rounded-2xl bg-card border border-border min-h-[100px] sm:min-h-0 flex flex-col items-center justify-center transition-colors text-left w-full ${progress.sunnahDaysCompleted > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
                     >
                       <div className="flex flex-col items-center gap-2">
                         <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
@@ -1039,7 +1039,7 @@ const Dashboard = () => {
                     <button
                       type="button"
                       onClick={() => brokenDaysList.length > 0 && setStatsDialog("broken")}
-                      className="p-3 sm:p-4 rounded-2xl bg-card border border-border min-h-[100px] sm:min-h-0 flex flex-col items-center justify-center hover:border-secondary/50 transition-colors text-left w-full"
+                      className={`p-3 sm:p-4 rounded-2xl bg-card border border-border min-h-[100px] sm:min-h-0 flex flex-col items-center justify-center transition-colors text-left w-full ${brokenDaysList.length > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
                     >
                       <div className="flex flex-col items-center gap-2">
                         <div className="w-10 h-10 rounded-full bg-destructive/20 flex items-center justify-center">
@@ -1451,16 +1451,18 @@ const Dashboard = () => {
             </motion.div>
           )}
 
-          {/* Quick action: Emergency break fast */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }} className="mb-6">
-            <Link
-              to="/emergency"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-destructive/50 text-destructive hover:bg-destructive/10 transition-colors text-sm font-medium"
-            >
-              <AlertTriangle className="w-4 h-4" />
-              Emergency: break fast
-            </Link>
-          </motion.div>
+          {/* Quick action: Emergency break fast — only when user is currently fasting */}
+          {fastingToday && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }} className="mb-6">
+              <Link
+                to="/emergency"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-destructive/50 text-destructive hover:bg-destructive/10 transition-colors text-sm font-medium"
+              >
+                <AlertTriangle className="w-4 h-4" />
+                Emergency: break fast
+              </Link>
+            </motion.div>
+          )}
 
           {/* Daily Ramadan Fact */}
           <Link to="/dashboard/learn">
