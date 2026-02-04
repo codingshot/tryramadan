@@ -788,6 +788,44 @@ export function useCalendarEvents() {
   return useLocalStorage<Record<string, CalendarEvent[]>>('tryramadan-calendar-events', {});
 }
 
+/** Per-date overrides for prayer times (e.g. imsak, maghrib). Keys: YYYY-MM-DD. */
+export type PrayerTimeOverrides = Record<string, Partial<{
+  imsak: string;
+  fajr: string;
+  dhuhr: string;
+  asr: string;
+  maghrib: string;
+  isha: string;
+}>>;
+
+export function usePrayerTimeOverrides() {
+  return useLocalStorage<PrayerTimeOverrides>('tryramadan-prayer-time-overrides', {});
+}
+
+/** Default duration in minutes per event type (for sync-to-calendar). */
+export type DefaultPrayerDurations = Partial<Record<CalendarEventType, number>>;
+
+const DEFAULT_PRAYER_DURATIONS: DefaultPrayerDurations = {
+  suhoor: 5,
+  iftar: 10,
+  fajr: 5,
+  dhuhr: 5,
+  asr: 5,
+  maghrib: 5,
+  isha: 5,
+  taraweeh: 60,
+  get_food: 30,
+  custom: 30,
+};
+
+export function useDefaultPrayerDurations() {
+  return useLocalStorage<DefaultPrayerDurations>('tryramadan-default-prayer-durations', DEFAULT_PRAYER_DURATIONS);
+}
+
+export function getDefaultDurationForType(type: CalendarEventType, durations: DefaultPrayerDurations): number {
+  return durations?.[type] ?? DEFAULT_PRAYER_DURATIONS[type] ?? 15;
+}
+
 // Wellness check-in: morning/evening mood (1-5) and optional note per day
 export interface WellnessEntry {
   timeOfDay: 'morning' | 'evening';

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
@@ -13,10 +13,14 @@ export default function OnboardingMode() {
   const preSelectMuslim = (location.state as { preSelectMuslim?: boolean } | null)?.preSelectMuslim;
 
   useEffect(() => {
-    if (preSelectMuslim) setMode("muslim");
-  }, [preSelectMuslim, setMode]);
+    if (preSelectMuslim) {
+      setMode("muslim");
+      setKnowledgeScore(KNOWLEDGE_QUIZ_LENGTH);
+      navigate("/onboarding/health", { replace: true });
+    }
+  }, [preSelectMuslim, setMode, setKnowledgeScore, navigate]);
 
-  const handleSelect = (mode: "new" | "muslim") => {
+  const handleSelect = useCallback((mode: "new" | "muslim") => {
     setMode(mode);
     if (mode === "muslim") {
       setKnowledgeScore(KNOWLEDGE_QUIZ_LENGTH);
@@ -24,7 +28,21 @@ export default function OnboardingMode() {
     } else {
       navigate("/onboarding/knowledge");
     }
-  };
+  }, [setMode, setKnowledgeScore, navigate]);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Enter") return;
+      const target = e.target as HTMLElement;
+      if (target.closest("input") || target.closest("textarea") || target.closest("select")) return;
+      if (state.mode) {
+        e.preventDefault();
+        handleSelect(state.mode);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [state.mode, handleSelect]);
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>

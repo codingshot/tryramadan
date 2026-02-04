@@ -31,7 +31,6 @@ import { Footer } from "@/components/Footer";
 import {
   useFastingProgress,
   useLocalStorage,
-  useDailyGoals,
   clampCalories,
   CALORIE_MIN,
   CALORIE_MAX,
@@ -55,6 +54,9 @@ import {
   getRecommendedCaloriesFromPreferences,
   useDisplayTimezone,
   useCalendarEvents,
+  usePrayerTimeOverrides,
+  useDefaultPrayerDurations,
+  getDefaultDurationForType,
   useDashboardQuickActions,
   DASHBOARD_QUICK_ACTIONS,
   DASHBOARD_QUICK_ACTION_IDS,
@@ -73,7 +75,7 @@ import {
   timeStringToSecondsSinceMidnight,
   secondsUntilTimeInTimezone,
 } from "@/lib/utils";
-import { usePrayerTimes, usePrayerTimesForDate } from "@/hooks/usePrayerTimes";
+import { usePrayerTimes, usePrayerTimesForDate, getEffectivePrayerTimes, useRamadanPrayerTimes } from "@/hooks/usePrayerTimes";
 import { buildIcalContent, downloadIcal } from "@/lib/ical";
 import { fetchPrayerTimesForMonth } from "@/hooks/usePrayerTimes";
 import { getRecipes, getRecipe, parseNutrient, type MealType } from "@/lib/cultureRecipes";
@@ -181,11 +183,16 @@ const DashboardSchedule = () => {
     "tryramadan-schedule-notes",
     {}
   );
-  const [dailyGoals, setDailyGoals] = useDailyGoals();
   const [mealPlans, setMealPlans] = useDayMealPlans();
   const [nutrition, setNutrition] = useDayNutrition();
   const [foodLogs, setFoodLogs] = useDayFoodLog();
   const [calendarEvents, setCalendarEvents] = useCalendarEvents();
+  const [prayerTimeOverrides, setPrayerTimeOverrides] = usePrayerTimeOverrides();
+  const [defaultDurations, setDefaultDurations] = useDefaultPrayerDurations();
+  const locationCoords = preferences.locationCoords;
+  const lat = locationCoords?.lat ?? null;
+  const lng = locationCoords?.lng ?? null;
+  const { prayerTimesMap: ramadanPrayerTimesMap, loading: ramadanPrayersLoading, refetch: refetchRamadanPrayers } = useRamadanPrayerTimes(lat, lng);
 
   const location = useLocation();
   const todayStrForInit = toLocalDateString(new Date());
@@ -205,7 +212,6 @@ const DashboardSchedule = () => {
       setCurrentMonth(new Date(d.getFullYear(), d.getMonth(), 1));
     }
   }, [location.state]);
-  const [showGoalsEditor, setShowGoalsEditor] = useState(false);
   const [showQuickActionsEditor, setShowQuickActionsEditor] = useState(false);
   const [quickActionOrder, setQuickActionOrder] = useDashboardQuickActions();
   const [addFoodMeal, setAddFoodMeal] = useState<MealType | null>(null);
@@ -219,6 +225,9 @@ const DashboardSchedule = () => {
   const [showBreakFastConfirm, setShowBreakFastConfirm] = useState(false);
   const [showBreakFastDialog, setShowBreakFastDialog] = useState(false);
   const [isFasting, setIsFasting] = useState(true);
+  const [editingEventId, setEditingEventId] = useState<string | null>(null);
+  const [editEventTime, setEditEventTime] = useState("09:00");
+  const [editEventDuration, setEditEventDuration] = useState(15);
   const [countdownToIftar, setCountdownToIftar] = useState({ h: 0, m: 0, s: 0 });
   const [countdownToSuhoor, setCountdownToSuhoor] = useState({ h: 0, m: 0, s: 0 });
 
@@ -226,9 +235,6 @@ const DashboardSchedule = () => {
   const journalDates = new Set(journalEntries.map((e) => e.date));
   const selectedDayJournal = selectedDate ? journalEntries.find((e) => e.date === selectedDate) : undefined;
 
-  const locationCoords = preferences.locationCoords;
-  const lat = locationCoords?.lat ?? null;
-  const lng = locationCoords?.lng ?? null;
   const displayTimezone = useDisplayTimezone();
   const today = new Date();
   const todayStr = displayTimezone ? getTodayStringInTimezone(displayTimezone) : toLocalDateString(today);
@@ -345,22 +351,6 @@ const DashboardSchedule = () => {
     getDayTotalsFromFoodLog(selectedDayFoodLog),
     [selectedDayFoodLog]
   );
-  // Effective totals: manual nutrition if any set, otherwise food log totals (for goal comparison)
-  const effectiveDayTotals = useMemo(() => selectedDate
-    ? {
-        calories: selectedDayNutrition?.calories ?? selectedDayTotalsFromFood.calories ?? 0,
-        protein: selectedDayNutrition?.protein ?? selectedDayTotalsFromFood.protein ?? 0,
-        carbs: selectedDayNutrition?.carbs ?? selectedDayTotalsFromFood.carbs ?? 0,
-        fat: selectedDayNutrition?.fat ?? selectedDayTotalsFromFood.fat ?? 0,
-      }
-    : { calories: 0, protein: 0, carbs: 0, fat: 0 },
-    [selectedDate, selectedDayNutrition, selectedDayTotalsFromFood]
-  );
-  const hasEffectiveTotals =
-    effectiveDayTotals.calories > 0 ||
-    effectiveDayTotals.protein > 0 ||
-    effectiveDayTotals.carbs > 0 ||
-    effectiveDayTotals.fat > 0;
   const selectedFastingLog = selectedDate ? getFastingLogForDate(progress, selectedDate) : undefined;
   const selectedDateObj = selectedDate ? new Date(selectedDate + "T12:00:00") : null;
   const selectedIsRamadan = selectedDateObj ? ramadanRange.isRamadanDay(selectedDateObj) : false;
@@ -476,7 +466,7 @@ const DashboardSchedule = () => {
 
   const quickAddCalendarEvent = (type: CalendarEventType, template: typeof QUICK_ADD_TEMPLATES[0]) => {
     if (!selectedDate) return;
-    const pt = selectedDayPrayerTimes;
+    const pt = effectiveSelectedDayPrayerTimes ?? selectedDayPrayerTimes;
     let time = "06:00";
     if (pt && template.timeKey in pt) {
       time = (pt as Record<string, string>)[template.timeKey] ?? time;
@@ -511,7 +501,83 @@ const DashboardSchedule = () => {
     });
   };
 
+  /** Effective prayer times for every Ramadan day (for table and sync). */
+  const effectiveRamadanTimesMap = useMemo(() => {
+    const map: Record<string, import("@/hooks/usePrayerTimes").PrayerTimes> = {};
+    const start = ramadanRange.start;
+    const end = ramadanRange.end;
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const dateStr = toLocalDateString(new Date(d));
+      const api = ramadanPrayerTimesMap[dateStr];
+      const effective = getEffectivePrayerTimes(api ?? null, prayerTimeOverrides[dateStr]);
+      if (effective) map[dateStr] = effective;
+    }
+    return map;
+  }, [ramadanRange.start, ramadanRange.end, ramadanPrayerTimesMap, prayerTimeOverrides]);
+
+  /** Sync Ramadan: add Suhoor end + Iftar (and optionally all prayers) as calendar events for each day. Skips days that already have that event type. */
+  const syncRamadanToCalendar = useCallback(async () => {
+    if (!lat || !lng) return;
+    const typesToSync: { type: CalendarEventType; title: string; timeKey: keyof import("@/hooks/usePrayerTimes").PrayerTimes; durationKey: CalendarEventType }[] = [
+      { type: "suhoor", title: "Suhoor ends (eat before)", timeKey: "imsak", durationKey: "suhoor" },
+      { type: "iftar", title: iftarLabelShort, timeKey: "maghrib", durationKey: "iftar" },
+      { type: "fajr", title: "Fajr", timeKey: "fajr", durationKey: "fajr" },
+      { type: "dhuhr", title: "Dhuhr", timeKey: "dhuhr", durationKey: "dhuhr" },
+      { type: "asr", title: "Asr", timeKey: "asr", durationKey: "asr" },
+      { type: "maghrib", title: "Maghrib", timeKey: "maghrib", durationKey: "maghrib" },
+      { type: "isha", title: "Isha", timeKey: "isha", durationKey: "isha" },
+    ];
+    setCalendarEvents((prev) => {
+      const next = { ...prev };
+      Object.entries(effectiveRamadanTimesMap).forEach(([dateStr, pt]) => {
+        let dayEvents = next[dateStr] ?? [];
+        const existingTypes = new Set(dayEvents.map((e) => e.type));
+        typesToSync.forEach(({ type, title, timeKey, durationKey }) => {
+          if (existingTypes.has(type)) return;
+          const time = (pt as Record<string, string>)[timeKey] ?? "06:00";
+          const duration = getDefaultDurationForType(durationKey, defaultDurations);
+          const entry: CalendarEvent = {
+            id: eventId(),
+            title: type === "iftar" ? iftarLabel : title,
+            type,
+            time,
+            durationMinutes: duration,
+            date: dateStr,
+          };
+          dayEvents = [...dayEvents, entry];
+          next[dateStr] = dayEvents;
+          existingTypes.add(type);
+        });
+      });
+      return next;
+    });
+    toast.success("Ramadan days synced to calendar. Export .ics to add to your calendar app.");
+  }, [lat, lng, effectiveRamadanTimesMap, defaultDurations, iftarLabel, iftarLabelShort, setCalendarEvents]);
+
   const selectedDayCalendarEvents = selectedDate ? (calendarEvents[selectedDate] ?? []) : [];
+
+  /** Effective prayer times for selected day (API + overrides). */
+  const effectiveSelectedDayPrayerTimes = useMemo(
+    () => getEffectivePrayerTimes(selectedDayPrayerTimes ?? null, selectedDate ? prayerTimeOverrides[selectedDate] : undefined),
+    [selectedDayPrayerTimes, selectedDate, prayerTimeOverrides]
+  );
+
+  const setOverrideForDate = useCallback((dateStr: string, field: "imsak" | "maghrib" | "fajr" | "dhuhr" | "asr" | "isha", value: string) => {
+    setPrayerTimeOverrides((prev) => ({
+      ...prev,
+      [dateStr]: { ...(prev[dateStr] ?? {}), [field]: value.trim() || undefined },
+    }));
+  }, []);
+
+  const updateCalendarEvent = useCallback((dateStr: string, eventId: string, updates: Partial<Pick<CalendarEvent, "time" | "durationMinutes" | "title">>) => {
+    setCalendarEvents((prev) => {
+      const day = prev[dateStr] ?? [];
+      return {
+        ...prev,
+        [dateStr]: day.map((e) => (e.id === eventId ? { ...e, ...updates } : e)),
+      };
+    });
+  }, [setCalendarEvents]);
 
   // Live countdown when viewing today (same logic as Dashboard)
   const tickFastingAndCountdown = useCallback(() => {
@@ -615,6 +681,10 @@ const DashboardSchedule = () => {
           Object.assign(prayerTimesMap, data);
         }
       }
+      Object.keys(prayerTimesMap).forEach((dateStr) => {
+        const effective = getEffectivePrayerTimes(prayerTimesMap[dateStr], prayerTimeOverrides[dateStr]);
+        if (effective) prayerTimesMap[dateStr] = effective;
+      });
       const ics = buildIcalContent({
         prayerTimesMap,
         customEvents: calendarEvents,
@@ -656,7 +726,7 @@ const DashboardSchedule = () => {
               Fasting Schedule
             </h1>
             <p className="text-muted-foreground mt-2">
-              Click a calendar day to view or edit its meal plan, food log, and macros. Hover stats and labels for tips.
+              Click a calendar day to view or edit its meal plan and food log. Hover stats and labels for tips.
             </p>
           </motion.div>
 
@@ -681,108 +751,6 @@ const DashboardSchedule = () => {
               </div>
             </motion.a>
           )}
-
-          {/* Daily goals */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            transition={{ delay: 0.05 }}
-            className="mb-6 p-4 rounded-2xl bg-card border border-border"
-          >
-            <button
-              type="button"
-              onClick={() => setShowGoalsEditor(!showGoalsEditor)}
-              className="w-full flex items-center justify-between font-medium"
-            >
-              <span className="flex items-center gap-2">
-                <Target className="w-4 h-4 text-secondary" />
-                Daily goals (calories & macros)
-              </span>
-              <span className="text-sm text-muted-foreground">
-                {dailyGoals.calories} cal · P {dailyGoals.protein}g · C {dailyGoals.carbs}g · F{" "}
-                {dailyGoals.fat}g
-              </span>
-            </button>
-            <AnimatePresence>
-              {showGoalsEditor && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-4 pt-4 border-t border-border">
-                    <div>
-                      <Label className="text-xs">Calories</Label>
-                      <Input
-                        type="number"
-                        min={CALORIE_MIN}
-                        max={CALORIE_MAX}
-                        value={dailyGoals.calories}
-                        onChange={(e) =>
-                          setDailyGoals((g) => ({ ...g, calories: clampCalories(parseInt(e.target.value, 10) || 0) }))
-                        }
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs">Protein (g)</Label>
-                      <Input
-                        type="number"
-                        min={0}
-                        value={dailyGoals.protein}
-                        onChange={(e) =>
-                          setDailyGoals((g) => ({ ...g, protein: parseInt(e.target.value, 10) || 0 }))
-                        }
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs">Carbs (g)</Label>
-                      <Input
-                        type="number"
-                        min={0}
-                        value={dailyGoals.carbs}
-                        onChange={(e) =>
-                          setDailyGoals((g) => ({ ...g, carbs: parseInt(e.target.value, 10) || 0 }))
-                        }
-                        className="mt-1"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs">Fat (g)</Label>
-                      <Input
-                        type="number"
-                        min={0}
-                        value={dailyGoals.fat}
-                        onChange={(e) =>
-                          setDailyGoals((g) => ({ ...g, fat: parseInt(e.target.value, 10) || 0 }))
-                        }
-                        className="mt-1"
-                      />
-                    </div>
-                  </div>
-                  {(preferences.sexForCalories != null || (preferences.bodyWeightKg != null && preferences.bodyWeightKg > 0)) && (
-                    <div className="mt-3 pt-3 border-t border-border flex flex-wrap items-center gap-2">
-                      <span className="text-xs text-muted-foreground">
-                        From your profile (Settings → Advanced): recommended {getRecommendedCaloriesFromPreferences(preferences)} cal
-                      </span>
-                      {getRecommendedCaloriesFromPreferences(preferences) !== dailyGoals.calories && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          className="h-8 text-xs"
-                          onClick={() => setDailyGoals((g) => ({ ...g, calories: getRecommendedCaloriesFromPreferences(preferences) }))}
-                        >
-                          Use recommended
-                        </Button>
-                      )}
-                    </div>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
 
           {/* Configure dashboard quick access */}
           <motion.div
@@ -951,7 +919,110 @@ const DashboardSchedule = () => {
                 className="mt-2"
               />
             )}
+            <div className="mt-3 pt-3 border-t border-border flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={syncRamadanToCalendar}
+                disabled={ramadanPrayersLoading || !lat || !lng || Object.keys(effectiveRamadanTimesMap).length === 0}
+                className="gap-2"
+              >
+                {ramadanPrayersLoading ? "Loading…" : <CalendarDays className="w-4 h-4" />}
+                Sync Ramadan to calendar
+              </Button>
+              <span className="text-xs text-muted-foreground self-center">
+                Adds Suhoor end + Iftar + all 5 prayers for each Ramadan day (only where not already added). Then export .ics.
+              </span>
+            </div>
+            <details className="mt-3 pt-3 border-t border-border">
+              <summary className="text-sm font-medium cursor-pointer hover:text-foreground">Default event durations (minutes)</summary>
+              <p className="text-xs text-muted-foreground mt-1 mb-2">Used when you sync Ramadan. You can edit each event after adding.</p>
+              <div className="flex flex-wrap gap-3 items-center">
+                {(["suhoor", "iftar", "fajr", "dhuhr", "asr", "maghrib", "isha", "taraweeh"] as const).map((type) => (
+                  <label key={type} className="flex items-center gap-1.5 text-sm">
+                    <span className="capitalize w-16 truncate">{type === "suhoor" ? "Suhoor" : type === "iftar" ? "Iftar" : type}</span>
+                    <input
+                      type="number"
+                      min={1}
+                      max={120}
+                      value={defaultDurations[type] ?? (type === "taraweeh" ? 60 : type === "iftar" ? 10 : 5)}
+                      onChange={(e) => setDefaultDurations((prev) => ({ ...prev, [type]: Math.max(1, parseInt(e.target.value, 10) || 5) }))}
+                      className="w-12 h-8 px-1 rounded border border-border bg-background text-center text-sm"
+                    />
+                    <span className="text-xs text-muted-foreground">min</span>
+                  </label>
+                ))}
+              </div>
+            </details>
           </motion.div>
+
+          {/* Ramadan daily schedule: every day with eating cutoff & break fast times */}
+          {(lat != null && lng != null) && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              transition={{ delay: 0.065 }}
+              className="mb-6 p-4 rounded-2xl bg-card border border-border"
+            >
+              <h3 className="font-display font-bold mb-2 flex items-center gap-2">
+                <Sunrise className="w-5 h-5 text-secondary" />
+                Ramadan daily schedule
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Eating cutoff (Suhoor end) and break fast times for each day of Ramadan, from prayer times. Override any date in the day panel below.
+              </p>
+              {ramadanPrayersLoading ? (
+                <p className="text-sm text-muted-foreground py-4">Loading prayer times…</p>
+              ) : Object.keys(effectiveRamadanTimesMap).length === 0 ? (
+                <p className="text-sm text-muted-foreground py-4">Set your location in Settings to see times.</p>
+              ) : (
+                <div className="overflow-x-auto -mx-2">
+                  <table className="w-full min-w-[320px] text-sm border-collapse">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left py-2 px-2 font-medium">Date</th>
+                        <th className="text-left py-2 px-2 font-medium">Day</th>
+                        <th className="text-right py-2 px-2 font-medium">Eating cutoff</th>
+                        <th className="text-right py-2 px-2 font-medium">Break fast</th>
+                        <th className="w-8" />
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {Object.entries(effectiveRamadanTimesMap)
+                        .sort(([a], [b]) => a.localeCompare(b))
+                        .map(([dateStr, pt]) => {
+                          const d = new Date(dateStr + "T12:00:00");
+                          const dayNum = ramadanRange.getRamadanDayNumber(d);
+                          const isSelected = selectedDate === dateStr;
+                          return (
+                            <tr
+                              key={dateStr}
+                              className={`border-b border-border/50 hover:bg-muted/30 ${isSelected ? "bg-primary/10" : ""}`}
+                            >
+                              <td className="py-2 px-2">
+                                {d.toLocaleDateString("en", { month: "short", day: "numeric", year: "numeric" })}
+                              </td>
+                              <td className="py-2 px-2 text-muted-foreground">R{dayNum ?? "—"}</td>
+                              <td className="py-2 px-2 text-right font-mono tabular-nums">{pt.imsak || "—"}</td>
+                              <td className="py-2 px-2 text-right font-mono tabular-nums">{pt.maghrib || "—"}</td>
+                              <td className="py-2 px-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 text-xs"
+                                  onClick={() => { setSelectedDate(dateStr); setNoteInput(scheduleNotes[dateStr] || ""); }}
+                                >
+                                  {isSelected ? "Open" : "View"}
+                                </Button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </motion.div>
+          )}
 
           {/* Stats: Ramadan, Sunnah, completed, hours fasted */}
           <motion.div
@@ -1140,6 +1211,11 @@ const DashboardSchedule = () => {
                       {date.toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
                       {isToday && " · Today"}
                       {isRamadan && ramadanDay != null && ` · Ramadan Day ${ramadanDay} (of 30)`}
+                      {isRamadan && effectiveRamadanTimesMap[dateStr] && (
+                        <span className="block mt-1 text-xs">
+                          Cutoff {effectiveRamadanTimesMap[dateStr].imsak} · Break fast {effectiveRamadanTimesMap[dateStr].maghrib}
+                        </span>
+                      )}
                       {isSpecialNight && " · Laylat al-Qadr"}
                       {isSunnah && !isRamadan && (isToday ? " · Today is a Sunnah fasting day (Mon/Thu)" : " · Sunnah day (Mon/Thu)")}
                       {completed && " · Completed ✓"}
@@ -1307,12 +1383,72 @@ const DashboardSchedule = () => {
                       userType={preferences?.userType}
                     />
 
+                    {/* Eating cutoff & break fast — prominent */}
+                    {effectiveSelectedDayPrayerTimes && (
+                      <div className="rounded-xl bg-secondary/10 border-2 border-secondary/20 p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Eating cutoff (Suhoor end)</p>
+                          <p className="font-mono text-lg font-bold text-secondary tabular-nums">{effectiveSelectedDayPrayerTimes.imsak || "—"}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Break fast ({iftarLabelShort})</p>
+                          <p className="font-mono text-lg font-bold text-secondary tabular-nums">{effectiveSelectedDayPrayerTimes.maghrib || "—"}</p>
+                        </div>
+                        {selectedDate && (prayerTimeOverrides[selectedDate]?.imsak != null || prayerTimeOverrides[selectedDate]?.maghrib != null) && (
+                          <div className="sm:col-span-2 flex gap-2 items-end flex-wrap">
+                            <Label className="text-xs w-full sm:w-auto">Override Imsak</Label>
+                            <input
+                              type="time"
+                              value={prayerTimeOverrides[selectedDate]?.imsak ?? ""}
+                              onChange={(e) => setOverrideForDate(selectedDate, "imsak", e.target.value)}
+                              className="h-9 px-2 rounded-md border border-border bg-background text-sm"
+                            />
+                            <Label className="text-xs w-full sm:w-auto">Override Maghrib</Label>
+                            <input
+                              type="time"
+                              value={prayerTimeOverrides[selectedDate]?.maghrib ?? ""}
+                              onChange={(e) => setOverrideForDate(selectedDate, "maghrib", e.target.value)}
+                              className="h-9 px-2 rounded-md border border-border bg-background text-sm"
+                            />
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                if (!selectedDate) return;
+                                setPrayerTimeOverrides((prev) => {
+                                  const next = { ...prev };
+                                  const day = next[selectedDate];
+                                  if (!day) return prev;
+                                  const { imsak: _, maghrib: __, ...rest } = day;
+                                  if (Object.keys(rest).length === 0) {
+                                    const o = { ...next };
+                                    delete o[selectedDate];
+                                    return o;
+                                  }
+                                  return { ...next, [selectedDate]: rest };
+                                });
+                              }}
+                            >
+                              Clear overrides
+                            </Button>
+                          </div>
+                        )}
+                        {selectedDate && !prayerTimeOverrides[selectedDate]?.imsak && !prayerTimeOverrides[selectedDate]?.maghrib && (
+                          <div className="sm:col-span-2">
+                            <Button variant="outline" size="sm" onClick={() => setPrayerTimeOverrides((prev) => ({ ...prev, [selectedDate]: { ...(prev[selectedDate] ?? {}), imsak: effectiveSelectedDayPrayerTimes?.imsak ?? "", maghrib: effectiveSelectedDayPrayerTimes?.maghrib ?? "" } }))}>
+                              Override times for this day
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
                     {/* Day summary: prayer times, meals, journal, fasting context */}
                     <div className="rounded-xl bg-card border border-border p-3 space-y-2 text-sm">
                       <p className="font-semibold text-muted-foreground text-xs uppercase tracking-wide">Day at a glance</p>
-                      {selectedDayPrayerTimes && (
+                      {effectiveSelectedDayPrayerTimes && (
                         <p className="text-muted-foreground">
-                          <span className="font-medium text-foreground">Prayer:</span> Fajr {selectedDayPrayerTimes.fajr} · Maghrib ({iftarLabelShort}) {selectedDayPrayerTimes.maghrib}
+                          <span className="font-medium text-foreground">Prayer:</span> Fajr {effectiveSelectedDayPrayerTimes.fajr} · Maghrib ({iftarLabelShort}) {effectiveSelectedDayPrayerTimes.maghrib}
                         </p>
                       )}
                       <p className="text-muted-foreground">
@@ -1340,10 +1476,10 @@ const DashboardSchedule = () => {
                               : selectedFastingLog?.startedAt
                                 ? "Started fasting (not completed)"
                                 : "No fast logged"}
-                          {selectedFastingLog && selectedDayPrayerTimes && (() => {
-                            const imsakStr = selectedDayPrayerTimes.imsak ?? selectedDayPrayerTimes.fajr;
+                          {selectedFastingLog && effectiveSelectedDayPrayerTimes && (() => {
+                            const imsakStr = effectiveSelectedDayPrayerTimes.imsak ?? effectiveSelectedDayPrayerTimes.fajr;
                             const imsakTime = new Date((selectedDate ?? "") + "T" + (imsakStr?.length === 5 ? imsakStr + ":00" : imsakStr ?? "05:00")).getTime();
-                            const maghribTime = new Date((selectedDate ?? "") + "T" + (selectedDayPrayerTimes.maghrib?.length === 5 ? selectedDayPrayerTimes.maghrib + ":00" : selectedDayPrayerTimes.maghrib)).getTime();
+                            const maghribTime = new Date((selectedDate ?? "") + "T" + (effectiveSelectedDayPrayerTimes.maghrib?.length === 5 ? effectiveSelectedDayPrayerTimes.maghrib + ":00" : effectiveSelectedDayPrayerTimes.maghrib)).getTime();
                             const started = selectedFastingLog.startedAt ? new Date(selectedFastingLog.startedAt).getTime() : 0;
                             const completed = selectedFastingLog.completedAt ? new Date(selectedFastingLog.completedAt).getTime() : 0;
                             const parts: string[] = [];
@@ -1360,11 +1496,11 @@ const DashboardSchedule = () => {
                       )}
                     </div>
 
-                    {/* Today's schedule timeline for selected day */}
-                    {selectedDayPrayerTimes && (
+                    {/* Today's schedule timeline for selected day (uses effective times including overrides) */}
+                    {effectiveSelectedDayPrayerTimes && (
                       <div className="mb-4">
                         <TodayScheduleTimeline
-                          prayerTimes={selectedDayPrayerTimes}
+                          prayerTimes={effectiveSelectedDayPrayerTimes}
                           iftarLabelShort={iftarLabelShort}
                           includeTaraweeh
                         />
@@ -1582,20 +1718,60 @@ const DashboardSchedule = () => {
                           {selectedDayCalendarEvents.map((e) => (
                             <li
                               key={e.id}
-                              className="flex items-center justify-between py-1.5 px-2 rounded-lg bg-muted/50 text-sm"
+                              className="flex flex-wrap items-center gap-2 py-1.5 px-2 rounded-lg bg-muted/50 text-sm"
                             >
-                              <span className="flex items-center gap-2">
-                                <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-                                {e.time} — {e.title}
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => removeCalendarEvent(e.id)}
-                                className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded border border-transparent hover:border-destructive/30 hover:bg-destructive/20 text-muted-foreground hover:text-destructive"
-                                aria-label="Remove"
-                              >
-                                <X className="w-3.5 h-3.5" />
-                              </button>
+                              {editingEventId === e.id ? (
+                                <>
+                                  <input
+                                    type="time"
+                                    value={editEventTime}
+                                    onChange={(ev) => setEditEventTime(ev.target.value)}
+                                    className="h-8 px-2 rounded border border-border bg-background text-xs"
+                                  />
+                                  <input
+                                    type="number"
+                                    min={1}
+                                    max={240}
+                                    value={editEventDuration}
+                                    onChange={(ev) => setEditEventDuration(parseInt(ev.target.value, 10) || 15)}
+                                    className="w-14 h-8 px-2 rounded border border-border bg-background text-xs"
+                                    title="Duration (minutes)"
+                                  />
+                                  <span className="text-xs text-muted-foreground">min</span>
+                                  <Button size="sm" className="h-8" onClick={() => { if (selectedDate) { updateCalendarEvent(selectedDate, e.id, { time: editEventTime, durationMinutes: editEventDuration }); setEditingEventId(null); toast.success("Event updated"); } }}>
+                                    Save
+                                  </Button>
+                                  <Button variant="ghost" size="sm" className="h-8" onClick={() => setEditingEventId(null)}>Cancel</Button>
+                                </>
+                              ) : (
+                                <>
+                                  <span className="flex items-center gap-2">
+                                    <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                                    {e.time} — {e.title}
+                                    {e.durationMinutes != null && (
+                                      <span className="text-xs text-muted-foreground">({e.durationMinutes} min)</span>
+                                    )}
+                                  </span>
+                                  <div className="flex items-center gap-0.5 ml-auto">
+                                    <button
+                                      type="button"
+                                      onClick={() => { setEditingEventId(e.id); setEditEventTime(e.time); setEditEventDuration(e.durationMinutes ?? 15); }}
+                                      className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded border border-transparent hover:bg-muted text-muted-foreground hover:text-foreground"
+                                      aria-label="Edit time and duration"
+                                    >
+                                      <PenLine className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => removeCalendarEvent(e.id)}
+                                      className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded border border-transparent hover:border-destructive/30 hover:bg-destructive/20 text-muted-foreground hover:text-destructive"
+                                      aria-label="Remove"
+                                    >
+                                      <X className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </>
+                              )}
                             </li>
                           ))}
                         </ul>
@@ -1702,16 +1878,16 @@ const DashboardSchedule = () => {
                         <TooltipTrigger asChild>
                           <Label className="flex items-center gap-2 text-sm font-medium mb-2 cursor-help w-fit">
                             <Flame className="w-4 h-4" />
-                            Food log (calories & macros)
+                            Food log
                           </Label>
                         </TooltipTrigger>
                         <TooltipContent className="max-w-xs">
-                          <p className="font-medium">What you ate and nutrition per portion</p>
-                          <p className="text-xs mt-1">Log Suhoor and Iftar items (from recipes or custom). Set portions; calories and macros are per portion. Totals feed into “Goal today” above.</p>
+                          <p className="font-medium">What you ate — calories (and optional P/C/F) per portion</p>
+                          <p className="text-xs mt-1">Log Suhoor and Iftar items. Each item has calories per portion; protein, carbs, fat are optional. Total shows below with recommended (from Settings) when set.</p>
                         </TooltipContent>
                       </Tooltip>
                       <p className="text-xs text-muted-foreground mb-2">
-                        Add items from recipes or type custom. Set portions; macros are per portion.
+                        Add items from recipes or custom. Set portions; calories and optional P/C/F are per portion.
                       </p>
 
                       {/* Suhoor entries */}
@@ -1772,21 +1948,15 @@ const DashboardSchedule = () => {
                         )}
                       </div>
 
-                      {/* Totals from food log */}
-                      {(selectedDayTotalsFromFood.calories != null && selectedDayTotalsFromFood.calories > 0) && (
-                        <div className="p-2 rounded-lg bg-muted/50 text-xs flex flex-wrap gap-3 mb-3">
-                          <span>Total from log: <strong>{Math.round(selectedDayTotalsFromFood.calories)} cal</strong></span>
-                          {selectedDayTotalsFromFood.protein != null && selectedDayTotalsFromFood.protein > 0 && (
-                            <span>P {Math.round(selectedDayTotalsFromFood.protein)}g</span>
-                          )}
-                          {selectedDayTotalsFromFood.carbs != null && selectedDayTotalsFromFood.carbs > 0 && (
-                            <span>C {Math.round(selectedDayTotalsFromFood.carbs)}g</span>
-                          )}
-                          {selectedDayTotalsFromFood.fat != null && selectedDayTotalsFromFood.fat > 0 && (
-                            <span>F {Math.round(selectedDayTotalsFromFood.fat)}g</span>
-                          )}
-                        </div>
-                      )}
+                      {/* Total calories from food log; show vs recommended when gender/weight in profile */}
+                      <div className="p-2 rounded-lg bg-muted/50 text-xs flex flex-wrap items-baseline gap-2 mb-3">
+                        <span>Total: <strong>{Math.round(selectedDayTotalsFromFood.calories ?? 0)} cal</strong></span>
+                        {(preferences.sexForCalories != null || (preferences.bodyWeightKg != null && preferences.bodyWeightKg > 0)) && (
+                          <span className="text-muted-foreground">
+                            / {getRecommendedCaloriesFromPreferences(preferences)} recommended
+                          </span>
+                        )}
+                      </div>
 
                       {/* Add food */}
                       <div className="space-y-2">
@@ -1888,123 +2058,6 @@ const DashboardSchedule = () => {
                       </div>
                     </div>
 
-                    {/* Calories & macros */}
-                    <div>
-                      <Label className="flex items-center gap-2 text-sm font-medium mb-2">
-                        <Flame className="w-4 h-4" />
-                        Calories & macros (estimate or log)
-                      </Label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
-                        <div>
-                          <Label className="text-xs text-muted-foreground">Calories</Label>
-                          <Input
-                            type="number"
-                            min={CALORIE_MIN}
-                            max={CALORIE_MAX}
-                            placeholder={String(dailyGoals.calories)}
-                            value={selectedDayNutrition?.calories ?? ""}
-                            onChange={(e) =>
-                              setNutrition((prev) => ({
-                                ...prev,
-                                [selectedDate]: {
-                                  ...prev[selectedDate],
-                                  calories:
-                                    e.target.value === ""
-                                      ? undefined
-                                      : clampCalories(parseInt(e.target.value, 10) || 0),
-                                },
-                              }))
-                            }
-                            className="mt-0.5 bg-background"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-xs text-muted-foreground">Protein (g)</Label>
-                          <Input
-                            type="number"
-                            min={0}
-                            placeholder={String(dailyGoals.protein)}
-                            value={selectedDayNutrition?.protein ?? ""}
-                            onChange={(e) =>
-                              setNutrition((prev) => ({
-                                ...prev,
-                                [selectedDate]: {
-                                  ...prev[selectedDate],
-                                  protein:
-                                    e.target.value === ""
-                                      ? undefined
-                                      : parseInt(e.target.value, 10) || 0,
-                                },
-                              }))
-                            }
-                            className="mt-0.5 bg-background"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-xs text-muted-foreground">Carbs (g)</Label>
-                          <Input
-                            type="number"
-                            min={0}
-                            placeholder={String(dailyGoals.carbs)}
-                            value={selectedDayNutrition?.carbs ?? ""}
-                            onChange={(e) =>
-                              setNutrition((prev) => ({
-                                ...prev,
-                                [selectedDate]: {
-                                  ...prev[selectedDate],
-                                  carbs:
-                                    e.target.value === ""
-                                      ? undefined
-                                      : parseInt(e.target.value, 10) || 0,
-                                },
-                              }))
-                            }
-                            className="mt-0.5 bg-background"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-xs text-muted-foreground">Fat (g)</Label>
-                          <Input
-                            type="number"
-                            min={0}
-                            placeholder={String(dailyGoals.fat)}
-                            value={selectedDayNutrition?.fat ?? ""}
-                            onChange={(e) =>
-                              setNutrition((prev) => ({
-                                ...prev,
-                                [selectedDate]: {
-                                  ...prev[selectedDate],
-                                  fat:
-                                    e.target.value === ""
-                                      ? undefined
-                                      : parseInt(e.target.value, 10) || 0,
-                                },
-                              }))
-                            }
-                            className="mt-0.5 bg-background"
-                          />
-                        </div>
-                      </div>
-                      {hasEffectiveTotals && (
-                        <div className="mt-2 flex flex-wrap gap-3 text-xs">
-                          <span className="text-muted-foreground">Goal today:</span>
-                          <span>
-                            Cal{" "}
-                            {effectiveDayTotals.calories >= dailyGoals.calories ? "✓" : ""}{" "}
-                            {Math.round(effectiveDayTotals.calories)} / {dailyGoals.calories}
-                          </span>
-                          <span>
-                            P {Math.round(effectiveDayTotals.protein)} / {dailyGoals.protein}g
-                          </span>
-                          <span>
-                            C {Math.round(effectiveDayTotals.carbs)} / {dailyGoals.carbs}g
-                          </span>
-                          <span>
-                            F {Math.round(effectiveDayTotals.fat)} / {dailyGoals.fat}g
-                          </span>
-                        </div>
-                      )}
-                    </div>
                   </div>
                 </motion.div>
               )}
@@ -2019,7 +2072,7 @@ const DashboardSchedule = () => {
 
             {/* Legend */}
             <div className="flex flex-wrap gap-4 mt-6 pt-4 border-t border-border text-xs">
-              <span className="text-muted-foreground">Click any day to log food, hours fasted & macros</span>
+              <span className="text-muted-foreground">Click any day to log food and hours fasted</span>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex items-center gap-2 cursor-help">

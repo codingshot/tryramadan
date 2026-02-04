@@ -51,6 +51,16 @@ async function main() {
   await mkdir(ASSETS_DIR, { recursive: true });
 
   const browser = await chromium.launch({ headless: true });
+  const checkPage = await browser.newPage();
+  try {
+    await checkPage.goto(BASE_URL, { waitUntil: "domcontentloaded", timeout: 8000 });
+  } catch (e) {
+    await checkPage.close();
+    await browser.close();
+    console.error(`\nCould not reach the app at ${BASE_URL}. Start it first:\n  npm run dev\n`);
+    process.exit(1);
+  }
+  await checkPage.close();
   const context = await browser.newContext({
     viewport: { width: 390, height: 844 },
     deviceScaleFactor: 2,
@@ -78,8 +88,9 @@ async function main() {
     const url = `${BASE_URL}${path}`;
     try {
       const page = await context.newPage();
-      await page.goto(url, { waitUntil: "networkidle", timeout: 15000 });
-      await page.waitForTimeout(800);
+      await page.goto(url, { waitUntil: "load", timeout: 20000 });
+      await page.waitForLoadState("networkidle", { timeout: 10000 }).catch(() => {});
+      await page.waitForTimeout(1200);
 
       const outPath = join(ASSETS_DIR, filename);
       await page.screenshot({ path: outPath, fullPage: false });

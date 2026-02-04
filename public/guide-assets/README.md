@@ -1,21 +1,32 @@
 # Guide assets (screenshots & GIFs)
 
-Place user-guide screenshots and optional GIFs here. Paths are referenced in `src/data/guides.ts`.
+Real app screenshots for the User Guides live here. Paths are referenced in `src/data/guides.ts`.
 
-## Auto-capture screenshots
+## Add real screenshots (recommended)
 
-1. Install Playwright: `npm install`
-2. Start the app: `npm run dev` (in another terminal)
-3. Run: `npm run guides:screenshots`
+1. **Install Playwright’s Chromium** (once per machine):
+   ```bash
+   npx playwright install chromium
+   ```
 
-Screenshots are saved to `public/guide-assets/` in PNG format, mobile viewport (390×844).
+2. **Start the app** (in one terminal):
+   ```bash
+   npm run dev
+   ```
+
+3. **Capture screenshots** (in another terminal):
+   ```bash
+   npm run guides:screenshots
+   ```
+
+Screenshots are saved to `public/guide-assets/` as PNGs, mobile viewport (390×844). The script seeds localStorage so dashboard/schedule routes render without redirecting to onboarding.
 
 ## Manual capture
 
 If you prefer to capture manually:
 
-1. Run the app (`npm run dev`) and open in a browser
-2. Use DevTools device toolbar (mobile view) for primary screenshots
+1. Run the app (`npm run dev`) and open it in a browser.
+2. Use DevTools device toolbar (mobile view) for primary screenshots.
 3. Save each screenshot with these names:
 
 | File | Screen |
@@ -45,8 +56,8 @@ If you prefer to capture manually:
 
 ## GIFs
 
-For animated steps, use the same base name with `.gif` and set `gif` in the guide step (e.g. `onboarding-flow.gif`). Use a screen recorder (LICEcap, Kap, or browser extension) to capture.
+For animated steps, use the same base name with `.gif` and set `gif` in the guide step. Use a screen recorder (LICEcap, Kap, or browser extension) to capture.
 
 ## Fallback
 
-Guides fall back to the app placeholder if an image is missing.
+If an image is missing, the guide page shows the app placeholder (`/placeholder.svg`) so guides still work before screenshots are added.

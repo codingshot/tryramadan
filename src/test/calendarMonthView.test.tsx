@@ -10,12 +10,17 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import DashboardSchedule from "@/pages/DashboardSchedule";
 import { PREFS_WITH_LOCATION, MOCK_PRAYER_TIMES } from "./testHelpers";
 
-vi.mock("@/hooks/usePrayerTimes", () => ({
-  usePrayerTimes: vi.fn(() => ({ prayerTimes: MOCK_PRAYER_TIMES, loading: false })),
-  usePrayerTimesForDate: vi.fn(() => ({ prayerTimes: MOCK_PRAYER_TIMES })),
-  fetchPrayerTimesForMonth: vi.fn().mockResolvedValue({}),
-  fetchRamadanPrayerTimes: vi.fn().mockResolvedValue({}),
-}));
+vi.mock("@/hooks/usePrayerTimes", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/hooks/usePrayerTimes")>();
+  return {
+    ...actual,
+    usePrayerTimes: vi.fn(() => ({ prayerTimes: MOCK_PRAYER_TIMES, loading: false })),
+    usePrayerTimesForDate: vi.fn(() => ({ prayerTimes: MOCK_PRAYER_TIMES })),
+    useRamadanPrayerTimes: vi.fn(() => ({ prayerTimesMap: {}, loading: false, refetch: vi.fn() })),
+    fetchPrayerTimesForMonth: vi.fn().mockResolvedValue({}),
+    fetchRamadanPrayerTimes: vi.fn().mockResolvedValue({}),
+  };
+});
 
 vi.mock("@/hooks/useLocation", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/hooks/useLocation")>();

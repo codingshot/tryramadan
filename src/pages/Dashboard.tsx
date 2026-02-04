@@ -31,9 +31,9 @@ import {
   setDaySkipped,
   useDayMealPlans,
   useDayNutrition,
-  useDailyGoals,
   clampCalories,
   CALORIE_MAX,
+  getRecommendedCaloriesFromPreferences,
   useDashboardQuickActions,
   DASHBOARD_QUICK_ACTIONS,
   useLocalStorage,
@@ -86,7 +86,7 @@ const Dashboard = () => {
   const [statsDialog, setStatsDialog] = useState<"streak" | "total" | "sunnah" | "broken" | null>(null);
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [addFoodMeal, setAddFoodMeal] = useState<"suhoor" | "iftar" | null>(null);
-  const [addFoodInputs, setAddFoodInputs] = useState({ name: "", cal: "", portions: "1" });
+  const [addFoodInputs, setAddFoodInputs] = useState({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "" });
   const [notifSettings] = useNotificationSettings();
   const [prayerPrefs] = usePrayerNotificationPrefs();
   const [locationBannerDismissed, setLocationBannerDismissed] = useState(() =>
@@ -141,7 +141,6 @@ const Dashboard = () => {
   const [mealPlans, setMealPlans] = useDayMealPlans();
   const [foodLogs, setFoodLogs] = useDayFoodLog();
   const [dayNutrition, setDayNutrition] = useDayNutrition();
-  const [dailyGoals] = useDailyGoals();
   const [quickActionOrder] = useDashboardQuickActions();
   const [journalEntries] = useLocalStorage<{ date: string; prompt?: string; content: string; gratitude?: string }[]>("tryramadan-journal", []);
   const iftarLabel = useIftarLabel();
@@ -296,6 +295,9 @@ const Dashboard = () => {
     const name = addFoodInputs.name.trim();
     const cal = parseInt(addFoodInputs.cal, 10) || 0;
     const portions = Math.max(0.1, parseFloat(addFoodInputs.portions) || 1);
+    const protein = parseFloat(addFoodInputs.protein) || 0;
+    const carbs = parseFloat(addFoodInputs.carbs) || 0;
+    const fat = parseFloat(addFoodInputs.fat) || 0;
     if (!name && cal <= 0) {
       toast.error("Add a name or at least one calorie so we can save this item.");
       return;
@@ -308,16 +310,16 @@ const Dashboard = () => {
       name: name || "Custom",
       portions,
       caloriesPerPortion: cal,
-      proteinPerPortion: undefined,
-      carbsPerPortion: undefined,
-      fatPerPortion: undefined,
+      proteinPerPortion: protein || undefined,
+      carbsPerPortion: carbs || undefined,
+      fatPerPortion: fat || undefined,
     };
     setFoodLogs((prev) => {
       const d = normalizeDayFoodLog(prev[selectedDate]);
       const list = mealType === "suhoor" ? [...d.suhoor, entry] : [...d.iftar, entry];
       return { ...prev, [selectedDate]: { ...d, [mealType]: list } };
     });
-    setAddFoodInputs({ name: "", cal: "", portions: "1" });
+    setAddFoodInputs({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "" });
     setAddFoodMeal(null);
   };
 
@@ -1093,7 +1095,7 @@ const Dashboard = () => {
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs">
                   <p className="font-medium">Log what you ate per meal</p>
-                  <p className="text-xs mt-1">Use + to add items for {suhoorLabelShort} and {iftarLabel}. Calories are summed per meal and totalled below. Optionally enter manual totals.</p>
+                  <p className="text-xs mt-1">Use + to add items for {suhoorLabelShort} and {iftarLabel}. Calories live in each item; total and recommended (from Settings) show below.</p>
                   <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">وجبات السحور والإفطار • السحور والإفطار</p>
                 </TooltipContent>
               </Tooltip>
@@ -1177,7 +1179,7 @@ const Dashboard = () => {
               <Dialog open={addFoodMeal != null} onOpenChange={(open) => !open && setAddFoodMeal(null)}>
                 <DialogContent className="max-w-sm">
                   <DialogTitle>Add to {addFoodMeal === "suhoor" ? suhoorLabelShort : iftarLabel}</DialogTitle>
-                  <p className="text-xs text-muted-foreground">What did you eat? Add name and optional calories.</p>
+                  <p className="text-xs text-muted-foreground">What did you eat? Add name and optional calories (and P/C/F per portion).</p>
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
@@ -1190,12 +1192,13 @@ const Dashboard = () => {
                       value={addFoodInputs.name}
                       onChange={(e) => setAddFoodInputs((p) => ({ ...p, name: e.target.value }))}
                     />
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       <Input
                         type="number"
                         min={0}
                         max={CALORIE_MAX}
                         placeholder="Cal (optional)"
+                        className="w-24"
                         value={addFoodInputs.cal}
                         onChange={(e) => setAddFoodInputs((p) => ({ ...p, cal: e.target.value }))}
                       />
@@ -1208,9 +1211,33 @@ const Dashboard = () => {
                         value={addFoodInputs.portions}
                         onChange={(e) => setAddFoodInputs((p) => ({ ...p, portions: e.target.value }))}
                       />
+                      <Input
+                        type="number"
+                        min={0}
+                        placeholder="P (g)"
+                        className="w-14"
+                        value={addFoodInputs.protein}
+                        onChange={(e) => setAddFoodInputs((p) => ({ ...p, protein: e.target.value }))}
+                      />
+                      <Input
+                        type="number"
+                        min={0}
+                        placeholder="C (g)"
+                        className="w-14"
+                        value={addFoodInputs.carbs}
+                        onChange={(e) => setAddFoodInputs((p) => ({ ...p, carbs: e.target.value }))}
+                      />
+                      <Input
+                        type="number"
+                        min={0}
+                        placeholder="F (g)"
+                        className="w-14"
+                        value={addFoodInputs.fat}
+                        onChange={(e) => setAddFoodInputs((p) => ({ ...p, fat: e.target.value }))}
+                      />
                     </div>
                     <div className="flex gap-2 justify-end pt-2">
-                      <Button type="button" variant="outline" size="sm" onClick={() => { setAddFoodMeal(null); setAddFoodInputs({ name: "", cal: "", portions: "1" }); }}>
+                      <Button type="button" variant="outline" size="sm" onClick={() => { setAddFoodMeal(null); setAddFoodInputs({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "" }); }}>
                         Cancel
                       </Button>
                       <Button type="submit" size="sm">
@@ -1221,147 +1248,38 @@ const Dashboard = () => {
                 </DialogContent>
               </Dialog>
 
-              {/* Calorie / nutrition for day — per meal from food log, then total; optional manual override */}
+              {/* Total calories from food items; optional override; show vs recommended when gender/weight set */}
               <div className="mb-4">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="text-xs font-medium text-muted-foreground block mb-2 cursor-help border-b border-dotted border-transparent hover:border-muted-foreground/40 w-fit">
-                      Calories & macros (optional)
+                <div className="p-3 rounded-xl bg-muted/30 border border-border flex flex-wrap items-baseline gap-2">
+                  <span className="text-xs text-muted-foreground">Total calories</span>
+                  <span className="font-bold text-secondary">
+                    {Math.round(selectedDayNutr?.calories ?? selectedDayTotalsFromLog.calories ?? 0)} cal
+                  </span>
+                  {(preferences.sexForCalories != null || (preferences.bodyWeightKg != null && preferences.bodyWeightKg > 0)) && (
+                    <span className="text-xs text-muted-foreground">
+                      / {getRecommendedCaloriesFromPreferences(preferences)} recommended
                     </span>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-xs">
-                    <p className="font-medium">How to track</p>
-                    <p className="text-xs mt-1">Add items per meal with + above; calories are summed per meal (Suhoor, Iftar) and totalled for the day. Optionally enter manual totals below.</p>
-                  </TooltipContent>
-                </Tooltip>
-                {/* Per-meal calories from food log + day total */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3 p-3 rounded-xl bg-muted/30 border border-border">
-                  <div>
-                    <span className="text-xs text-muted-foreground block">{suhoorLabelShort}</span>
-                    <span className="font-medium text-foreground">{Math.round(suhoorCal)} cal</span>
-                  </div>
-                  <div>
-                    <span className="text-xs text-muted-foreground block">{iftarLabel}</span>
-                    <span className="font-medium text-foreground">{Math.round(iftarCal)} cal</span>
-                  </div>
-                  <div>
-                    <span className="text-xs text-muted-foreground block">Total</span>
-                    <span className="font-bold text-secondary">
-                      {Math.round(selectedDayTotalsFromLog.calories)} cal
-                      <span className="text-[10px] font-normal text-muted-foreground"> / {dailyGoals.calories} goal</span>
-                    </span>
-                  </div>
+                  )}
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="cursor-help">
-                        <span className="text-[10px] text-muted-foreground block mb-0.5">Override total (optional)</span>
-                        <input
-                          type="number"
-                          min={0}
-                          max={CALORIE_MAX}
-                          placeholder={selectedDayTotalsFromLog.calories ? String(Math.round(selectedDayTotalsFromLog.calories)) : "Cal"}
-                          value={selectedDayNutr?.calories ?? ""}
-                          onChange={(e) =>
-                            setDayNutrition((prev) => ({
-                              ...prev,
-                              [selectedDate]: {
-                                ...(prev[selectedDate] || {}),
-                                calories: e.target.value ? clampCalories(Number(e.target.value)) : undefined,
-                              },
-                            }))
-                          }
-                          className="w-full px-2 py-1.5 rounded-lg border border-border bg-background text-sm"
-                        />
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-xs">
-                      <p className="font-medium">Calories</p>
-                      <p className="text-xs mt-1">Total above is from logged items. Enter a number here only if you want to override the total (e.g. estimate without logging each item).</p>
-                    </TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="cursor-help">
-                        <input
-                          type="number"
-                          min={0}
-                          placeholder="P"
-                          value={selectedDayNutr?.protein ?? ""}
-                          onChange={(e) =>
-                            setDayNutrition((prev) => ({
-                              ...prev,
-                              [selectedDate]: {
-                                ...(prev[selectedDate] || {}),
-                                protein: e.target.value ? Number(e.target.value) : undefined,
-                              },
-                            }))
-                          }
-                          className="w-full px-2 py-1.5 rounded-lg border border-border bg-background text-sm"
-                        />
-                        <span className="text-[10px] text-muted-foreground">/ {dailyGoals.protein}g</span>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-xs">
-                      <p className="font-medium">Protein (g)</p>
-                      <p className="text-xs mt-1">Macro in grams. Log foods above to build totals on Schedule, or enter your daily total here.</p>
-                    </TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="cursor-help">
-                        <input
-                          type="number"
-                          min={0}
-                          placeholder="C"
-                          value={selectedDayNutr?.carbs ?? ""}
-                          onChange={(e) =>
-                            setDayNutrition((prev) => ({
-                              ...prev,
-                              [selectedDate]: {
-                                ...(prev[selectedDate] || {}),
-                                carbs: e.target.value ? Number(e.target.value) : undefined,
-                              },
-                            }))
-                          }
-                          className="w-full px-2 py-1.5 rounded-lg border border-border bg-background text-sm"
-                        />
-                        <span className="text-[10px] text-muted-foreground">/ {dailyGoals.carbs}g</span>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-xs">
-                      <p className="font-medium">Carbs (g)</p>
-                      <p className="text-xs mt-1">Carbohydrates in grams. Track via logged items on Schedule or enter daily total here.</p>
-                    </TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="cursor-help">
-                        <input
-                          type="number"
-                          min={0}
-                          placeholder="F"
-                          value={selectedDayNutr?.fat ?? ""}
-                          onChange={(e) =>
-                            setDayNutrition((prev) => ({
-                              ...prev,
-                              [selectedDate]: {
-                                ...(prev[selectedDate] || {}),
-                                fat: e.target.value ? Number(e.target.value) : undefined,
-                              },
-                            }))
-                          }
-                          className="w-full px-2 py-1.5 rounded-lg border border-border bg-background text-sm"
-                        />
-                        <span className="text-[10px] text-muted-foreground">/ {dailyGoals.fat}g</span>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-xs">
-                      <p className="font-medium">Fat (g)</p>
-                      <p className="text-xs mt-1">Fat in grams. Log items above for per-meal tracking on Schedule, or enter daily total here.</p>
-                    </TooltipContent>
-                  </Tooltip>
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="text-[10px] text-muted-foreground">Override total (optional):</span>
+                  <input
+                    type="number"
+                    min={0}
+                    max={CALORIE_MAX}
+                    placeholder={selectedDayTotalsFromLog.calories ? String(Math.round(selectedDayTotalsFromLog.calories)) : "Cal"}
+                    value={selectedDayNutr?.calories ?? ""}
+                    onChange={(e) =>
+                      setDayNutrition((prev) => ({
+                        ...prev,
+                        [selectedDate]: {
+                          ...(prev[selectedDate] || {}),
+                          calories: e.target.value ? clampCalories(Number(e.target.value)) : undefined,
+                        },
+                      }))
+                    }
+                    className="w-20 px-2 py-1 rounded-lg border border-border bg-background text-sm"
+                  />
                 </div>
               </div>
 

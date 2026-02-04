@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, AlertTriangle } from "lucide-react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
+import { getOnboardingBackPath } from "./getOnboardingBackPath";
 
 const HEALTH_OPTIONS = [
   { id: "none", label: "None of these", emoji: "✅", safe: true },
@@ -46,7 +47,7 @@ export default function OnboardingHealth() {
         }}
       >
       <Link
-        to="/onboarding/knowledge"
+        to={getOnboardingBackPath("/onboarding/health", state.mode) ?? "/onboarding/knowledge"}
         className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6"
       >
         <ArrowLeft className="w-4 h-4" /> Back

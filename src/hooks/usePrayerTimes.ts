@@ -15,6 +15,24 @@ export interface PrayerTimes {
   date: string;
 }
 
+/** Merge API prayer times with per-date overrides. Override keys: imsak, fajr, dhuhr, asr, maghrib, isha. */
+export function getEffectivePrayerTimes(
+  apiTimes: PrayerTimes | null,
+  overrides: Partial<PrayerTimes> | null | undefined
+): PrayerTimes | null {
+  if (!apiTimes) return null;
+  if (!overrides || Object.keys(overrides).length === 0) return apiTimes;
+  return {
+    ...apiTimes,
+    ...(overrides.imsak != null && overrides.imsak.trim() !== '' && { imsak: overrides.imsak.trim() }),
+    ...(overrides.fajr != null && overrides.fajr.trim() !== '' && { fajr: overrides.fajr.trim() }),
+    ...(overrides.dhuhr != null && overrides.dhuhr.trim() !== '' && { dhuhr: overrides.dhuhr.trim() }),
+    ...(overrides.asr != null && overrides.asr.trim() !== '' && { asr: overrides.asr.trim() }),
+    ...(overrides.maghrib != null && overrides.maghrib.trim() !== '' && { maghrib: overrides.maghrib.trim() }),
+    ...(overrides.isha != null && overrides.isha.trim() !== '' && { isha: overrides.isha.trim() }),
+  };
+}
+
 interface AladhanResponse {
   code: number;
   status: string;

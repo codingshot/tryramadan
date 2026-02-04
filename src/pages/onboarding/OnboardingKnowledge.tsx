@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
@@ -54,6 +54,24 @@ export default function OnboardingKnowledge() {
       setCurrent(current + 1);
     }
   };
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "ArrowLeft") return;
+      const target = e.target as HTMLElement;
+      if (target.closest("input") || target.closest("textarea") || target.closest("select")) return;
+      if (current > 0 && selectedOption === null) {
+        e.preventDefault();
+        setCurrent((c) => c - 1);
+        setAnswers((a) => a.slice(0, -1));
+      } else if (current === 0) {
+        e.preventDefault();
+        navigate("/onboarding/mode");
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [current, selectedOption, navigate]);
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>

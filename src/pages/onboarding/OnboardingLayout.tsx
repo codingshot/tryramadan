@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
@@ -5,6 +6,7 @@ import { useOnboarding } from "@/contexts/OnboardingContext";
 import { PageSEO } from "@/components/PageSEO";
 import { useUserPreferences, getQuickActionOrderFromPriorities, persistPreferencesSync, persistQuickActionsSync } from "@/hooks/useLocalStorage";
 import { useDashboardQuickActions } from "@/hooks/useLocalStorage";
+import { getOnboardingBackPath } from "./getOnboardingBackPath";
 
 const STEPS = [
   { path: "welcome", label: "Welcome" },
@@ -29,6 +31,21 @@ export default function OnboardingLayout() {
   const path = location.pathname.replace("/onboarding/", "") || "welcome";
   const stepIndex = STEPS.findIndex((s) => s.path === path);
   const progress = stepIndex < 0 ? 0 : ((stepIndex + 1) / STEPS.length) * 100;
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "ArrowLeft") return;
+      const target = e.target as HTMLElement;
+      if (target.closest("input") || target.closest("textarea") || target.closest("select")) return;
+      const backTo = getOnboardingBackPath(location.pathname, state.mode);
+      if (backTo) {
+        e.preventDefault();
+        navigate(backTo);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [location.pathname, state.mode, navigate]);
 
   const handleClose = () => {
     const hasBeenOnDashboard = preferences.onboardingComplete === true;
