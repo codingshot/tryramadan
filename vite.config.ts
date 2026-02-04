@@ -73,28 +73,8 @@ export default defineConfig(({ mode }) => ({
               },
             },
           },
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "google-fonts-cache",
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
-              },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "gstatic-fonts-cache",
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
-              },
-            },
-          },
+          // Google Fonts: do not cache via SW — CacheFirst with empty cache can throw "no-response"
+          // when the request fails (e.g. adblocker, CORS), breaking page load. Let browser handle fonts.
           {
             urlPattern: /^https:\/\/nominatim\.openstreetmap\.org\/.*/i,
             handler: "CacheFirst",

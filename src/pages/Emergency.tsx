@@ -158,6 +158,41 @@ const Emergency = () => {
               </li>
             </ul>
           </motion.div>
+
+          {/* What invalidates a fast — links to home page anchors */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.65 }}
+            className="p-6 rounded-2xl bg-card border border-border mb-8"
+          >
+            <h3 className="font-bold mb-3">Learn more on the home page</h3>
+            <p className="text-sm text-muted-foreground mb-3">
+              What invalidates a fast, what does not, and who is exempt:
+            </p>
+            <ul className="space-y-2">
+              <li>
+                <Link to="/#invalidates-fast" className="text-secondary font-medium hover:underline">
+                  What invalidates the fast
+                </Link>
+              </li>
+              <li>
+                <Link to="/#does-not-invalidate" className="text-secondary font-medium hover:underline">
+                  What does not invalidate the fast
+                </Link>
+              </li>
+              <li>
+                <Link to="/#exempt-from-fasting" className="text-secondary font-medium hover:underline">
+                  Who is exempt from fasting
+                </Link>
+              </li>
+              <li>
+                <Link to="/#health" className="text-secondary font-medium hover:underline">
+                  Health & when to break fast (science)
+                </Link>
+              </li>
+            </ul>
+          </motion.div>
           
           {/* Emergency contacts */}
           <motion.div

@@ -64,6 +64,7 @@ import { FastingBottomBar } from "./components/FastingBottomBar";
 import { ReminderScheduler } from "./components/ReminderScheduler";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { KeyboardShortcutsHelp } from "./components/KeyboardShortcutsHelp";
+import { RouteErrorBoundary } from "./components/RouteErrorBoundary";
 
 const queryClient = new QueryClient();
 
@@ -161,6 +162,7 @@ const App = () => (
         <KeyboardShortcutsManager />
         <FastingAndSchedulers />
         <KeyboardShortcutsHelp />
+        <RouteErrorBoundary>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route
@@ -270,6 +272,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<Suspense fallback={<PageFallback />}><NotFound /></Suspense>} />
         </Routes>
+        </RouteErrorBoundary>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

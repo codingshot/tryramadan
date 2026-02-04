@@ -583,19 +583,26 @@ const DashboardSchedule = () => {
       const now = new Date();
       let start: Date;
       let end: Date;
+      let startStr: string;
+      let endStr: string;
       if (range === "month") {
         start = new Date(now.getFullYear(), now.getMonth(), 1);
         end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        startStr = toLocalDateString(start);
+        endStr = toLocalDateString(end);
       } else if (range === "30days") {
         start = new Date(now);
         end = new Date(now);
         end.setDate(end.getDate() + 29);
+        startStr = toLocalDateString(start);
+        endStr = toLocalDateString(end);
       } else {
-        start = new Date(ramadanRange.start.getFullYear(), ramadanRange.start.getMonth(), ramadanRange.start.getDate());
-        end = new Date(ramadanRange.end.getFullYear(), ramadanRange.end.getMonth(), ramadanRange.end.getDate());
+        // Ramadan: use effective range (includes user overrides from Settings) for accurate export
+        startStr = ramadanRange.startStr;
+        endStr = ramadanRange.endStr;
+        start = new Date(startStr + "T00:00:00");
+        end = new Date(endStr + "T23:59:59");
       }
-      const startStr = toLocalDateString(start);
-      const endStr = toLocalDateString(end);
       const prayerTimesMap: Record<string, import("@/hooks/usePrayerTimes").PrayerTimes> = {};
       const startYear = start.getFullYear();
       const endYear = end.getFullYear();
@@ -1179,9 +1186,9 @@ const DashboardSchedule = () => {
                       </h4>
                       <button
                         type="button"
-                        onClick={() => setSelectedDate(null)}
+                        onClick={() => { setSelectedDate(todayStr); setNoteInput(scheduleNotes[todayStr] || ""); }}
                         className="p-1 rounded hover:bg-muted"
-                        aria-label="Close"
+                        aria-label="Back to today"
                       >
                         <X className="w-5 h-5" />
                       </button>

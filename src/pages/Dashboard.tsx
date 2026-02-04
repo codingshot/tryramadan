@@ -612,12 +612,16 @@ const Dashboard = () => {
             </div>
           </motion.div>
           
+          {/* Desktop: two columns — left: fast status + checklist; right: streak/total/sunnah/broken */}
+          <div className="grid grid-cols-1 md:grid-cols-[1fr,minmax(240px,280px)] gap-6 lg:gap-8 mb-6">
+            {/* Left column: Current Fast Status + Suhoor/Iftar + Today's schedule + Daily missions */}
+            <div className="min-w-0 space-y-4">
           {/* Current Fast Status Card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.08 }}
-            className={`mb-4 p-4 sm:p-5 rounded-2xl border-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 ${
+            className={`p-4 sm:p-5 rounded-2xl border-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 ${
               isFasting ? "bg-primary/10 border-primary/30" : "bg-muted/50 border-border"
             }`}
           >
@@ -912,11 +916,13 @@ const Dashboard = () => {
               onSelectReason={(reasonId) => breakFastingToday(progress, setProgress, reasonId, todayStr)}
               userType={preferences.userType}
             />
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="mt-6">
               <DailyMissionsCard />
             </div>
           </motion.div>
-          
+            </div>
+
+            {/* Right column (desktop): Streak, Total, Sunnah, Broken */}
           {/* Quick Actions Grid — Streak, Total, Sunnah, Broken (click to see days) */}
           {(() => {
             const streakDaysList = getStreakDays(progress, todayStr);
@@ -962,7 +968,7 @@ const Dashboard = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8"
+                className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-2 gap-3 sm:gap-4 md:mb-0"
               >
                 {/* Streak — hidden when showStreakAndAchievements is off */}
                 {preferences.showStreakAndAchievements !== false && (
@@ -1058,7 +1064,7 @@ const Dashboard = () => {
                   </TooltipContent>
                 </Tooltip>
               </motion.div>
-              <p className="text-xs text-muted-foreground text-center mb-4 -mt-2">
+              <p className="text-xs text-muted-foreground text-center md:text-left mb-4 -mt-2">
                 Completed: {progress.completedDays.length} · Broken: {brokenDaysList.length}
                 {excusedDaysList.length > 0 ? ` (${excusedDaysList.length} excused)` : ""} · Skipped: {(progress.skippedDays ?? []).length}
               </p>
@@ -1069,6 +1075,7 @@ const Dashboard = () => {
               </>
             );
           })()}
+          </div>
 
             {/* Day view: meal plan, calories, prayer times, journal for selected day */}
             <motion.div

@@ -14,8 +14,14 @@ export const FastingRulesSection = () => {
     "Who is Exempt from Fasting": <Info className="w-5 h-5 text-secondary" />,
   };
 
+  const anchorIdMap: Record<string, string> = {
+    "What Invalidates the Fast": "invalidates-fast",
+    "What Does NOT Invalidate the Fast": "does-not-invalidate",
+    "Who is Exempt from Fasting": "exempt-from-fasting",
+  };
+
   return (
-    <section className="py-16">
+    <section id="fasting-rules" className="py-16">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -44,11 +50,12 @@ export const FastingRulesSection = () => {
           {rules.map((ruleSet, index) => (
             <motion.div
               key={ruleSet.title}
+              id={anchorIdMap[ruleSet.title]}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
-              className="card-cultural"
+              className="card-cultural scroll-mt-24"
             >
               <div className="flex items-center gap-3 mb-4">
                 {iconMap[ruleSet.title]}

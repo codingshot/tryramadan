@@ -85,9 +85,6 @@ export const HeroSection = () => {
                     : `Day ${ramadanDay} of Ramadan`
                   : `${daysUntil} day${daysUntil === 1 ? "" : "s"} until Ramadan`}
               </span>
-              <p className="text-xs text-primary-foreground/70 mt-2 text-center">
-                New? Start your journey below
-              </p>
             </motion.div>
 
             {/* Main headline - responsive for mobile */}

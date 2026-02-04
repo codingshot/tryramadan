@@ -23,15 +23,24 @@ export const Navbar = () => {
 
   useEffect(() => {
     const formatTime = () => {
-      const options: Intl.DateTimeFormatOptions = {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      };
-      if (displayTimezone?.trim()) {
-        options.timeZone = displayTimezone;
+      const tz = displayTimezone?.trim();
+      if (tz) {
+        const formatter = new Intl.DateTimeFormat(undefined, {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          timeZone: tz,
+        });
+        setLocalTime(formatter.format(new Date()));
+      } else {
+        setLocalTime(
+          new Date().toLocaleTimeString(undefined, {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          })
+        );
       }
-      setLocalTime(new Date().toLocaleTimeString(undefined, options));
     };
     formatTime();
     const interval = setInterval(formatTime, 2000);
@@ -39,12 +48,10 @@ export const Navbar = () => {
   }, [displayTimezone]);
 
   const navLinks = [
-    { name: "Features", nameAr: "المميزات", to: "/" },
     { name: "Programs", nameAr: "البرامج", to: "/programs" },
     { name: "Health", nameAr: "الصحة", to: "/health" },
     { name: "Recipes", nameAr: "وصفات", to: "/recipes" },
     { name: "Culture", nameAr: "الثقافة", to: "/culture" },
-    { name: "About", nameAr: "عنا", to: "/faq" },
   ];
 
   const scrollToTop = () => {
