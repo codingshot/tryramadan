@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
   Check,
@@ -172,6 +172,13 @@ const QUICK_ADD_TEMPLATES: { type: CalendarEventType; title: string; timeKey: ke
   { type: "get_food", title: "Get food / prepare", timeKey: "maghrib" },
 ];
 
+/** Valid YYYY-MM-DD for URL/sync. */
+function isValidDateString(s: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const t = new Date(s + "T12:00:00").getTime();
+  return Number.isFinite(t);
+}
+
 const DashboardSchedule = () => {
   const [preferences] = useUserPreferences();
   const [progress, setProgress] = useFastingProgress();
@@ -195,23 +202,39 @@ const DashboardSchedule = () => {
   const { prayerTimesMap: ramadanPrayerTimesMap, loading: ramadanPrayersLoading, refetch: refetchRamadanPrayers } = useRamadanPrayerTimes(lat, lng);
 
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const todayStrForInit = toLocalDateString(new Date());
+  const dateFromUrl = searchParams.get("date");
+  const initialDateFromUrl = dateFromUrl && isValidDateString(dateFromUrl) ? dateFromUrl : null;
   const initialDateFromState = (location.state as { date?: string } | null)?.date;
-  const initialDate = initialDateFromState ?? todayStrForInit;
+  const initialDate = initialDateFromUrl ?? initialDateFromState ?? todayStrForInit;
   const [selectedDate, setSelectedDate] = useState<string | null>(initialDate);
   const [noteInput, setNoteInput] = useState(() => scheduleNotes[initialDate] || "");
   const [currentMonth, setCurrentMonth] = useState(() => {
     const d = new Date(initialDate + "T12:00:00");
     return new Date(d.getFullYear(), d.getMonth(), 1);
   });
+  // Sync URL -> state when URL date changes (e.g. browser back, or link with ?date=)
   useEffect(() => {
-    const date = (location.state as { date?: string } | null)?.date;
-    if (date) {
-      setSelectedDate(date);
-      const d = new Date(date + "T12:00:00");
+    const urlDate = searchParams.get("date");
+    if (urlDate && isValidDateString(urlDate)) {
+      setSelectedDate(urlDate);
+      setNoteInput(scheduleNotes[urlDate] || "");
+      const d = new Date(urlDate + "T12:00:00");
       setCurrentMonth(new Date(d.getFullYear(), d.getMonth(), 1));
     }
-  }, [location.state]);
+  }, [searchParams]);
+  // When navigating from Dashboard popup with state (no ?date= in URL yet), sync and add date to URL
+  useEffect(() => {
+    const date = (location.state as { date?: string } | null)?.date;
+    if (date && isValidDateString(date) && !searchParams.get("date")) {
+      setSelectedDate(date);
+      setNoteInput(scheduleNotes[date] || "");
+      const d = new Date(date + "T12:00:00");
+      setCurrentMonth(new Date(d.getFullYear(), d.getMonth(), 1));
+      setSearchParams({ date }, { replace: true });
+    }
+  }, [location.state, searchParams]);
   const [showQuickActionsEditor, setShowQuickActionsEditor] = useState(false);
   const [quickActionOrder, setQuickActionOrder] = useDashboardQuickActions();
   const [addFoodMeal, setAddFoodMeal] = useState<MealType | null>(null);
@@ -294,7 +317,8 @@ const DashboardSchedule = () => {
     setCurrentMonth(new Date(now.getFullYear(), now.getMonth(), 1));
     setSelectedDate(str);
     setNoteInput(scheduleNotes[str] || "");
-  }, [scheduleNotes]);
+    setSearchParams({ date: str }, { replace: true });
+  }, [scheduleNotes, setSearchParams]);
 
   const goToRamadan = useCallback(() => {
     const start = ramadanRange.start;
@@ -302,14 +326,16 @@ const DashboardSchedule = () => {
     const startStr = toLocalDateString(start);
     setSelectedDate(startStr);
     setNoteInput(scheduleNotes[startStr] || "");
-  }, [scheduleNotes, ramadanRange.start]);
+    setSearchParams({ date: startStr }, { replace: true });
+  }, [scheduleNotes, ramadanRange.start, setSearchParams]);
 
   const selectDay = useCallback(
     (dateStr: string) => {
       setSelectedDate(dateStr);
       setNoteInput(scheduleNotes[dateStr] || "");
+      setSearchParams({ date: dateStr }, { replace: true });
     },
-    [scheduleNotes]
+    [scheduleNotes, setSearchParams]
   );
 
   const prevMonth = () =>
@@ -1009,7 +1035,7 @@ const DashboardSchedule = () => {
                                   variant="ghost"
                                   size="sm"
                                   className="h-8 text-xs"
-                                  onClick={() => { setSelectedDate(dateStr); setNoteInput(scheduleNotes[dateStr] || ""); }}
+                                  onClick={() => { setSelectedDate(dateStr); setNoteInput(scheduleNotes[dateStr] || ""); setSearchParams({ date: dateStr }, { replace: true }); }}
                                 >
                                   {isSelected ? "Open" : "View"}
                                 </Button>
@@ -1262,7 +1288,7 @@ const DashboardSchedule = () => {
                       </h4>
                       <button
                         type="button"
-                        onClick={() => { setSelectedDate(todayStr); setNoteInput(scheduleNotes[todayStr] || ""); }}
+                        onClick={() => { setSelectedDate(todayStr); setNoteInput(scheduleNotes[todayStr] || ""); setSearchParams({ date: todayStr }, { replace: true }); }}
                         className="p-1 rounded hover:bg-muted"
                         aria-label="Back to today"
                       >

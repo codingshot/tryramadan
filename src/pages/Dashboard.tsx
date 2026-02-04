@@ -733,12 +733,12 @@ const Dashboard = () => {
               >
                 <Link
                   to="/dashboard/schedule"
-                  className="block p-3 sm:p-4 rounded-2xl bg-card border border-border grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 hover:border-secondary/50 transition-colors min-h-[72px] sm:min-h-0"
+                  className="block p-3 sm:p-4 rounded-2xl bg-card border border-border grid grid-cols-2 gap-2 sm:gap-3 hover:border-secondary/50 transition-colors"
                 >
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="cursor-help">
-                        <span className="text-xs text-muted-foreground block">{suhoorLabelShort} end · Fajr</span>
+                      <div className="cursor-help min-w-0">
+                        <span className="text-xs text-muted-foreground block truncate">{suhoorLabelShort} end · Fajr</span>
                         <span className="font-bold text-secondary">{prayerTimes.fajr}</span>
                       </div>
                     </TooltipTrigger>
@@ -758,8 +758,8 @@ const Dashboard = () => {
                   </Tooltip>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <div className="cursor-help">
-                        <span className="text-xs text-muted-foreground block">{iftarLabel} · Maghrib</span>
+                      <div className="cursor-help min-w-0">
+                        <span className="text-xs text-muted-foreground block truncate">{iftarLabel} · Maghrib</span>
                         <span className="font-bold text-secondary">{prayerTimes.maghrib}</span>
                       </div>
                     </TooltipTrigger>
@@ -948,8 +948,7 @@ const Dashboard = () => {
                         {dates.map((dateStr) => (
                           <li key={dateStr}>
                             <Link
-                              to="/dashboard/schedule"
-                              state={{ date: dateStr }}
+                              to={`/dashboard/schedule?date=${dateStr}`}
                               onClick={() => onOpenChange(false)}
                               className="block py-2 px-3 rounded-lg hover:bg-muted text-sm font-medium"
                             >
@@ -1110,13 +1109,13 @@ const Dashboard = () => {
 
               {/* Prayer times for this day */}
               {selectedDayPrayerTimes && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 p-3 rounded-xl bg-muted/50">
-                  <div>
-                    <span className="text-xs text-muted-foreground block">{suhoorLabelShort} end · Fajr</span>
+                <div className="grid grid-cols-2 gap-3 mb-4 p-3 rounded-xl bg-muted/50">
+                  <div className="min-w-0">
+                    <span className="text-xs text-muted-foreground block truncate">{suhoorLabelShort} end · Fajr</span>
                     <span className="font-bold text-secondary">{selectedDayPrayerTimes.fajr}</span>
                   </div>
-                  <div>
-                    <span className="text-xs text-muted-foreground block">{iftarLabel} · Maghrib</span>
+                  <div className="min-w-0">
+                    <span className="text-xs text-muted-foreground block truncate">{iftarLabel} · Maghrib</span>
                     <span className="font-bold text-secondary">{selectedDayPrayerTimes.maghrib}</span>
                   </div>
                 </div>
