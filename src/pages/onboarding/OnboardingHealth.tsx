@@ -39,67 +39,72 @@ export default function OnboardingHealth() {
   const hasWarning = sel.some((id) => id !== "none" && HEALTH_OPTIONS.find((o) => o.id === id)?.safe === false);
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col min-h-0 flex-1">
       <form
         onSubmit={(e) => {
           e.preventDefault();
           handleContinue();
         }}
+        className="flex flex-col min-h-0 flex-1"
       >
-      <Link
-        to={getOnboardingBackPath("/onboarding/health", state.mode) ?? "/onboarding/knowledge"}
-        className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6"
-      >
-        <ArrowLeft className="w-4 h-4" /> Back
-      </Link>
-      <h2 className="font-display text-2xl font-bold mb-2">Health screening</h2>
-      <p className="text-muted-foreground mb-6">
-        So we can show relevant safety information. Always consult a doctor before fasting.
-      </p>
-
-      <div className="space-y-2 mb-6">
-        {HEALTH_OPTIONS.map((opt) => {
-          const isSelected = opt.id === "none" ? sel.length === 0 : sel.includes(opt.id);
-          return (
-          <button
-            key={opt.id}
-            type="button"
-            onClick={() => toggle(opt.id)}
-            className={`w-full min-h-[44px] p-4 rounded-xl border-2 text-left transition-all cursor-pointer touch-manipulation flex items-center gap-3 ${
-              isSelected
-                ? "border-secondary bg-secondary/5"
-                : "border-border hover:border-secondary/50"
-            }`}
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          <Link
+            to={getOnboardingBackPath("/onboarding/health", state.mode) ?? "/onboarding/knowledge"}
+            className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6"
           >
-            <span className="text-2xl shrink-0" aria-hidden>{opt.emoji}</span>
-            <span>{opt.label}</span>
-          </button>
-          );
-        })}
-      </div>
+            <ArrowLeft className="w-4 h-4" /> Back
+          </Link>
+          <h2 className="font-display text-2xl font-bold mb-2">Health screening</h2>
+          <p className="text-muted-foreground mb-6">
+            So we can show relevant safety information. Always consult a doctor before fasting.
+          </p>
 
-      {hasWarning && (
-        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex gap-3 mb-6">
-          <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-muted-foreground">
-            We'll show health & safety guidance. Please speak to your doctor before fasting.
+          <div className="space-y-2 mb-6">
+            {HEALTH_OPTIONS.map((opt) => {
+              const isSelected = opt.id === "none" ? sel.length === 0 : sel.includes(opt.id);
+              return (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => toggle(opt.id)}
+                className={`w-full min-h-[44px] p-4 rounded-xl border-2 text-left transition-all cursor-pointer touch-manipulation flex items-center gap-3 ${
+                  isSelected
+                    ? "border-secondary bg-secondary/5"
+                    : "border-border hover:border-secondary/50"
+                }`}
+              >
+                <span className="text-2xl shrink-0" aria-hidden>{opt.emoji}</span>
+                <span>{opt.label}</span>
+              </button>
+              );
+            })}
+          </div>
+
+          {hasWarning && (
+            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex gap-3 mb-6">
+              <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-muted-foreground">
+                We'll show health & safety guidance. Please speak to your doctor before fasting.
+              </p>
+            </div>
+          )}
+
+          <p className="text-sm text-muted-foreground mb-2">
+            This app does not replace your doctor. Always consult a healthcare professional before fasting.
+          </p>
+          <p className="text-sm text-muted-foreground mb-4">
+            By continuing, you understand this app is not medical advice and you should consult your doctor if you have health concerns.
           </p>
         </div>
-      )}
 
-      <p className="text-sm text-muted-foreground mb-2">
-        This app does not replace your doctor. Always consult a healthcare professional before fasting.
-      </p>
-      <p className="text-sm text-muted-foreground mb-4">
-        By continuing, you understand this app is not medical advice and you should consult your doctor if you have health concerns.
-      </p>
-
-      <button
-        type="submit"
-        className="w-full min-h-[44px] py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2 cursor-pointer"
-      >
-        Continue <ArrowRight className="w-5 h-5" />
-      </button>
+        <div className="sticky bottom-0 left-0 right-0 z-10 bg-background border-t border-border pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] -mx-4 px-4 mt-4 sm:static sm:border-0 sm:pt-0 sm:pb-0 sm:mx-0 sm:px-0 sm:mt-0">
+          <button
+            type="submit"
+            className="w-full min-h-[44px] py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2 cursor-pointer"
+          >
+            Continue <ArrowRight className="w-5 h-5" />
+          </button>
+        </div>
       </form>
     </motion.div>
   );

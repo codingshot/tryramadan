@@ -80,13 +80,15 @@ export default function OnboardingGoals() {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col min-h-0 flex-1">
       <form
         onSubmit={(e) => {
           e.preventDefault();
           handleComplete();
         }}
+        className="flex flex-col min-h-0 flex-1"
       >
+        <div className="flex-1 min-h-0 overflow-y-auto">
       <button
         type="button"
         onClick={() => navigate("/onboarding/priorities")}
@@ -104,7 +106,7 @@ export default function OnboardingGoals() {
           onClick={handleComplete}
           className="w-full mb-6 py-2.5 px-4 rounded-xl border border-secondary/50 text-secondary font-medium text-sm hover:bg-secondary/10 transition-colors"
         >
-          Skip — go to dashboard • الذهاب إلى لوحة التحكم
+          Skip — go to dashboard
         </button>
       )}
 
@@ -139,12 +141,16 @@ export default function OnboardingGoals() {
       <p className="mt-2 mb-2 text-xs text-muted-foreground">
         You can change prayer-time method and more in Settings after setup.
       </p>
-      <button
-        type="submit"
-        className="w-full mt-6 min-h-[44px] py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2 cursor-pointer"
-      >
-        Go to dashboard <Check className="w-5 h-5" />
-      </button>
+        </div>
+
+        <div className="sticky bottom-0 left-0 right-0 z-10 bg-background border-t border-border pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] -mx-4 px-4 mt-4 sm:static sm:border-0 sm:pt-0 sm:pb-0 sm:mx-0 sm:px-0 sm:mt-0">
+          <button
+            type="submit"
+            className="w-full min-h-[44px] py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2 cursor-pointer"
+          >
+            Go to dashboard <Check className="w-5 h-5" />
+          </button>
+        </div>
       </form>
     </motion.div>
   );

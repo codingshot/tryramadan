@@ -1382,7 +1382,9 @@ const DashboardSchedule = () => {
                         <AlertDialogHeader>
                           <AlertDialogTitle>Break fast?</AlertDialogTitle>
                           <AlertDialogDescription>
-                            Log that you broke your fast early. Choose a reason.
+                            {isFasting
+                              ? "Log that you broke your fast early. Choose a reason."
+                              : "It's not fasting period right now (you're in the eating window). Did you break your fast earlier, during the fasting window (before Maghrib)? If so, choose a reason below."}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -1407,6 +1409,7 @@ const DashboardSchedule = () => {
                         toast.success("Fast logged as broken");
                       }}
                       userType={preferences?.userType}
+                      notInFastingPeriod={!isFasting}
                     />
 
                     {/* Eating cutoff & break fast — prominent */}

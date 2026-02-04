@@ -17,6 +17,8 @@ interface BreakFastReasonDialogProps {
   title?: string;
   /** When non-Muslim, show tooltip on Travel reason (COPY-AUDIT) */
   userType?: "muslim" | "non-muslim";
+  /** When true, show reminder that it's not fasting period and they're logging a break during the fasting window */
+  notInFastingPeriod?: boolean;
 }
 
 const TRAVEL_TOOLTIP_NON_MUSLIM = "Travelers may be exempt from fasting; make up days later.";
@@ -27,6 +29,7 @@ export function BreakFastReasonDialog({
   onSelectReason,
   title = "Why did you break your fast?",
   userType,
+  notInFastingPeriod,
 }: BreakFastReasonDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -34,6 +37,11 @@ export function BreakFastReasonDialog({
         <DialogHeader>
           <DialogTitle className="font-display">{title}</DialogTitle>
         </DialogHeader>
+        {notInFastingPeriod && (
+          <p className="text-sm text-amber-700 dark:text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2 -mt-2">
+            It&apos;s not fasting period right now (eating window). You&apos;re logging that you broke your fast earlier, during the fasting window (before Maghrib). Choose a reason below.
+          </p>
+        )}
         <p className="text-sm text-muted-foreground -mt-2">
           Choose a reason so you can track it. No judgment — your intention matters.
         </p>

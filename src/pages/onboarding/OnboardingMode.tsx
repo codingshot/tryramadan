@@ -53,7 +53,7 @@ export default function OnboardingMode() {
         <ArrowLeft className="w-4 h-4" /> Back
       </Link>
       <h2 className="font-display text-2xl font-bold mb-2">Choose your mode</h2>
-      <p className="text-muted-foreground mb-6 font-arabic">أخبرنا عن نفسك</p>
+      <p className="text-muted-foreground mb-6">Tell us about yourself</p>
 
       <div className="space-y-4">
         <button
@@ -67,7 +67,6 @@ export default function OnboardingMode() {
             <span className="text-3xl">🌱</span>
             <div className="flex-1">
               <h3 className="font-bold text-lg">Non-Muslim Mode</h3>
-              <p className="font-arabic text-secondary text-sm">تعلم واختبر</p>
               <p className="text-muted-foreground text-sm mt-1">
                 Learning focus: explore fasting, culture, and wellness at your own pace.
               </p>
@@ -87,7 +86,6 @@ export default function OnboardingMode() {
             <span className="text-3xl">☪️</span>
             <div className="flex-1">
               <h3 className="font-bold text-lg">Muslim Mode</h3>
-              <p className="font-arabic text-secondary text-sm">أنا مسلم</p>
               <p className="text-muted-foreground text-sm mt-1">
                 Full religious observance support: prayer times, Ramadan tracking, and spiritual content.
               </p>

@@ -316,6 +316,7 @@ const DashboardToday = () => {
               onOpenChange={setShowBreakFastDialog}
               onSelectReason={(reasonId) => breakFastingToday(progress, setProgress, reasonId, todayStr)}
               userType={preferences.userType}
+              notInFastingPeriod={isFastingWindow === false}
             />
           </motion.div>
 

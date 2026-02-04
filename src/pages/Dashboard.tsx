@@ -890,7 +890,13 @@ const Dashboard = () => {
             <Dialog open={showBreakFastConfirm} onOpenChange={setShowBreakFastConfirm}>
               <DialogContent className="max-w-xs">
                 <DialogTitle>Break fast?</DialogTitle>
-                <p className="text-sm text-muted-foreground">Log that you broke your fast early. Choose a reason.</p>
+                {isFasting ? (
+                  <p className="text-sm text-muted-foreground">Log that you broke your fast early. Choose a reason.</p>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    It&apos;s not fasting period right now (you&apos;re in the eating window). Did you break your fast earlier, during the fasting window (before Maghrib)? If so, choose a reason below.
+                  </p>
+                )}
                 <div className="flex gap-2 justify-end">
                   <button
                     type="button"
@@ -917,6 +923,7 @@ const Dashboard = () => {
               onOpenChange={setShowBreakFastDialog}
               onSelectReason={(reasonId) => breakFastingToday(progress, setProgress, reasonId, todayStr)}
               userType={preferences.userType}
+              notInFastingPeriod={!isFasting}
             />
             <div className="mt-6">
               <DailyMissionsCard />
@@ -978,7 +985,7 @@ const Dashboard = () => {
                       <button
                         type="button"
                         onClick={() => streak > 0 && setStatsDialog("streak")}
-                        className={`p-3 sm:p-4 rounded-2xl bg-card border border-border min-h-[100px] sm:min-h-0 flex flex-col items-center justify-center transition-colors text-left w-full ${streak > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
+                        className={`p-3 sm:p-4 rounded-2xl bg-card border border-border h-[100px] flex flex-col items-center justify-center transition-colors text-left w-full ${streak > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
                       >
                         <div className="flex flex-col items-center gap-2">
                           <div className="w-10 h-10 rounded-full bg-gradient-gold flex items-center justify-center">
@@ -1002,7 +1009,7 @@ const Dashboard = () => {
                     <button
                       type="button"
                       onClick={() => progress.completedDays.length > 0 && setStatsDialog("total")}
-                      className={`p-3 sm:p-4 rounded-2xl bg-card border border-border min-h-[100px] sm:min-h-0 flex flex-col items-center justify-center transition-colors text-left w-full ${progress.completedDays.length > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
+                      className={`p-3 sm:p-4 rounded-2xl bg-card border border-border h-[100px] flex flex-col items-center justify-center transition-colors text-left w-full ${progress.completedDays.length > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
                     >
                       <div className="flex flex-col items-center gap-2">
                         <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
@@ -1024,7 +1031,7 @@ const Dashboard = () => {
                     <button
                       type="button"
                       onClick={() => progress.sunnahDaysCompleted > 0 && setStatsDialog("sunnah")}
-                      className={`p-3 sm:p-4 rounded-2xl bg-card border border-border min-h-[100px] sm:min-h-0 flex flex-col items-center justify-center transition-colors text-left w-full ${progress.sunnahDaysCompleted > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
+                      className={`p-3 sm:p-4 rounded-2xl bg-card border border-border h-[100px] flex flex-col items-center justify-center transition-colors text-left w-full ${progress.sunnahDaysCompleted > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
                     >
                       <div className="flex flex-col items-center gap-2">
                         <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
@@ -1046,7 +1053,7 @@ const Dashboard = () => {
                     <button
                       type="button"
                       onClick={() => brokenDaysList.length > 0 && setStatsDialog("broken")}
-                      className={`p-3 sm:p-4 rounded-2xl bg-card border border-border min-h-[100px] sm:min-h-0 flex flex-col items-center justify-center transition-colors text-left w-full ${brokenDaysList.length > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
+                      className={`p-3 sm:p-4 rounded-2xl bg-card border border-border h-[100px] flex flex-col items-center justify-center transition-colors text-left w-full ${brokenDaysList.length > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
                     >
                       <div className="flex flex-col items-center gap-2">
                         <div className="w-10 h-10 rounded-full bg-destructive/20 flex items-center justify-center">

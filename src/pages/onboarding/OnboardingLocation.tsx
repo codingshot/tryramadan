@@ -90,13 +90,15 @@ export default function OnboardingLocation() {
   const hasLocation = !!state.location;
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col min-h-0 flex-1">
       <form
         onSubmit={(e) => {
           e.preventDefault();
           if (hasLocation) handleContinue();
         }}
+        className="flex flex-col min-h-0 flex-1"
       >
+        <div className="flex-1 min-h-0 overflow-y-auto">
       <Link
         to="/onboarding/gender"
         className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6"
@@ -171,27 +173,31 @@ export default function OnboardingLocation() {
         </button>
       </div>
 
-      <button
-        type="submit"
-        disabled={!hasLocation}
-        className="w-full mt-6 min-h-[44px] py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary"
-      >
-        Continue <ArrowRight className="w-5 h-5" />
-      </button>
-      {!hasLocation && (
-        <>
-          <p className="mt-2 text-sm text-muted-foreground text-center">
-            Select or detect a location above to continue. Prayer and fasting times need your location.
-          </p>
+          {!hasLocation && (
+            <p className="mt-4 text-sm text-muted-foreground text-center">
+              Select or detect a location above to continue. Prayer and fasting times need your location.
+            </p>
+          )}
+        </div>
+
+        <div className="sticky bottom-0 left-0 right-0 z-10 bg-background border-t border-border pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] -mx-4 px-4 mt-4 sm:static sm:border-0 sm:pt-0 sm:pb-0 sm:mx-0 sm:px-0 sm:mt-0 space-y-2">
           <button
-            type="button"
-            onClick={() => navigate("/onboarding/schedule")}
-            className="w-full mt-3 min-h-[44px] py-2 px-4 rounded-xl border border-border text-muted-foreground hover:bg-muted/50 text-sm"
+            type="submit"
+            disabled={!hasLocation}
+            className="w-full min-h-[44px] py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary"
           >
-            Skip for now (set location later in Settings)
+            Continue <ArrowRight className="w-5 h-5" />
           </button>
-        </>
-      )}
+          {!hasLocation && (
+            <button
+              type="button"
+              onClick={() => navigate("/onboarding/schedule")}
+              className="w-full min-h-[44px] py-2 px-4 rounded-xl border border-border text-muted-foreground hover:bg-muted/50 text-sm"
+            >
+              Skip for now (set location later in Settings)
+            </button>
+          )}
+        </div>
       </form>
     </motion.div>
   );
