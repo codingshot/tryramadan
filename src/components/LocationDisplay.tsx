@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, ChevronDown, Loader2, X, Check } from "lucide-react";
 import { LocationSearch } from "./LocationSearch";
-import { LocationResult, getLocationFromIP } from "@/hooks/useLocation";
+import { LocationResult, getLocationFromIP, getTimezoneFromCoords } from "@/hooks/useLocation";
 import { useUserPreferences } from "@/hooks/useLocalStorage";
 
 interface LocationDisplayProps {
@@ -22,20 +22,25 @@ export const LocationDisplay = ({ compact = false, showTimezone = false, open: c
   const isEditing = isControlled ? controlledOpen : internalOpen;
   const setIsEditing = isControlled ? onOpenChange! : setInternalOpen;
   
-  const handleLocationSelect = (location: LocationResult) => {
+  const handleLocationSelect = async (location: LocationResult) => {
+    let timezone: string | null = location.timezone ?? null;
+    if (!timezone) {
+      timezone = await getTimezoneFromCoords(location.lat, location.lng);
+    }
     setPreferences({
       ...preferences,
       location: location.displayName,
-      locationCoords: { lat: location.lat, lng: location.lng }
+      locationCoords: { lat: location.lat, lng: location.lng },
+      timezone,
     });
     setIsEditing(false);
   };
-  
+
   const handleAutoDetect = async () => {
     setLoading(true);
     const location = await getLocationFromIP();
     if (location) {
-      handleLocationSelect(location);
+      await handleLocationSelect(location);
     }
     setLoading(false);
   };

@@ -376,7 +376,10 @@ const DashboardMeals = () => {
               </span>
             </button>
             {showCreateMeal && (
-              <div className="mt-4 pt-4 border-t border-border space-y-3">
+              <form
+                onSubmit={(e) => { e.preventDefault(); submitCreateOwnMeal(); }}
+                className="mt-4 pt-4 border-t border-border space-y-3"
+              >
                 <p className="text-xs text-muted-foreground">
                   Add a custom meal for today. It will appear in your food log (macro tracker) on the Schedule page and in your meal plan notes.
                 </p>
@@ -469,14 +472,14 @@ const DashboardMeals = () => {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button type="button" size="sm" onClick={submitCreateOwnMeal}>
+                  <Button type="submit" size="sm">
                     Add to food log & meal plan
                   </Button>
                   <Button type="button" variant="ghost" size="sm" onClick={() => setShowCreateMeal(false)}>
                     Cancel (don't add)
                   </Button>
                 </div>
-              </div>
+              </form>
             )}
           </motion.div>
 

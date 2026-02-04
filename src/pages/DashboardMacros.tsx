@@ -426,7 +426,10 @@ export default function DashboardMacros() {
             </div>
 
             {logForm.active && (
-              <div className="p-3 rounded-xl border border-border bg-muted/30 mb-4 space-y-2">
+              <form
+                onSubmit={(e) => { e.preventDefault(); addToLog(); }}
+                className="p-3 rounded-xl border border-border bg-muted/30 mb-4 space-y-2"
+              >
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium flex items-center gap-2">
                     {(() => {
@@ -449,8 +452,8 @@ export default function DashboardMacros() {
                     <Input type="number" placeholder="F" value={logForm.fat} onChange={(e) => setLogForm((f) => ({ ...f, fat: e.target.value }))} className="w-12 text-center" />
                   </div>
                 </div>
-                <Button type="button" size="sm" onClick={addToLog}>Add to log</Button>
-              </div>
+                <Button type="submit" size="sm">Add to log</Button>
+              </form>
             )}
 
             {selectedLog.suhoor.length === 0 && selectedLog.iftar.length === 0 && (selectedLog.between?.length ?? 0) === 0 ? (

@@ -113,15 +113,7 @@ export const HeroSection = () => {
               Fast like a Muslim for the holy month of{" "}
               <span className="text-secondary font-semibold">Ramadan</span>.
             </motion.p>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
-              className="text-sm md:text-base text-primary-foreground/70 text-center max-w-2xl mx-auto mb-8"
-            >
-              TryRamadan is a free app that gives you prayer times, suhoor and iftar reminders, and cultural education so you can experience Ramadan-style fasting safely. It’s for everyone—Muslims and non-Muslims alike.{" "}
-              <Link to="/faq" className="text-secondary font-medium underline underline-offset-2 hover:text-secondary/90">Learn more in our FAQ</Link>.
-            </motion.p>
+
 
             {/* CTA Buttons - touch-friendly min height */}
             <motion.div

@@ -92,7 +92,46 @@ export async function searchLocations(query: string): Promise<LocationResult[]> 
   }
 }
 
-// Custom hook for location with auto-detect
+/** IP-only detection: no browser geolocation. Use for automatic load so we don't prompt for location. */
+async function detectLocationFromIPOnly(): Promise<LocationResult | null> {
+  return getLocationFromIP();
+}
+
+/** Full detection: try browser geolocation first, then fall back to IP. Call only when user explicitly chooses "use my location". */
+export async function detectLocationWithGeolocation(): Promise<LocationResult | null> {
+  if ('geolocation' in navigator) {
+    try {
+      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: false,
+          timeout: 5000,
+          maximumAge: 300000, // 5 min cache
+        });
+      });
+
+      const response = await fetch(
+        `${API_CONFIG.nominatim}/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`,
+        { headers: { 'User-Agent': 'TryRamadan.app' } }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        return {
+          name: data.address?.city || data.address?.town || data.address?.village || 'Your Location',
+          displayName: data.display_name,
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+          country: data.address?.country || '',
+        };
+      }
+    } catch (geoError) {
+      console.log('Geolocation failed, falling back to IP:', geoError);
+    }
+  }
+  return getLocationFromIP();
+}
+
+// Custom hook for location: auto-detect from IP only on load (no browser location request). Use detectLocation for explicit "use my location" (geolocation then IP).
 export function useAutoLocation() {
   const [state, setState] = useState<LocationState>({
     location: null,
@@ -102,64 +141,35 @@ export function useAutoLocation() {
 
   const detectLocation = useCallback(async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
-
-    // Try browser geolocation first
-    if ('geolocation' in navigator) {
-      try {
-        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(resolve, reject, {
-            enableHighAccuracy: false,
-            timeout: 5000,
-            maximumAge: 300000, // 5 min cache
-          });
-        });
-
-        // Reverse geocode to get city name
-        const response = await fetch(
-          `${API_CONFIG.nominatim}/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`,
-          { headers: { 'User-Agent': 'TryRamadan.app' } }
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          const location: LocationResult = {
-            name: data.address?.city || data.address?.town || data.address?.village || 'Your Location',
-            displayName: data.display_name,
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
-            country: data.address?.country || '',
-          };
-          
-          setState({ location, loading: false, error: null });
-          return location;
-        }
-      } catch (geoError) {
-        console.log('Geolocation failed, falling back to IP:', geoError);
-      }
+    const location = await detectLocationWithGeolocation();
+    if (location) {
+      setState({ location, loading: false, error: null });
+      return location;
     }
-
-    // Fallback to IP-based location
-    const ipLocation = await getLocationFromIP();
-    if (ipLocation) {
-      setState({ location: ipLocation, loading: false, error: null });
-      return ipLocation;
-    }
-
     setState({ location: null, loading: false, error: 'Could not detect location' });
     return null;
   }, []);
 
-  // Defer location detection until after first paint to improve INP (avoids blocking main thread on load)
+  // On load: IP only (no browser geolocation). User can request precise location when selecting location (e.g. "Use my location" button).
   useEffect(() => {
+    const run = async () => {
+      setState(prev => ({ ...prev, loading: true, error: null }));
+      const ipLocation = await detectLocationFromIPOnly();
+      if (ipLocation) {
+        setState({ location: ipLocation, loading: false, error: null });
+      } else {
+        setState({ location: null, loading: false, error: 'Could not detect location' });
+      }
+    };
     const id =
       typeof requestIdleCallback !== 'undefined'
-        ? requestIdleCallback(() => detectLocation(), { timeout: 500 })
-        : setTimeout(detectLocation, 0);
+        ? requestIdleCallback(() => run(), { timeout: 500 })
+        : setTimeout(run, 0);
     return () => {
       if (typeof cancelIdleCallback !== 'undefined') cancelIdleCallback(id as number);
       else clearTimeout(id as number);
     };
-  }, [detectLocation]);
+  }, []);
 
   return { ...state, detectLocation };
 }

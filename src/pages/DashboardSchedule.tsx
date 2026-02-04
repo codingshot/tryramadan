@@ -23,6 +23,8 @@ import {
   GripVertical,
   ChevronUp,
   ChevronDown,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -45,8 +47,13 @@ import {
   updateBrokenReason,
   setBrokenDayToCompleted,
   setBrokenDayToInProgress,
+  startFastingToday,
+  breakFastingToday,
+  isFastingToday,
+  getTodayFastingLog,
   useUserPreferences,
   getRecommendedCaloriesFromPreferences,
+  useDisplayTimezone,
   useCalendarEvents,
   useDashboardQuickActions,
   DASHBOARD_QUICK_ACTIONS,
@@ -59,8 +66,14 @@ import {
   type CalendarEventType,
 } from "@/hooks/useLocalStorage";
 import { useRamadanRange } from "@/hooks/useRamadanRange";
-import { toLocalDateString } from "@/lib/utils";
-import { usePrayerTimesForDate } from "@/hooks/usePrayerTimes";
+import {
+  toLocalDateString,
+  getTodayStringInTimezone,
+  getNowSecondsSinceMidnightInTimezone,
+  timeStringToSecondsSinceMidnight,
+  secondsUntilTimeInTimezone,
+} from "@/lib/utils";
+import { usePrayerTimes, usePrayerTimesForDate } from "@/hooks/usePrayerTimes";
 import { buildIcalContent, downloadIcal } from "@/lib/ical";
 import { fetchPrayerTimesForMonth } from "@/hooks/usePrayerTimes";
 import { getRecipes, getRecipe, parseNutrient, type MealType } from "@/lib/cultureRecipes";
@@ -203,6 +216,11 @@ const DashboardSchedule = () => {
   const [editReasonOpen, setEditReasonOpen] = useState(false);
   const [confirmCompleteOpen, setConfirmCompleteOpen] = useState(false);
   const [confirmInProgressOpen, setConfirmInProgressOpen] = useState(false);
+  const [showBreakFastConfirm, setShowBreakFastConfirm] = useState(false);
+  const [showBreakFastDialog, setShowBreakFastDialog] = useState(false);
+  const [isFasting, setIsFasting] = useState(true);
+  const [countdownToIftar, setCountdownToIftar] = useState({ h: 0, m: 0, s: 0 });
+  const [countdownToSuhoor, setCountdownToSuhoor] = useState({ h: 0, m: 0, s: 0 });
 
   const [journalEntries] = useLocalStorage<{ date: string; content?: string; gratitude?: string }[]>("tryramadan-journal", []);
   const journalDates = new Set(journalEntries.map((e) => e.date));
@@ -211,10 +229,16 @@ const DashboardSchedule = () => {
   const locationCoords = preferences.locationCoords;
   const lat = locationCoords?.lat ?? null;
   const lng = locationCoords?.lng ?? null;
-  const { prayerTimes: selectedDayPrayerTimes } = usePrayerTimesForDate(lat, lng, selectedDate);
-
+  const displayTimezone = useDisplayTimezone();
   const today = new Date();
-  const todayStr = toLocalDateString(today);
+  const todayStr = displayTimezone ? getTodayStringInTimezone(displayTimezone) : toLocalDateString(today);
+  const { prayerTimes: todayPrayerTimes } = usePrayerTimes(lat, lng, displayTimezone);
+  const tomorrowDate = new Date(todayStr + "T12:00:00");
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  const tomorrowStr = toLocalDateString(tomorrowDate);
+  const { prayerTimes: tomorrowPrayerTimes } = usePrayerTimesForDate(lat, lng, tomorrowStr);
+  const imsakTomorrow = tomorrowPrayerTimes?.imsak ?? todayPrayerTimes?.imsak;
+  const { prayerTimes: selectedDayPrayerTimes } = usePrayerTimesForDate(lat, lng, selectedDate);
 
   const getDaysInMonth = (date: Date) =>
     new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -488,6 +512,69 @@ const DashboardSchedule = () => {
   };
 
   const selectedDayCalendarEvents = selectedDate ? (calendarEvents[selectedDate] ?? []) : [];
+
+  // Live countdown when viewing today (same logic as Dashboard)
+  const tickFastingAndCountdown = useCallback(() => {
+    if (!todayPrayerTimes?.imsak || !todayPrayerTimes?.maghrib) return;
+    const suhoorForTomorrow = imsakTomorrow ?? todayPrayerTimes.imsak;
+    if (displayTimezone) {
+      const nowSeconds = getNowSecondsSinceMidnightInTimezone(displayTimezone);
+      const imsakSeconds = timeStringToSecondsSinceMidnight(todayPrayerTimes.imsak);
+      const imsakTomorrowSeconds = timeStringToSecondsSinceMidnight(suhoorForTomorrow);
+      const maghribSeconds = timeStringToSecondsSinceMidnight(todayPrayerTimes.maghrib);
+      const fasting = nowSeconds >= imsakSeconds && nowSeconds < maghribSeconds;
+      setIsFasting(fasting);
+      if (fasting) {
+        const diff = secondsUntilTimeInTimezone(nowSeconds, maghribSeconds);
+        setCountdownToIftar({
+          h: Math.floor(diff / 3600),
+          m: Math.floor((diff % 3600) / 60),
+          s: diff % 60,
+        });
+      } else {
+        const diff = secondsUntilTimeInTimezone(nowSeconds, timeStringToSecondsSinceMidnight(suhoorForTomorrow));
+        setCountdownToSuhoor({
+          h: Math.floor(diff / 3600),
+          m: Math.floor((diff % 3600) / 60),
+          s: diff % 60,
+        });
+      }
+    } else {
+      const now = new Date();
+      const imsakStr = (todayPrayerTimes.imsak ?? "").trim().split(" ")[0] || "05:00";
+      const maghribStr = (todayPrayerTimes.maghrib ?? "").trim().split(" ")[0] || "18:00";
+      const imsakTomorrowStr = (suhoorForTomorrow ?? "").trim().split(" ")[0] || "05:00";
+      const imsakTime = new Date(todayStr + "T" + (imsakStr.length === 5 ? imsakStr + ":00" : imsakStr + ":00"));
+      const maghribTime = new Date(todayStr + "T" + (maghribStr.length === 5 ? maghribStr + ":00" : maghribStr + ":00"));
+      const imsakTomorrowTime = new Date(tomorrowStr + "T" + (imsakTomorrowStr.length === 5 ? imsakTomorrowStr + ":00" : imsakTomorrowStr + ":00"));
+      const fasting = now >= imsakTime && now < maghribTime;
+      setIsFasting(fasting);
+      if (fasting) {
+        const diff = maghribTime.getTime() - now.getTime();
+        if (diff > 0) setCountdownToIftar({
+          h: Math.floor(diff / 36e5),
+          m: Math.floor((diff % 36e5) / 6e4),
+          s: Math.floor((diff % 6e4) / 1000),
+        });
+      } else {
+        const diff = imsakTomorrowTime.getTime() - now.getTime();
+        if (diff > 0) setCountdownToSuhoor({
+          h: Math.floor(diff / 36e5),
+          m: Math.floor((diff % 36e5) / 6e4),
+          s: Math.floor((diff % 6e4) / 1000),
+        });
+      }
+    }
+  }, [todayPrayerTimes, imsakTomorrow, displayTimezone, todayStr, tomorrowStr]);
+
+  useEffect(() => {
+    tickFastingAndCountdown();
+  }, [tickFastingAndCountdown]);
+
+  useEffect(() => {
+    const t = setInterval(tickFastingAndCountdown, 2000);
+    return () => clearInterval(t);
+  }, [tickFastingAndCountdown]);
 
   const handleExportIcal = async (range: "month" | "30days" | "ramadan") => {
     if (!lat || !lng) return;
@@ -1100,6 +1187,119 @@ const DashboardSchedule = () => {
                       </button>
                     </div>
 
+                    {/* Today's live status: countdown + I'm fasting / Break fast / I didn't fast (same as Dashboard) */}
+                    {selectedDate === todayStr && (() => {
+                      const todaySkipped = (progress.skippedDays ?? []).includes(todayStr);
+                      const todayComplete = progress.completedDays.includes(todayStr);
+                      const fastingToday = isFastingToday(progress, todayStr);
+                      const todayLog = getTodayFastingLog(progress, todayStr);
+                      return (
+                        <div className={`p-4 rounded-2xl border-2 flex flex-col gap-3 ${
+                          isFasting ? "bg-primary/10 border-primary/30" : "bg-muted/50 border-border"
+                        }`}>
+                          <div className="flex items-center gap-2">
+                            <div className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center ${isFasting ? "bg-primary/20" : "bg-muted"}`}>
+                              {isFasting ? <Moon className="w-5 h-5 text-foreground" /> : <Sun className="w-5 h-5 text-muted-foreground" />}
+                            </div>
+                            <div>
+                              <span className="text-sm font-semibold" aria-live="polite">
+                                {isFasting ? "Right now: Fasting" : "Right now: Eating window"}
+                              </span>
+                              {isFasting ? (
+                                <div className="flex items-baseline gap-1.5 mt-0.5">
+                                  <span className="text-lg font-bold tabular-nums">
+                                    {String(countdownToIftar.h).padStart(2, "0")}:{String(countdownToIftar.m).padStart(2, "0")}:{String(countdownToIftar.s).padStart(2, "0")}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">until {iftarLabel}</span>
+                                </div>
+                              ) : (
+                                <div className="flex items-baseline gap-1.5 mt-0.5">
+                                  <span className="text-xs text-muted-foreground">Next: {suhoorLabel} —</span>
+                                  <span className="text-lg font-bold tabular-nums">
+                                    {String(countdownToSuhoor.h).padStart(2, "0")}:{String(countdownToSuhoor.m).padStart(2, "0")}:{String(countdownToSuhoor.s).padStart(2, "0")}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          {todayLog?.startedAt && !todayLog?.completedAt && (
+                            <p className="text-xs text-muted-foreground">
+                              Started {new Date(todayLog.startedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
+                            </p>
+                          )}
+                          {!todaySkipped && !todayComplete && (
+                            <div className="flex flex-wrap gap-2">
+                              {!fastingToday ? (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => startFastingToday(progress, setProgress, todayStr)}
+                                    className="gap-1"
+                                  >
+                                    <Sunrise className="w-4 h-4" />
+                                    I&apos;m fasting
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setDaySkipped(progress, setProgress, todayStr)}
+                                  >
+                                    I didn&apos;t fast today
+                                  </Button>
+                                </>
+                              ) : (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="border-destructive/50 text-destructive hover:bg-destructive/10"
+                                  onClick={() => setShowBreakFastConfirm(true)}
+                                >
+                                  <Sunset className="w-4 h-4" />
+                                  Break fast
+                                </Button>
+                              )}
+                            </div>
+                          )}
+                          {todaySkipped && (
+                            <span className="text-sm text-muted-foreground">I didn&apos;t fast today</span>
+                          )}
+                        </div>
+                      );
+                    })()}
+
+                    {/* Break fast confirm + reason (for today on Schedule) */}
+                    <AlertDialog open={showBreakFastConfirm} onOpenChange={setShowBreakFastConfirm}>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Break fast?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Log that you broke your fast early. Choose a reason.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => {
+                              setShowBreakFastConfirm(false);
+                              setShowBreakFastDialog(true);
+                            }}
+                          >
+                            Sure
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                    <BreakFastReasonDialog
+                      open={showBreakFastDialog}
+                      onOpenChange={setShowBreakFastDialog}
+                      onSelectReason={(reasonId) => {
+                        breakFastingToday(progress, setProgress, reasonId, todayStr);
+                        setShowBreakFastDialog(false);
+                        toast.success("Fast logged as broken");
+                      }}
+                      userType={preferences?.userType}
+                    />
+
                     {/* Day summary: prayer times, meals, journal, fasting context */}
                     <div className="rounded-xl bg-card border border-border p-3 space-y-2 text-sm">
                       <p className="font-semibold text-muted-foreground text-xs uppercase tracking-wide">Day at a glance</p>
@@ -1619,54 +1819,62 @@ const DashboardSchedule = () => {
                                 </Select>
                               </div>
                               <span className="text-xs font-medium text-muted-foreground">Create your own meal:</span>
-                              <Input
-                                placeholder="Name"
-                                className="w-28 h-9"
-                                value={addFoodCustomInputs.name}
-                                onChange={(e) => setAddFoodCustomInputs((c) => ({ ...c, name: e.target.value }))}
-                              />
-                              <Input
-                                type="number"
-                                placeholder="Cal/portion"
-                                className="w-20 h-9"
-                                value={addFoodCustomInputs.cal}
-                                onChange={(e) => setAddFoodCustomInputs((c) => ({ ...c, cal: e.target.value }))}
-                              />
-                              <Input
-                                type="number"
-                                step="0.5"
-                                placeholder="Portions"
-                                className="w-16 h-9"
-                                value={addFoodCustomInputs.portions}
-                                onChange={(e) => setAddFoodCustomInputs((c) => ({ ...c, portions: e.target.value }))}
-                              />
-                              <Input
-                                type="number"
-                                placeholder="P"
-                                className="w-12 h-9"
-                                value={addFoodCustomInputs.protein}
-                                onChange={(e) => setAddFoodCustomInputs((c) => ({ ...c, protein: e.target.value }))}
-                              />
-                              <Input
-                                type="number"
-                                placeholder="C"
-                                className="w-12 h-9"
-                                value={addFoodCustomInputs.carbs}
-                                onChange={(e) => setAddFoodCustomInputs((c) => ({ ...c, carbs: e.target.value }))}
-                              />
-                              <Input
-                                type="number"
-                                placeholder="F"
-                                className="w-12 h-9"
-                                value={addFoodCustomInputs.fat}
-                                onChange={(e) => setAddFoodCustomInputs((c) => ({ ...c, fat: e.target.value }))}
-                              />
-                              <Button type="button" size="sm" onClick={() => submitAddFoodCustom(addFoodMeal)}>
-                                Add this meal to food log
-                              </Button>
-                              <Button type="button" variant="ghost" size="sm" onClick={() => { setAddFoodMeal(null); setAddFoodCustomInputs({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "" }); }}>
-                                Cancel (don't add)
-                              </Button>
+                              <form
+                                onSubmit={(e) => {
+                                  e.preventDefault();
+                                  submitAddFoodCustom(addFoodMeal);
+                                }}
+                                className="contents"
+                              >
+                                <Input
+                                  placeholder="Name"
+                                  className="w-28 h-9"
+                                  value={addFoodCustomInputs.name}
+                                  onChange={(e) => setAddFoodCustomInputs((c) => ({ ...c, name: e.target.value }))}
+                                />
+                                <Input
+                                  type="number"
+                                  placeholder="Cal/portion"
+                                  className="w-20 h-9"
+                                  value={addFoodCustomInputs.cal}
+                                  onChange={(e) => setAddFoodCustomInputs((c) => ({ ...c, cal: e.target.value }))}
+                                />
+                                <Input
+                                  type="number"
+                                  step="0.5"
+                                  placeholder="Portions"
+                                  className="w-16 h-9"
+                                  value={addFoodCustomInputs.portions}
+                                  onChange={(e) => setAddFoodCustomInputs((c) => ({ ...c, portions: e.target.value }))}
+                                />
+                                <Input
+                                  type="number"
+                                  placeholder="P"
+                                  className="w-12 h-9"
+                                  value={addFoodCustomInputs.protein}
+                                  onChange={(e) => setAddFoodCustomInputs((c) => ({ ...c, protein: e.target.value }))}
+                                />
+                                <Input
+                                  type="number"
+                                  placeholder="C"
+                                  className="w-12 h-9"
+                                  value={addFoodCustomInputs.carbs}
+                                  onChange={(e) => setAddFoodCustomInputs((c) => ({ ...c, carbs: e.target.value }))}
+                                />
+                                <Input
+                                  type="number"
+                                  placeholder="F"
+                                  className="w-12 h-9"
+                                  value={addFoodCustomInputs.fat}
+                                  onChange={(e) => setAddFoodCustomInputs((c) => ({ ...c, fat: e.target.value }))}
+                                />
+                                <Button type="submit" size="sm">
+                                  Add this meal to food log
+                                </Button>
+                                <Button type="button" variant="ghost" size="sm" onClick={() => { setAddFoodMeal(null); setAddFoodCustomInputs({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "" }); }}>
+                                  Cancel (don't add)
+                                </Button>
+                              </form>
                             </div>
                           </div>
                         )}
@@ -1794,6 +2002,13 @@ const DashboardSchedule = () => {
                 </motion.div>
               )}
             </AnimatePresence>
+
+            {/* When no day selected, prompt to click */}
+            {!selectedDate && (
+              <p className="mt-6 p-4 rounded-2xl bg-muted/50 border border-border text-sm text-center text-muted-foreground">
+                Click a day above to view meal plan, food log, fasting actions, and notes.
+              </p>
+            )}
 
             {/* Legend */}
             <div className="flex flex-wrap gap-4 mt-6 pt-4 border-t border-border text-xs">

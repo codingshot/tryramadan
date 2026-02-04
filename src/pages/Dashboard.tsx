@@ -48,6 +48,7 @@ import {
   usePrayerNotificationPrefs,
   useDayFoodLog,
   normalizeDayFoodLog,
+  getDayTotalsFromFoodLog,
   useDisplayTimezone,
 } from "@/hooks/useLocalStorage";
 import { toLocalDateString, getTodayStringInTimezone, getNowSecondsSinceMidnightInTimezone, timeStringToSecondsSinceMidnight, secondsUntilTimeInTimezone } from "@/lib/utils";
@@ -151,6 +152,18 @@ const Dashboard = () => {
   
   const selectedDayMeals = mealPlans[selectedDate];
   const selectedDayNutr = dayNutrition[selectedDate];
+  const selectedDayLog = useMemo(() => normalizeDayFoodLog(foodLogs[selectedDate]), [foodLogs, selectedDate]);
+  const selectedDayTotalsFromLog = useMemo(() => getDayTotalsFromFoodLog(selectedDayLog), [selectedDayLog]);
+  const suhoorCal = useMemo(
+    () => selectedDayLog.suhoor.reduce((sum, e) => sum + (e.caloriesPerPortion || 0) * (e.portions || 1),
+    0),
+    [selectedDayLog.suhoor]
+  );
+  const iftarCal = useMemo(
+    () => selectedDayLog.iftar.reduce((sum, e) => sum + (e.caloriesPerPortion || 0) * (e.portions || 1),
+    0),
+    [selectedDayLog.iftar]
+  );
   const selectedDayJournal = journalEntries.find((e) => e.date === selectedDate);
   const selectedDayComplete = progress.completedDays.includes(selectedDate);
   const selectedDateObj = new Date(selectedDate + "T12:00:00");
@@ -714,12 +727,12 @@ const Dashboard = () => {
               >
                 <Link
                   to="/dashboard/schedule"
-                  className="block p-3 sm:p-4 rounded-2xl bg-card border border-border grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 hover:border-secondary/50 transition-colors min-h-[72px] sm:min-h-0"
+                  className="block p-3 sm:p-4 rounded-2xl bg-card border border-border grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 hover:border-secondary/50 transition-colors min-h-[72px] sm:min-h-0"
                 >
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div className="cursor-help">
-                        <span className="text-xs text-muted-foreground block">{suhoorLabelShort} end<span className="sm:hidden"> (Fajr)</span></span>
+                        <span className="text-xs text-muted-foreground block">{suhoorLabelShort} end · Fajr</span>
                         <span className="font-bold text-secondary">{prayerTimes.fajr}</span>
                       </div>
                     </TooltipTrigger>
@@ -740,37 +753,13 @@ const Dashboard = () => {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div className="cursor-help">
-                        <span className="text-xs text-muted-foreground block">{iftarLabel}<span className="sm:hidden"> (Maghrib)</span></span>
+                        <span className="text-xs text-muted-foreground block">{iftarLabel} · Maghrib</span>
                         <span className="font-bold text-secondary">{prayerTimes.maghrib}</span>
                       </div>
                     </TooltipTrigger>
                     <TooltipContent className="max-w-xs p-3">
                       <p className="text-sm text-foreground">{EATING_TIME_TOOLTIPS.iftar.body}</p>
                       <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{(EATING_TIME_TOOLTIPS.iftar as { bodyAr?: string }).bodyAr}</span></p>
-                    </TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="cursor-help hidden sm:block">
-                        <span className="text-xs text-muted-foreground block">Fajr</span>
-                        <span className="font-medium">{prayerTimes.fajr}</span>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-xs p-3">
-                      <p className="text-sm text-foreground">{EATING_TIME_TOOLTIPS.fajr.body}</p>
-                      <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{(EATING_TIME_TOOLTIPS.fajr as { bodyAr?: string }).bodyAr}</span></p>
-                    </TooltipContent>
-                  </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div className="cursor-help hidden sm:block">
-                        <span className="text-xs text-muted-foreground block">Maghrib</span>
-                        <span className="font-medium">{prayerTimes.maghrib}</span>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-xs p-3">
-                      <p className="text-sm text-foreground">{EATING_TIME_TOOLTIPS.maghrib.body}</p>
-                      <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{(EATING_TIME_TOOLTIPS.maghrib as { bodyAr?: string }).bodyAr}</span></p>
                     </TooltipContent>
                   </Tooltip>
                 </Link>
@@ -1096,8 +1085,8 @@ const Dashboard = () => {
                   </h2>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs">
-                  <p className="font-medium">Log what you ate and optional daily totals</p>
-                  <p className="text-xs mt-1">Use + to add items for {suhoorLabelShort} and {iftarLabel}. View all items and totals on the Schedule page. Optionally enter calories and macros below.</p>
+                  <p className="font-medium">Log what you ate per meal</p>
+                  <p className="text-xs mt-1">Use + to add items for {suhoorLabelShort} and {iftarLabel}. Calories are summed per meal and totalled below. Optionally enter manual totals.</p>
                   <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">وجبات السحور والإفطار • السحور والإفطار</p>
                 </TooltipContent>
               </Tooltip>
@@ -1114,11 +1103,11 @@ const Dashboard = () => {
               {selectedDayPrayerTimes && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 p-3 rounded-xl bg-muted/50">
                   <div>
-                    <span className="text-xs text-muted-foreground block">{suhoorLabelShort} ends (Fajr)</span>
+                    <span className="text-xs text-muted-foreground block">{suhoorLabelShort} end · Fajr</span>
                     <span className="font-bold text-secondary">{selectedDayPrayerTimes.fajr}</span>
                   </div>
                   <div>
-                    <span className="text-xs text-muted-foreground block">{iftarLabel} (Maghrib)</span>
+                    <span className="text-xs text-muted-foreground block">{iftarLabel} · Maghrib</span>
                     <span className="font-bold text-secondary">{selectedDayPrayerTimes.maghrib}</span>
                   </div>
                 </div>
@@ -1182,7 +1171,13 @@ const Dashboard = () => {
                 <DialogContent className="max-w-sm">
                   <DialogTitle>Add to {addFoodMeal === "suhoor" ? suhoorLabelShort : iftarLabel}</DialogTitle>
                   <p className="text-xs text-muted-foreground">What did you eat? Add name and optional calories.</p>
-                  <div className="grid gap-2 pt-2">
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (addFoodMeal) submitAddFood(addFoodMeal);
+                    }}
+                    className="grid gap-2 pt-2"
+                  >
                     <Input
                       placeholder="e.g. Oats & dates"
                       value={addFoodInputs.name}
@@ -1207,19 +1202,19 @@ const Dashboard = () => {
                         onChange={(e) => setAddFoodInputs((p) => ({ ...p, portions: e.target.value }))}
                       />
                     </div>
-                  </div>
-                  <div className="flex gap-2 justify-end pt-2">
-                    <Button type="button" variant="outline" size="sm" onClick={() => { setAddFoodMeal(null); setAddFoodInputs({ name: "", cal: "", portions: "1" }); }}>
-                      Cancel
-                    </Button>
-                    <Button type="button" size="sm" onClick={() => addFoodMeal && submitAddFood(addFoodMeal)}>
-                      Add
-                    </Button>
-                  </div>
+                    <div className="flex gap-2 justify-end pt-2">
+                      <Button type="button" variant="outline" size="sm" onClick={() => { setAddFoodMeal(null); setAddFoodInputs({ name: "", cal: "", portions: "1" }); }}>
+                        Cancel
+                      </Button>
+                      <Button type="submit" size="sm">
+                        Add
+                      </Button>
+                    </div>
+                  </form>
                 </DialogContent>
               </Dialog>
 
-              {/* Calorie / nutrition for day — optional totals with tooltips on how to track */}
+              {/* Calorie / nutrition for day — per meal from food log, then total; optional manual override */}
               <div className="mb-4">
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -1229,18 +1224,37 @@ const Dashboard = () => {
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs">
                     <p className="font-medium">How to track</p>
-                    <p className="text-xs mt-1">Use the + buttons above to log what you ate for {suhoorLabelShort} and Iftar; items and totals appear on the Schedule page. Or enter manual daily totals here.</p>
+                    <p className="text-xs mt-1">Add items per meal with + above; calories are summed per meal (Suhoor, Iftar) and totalled for the day. Optionally enter manual totals below.</p>
                   </TooltipContent>
                 </Tooltip>
+                {/* Per-meal calories from food log + day total */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3 p-3 rounded-xl bg-muted/30 border border-border">
+                  <div>
+                    <span className="text-xs text-muted-foreground block">{suhoorLabelShort}</span>
+                    <span className="font-medium text-foreground">{Math.round(suhoorCal)} cal</span>
+                  </div>
+                  <div>
+                    <span className="text-xs text-muted-foreground block">{iftarLabel}</span>
+                    <span className="font-medium text-foreground">{Math.round(iftarCal)} cal</span>
+                  </div>
+                  <div>
+                    <span className="text-xs text-muted-foreground block">Total</span>
+                    <span className="font-bold text-secondary">
+                      {Math.round(selectedDayTotalsFromLog.calories)} cal
+                      <span className="text-[10px] font-normal text-muted-foreground"> / {dailyGoals.calories} goal</span>
+                    </span>
+                  </div>
+                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div className="cursor-help">
+                        <span className="text-[10px] text-muted-foreground block mb-0.5">Override total (optional)</span>
                         <input
                           type="number"
                           min={0}
                           max={CALORIE_MAX}
-                          placeholder="Cal"
+                          placeholder={selectedDayTotalsFromLog.calories ? String(Math.round(selectedDayTotalsFromLog.calories)) : "Cal"}
                           value={selectedDayNutr?.calories ?? ""}
                           onChange={(e) =>
                             setDayNutrition((prev) => ({
@@ -1253,12 +1267,11 @@ const Dashboard = () => {
                           }
                           className="w-full px-2 py-1.5 rounded-lg border border-border bg-background text-sm"
                         />
-                        <span className="text-[10px] text-muted-foreground">/ {dailyGoals.calories} goal</span>
                       </div>
                     </TooltipTrigger>
                     <TooltipContent className="max-w-xs">
                       <p className="font-medium">Calories</p>
-                      <p className="text-xs mt-1">Daily energy intake. Log items with + above for automatic totals on Schedule, or enter a number here.</p>
+                      <p className="text-xs mt-1">Total above is from logged items. Enter a number here only if you want to override the total (e.g. estimate without logging each item).</p>
                     </TooltipContent>
                   </Tooltip>
                   <Tooltip>
@@ -1731,22 +1744,30 @@ const Dashboard = () => {
                 date.setDate(date.getDate() - 6 + i);
                 const dateStr = toLocalDateString(date);
                 const isComplete = progress.completedDays.includes(dateStr);
-                const isToday = i === 6;
+                const isToday = dateStr === todayStr;
+                const isSelected = dateStr === selectedDate;
                 const dayName = date.toLocaleDateString('en', { weekday: 'short' });
-                
                 return (
                   <Tooltip key={i}>
                     <TooltipTrigger asChild>
-                      <div className={`flex-1 p-2 rounded-xl text-center cursor-default ${
-                        isToday ? 'ring-2 ring-secondary' : ''
-                      } ${isComplete ? 'bg-secondary/20' : 'bg-muted/50'}`}>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedDate(dateStr)}
+                        className={`flex-1 min-w-0 p-2 rounded-xl text-center transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                          isSelected ? 'ring-2 ring-secondary bg-secondary/20' : ''
+                        } ${isToday && !isSelected ? 'ring-2 ring-secondary/60' : ''} ${
+                          !isSelected && !isToday ? (isComplete ? 'bg-secondary/20' : 'bg-muted/50') : ''
+                        } ${isSelected ? 'bg-secondary/20' : ''}`}
+                        aria-label={`${dayName} ${date.getDate()} — ${isComplete ? 'Fast completed' : 'View day'}`}
+                        aria-pressed={isSelected}
+                      >
                         <span className="text-xs text-muted-foreground block">{dayName}</span>
                         <span className="text-sm font-bold block">{date.getDate()}</span>
                         {isComplete && <Check className="w-3 h-3 text-secondary mx-auto mt-1" />}
-                      </div>
+                      </button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      {isComplete ? 'Fast completed ✓' : isToday ? 'Today' : 'Not fasted'}
+                      {isComplete ? 'Fast completed ✓ — click to view day' : isToday ? 'Today — click to view' : `Click to view ${dayName}`}
                     </TooltipContent>
                   </Tooltip>
                 );

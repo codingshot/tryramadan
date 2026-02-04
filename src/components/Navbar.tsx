@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Menu, X, MapPin, User } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { useUserPreferences, useFastingProgress, isFastingToday, useDisplayTimezone } from "@/hooks/useLocalStorage";
@@ -8,6 +8,7 @@ import { useAutoLocation } from "@/hooks/useLocation";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export const Navbar = () => {
+  const { pathname } = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [localTime, setLocalTime] = useState("");
   const [preferences] = useUserPreferences();
@@ -22,17 +23,18 @@ export const Navbar = () => {
 
   useEffect(() => {
     const formatTime = () => {
-      setLocalTime(
-        new Date().toLocaleTimeString(undefined, {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          ...(displayTimezone && { timeZone: displayTimezone }),
-        })
-      );
+      const options: Intl.DateTimeFormatOptions = {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      };
+      if (displayTimezone?.trim()) {
+        options.timeZone = displayTimezone;
+      }
+      setLocalTime(new Date().toLocaleTimeString(undefined, options));
     };
     formatTime();
-    const interval = setInterval(formatTime, 2000); // Throttle for INP (was 1s)
+    const interval = setInterval(formatTime, 2000);
     return () => clearInterval(interval);
   }, [displayTimezone]);
 
@@ -102,23 +104,34 @@ export const Navbar = () => {
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center gap-6">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  to={link.to}
-                  onClick={() => setIsOpen(false)}
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {link.name}
-                </Link>
-              ))}
+              {navLinks.map((link) => {
+                const isActive = pathname === link.to || (link.to !== "/" && pathname.startsWith(link.to));
+                return (
+                  <Link
+                    key={link.name}
+                    to={link.to}
+                    onClick={() => setIsOpen(false)}
+                    className={`text-sm font-medium transition-colors rounded-md px-2 py-1.5 -mx-2 -my-1.5 ${
+                      isActive
+                        ? "text-foreground bg-muted/60 hover:bg-muted"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                    }`}
+                    aria-current={isActive ? "page" : undefined}
+                  >
+                    {link.name}
+                  </Link>
+                );
+              })}
             </div>
 
             {/* Location, time, profile & CTA */}
             <div className="hidden md:flex items-center gap-3">
               <Link
                 to="/settings"
-                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors min-w-0 max-w-[140px] cursor-pointer"
+                className={`flex items-center gap-1.5 text-sm transition-colors min-w-0 max-w-[140px] cursor-pointer rounded-md px-2 py-1.5 ${
+                  pathname === "/settings" ? "text-foreground bg-muted/60" : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+                }`}
+                aria-current={pathname === "/settings" ? "page" : undefined}
               >
                 <MapPin className="w-4 h-4 flex-shrink-0" />
                 <span className="truncate">{locationShort}</span>
@@ -129,10 +142,13 @@ export const Navbar = () => {
               <Link
                 to="/dashboard"
                 onClick={() => setIsOpen(false)}
-                className="p-2 rounded-lg hover:bg-muted transition-colors"
+                className={`p-2 rounded-lg transition-colors ${
+                  pathname.startsWith("/dashboard") ? "bg-muted/60 text-foreground" : "hover:bg-muted"
+                }`}
                 aria-label="Go to dashboard"
+                aria-current={pathname.startsWith("/dashboard") ? "page" : undefined}
               >
-                <User className="w-5 h-5 text-muted-foreground hover:text-foreground" />
+                <User className={`w-5 h-5 ${pathname.startsWith("/dashboard") ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`} />
               </Link>
               {!preferences.onboardingComplete && (
                 <Link
@@ -157,10 +173,13 @@ export const Navbar = () => {
               </button>
               <Link
                 to="/dashboard"
-                className="p-3 rounded-lg hover:bg-muted transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                className={`p-3 rounded-lg transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
+                  pathname.startsWith("/dashboard") ? "bg-muted/60" : "hover:bg-muted"
+                }`}
                 aria-label="Go to dashboard"
+                aria-current={pathname.startsWith("/dashboard") ? "page" : undefined}
               >
-                <User className="w-5 h-5 text-muted-foreground hover:text-foreground" />
+                <User className={`w-5 h-5 ${pathname.startsWith("/dashboard") ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`} />
               </Link>
             </div>
           </div>
@@ -174,20 +193,33 @@ export const Navbar = () => {
               className="lg:hidden py-4 border-t border-border"
             >
               <div className="flex flex-col gap-0">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.name}
-                    to={link.to}
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center justify-between py-3 px-4 rounded-lg hover:bg-muted transition-colors min-h-[44px]"
-                  >
-                    <span className="text-sm font-medium text-foreground">
-                      {link.name}
-                    </span>
-                  </Link>
-                ))}
+                {navLinks.map((link) => {
+                  const isActive = pathname === link.to || (link.to !== "/" && pathname.startsWith(link.to));
+                  return (
+                    <Link
+                      key={link.name}
+                      to={link.to}
+                      onClick={() => setIsOpen(false)}
+                      className={`flex items-center justify-between py-3 px-4 rounded-lg transition-colors min-h-[44px] ${
+                        isActive ? "bg-muted/60 text-foreground font-medium" : "hover:bg-muted text-muted-foreground hover:text-foreground"
+                      }`}
+                      aria-current={isActive ? "page" : undefined}
+                    >
+                      <span className="text-sm font-medium">
+                        {link.name}
+                      </span>
+                    </Link>
+                  );
+                })}
                 <div className="mt-4 pt-4 border-t border-border flex flex-col gap-2">
-                  <Link to="/settings" onClick={() => setIsOpen(false)} className="flex items-center gap-2 text-sm text-muted-foreground min-h-[44px] items-center cursor-pointer">
+                  <Link
+                    to="/settings"
+                    onClick={() => setIsOpen(false)}
+                    className={`flex items-center gap-2 text-sm min-h-[44px] items-center cursor-pointer rounded-lg px-4 py-3 ${
+                      pathname === "/settings" ? "bg-muted/60 text-foreground font-medium" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    }`}
+                    aria-current={pathname === "/settings" ? "page" : undefined}
+                  >
                     <MapPin className="w-4 h-4" />
                     <span className="truncate">{locationShort}</span>
                   </Link>

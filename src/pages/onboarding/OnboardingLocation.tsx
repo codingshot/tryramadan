@@ -4,8 +4,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, MapPin, Check, Loader2, Navigation } from "lucide-react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { LocationSearch } from "@/components/LocationSearch";
-import { LocationResult, getLocationFromIP, getTimezoneFromCoords } from "@/hooks/useLocation";
-import { API_CONFIG } from "@/lib/config";
+import {
+  LocationResult,
+  getLocationFromIP,
+  getTimezoneFromCoords,
+  detectLocationWithGeolocation,
+} from "@/hooks/useLocation";
 
 export default function OnboardingLocation() {
   const { state, setLocation } = useOnboarding();
@@ -13,48 +17,51 @@ export default function OnboardingLocation() {
   const [initialTried, setInitialTried] = useState(false);
   const navigate = useNavigate();
 
-  const runAutoDetect = useCallback(async () => {
+  // Initial load: IP only (no browser location request)
+  const runAutoDetectIPOnly = useCallback(async () => {
     setDetecting(true);
-    let loc: LocationResult | null = null;
-
     try {
-      if ("geolocation" in navigator) {
-        try {
-          const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject, {
-              enableHighAccuracy: false,
-              timeout: 8000,
-              maximumAge: 300000,
-            });
-          });
-          const response = await fetch(
-            `${API_CONFIG.nominatim}/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`,
-            { headers: { "User-Agent": "TryRamadan.app" } }
-          );
-          if (response.ok) {
-            const data = await response.json();
-            loc = {
-              name: data.address?.city || data.address?.town || data.address?.village || "Your Location",
-              displayName: data.display_name,
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-              country: data.address?.country || "",
-            };
-          }
-        } catch {
-          // Fall back to IP
-        }
-      }
-      if (!loc) loc = await getLocationFromIP();
+      const loc = await getLocationFromIP();
       if (loc) {
+        let withTz = loc;
         if (!loc.timezone) {
           const tz = await getTimezoneFromCoords(loc.lat, loc.lng);
-          loc = { ...loc, timezone: tz ?? undefined };
+          withTz = { ...loc, timezone: tz ?? undefined };
         }
-        setLocation(loc);
+        setLocation(withTz);
       }
     } catch {
-      // leave loc null
+      // leave as null
+    } finally {
+      setDetecting(false);
+    }
+  }, [setLocation]);
+
+  // When user clicks "Use my location": try browser geolocation first, then IP
+  const runUseMyLocation = useCallback(async () => {
+    setDetecting(true);
+    try {
+      const loc = await detectLocationWithGeolocation();
+      if (loc) {
+        let withTz = loc;
+        if (!loc.timezone) {
+          const tz = await getTimezoneFromCoords(loc.lat, loc.lng);
+          withTz = { ...loc, timezone: tz ?? undefined };
+        }
+        setLocation(withTz);
+      } else {
+        const ipLoc = await getLocationFromIP();
+        if (ipLoc) {
+          let withTz = ipLoc;
+          if (!ipLoc.timezone) {
+            const tz = await getTimezoneFromCoords(ipLoc.lat, ipLoc.lng);
+            withTz = { ...ipLoc, timezone: tz ?? undefined };
+          }
+          setLocation(withTz);
+        }
+      }
+    } catch {
+      // leave as null
     } finally {
       setDetecting(false);
     }
@@ -63,9 +70,9 @@ export default function OnboardingLocation() {
   useEffect(() => {
     if (!state.location && !initialTried) {
       setInitialTried(true);
-      runAutoDetect();
+      runAutoDetectIPOnly();
     }
-  }, [state.location, initialTried, runAutoDetect]);
+  }, [state.location, initialTried, runAutoDetectIPOnly]);
 
   const handleSelect = async (loc: LocationResult) => {
     if (loc.timezone) {
@@ -114,7 +121,7 @@ export default function OnboardingLocation() {
       ) : detecting ? (
         <div className="flex items-center gap-2 p-4 rounded-xl bg-muted/50 border border-border mb-4">
           <Loader2 className="w-5 h-5 animate-spin shrink-0 text-muted-foreground" aria-hidden />
-          <span className="text-sm text-muted-foreground">Detecting location from IP...</span>
+          <span className="text-sm text-muted-foreground">Detecting location...</span>
         </div>
       ) : (
         <>
@@ -124,7 +131,7 @@ export default function OnboardingLocation() {
             </p>
           )}
           <p className="text-sm text-muted-foreground mb-4">
-            Or search for your city below. You can also use the button to detect from IP.
+            Search for your city below, or use the buttons to detect from IP or from your device.
           </p>
         </>
       )}
@@ -135,22 +142,34 @@ export default function OnboardingLocation() {
         placeholder="Type a city name..."
       />
 
-      <button
-        type="button"
-        onClick={runAutoDetect}
-        disabled={detecting}
-        className="w-full mt-3 min-h-[44px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-border bg-muted/30 hover:bg-muted/50 text-sm font-medium transition-colors disabled:opacity-70"
-      >
-        {detecting ? (
-          <Loader2 className="w-5 h-5 animate-spin shrink-0" aria-hidden />
-        ) : (
-          <>
+      <div className="flex flex-col sm:flex-row gap-2 mt-3">
+        <button
+          type="button"
+          onClick={runAutoDetectIPOnly}
+          disabled={detecting}
+          className="flex-1 min-h-[44px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-border bg-muted/30 hover:bg-muted/50 text-sm font-medium transition-colors disabled:opacity-70"
+        >
+          {detecting ? (
+            <Loader2 className="w-5 h-5 animate-spin shrink-0" aria-hidden />
+          ) : (
             <span aria-hidden>🌐</span>
+          )}
+          {detecting ? "Detecting..." : "Use IP location"}
+        </button>
+        <button
+          type="button"
+          onClick={runUseMyLocation}
+          disabled={detecting}
+          className="flex-1 min-h-[44px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-border bg-muted/30 hover:bg-muted/50 text-sm font-medium transition-colors disabled:opacity-70"
+        >
+          {detecting ? (
+            <Loader2 className="w-5 h-5 animate-spin shrink-0" aria-hidden />
+          ) : (
             <Navigation className="w-5 h-5 shrink-0" aria-hidden />
-          </>
-        )}
-        {detecting ? "Detecting..." : "Use my location (from IP)"}
-      </button>
+          )}
+          {detecting ? "Detecting..." : "Use device location"}
+        </button>
+      </div>
 
       <button
         type="submit"
