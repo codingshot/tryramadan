@@ -8,6 +8,10 @@
  * - Do not rely on it for sensitive data without optional client-side encryption.
  */
 
+/** Key used for undo-after-clear-all; must NOT be in TRYRAMADAN_LOCALSTORAGE_KEYS so it survives deleteAllUserData. */
+export const UNDO_BACKUP_KEY = "tryramadan-undo-backup";
+const UNDO_BACKUP_MAX_AGE_MS = 15_000;
+
 /** All localStorage keys used by TryRamadan. Must stay in sync with useLocalStorage and other consumers. */
 export const TRYRAMADAN_LOCALSTORAGE_KEYS = [
   "tryramadan-preferences",
@@ -46,8 +50,55 @@ export const TRYRAMADAN_LOCALSTORAGE_KEYS = [
 ] as const;
 
 /**
+ * Save a snapshot of data so the user can undo "Clear all data" after reload.
+ * Call before deleteAllUserData(); then deleteAllUserData will skip UNDO_BACKUP_KEY.
+ */
+export function saveBackupBeforeClear(backup: Record<string, unknown>): void {
+  try {
+    window.localStorage.setItem(
+      UNDO_BACKUP_KEY,
+      JSON.stringify({ at: Date.now(), data: backup })
+    );
+  } catch {
+    // ignore
+  }
+}
+
+/**
+ * If an undo backup exists and is recent, return it. Otherwise null.
+ */
+export function getUndoBackup(): { at: number; data: Record<string, unknown> } | null {
+  try {
+    const raw = window.localStorage.getItem(UNDO_BACKUP_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { at: number; data: Record<string, unknown> };
+    if (Date.now() - parsed.at > UNDO_BACKUP_MAX_AGE_MS) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Restore from undo backup: write each key back to localStorage, then remove backup and reload.
+ */
+export function restoreFromUndoBackup(): void {
+  const backup = getUndoBackup();
+  if (!backup) return;
+  try {
+    for (const [key, value] of Object.entries(backup.data)) {
+      window.localStorage.setItem(key, JSON.stringify(value));
+    }
+    window.localStorage.removeItem(UNDO_BACKUP_KEY);
+  } catch {
+    // ignore
+  }
+  window.location.reload();
+}
+
+/**
  * Delete all TryRamadan data from this device: localStorage and Cache Storage.
- * Caller should navigate and reload after this.
+ * Skips UNDO_BACKUP_KEY so undo-after-clear can work. Caller should navigate and reload after this.
  */
 export async function deleteAllUserData(): Promise<void> {
   for (const key of TRYRAMADAN_LOCALSTORAGE_KEYS) {

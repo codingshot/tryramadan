@@ -2,7 +2,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { reportWebVitals } from "./lib/reportWebVitals";
-import { injectJsonLd } from "./lib/jsonLd";
+import { injectJsonLd } from "./lib/jsonld";
 
 injectJsonLd();
 

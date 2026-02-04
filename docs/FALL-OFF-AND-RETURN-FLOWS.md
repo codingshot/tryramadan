@@ -89,7 +89,7 @@ Design document for **realistic behavior when users stop logging and come back**
 | **Completed and broken** | A day can be **broken** (fast started then broken) — that day is in `fastingLog` with `status: 'broken'` and should **not** be in `completedDays`. So completed and broken are mutually exclusive. When user marks "broken" for a day, remove from `completedDays`. | Same: one state. Broken takes precedence over completed if both present (normalize on read). |
 | **Skipped and broken** | Semantically distinct: "didn’t fast" vs "started then broke." A day should be one or the other. If both exist in data, define precedence (e.g. broken over skipped) and normalize. | One state per day. |
 
-**Implementation note:** `setDaySkipped` already removes the day from `completedDays` and clears `fastingLog` for that date. `setDayCompleted(..., false)` removes from completed but doesn’t add to skipped. So the only way to get "both" is legacy data or a future bug. Add a **normalizer** (e.g. on load or before save): for each date, ensure it appears in at most one of completed / skipped / broken.
+**Implementation note:** `setDaySkipped` already removes the day from `completedDays` and clears `fastingLog` for that date. `setDayCompleted(..., false)` removes from completed but doesn’t add to skipped. So the only way to get "both" is legacy data or a future bug. A **normalizer** is implemented: `normalizeProgressSameDayConflict()` in `useLocalStorage.ts` ensures no date is in both `completedDays` and `skippedDays` (skipped wins); applied in `useFastingProgress()` on read, and the normalized result is persisted once on load to fix legacy data.
 
 ### 3.2 Backfill "complete" then later "skip" (or vice versa)
 

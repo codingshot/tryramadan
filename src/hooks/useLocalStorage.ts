@@ -345,15 +345,35 @@ export const defaultProgress: FastingProgress = {
   fastingLog: [],
 };
 
+/** Normalize progress so no date is in both completedDays and skippedDays (skipped wins). See FALL-OFF-AND-RETURN-FLOWS §3. */
+export function normalizeProgressSameDayConflict(p: FastingProgress): FastingProgress {
+  const skipped = new Set(p.skippedDays ?? []);
+  const completed = (p.completedDays ?? []).filter((d) => !skipped.has(d));
+  if (completed.length === (p.completedDays ?? []).length) return p;
+  return { ...p, completedDays: completed };
+}
+
 export function useFastingProgress() {
   const [stored, setStored] = useLocalStorage<FastingProgress>('tryramadan-progress', defaultProgress);
-  // Migrate old progress: ensure fastingLog and skippedDays exist
-  const progress: FastingProgress = {
-    ...defaultProgress,
-    ...stored,
-    fastingLog: Array.isArray(stored.fastingLog) ? stored.fastingLog : [],
-    skippedDays: Array.isArray(stored.skippedDays) ? stored.skippedDays : [],
-  };
+  // Migrate old progress: ensure fastingLog and skippedDays exist; normalize same-day conflict (completed vs skipped)
+  const progress: FastingProgress = React.useMemo(() => {
+    const migrated: FastingProgress = {
+      ...defaultProgress,
+      ...stored,
+      fastingLog: Array.isArray(stored.fastingLog) ? stored.fastingLog : [],
+      skippedDays: Array.isArray(stored.skippedDays) ? stored.skippedDays : [],
+    };
+    return normalizeProgressSameDayConflict(migrated);
+  }, [stored]);
+  // Persist normalized form once if we had to remove overlap (fix legacy data)
+  React.useEffect(() => {
+    const skipped = new Set(stored.skippedDays ?? []);
+    const completed = (stored.completedDays ?? []).filter((d) => !skipped.has(d));
+    if (completed.length !== (stored.completedDays ?? []).length) {
+      setStored((prev) => ({ ...prev, completedDays: completed }));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount to fix legacy overlap
+  }, []);
   return [progress, setStored] as const;
 }
 

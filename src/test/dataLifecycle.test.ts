@@ -4,7 +4,11 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import {
   TRYRAMADAN_LOCALSTORAGE_KEYS,
+  UNDO_BACKUP_KEY,
   deleteAllUserData,
+  saveBackupBeforeClear,
+  getUndoBackup,
+  restoreFromUndoBackup,
   clearJournalOnly,
   clearHealthDataOnly,
   clearLocationFromPreferences,
@@ -47,6 +51,44 @@ describe("dataLifecycle", () => {
     window.localStorage.setItem("other-app-key", "value");
     await deleteAllUserData();
     expect(window.localStorage.getItem("other-app-key")).toBe("value");
+  });
+
+  it("deleteAllUserData leaves UNDO_BACKUP_KEY intact so undo-after-clear works", async () => {
+    window.localStorage.setItem("tryramadan-progress", "{}");
+    saveBackupBeforeClear({ "tryramadan-progress": {} });
+    expect(window.localStorage.getItem(UNDO_BACKUP_KEY)).toBeTruthy();
+    await deleteAllUserData();
+    expect(window.localStorage.getItem("tryramadan-progress")).toBeNull();
+    expect(window.localStorage.getItem(UNDO_BACKUP_KEY)).toBeTruthy();
+  });
+
+  describe("undo backup", () => {
+    it("getUndoBackup returns null when no backup", () => {
+      expect(getUndoBackup()).toBeNull();
+    });
+
+    it("getUndoBackup returns backup when recent", () => {
+      saveBackupBeforeClear({ "tryramadan-journal": [] });
+      const b = getUndoBackup();
+      expect(b).toBeTruthy();
+      expect(b!.data).toEqual({ "tryramadan-journal": [] });
+    });
+
+    it("restoreFromUndoBackup writes back keys and removes backup", () => {
+      window.localStorage.removeItem("tryramadan-journal");
+      saveBackupBeforeClear({ "tryramadan-journal": [{ date: "2025-01-01", content: "x" }] });
+      try {
+        restoreFromUndoBackup();
+      } catch (e) {
+        // jsdom throws "Not implemented: navigation" for location.reload(); restore still ran
+      }
+      const raw = window.localStorage.getItem("tryramadan-journal");
+      expect(raw).toBeTruthy();
+      const arr = JSON.parse(raw!) as unknown[];
+      expect(arr).toHaveLength(1);
+      expect(arr[0]).toMatchObject({ date: "2025-01-01", content: "x" });
+      expect(window.localStorage.getItem(UNDO_BACKUP_KEY)).toBeNull();
+    });
   });
 
   describe("partial delete", () => {

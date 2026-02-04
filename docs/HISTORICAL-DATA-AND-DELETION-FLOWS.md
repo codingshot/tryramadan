@@ -83,7 +83,7 @@ Design document for **viewing history**, **comparing Ramadan years**, **export/r
 | **Undo reset** | After "Reset all progress": toast "Progress reset. Undo?" with short window. If Undo: restore previous `progress` from snapshot. | Before applying reset, copy `progress` (and if we add full reset, copy journal/meals) to a transient or short-lived key (e.g. `tryramadan-pre-reset-backup`). On Undo, copy back and remove backup. |
 | **No undo** | If no undo implemented: confirmation modal must be strong ("This cannot be undone. Export a backup first."). | N/A. |
 
-**Current implementation:** No undo. Reset has confirmation and "Download progress (backup before reset)" CTA. Implementing undo would require storing a one-step backup (e.g. previous progress) and restoring on Undo within a timeout.
+**Current implementation:** **Undo implemented.** (1) After "Delete this entry" on Journal: toast "Entry deleted" with "Undo" (8 s); Undo restores the deleted entry. (2) After "Clear all data": app saves a snapshot to `tryramadan-undo-backup` (excluded from delete), then reloads; on load, if backup is recent (<15 s), toast "Data cleared. Undo?" (10 s); Undo restores all keys from backup and reloads. See `saveBackupBeforeClear`, `getUndoBackup`, `restoreFromUndoBackup` in `src/lib/dataLifecycle.ts`.
 
 ---
 
@@ -111,7 +111,7 @@ Design document for **viewing history**, **comparing Ramadan years**, **export/r
 | Delete single journal entry | Done | "Delete this entry" on Journal when viewing an existing entry; confirm then remove from array. |
 | Delete single meal item | Schedule may allow; verify | Confirm in Schedule/Meals; document behaviour. |
 | Reset all | Resets progress only; label says "Reset all progress" | Rename to "Reset fasting progress" or add full reset with clear copy and "Export first" CTA. |
-| Undo delete / reset | Not implemented | Add optional undo toast (single-step backup) for uncomplete and reset. |
+| Undo delete / reset | Done | Journal delete: toast with Undo (8 s). Clear all data: backup before clear, toast after reload with Undo (10 s). |
 | New device / cleared storage | No history; no import | Add "Import from backup" (JSON) and in-app copy about exporting before changing device. |
 
 ---

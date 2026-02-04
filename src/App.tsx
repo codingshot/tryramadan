@@ -2,7 +2,8 @@ import { useEffect, lazy, Suspense } from "react";
 import { useLocation } from "react-router-dom";
 import { useUserPreferences } from "@/hooks/useLocalStorage";
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster as Sonner, toast } from "@/components/ui/sonner";
+import { getUndoBackup, restoreFromUndoBackup } from "@/lib/dataLifecycle";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
@@ -89,6 +90,19 @@ function ScrollToTop() {
   return null;
 }
 
+/** After "Clear all data", show Undo toast on reload (HISTORICAL-DATA undo reset). */
+function UndoClearAllToast() {
+  useEffect(() => {
+    const backup = getUndoBackup();
+    if (!backup) return;
+    toast("Data cleared. Undo?", {
+      action: { label: "Undo", onClick: restoreFromUndoBackup },
+      duration: 10_000,
+    });
+  }, []);
+  return null;
+}
+
 function KeyboardShortcutsManager() {
   useKeyboardShortcuts();
   return null;
@@ -143,6 +157,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ScrollToTop />
+        <UndoClearAllToast />
         <KeyboardShortcutsManager />
         <FastingAndSchedulers />
         <KeyboardShortcutsHelp />

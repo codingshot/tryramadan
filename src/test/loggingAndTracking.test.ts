@@ -20,6 +20,7 @@ import {
   updateBrokenReason,
   setBrokenDayToCompleted,
   setBrokenDayToInProgress,
+  normalizeProgressSameDayConflict,
   type FastingProgress,
   type DayFoodLog,
 } from "@/hooks/useLocalStorage";
@@ -219,6 +220,30 @@ describe("hoursBetween", () => {
   it("handles same time", () => {
     const t = "2025-01-01T12:00:00Z";
     expect(hoursBetween(t, t)).toBe(0);
+  });
+});
+
+describe("normalizeProgressSameDayConflict", () => {
+  it("removes from completedDays when date is in skippedDays (skipped wins)", () => {
+    const progress: FastingProgress = {
+      ...defaultProgress,
+      completedDays: ["2025-03-01", "2025-03-02", "2025-03-03"],
+      skippedDays: ["2025-03-02"],
+    };
+    const out = normalizeProgressSameDayConflict(progress);
+    expect(out.completedDays).toEqual(["2025-03-01", "2025-03-03"]);
+    expect(out.skippedDays).toEqual(["2025-03-02"]);
+  });
+
+  it("returns same object when no overlap", () => {
+    const progress: FastingProgress = {
+      ...defaultProgress,
+      completedDays: ["2025-03-01"],
+      skippedDays: ["2025-03-02"],
+    };
+    const out = normalizeProgressSameDayConflict(progress);
+    expect(out.completedDays).toEqual(["2025-03-01"]);
+    expect(out).toBe(progress);
   });
 });
 

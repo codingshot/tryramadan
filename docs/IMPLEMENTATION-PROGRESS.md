@@ -41,7 +41,8 @@ These items from the docs are implemented and marked complete in their source do
 
 ### Flows & deletion (from HISTORICAL-DATA, FALL-OFF, STATE-TRANSITION)
 - **FALL-OFF-AND-RETURN-FLOWS:** Mark past day as "I didn't fast" — Schedule shows "I didn't fast this day" for selected day; `setDaySkipped(progress, setProgress, selectedDate)`.
-- **HISTORICAL-DATA-AND-DELETION-FLOWS:** Delete single journal entry — Journal has "Delete this entry" with confirm; removes entry from array.
+- **HISTORICAL-DATA-AND-DELETION-FLOWS:** Delete single journal entry — Journal has "Delete this entry" with confirm; removes entry from array. **Undo delete/reset:** Journal delete shows toast "Entry deleted" with "Undo" (8 s); Clear all data saves backup to `tryramadan-undo-backup`, after reload toast "Data cleared. Undo?" (10 s) restores via `restoreFromUndoBackup()`.
+- **FALL-OFF-AND-RETURN-FLOWS:** Normalize same-day conflict: `normalizeProgressSameDayConflict()` in useFastingProgress; any date in both completedDays and skippedDays is removed from completedDays (skipped wins); persisted on load.
 - **STATE-TRANSITION-TESTING-FASTING:** For a **broken** selected day on Schedule: "Edit reason" (E8) — `updateBrokenReason`; "Mark as completed anyway?" (B→C) — `setBrokenDayToCompleted`; "Start fast again" (B→I) — `setBrokenDayToInProgress`; all with confirmation where appropriate.
 
 ### Testing (implemented features)
@@ -57,6 +58,7 @@ These items from the docs are implemented and marked complete in their source do
 | Onboarding / flows | `src/test/onboardingFlow.test.tsx`, `src/test/onboardingCritical.test.tsx` |
 | Routes (smoke) | `src/test/routes.test.tsx`; `e2e/happy-path.spec.ts` |
 | State transition (E8, B→C, B→I) | `src/test/loggingAndTracking.test.ts` — updateBrokenReason, setBrokenDayToCompleted, setBrokenDayToInProgress |
+| Undo backup / normalize progress | `src/test/dataLifecycle.test.ts` — saveBackupBeforeClear, getUndoBackup, restoreFromUndoBackup; `loggingAndTracking.test.ts` — normalizeProgressSameDayConflict |
 
 ---
 
@@ -109,8 +111,8 @@ These items from the docs are implemented and marked complete in their source do
 | SECURITY-LOCALSTORAGE-AUDIT.md | Done (Settings Data & privacy; journal notice; checklist 1,2,4 marked done) |
 | SECURITY-THIRD-PARTY-RISK.md | Partial (CSP done; npm audit / Privacy "Data we share" optional) |
 | QA-RAMADAN-LOGIC-AND-TEST-CASES.md | Done (implementation status includes user override; ramadan.test.ts) |
-| FALL-OFF-AND-RETURN-FLOWS.md | Done (Schedule "I didn't fast this day" for selected day) |
-| HISTORICAL-DATA-AND-DELETION-FLOWS.md | Partial (delete journal entry done; undo/compare last year/import optional) |
+| FALL-OFF-AND-RETURN-FLOWS.md | Done (Schedule "I didn't fast this day"; normalize same-day conflict in useFastingProgress) |
+| HISTORICAL-DATA-AND-DELETION-FLOWS.md | Partial (delete journal entry + undo delete/reset done; compare last year/import optional) |
 | Other QA docs | Doc complete; tests optional |
 
 ---
@@ -144,9 +146,9 @@ Every doc that has implementation or checklist items, with each item marked Done
 | 21 | QA-VISUAL-REGRESSION-TESTS.md | Percy/Chromatic/Playwright visual | Optional |
 | 22 | RAMADAN-CALENDAR-ROBUSTNESS-AND-OVERRIDE.md | Override prefs, Settings UI, useRamadanRange, stats | Done |
 | 23 | FALL-OFF-AND-RETURN-FLOWS.md | Mark past day "I didn't fast" on Schedule | Done |
-| 24 | FALL-OFF-AND-RETURN-FLOWS.md | Normalize same-day conflict (completed/skipped/broken) | Optional |
+| 24 | FALL-OFF-AND-RETURN-FLOWS.md | Normalize same-day conflict (completed/skipped/broken) | Done |
 | 25 | HISTORICAL-DATA-AND-DELETION-FLOWS.md | Delete single journal entry | Done |
-| 26 | HISTORICAL-DATA-AND-DELETION-FLOWS.md | Undo delete / reset | Not done |
+| 26 | HISTORICAL-DATA-AND-DELETION-FLOWS.md | Undo delete / reset | Done |
 | 27 | HISTORICAL-DATA-AND-DELETION-FLOWS.md | Compare to last year | Not done |
 | 28 | HISTORICAL-DATA-AND-DELETION-FLOWS.md | Import from backup | Not done |
 | 29 | STATE-TRANSITION-TESTING-FASTING.md | Edit brokenReason in UI (E8) | Done |
@@ -157,4 +159,4 @@ Every doc that has implementation or checklist items, with each item marked Done
 
 ---
 
-*Last updated: E8 (edit broken reason), B→C (mark broken as completed), B→I (start fast again) on Schedule; buildRecipeSchema added to jsonld.ts; STATE-TRANSITION doc and tests updated.*
+*Last updated: Undo delete (journal toast + Clear all backup/restore); normalize same-day conflict (completed/skipped) in useFastingProgress; HISTORICAL-DATA and FALL-OFF docs updated.*

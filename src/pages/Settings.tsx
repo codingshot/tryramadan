@@ -58,7 +58,7 @@ import { LANGUAGE_OPTIONS, COUNTRY_OPTIONS } from "@/data/languages-and-countrie
 import { getDefaultHydrationGoalMl, getHydrationUnit, ML_PER_US_CUP } from "@/lib/hydration";
 import { getRamadanDayNumber, isRamadanDay, getRamadanDateRange } from "@/lib/ramadan";
 import { useRamadanRange } from "@/hooks/useRamadanRange";
-import { deleteAllUserData, clearJournalOnly, clearHealthDataOnly, clearLocationFromPreferences } from "@/lib/dataLifecycle";
+import { deleteAllUserData, clearJournalOnly, clearHealthDataOnly, clearLocationFromPreferences, saveBackupBeforeClear, TRYRAMADAN_LOCALSTORAGE_KEYS } from "@/lib/dataLifecycle";
 import type { UserPreferences } from "@/hooks/useLocalStorage";
 
 function RamadanDatesSection({
@@ -254,6 +254,16 @@ const Settings = () => {
 
   const handleClearAllData = async () => {
     setClearing(true);
+    const backup: Record<string, unknown> = {};
+    for (const key of TRYRAMADAN_LOCALSTORAGE_KEYS) {
+      try {
+        const v = window.localStorage.getItem(key);
+        if (v != null) backup[key] = JSON.parse(v);
+      } catch {
+        // skip
+      }
+    }
+    saveBackupBeforeClear(backup);
     await deleteAllUserData();
     setShowClearAllConfirm(false);
     setClearing(false);

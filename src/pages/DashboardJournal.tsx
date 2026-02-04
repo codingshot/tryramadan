@@ -158,14 +158,28 @@ export default function DashboardJournal() {
     setMood(existing?.mood);
   };
 
+  const undoDeleteRef = useRef<JournalEntry[] | null>(null);
   const handleDeleteEntry = () => {
     if (!existingForWriteDate) return;
-    if (typeof window !== "undefined" && !window.confirm("Delete this entry? This cannot be undone.")) return;
+    if (typeof window !== "undefined" && !window.confirm("Delete this entry? You can undo within a few seconds.")) return;
+    undoDeleteRef.current = entries;
     setEntries((prev) => prev.filter((e) => e.date !== writeDate));
     setContent("");
     setGratitude("");
     setMood(undefined);
-    toast.success("Entry deleted");
+    toast.success("Entry deleted", {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          if (undoDeleteRef.current) {
+            setEntries(undoDeleteRef.current);
+            undoDeleteRef.current = null;
+            toast.info("Entry restored");
+          }
+        },
+      },
+      duration: 8000,
+    });
   };
 
   const handleExport = () => {
