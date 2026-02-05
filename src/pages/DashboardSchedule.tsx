@@ -26,6 +26,7 @@ import {
   Moon,
   Sun,
   ImagePlus,
+  Copy,
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -110,6 +111,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { BreakFastReasonDialog } from "@/components/BreakFastReasonDialog";
 
 const allRecipesForPicker = getRecipes();
@@ -271,6 +273,7 @@ const DashboardSchedule = () => {
   const [editEventDuration, setEditEventDuration] = useState(15);
   const [countdownToIftar, setCountdownToIftar] = useState({ h: 0, m: 0, s: 0 });
   const [countdownToSuhoor, setCountdownToSuhoor] = useState({ h: 0, m: 0, s: 0 });
+  const [copyMealsFromOpen, setCopyMealsFromOpen] = useState(false);
 
   const [journalEntries] = useLocalStorage<{ date: string; content?: string; gratitude?: string }[]>("tryramadan-journal", []);
   const journalDates = new Set(journalEntries.map((e) => e.date));
@@ -360,6 +363,90 @@ const DashboardSchedule = () => {
     },
     [scheduleNotes, setSearchParams]
   );
+
+  /** Last 5 days of Ramadan (day 26–30) for quick "Plan last days" links */
+  const lastFiveRamadanDates = useMemo(() => {
+    const start = new Date(ramadanRange.start.getTime());
+    const dates: { dayNum: number; dateStr: string }[] = [];
+    for (let dayNum = 26; dayNum <= 30; dayNum++) {
+      const d = new Date(start);
+      d.setDate(d.getDate() + dayNum - 1);
+      dates.push({ dayNum, dateStr: toLocalDateString(d) });
+    }
+    return dates;
+  }, [ramadanRange.start]);
+
+  const copyMealsFromDay = useCallback(
+    (sourceDateStr: string) => {
+      if (!selectedDate) return;
+      const source = mealPlans[sourceDateStr];
+      if (!source?.suhoor && !source?.iftar) {
+        toast.info("That day has no meals planned to copy.");
+        setCopyMealsFromOpen(false);
+        return;
+      }
+      setMealPlans((prev) => ({
+        ...prev,
+        [selectedDate]: { ...(prev[selectedDate] ?? {}), ...source },
+      }));
+      toast.success("Meals copied to this day.");
+      setCopyMealsFromOpen(false);
+    },
+    [selectedDate, mealPlans, setMealPlans]
+  );
+
+  /** Copy selected day's meals to the next day (only if next day is today or future). */
+  const copyMealsToNextDay = useCallback(() => {
+    if (!selectedDate) return;
+    const source = mealPlans[selectedDate];
+    if (!source?.suhoor && !source?.iftar) {
+      toast.info("This day has no meals planned to copy.");
+      return;
+    }
+    const next = new Date(selectedDate + "T12:00:00");
+    next.setDate(next.getDate() + 1);
+    const nextStr = toLocalDateString(next);
+    if (nextStr < todayStr) {
+      toast.info("Next day is in the past; planning is for today and future only.");
+      return;
+    }
+    setMealPlans((prev) => ({
+      ...prev,
+      [nextStr]: { ...(prev[nextStr] ?? {}), ...source },
+    }));
+    toast.success(`Meals copied to ${nextStr}.`);
+  }, [selectedDate, todayStr, mealPlans, setMealPlans]);
+
+  /** Copy selected day's meals to all remaining Ramadan days (from selectedDate+1 to end, today or future only). */
+  const copyMealsToRemainingRamadan = useCallback(() => {
+    if (!selectedDate) return;
+    const source = mealPlans[selectedDate];
+    if (!source?.suhoor && !source?.iftar) {
+      toast.info("This day has no meals planned to copy.");
+      return;
+    }
+    const start = new Date(selectedDate + "T12:00:00");
+    start.setDate(start.getDate() + 1);
+    const end = new Date(ramadanRange.end);
+    end.setHours(0, 0, 0, 0);
+    const dateStrs: string[] = [];
+    for (const d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const str = toLocalDateString(d);
+      if (str >= todayStr) dateStrs.push(str);
+    }
+    if (dateStrs.length === 0) {
+      toast.info("No future days left in Ramadan to copy to.");
+      return;
+    }
+    setMealPlans((prev) => {
+      const next = { ...prev };
+      dateStrs.forEach((str) => {
+        next[str] = { ...(next[str] ?? {}), ...source };
+      });
+      return next;
+    });
+    toast.success(`Meals copied to ${dateStrs.length} day(s) through end of Ramadan.`);
+  }, [selectedDate, todayStr, mealPlans, setMealPlans, ramadanRange.end]);
 
   const prevMonth = () =>
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
@@ -1919,6 +2006,35 @@ const DashboardSchedule = () => {
                       )}
                     </div>
 
+                    {/* Meals in line with times (compact timeline for this day) */}
+                    {effectiveSelectedDayPrayerTimes?.imsak != null && effectiveSelectedDayPrayerTimes?.maghrib != null && (
+                      <div className="rounded-xl border border-border bg-card p-3 space-y-2">
+                        <p className="text-xs font-medium text-muted-foreground">Meals & times</p>
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                          <span className="flex items-center gap-2">
+                            <span className="font-mono text-secondary shrink-0">{effectiveSelectedDayPrayerTimes.imsak.split(" ")[0]}</span>
+                            <Sunrise className="w-4 h-4 text-muted-foreground shrink-0" />
+                            <span className="text-muted-foreground">Suhoor end</span>
+                            {selectedDayMeals?.suhoor ? (
+                              <span className="truncate max-w-[180px]" title={selectedDayMeals.suhoor}>— {selectedDayMeals.suhoor}</span>
+                            ) : (
+                              <span className="text-muted-foreground/70">—</span>
+                            )}
+                          </span>
+                          <span className="flex items-center gap-2">
+                            <span className="font-mono text-secondary shrink-0">{effectiveSelectedDayPrayerTimes.maghrib.split(" ")[0]}</span>
+                            <Sunset className="w-4 h-4 text-muted-foreground shrink-0" />
+                            <span className="text-muted-foreground">{iftarLabel}</span>
+                            {selectedDayMeals?.iftar ? (
+                              <span className="truncate max-w-[180px]" title={selectedDayMeals.iftar}>— {selectedDayMeals.iftar}</span>
+                            ) : (
+                              <span className="text-muted-foreground/70">—</span>
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Meal plan: for today and future days only; past days show read-only */}
                     <div>
                       <Tooltip>
@@ -2011,7 +2127,68 @@ const DashboardSchedule = () => {
                           />
                         </div>
                       </div>
+                      {canEditMealPlan && (
+                        <div className="flex flex-wrap items-center gap-2 mt-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCopyMealsFromOpen(true)}
+                            className="gap-1"
+                          >
+                            <Copy className="w-3.5 h-3.5" />
+                            Copy meals from another day
+                          </Button>
+                          {(selectedDayMeals?.suhoor || selectedDayMeals?.iftar) && (
+                            <>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={copyMealsToNextDay}
+                                className="gap-1"
+                              >
+                                Copy to next day
+                              </Button>
+                              {selectedIsRamadan && (
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={copyMealsToRemainingRamadan}
+                                  className="gap-1"
+                                >
+                                  Copy to remaining Ramadan days
+                                </Button>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      )}
                     </div>
+
+                    {/* Plan last days of Ramadan — quick jump */}
+                    {selectedDate && (selectedIsRamadan || selectedRamadanDay == null) && lastFiveRamadanDates.length > 0 && (
+                      <div className="rounded-xl border border-border bg-background/50 p-3">
+                        <p className="text-xs font-medium text-muted-foreground mb-2">Plan last days of Ramadan</p>
+                        <div className="flex flex-wrap gap-2">
+                          {lastFiveRamadanDates.map(({ dayNum, dateStr }) => (
+                            <button
+                              key={dateStr}
+                              type="button"
+                              onClick={() => selectDay(dateStr)}
+                              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                                selectedDate === dateStr
+                                  ? "bg-secondary text-secondary-foreground"
+                                  : "bg-muted hover:bg-muted/80"
+                              }`}
+                            >
+                              Day {dayNum}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Food log: what you ate with portions & macros */}
                     <div>
@@ -2297,6 +2474,48 @@ const DashboardSchedule = () => {
           </motion.div>
         </div>
       </main>
+
+      {/* Copy meals from another day */}
+      <Dialog open={copyMealsFromOpen} onOpenChange={setCopyMealsFromOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogTitle>Copy meals from another day</DialogTitle>
+          <p className="text-xs text-muted-foreground mb-3">
+            Copy that day&apos;s Suhoor and {iftarLabel} plan to the currently selected day ({selectedDate}). Meal planning is for today and future days only.
+          </p>
+          <ul className="space-y-1 max-h-60 overflow-auto">
+            {(() => {
+              const yesterday = new Date(todayStr + "T12:00:00");
+              yesterday.setDate(yesterday.getDate() - 1);
+              const yesterdayStr = toLocalDateString(yesterday);
+              const options: { label: string; dateStr: string }[] = [
+                { label: `Today (${todayStr})`, dateStr: todayStr },
+                { label: `Yesterday (${yesterdayStr})`, dateStr: yesterdayStr },
+                ...lastFiveRamadanDates.map(({ dayNum, dateStr }) => ({
+                  label: `Ramadan Day ${dayNum} (${dateStr})`,
+                  dateStr,
+                })),
+              ];
+              return options.map(({ label, dateStr }) => {
+                const hasPlans = mealPlans[dateStr]?.suhoor || mealPlans[dateStr]?.iftar;
+                return (
+                  <li key={dateStr}>
+                    <button
+                      type="button"
+                      onClick={() => copyMealsFromDay(dateStr)}
+                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                        hasPlans ? "hover:bg-muted" : "text-muted-foreground"
+                      }`}
+                    >
+                      {label}
+                      {!hasPlans && " (no meals planned)"}
+                    </button>
+                  </li>
+                );
+              });
+            })()}
+          </ul>
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>

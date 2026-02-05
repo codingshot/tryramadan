@@ -5,7 +5,16 @@
       "name": "Middle Eastern Power Bowl",
       "region": "Middle East",
       "description": "Ful medames with eggs, tahini, fresh vegetables, and warm pita",
-      "ingredients": ["Fava beans", "Eggs", "Tahini", "Olive oil", "Tomatoes", "Cucumber", "Pita bread"],
+      "defaultServings": 4,
+      "ingredients": [
+        { "name": "Fava beans (canned or cooked)", "amount": "2 cups" },
+        { "name": "Eggs", "amount": "4" },
+        { "name": "Tahini", "amount": "3 tbsp" },
+        { "name": "Olive oil", "amount": "2 tbsp" },
+        { "name": "Tomatoes", "amount": "2" },
+        { "name": "Cucumber", "amount": "1" },
+        { "name": "Pita bread", "amount": "4" }
+      ],
       "prepTime": "10 min",
       "cookTime": "10 min",
       "totalTime": "20 min",
@@ -85,7 +94,15 @@
       "name": "Overnight Oats with Dates",
       "region": "Modern/Western",
       "description": "Steel-cut oats soaked overnight with dates, nuts, and honey",
-      "ingredients": ["Oats", "Dates", "Almonds", "Milk", "Honey", "Cinnamon"],
+      "defaultServings": 2,
+      "ingredients": [
+        { "name": "Rolled or steel-cut oats", "amount": "1 cup" },
+        { "name": "Medjool dates", "amount": "2" },
+        { "name": "Almonds", "amount": "2 tbsp" },
+        { "name": "Milk (or plant-based)", "amount": "1 cup" },
+        { "name": "Honey", "amount": "1 tbsp" },
+        { "name": "Cinnamon", "amount": "1/4 tsp" }
+      ],
       "prepTime": "5 min",
       "cookTime": "0 min",
       "totalTime": "5 min (+ overnight soak)",
@@ -215,6 +232,25 @@
         "Score the top into squares or diamonds. Bake at 375°F (190°C) 35–45 min until golden and crisp.",
         "Let rest 10 min. Serve warm with plain yogurt on the side."
       ]
+    },
+    {
+      "id": 12,
+      "name": "Somali Canjeero",
+      "region": "East Africa",
+      "description": "Soft fermented pancake with honey and ghee, often with liver or eggs",
+      "ingredients": ["Sorghum or rice flour", "Yeast", "Sugar", "Ghee", "Honey", "Eggs (optional)"],
+      "prepTime": "5 min",
+      "cookTime": "15 min",
+      "totalTime": "20 min (+ 8–12 hr ferment)",
+      "benefits": "Light and digestible; traditional Somali suhoor before dawn",
+      "tips": "Canjeero (lahoh) is a staple across Somalia and Djibouti; serve with honey and tea",
+      "countryId": "somalia",
+      "steps": [
+        "The night before: mix 2 cups sorghum or rice flour with 1/2 tsp yeast, 1 tsp sugar, and 2 cups warm water. Whisk until smooth; cover and leave 8–12 hours to ferment.",
+        "In the morning: batter should be bubbly. Heat a nonstick pan over medium; pour a ladle of batter in a spiral from the center. Do not spread. Cover 2–3 min until set and holes form on top.",
+        "Cook uncovered 1 min; no need to flip. Remove and keep warm. Repeat with remaining batter.",
+        "Serve canjeero with ghee, honey, and optional scrambled eggs or liver for a filling suhoor."
+      ]
     }
   ],
   "iftar": [
@@ -223,7 +259,12 @@
       "name": "Traditional Date & Water Start",
       "region": "Universal",
       "description": "The Prophetic way to break fast - dates and water first",
-      "ingredients": ["Medjool dates", "Water", "Milk (optional)"],
+      "defaultServings": 1,
+      "ingredients": [
+        { "name": "Medjool dates", "amount": "1–3" },
+        { "name": "Water", "amount": "1 glass" },
+        { "name": "Milk (optional)", "amount": "" }
+      ],
       "prepTime": "0 min",
       "cookTime": "0 min",
       "totalTime": "1 min",
@@ -529,6 +570,82 @@
         "In same pot, sauté 2 chopped onions 5 min. Add 3 tbsp tomato paste, 2 chopped tomatoes, 1 tbsp fish paste (optional), 1 tsp garlic. Cook 10 min. Add 1/2 head cabbage (quartered), 3 carrots, 1 eggplant (chunks), 2 cups water. Simmer 20 min.",
         "Add 2 cups broken rice (or regular rice), more water to cover, and fish on top. Cover and cook 25 min until rice is tender. Add water if needed.",
         "Serve on a large platter: rice first, then vegetables and fish. Drizzle with remaining sauce. Eat communally for ndogou (breaking fast)."
+      ]
+    },
+    {
+      "id": 16,
+      "name": "Malaysian Bubur Lambuk",
+      "region": "Southeast Asia",
+      "description": "Savory rice porridge with beef, coconut milk, and spices - mosque charity iftar staple",
+      "ingredients": ["Rice", "Beef", "Coconut milk", "Ginger", "Cinnamon", "Star anise", "Fried shallots"],
+      "prepTime": "15 min",
+      "cookTime": "60 min",
+      "totalTime": "75 min",
+      "benefits": "Rehydrating and nourishing; shared at mosque iftars across Malaysia",
+      "tips": "Bubur lambuk is traditionally prepared by mosque communities and distributed at iftar",
+      "countryId": "malaysia",
+      "steps": [
+        "Rinse 1 cup rice and soak 15 min; drain. In a large pot, sauté 2 tbsp grated ginger, 2 cinnamon sticks, 2 star anise in 1 tbsp oil 2 min. Add 1 lb (450g) cubed beef; brown 5 min.",
+        "Add rice, 6 cups water, and 1 cup coconut milk. Bring to a boil; reduce heat and simmer 45–60 min, stirring often, until rice breaks down and beef is tender.",
+        "Season with salt, white pepper, and a little sugar. Add more water if too thick. Stir in 1/2 cup coconut milk (2 min).",
+        "Serve hot in bowls topped with fried shallots, sliced scallions, and optional sambal. Often shared as communal iftar at mosques."
+      ]
+    },
+    {
+      "id": 17,
+      "name": "Iranian Ash Reshteh",
+      "region": "Persian",
+      "description": "Hearty noodle and bean soup with herbs, kashk, and fried mint",
+      "ingredients": ["Chickpeas", "Lentils", "Reshteh noodles", "Spinach", "Parsley", "Kashk", "Mint", "Onions"],
+      "prepTime": "20 min",
+      "cookTime": "55 min",
+      "totalTime": "75 min",
+      "benefits": "Protein-rich and warming; traditional Persian iftar and Nowruz dish",
+      "tips": "Kashk (whey) gives a tangy finish; find it at Middle Eastern grocers or omit",
+      "countryId": "iran",
+      "steps": [
+        "Soak 1/2 cup chickpeas and 1/2 cup lentils 30 min (or use canned). In a large pot, sauté 2 chopped onions 5 min. Add 8 cups water, chickpeas, lentils; simmer 30 min.",
+        "Add 2 cups chopped spinach, 1 cup chopped parsley, 1 cup chopped cilantro, 1 cup chopped scallions. Cook 15 min. Add 2 cups reshteh (Persian noodles) or linguine broken in half; cook 10 min.",
+        "Stir in 2 tbsp dried mint, 1 tsp turmeric, salt, and pepper. Thin 2–3 tbsp kashk with a little soup; stir in (or omit). Simmer 5 min.",
+        "Serve in bowls; drizzle with kashk and fried mint (mint + oil). Garnish with fried onion. Common at Iranian iftar tables."
+      ]
+    },
+    {
+      "id": 18,
+      "name": "Palestinian Musakhan",
+      "region": "Levant",
+      "description": "Sumac-roasted chicken on taboon bread with caramelized onions and pine nuts",
+      "ingredients": ["Chicken", "Sumac", "Onions", "Taboon or pita bread", "Pine nuts", "Olive oil"],
+      "prepTime": "25 min",
+      "cookTime": "50 min",
+      "totalTime": "75 min",
+      "benefits": "Celebration dish; sumac and olive oil are staples of Palestinian cuisine",
+      "tips": "Musakhan is often served at Ramadan and family gatherings; eat with hands",
+      "countryId": "palestine",
+      "steps": [
+        "Marinate chicken pieces with 3 tbsp sumac, 1 tsp allspice, salt, pepper, and 2 tbsp olive oil (5 min). Caramelize 4 sliced onions in 1/4 cup olive oil 15–20 min; add 2 tbsp sumac (2 min).",
+        "Roast chicken at 400°F (200°C) 40–45 min until golden. Warm taboon or large pita in the oven (2 min). Toast pine nuts in a dry pan 2–3 min.",
+        "Place bread on a platter. Top with onion mixture, then chicken. Drizzle with pan juices and olive oil; scatter pine nuts and more sumac.",
+        "Serve with yogurt and salad. A centerpiece at Palestinian iftar."
+      ]
+    },
+    {
+      "id": 19,
+      "name": "Indian Chana Chaat",
+      "region": "South Asia",
+      "description": "Spiced chickpea salad with chaat masala, lime, and fresh herbs",
+      "ingredients": ["Chickpeas", "Tomatoes", "Onion", "Chaat masala", "Lime", "Cilantro", "Sev (optional)"],
+      "prepTime": "10 min",
+      "cookTime": "0 min",
+      "totalTime": "10 min",
+      "benefits": "Quick, hydrating, and protein-rich; popular iftar snack across India and Pakistan",
+      "tips": "Use canned chickpeas for speed; chaat masala is available at South Asian grocers",
+      "countryId": "india",
+      "steps": [
+        "Drain and rinse 2 cans chickpeas; put in a large bowl. Dice 2 tomatoes, 1 red onion; add to bowl (3 min).",
+        "Add 2 tsp chaat masala, 1/2 tsp cumin, pinch black salt (kala namak) if you have it, salt to taste. Squeeze juice of 2 limes; toss (2 min).",
+        "Add 1/2 cup chopped cilantro and 2 tbsp chopped mint. Add a handful of sev (crispy noodles) or crushed papdi just before serving (1 min).",
+        "Serve at room temperature or chilled. A refreshing start to iftar."
       ]
     }
   ]

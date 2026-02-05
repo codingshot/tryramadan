@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Utensils, ChevronRight } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { CulturalCarousel } from "@/components/CulturalCarousel";
@@ -73,10 +73,23 @@ const Culture = () => {
             <p className="text-muted-foreground mt-2 text-sm sm:text-base max-w-2xl">
               Explore iftar and suhoor traditions, foods, and customs from Muslim communities by country.
             </p>
+            <Link
+              to="/recipes"
+              className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-secondary/10 text-secondary font-medium hover:bg-secondary/20 transition-colors text-sm"
+            >
+              <Utensils className="w-4 h-4" aria-hidden />
+              Browse recipes by region
+              <ChevronRight className="w-4 h-4" aria-hidden />
+            </Link>
           </motion.header>
           <section aria-label="Countries and regions">
             <CulturalCarousel />
           </section>
+          <p className="mt-8 text-center text-sm text-muted-foreground">
+            <Link to="/recipes" className="text-secondary hover:underline">
+              View all Ramadan recipes by culture and meal type →
+            </Link>
+          </p>
         </div>
       </main>
       <Footer />

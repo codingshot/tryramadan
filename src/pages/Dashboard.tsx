@@ -849,9 +849,18 @@ const Dashboard = () => {
                           Today&apos;s schedule
                         </span>
                         {!scheduleOpen && (
-                          <span className="text-xs text-muted-foreground font-normal truncate">
-                            Next: {nextPrayer.name} {nextPrayer.time}
-                            {nextPrayer.isTomorrow && " (tomorrow)"}
+                          <span className="text-xs text-muted-foreground font-normal truncate min-w-0">
+                            {mealPlans[todayStr]?.suhoor || mealPlans[todayStr]?.iftar ? (
+                              <>
+                                <span className="text-secondary font-medium">Meals planned: </span>
+                                {[
+                                  mealPlans[todayStr]?.suhoor ? "Suhoor: " + (mealPlans[todayStr].suhoor.length > 15 ? mealPlans[todayStr].suhoor.slice(0, 14) + "…" : mealPlans[todayStr].suhoor) : "",
+                                  mealPlans[todayStr]?.iftar ? iftarLabelShort + ": " + (mealPlans[todayStr].iftar!.length > 15 ? mealPlans[todayStr].iftar!.slice(0, 14) + "…" : mealPlans[todayStr].iftar) : "",
+                                ].filter(Boolean).join(" · ")}
+                              </>
+                            ) : (
+                              <>Next: {nextPrayer.name} {nextPrayer.time}{nextPrayer.isTomorrow && " (tomorrow)"}</>
+                            )}
                           </span>
                         )}
                         <ChevronDown
@@ -866,6 +875,7 @@ const Dashboard = () => {
                           prayerTimes={prayerTimes}
                           iftarLabelShort={iftarLabelShort}
                           includeTaraweeh
+                          dayMeals={mealPlans[todayStr]}
                         />
                       </div>
                     </CollapsibleContent>

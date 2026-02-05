@@ -82,10 +82,17 @@ export function addTaraweehToTimeline(
   return [...items, taraweehItem];
 }
 
+export interface DayMealsForTimeline {
+  suhoor?: string;
+  iftar?: string;
+}
+
 interface TodayScheduleTimelineProps {
   prayerTimes: PrayerTimes;
   iftarLabelShort?: string;
   includeTaraweeh?: boolean;
+  /** Today's planned meals — shown in line with Suhoor / Iftar times */
+  dayMeals?: DayMealsForTimeline | null;
   className?: string;
 }
 
@@ -93,12 +100,19 @@ export const TodayScheduleTimeline = memo(function TodayScheduleTimeline({
   prayerTimes,
   iftarLabelShort = "Iftar",
   includeTaraweeh = false,
+  dayMeals,
   className = "",
 }: TodayScheduleTimelineProps) {
   let items = buildTodayTimeline(prayerTimes, iftarLabelShort);
   if (includeTaraweeh) {
     items = addTaraweehToTimeline(items, prayerTimes.isha);
   }
+
+  const getMealPlanForItem = (item: TimelineItem): string | undefined => {
+    if (item.label.includes("Suhoor") && dayMeals?.suhoor?.trim()) return dayMeals.suhoor.trim();
+    if ((item.label === iftarLabelShort || item.label.includes("Iftar")) && !item.label.includes("Taraweeh") && dayMeals?.iftar?.trim()) return dayMeals.iftar.trim();
+    return undefined;
+  };
 
   return (
     <motion.div
@@ -112,11 +126,13 @@ export const TodayScheduleTimeline = memo(function TodayScheduleTimeline({
           Today&apos;s schedule
         </h3>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Key times for fasting and prayer
+          Key times for fasting and prayer{dayMeals?.suhoor || dayMeals?.iftar ? " · Meals planned" : ""}
         </p>
       </div>
       <ul className="divide-y divide-border">
-        {items.map((item) => (
+        {items.map((item) => {
+          const plannedMeal = getMealPlanForItem(item);
+          return (
           <li
             key={`${item.time}-${item.label}`}
             className={`flex items-center gap-3 px-4 py-2.5 ${
@@ -163,12 +179,18 @@ export const TodayScheduleTimeline = memo(function TodayScheduleTimeline({
                   {item.sublabel}
                 </span>
               )}
+              {plannedMeal && (
+                <p className="text-xs text-secondary font-medium truncate mt-1" title={plannedMeal}>
+                  {plannedMeal}
+                </p>
+              )}
             </div>
             <span className="font-mono text-sm font-semibold text-secondary shrink-0 tabular-nums">
               {item.time}
             </span>
           </li>
-        ))}
+        );
+        })}
       </ul>
     </motion.div>
   );

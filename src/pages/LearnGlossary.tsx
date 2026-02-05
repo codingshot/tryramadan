@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Search, BookOpen, Volume2 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -22,13 +22,36 @@ type GlossaryEntry = {
 
 const LearnGlossary = () => {
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const fromDashboard = location.pathname.startsWith("/dashboard/glossary");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  
+  const qFromUrl = searchParams.get("q") ?? "";
+  const categoryFromUrl = searchParams.get("category");
+  const [searchQuery, setSearchQuery] = useState(qFromUrl);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(categoryFromUrl || null);
+
+  useEffect(() => {
+    setSearchQuery(qFromUrl);
+    setSelectedCategory(categoryFromUrl || null);
+  }, [qFromUrl, categoryFromUrl]);
+
   const glossary = glossaryData.glossary as GlossaryEntry[];
   const categories = useMemo(() => [...new Set(glossary.map(item => item.category))], [glossary]);
-  
+
+  const setSearchQueryAndUrl = (value: string) => {
+    setSearchQuery(value);
+    const next: Record<string, string> = {};
+    if (value.trim()) next.q = value.trim();
+    if (selectedCategory) next.category = selectedCategory;
+    setSearchParams(next, { replace: true });
+  };
+  const setSelectedCategoryAndUrl = (value: string | null) => {
+    setSelectedCategory(value);
+    const next: Record<string, string> = {};
+    if (searchQuery.trim()) next.q = searchQuery.trim();
+    if (value) next.category = value;
+    setSearchParams(next, { replace: true });
+  };
+
   // Debounce search for better performance
   const debouncedSearch = useDebounce(searchQuery, 200);
   
@@ -89,7 +112,7 @@ const LearnGlossary = () => {
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => setSearchQueryAndUrl(e.target.value)}
                 placeholder="Search terms in English or Arabic..."
                 className="w-full pl-12 pr-4 py-3 rounded-xl border border-border bg-background focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all"
               />
@@ -104,7 +127,7 @@ const LearnGlossary = () => {
             className="flex flex-wrap gap-2 mb-8"
           >
             <button
-              onClick={() => setSelectedCategory(null)}
+              onClick={() => setSelectedCategoryAndUrl(null)}
               className={`px-4 py-2 rounded-full text-sm transition-all ${
                 !selectedCategory 
                   ? 'bg-secondary text-secondary-foreground' 
@@ -116,7 +139,7 @@ const LearnGlossary = () => {
             {categories.map(category => (
               <button
                 key={category}
-                onClick={() => setSelectedCategory(category)}
+                onClick={() => setSelectedCategoryAndUrl(category)}
                 className={`px-4 py-2 rounded-full text-sm transition-all ${
                   selectedCategory === category 
                     ? 'bg-secondary text-secondary-foreground' 

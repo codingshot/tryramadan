@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { ArrowLeft, ChevronDown, Search, HelpCircle } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -8,9 +8,20 @@ import { PageSEO } from "@/components/PageSEO";
 import { buildFAQPageSchema } from "@/lib/jsonld";
 
 const FAQ = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const qFromUrl = searchParams.get("q") ?? "";
+  const [searchQuery, setSearchQuery] = useState(qFromUrl);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-  
+
+  useEffect(() => {
+    setSearchQuery(qFromUrl);
+  }, [qFromUrl]);
+
+  const setSearchQueryAndUrl = (value: string) => {
+    setSearchQuery(value);
+    setSearchParams(value.trim() ? { q: value.trim() } : {}, { replace: true });
+  };
+
   const faqs = [
     {
       category: "About Fasting",
@@ -160,7 +171,7 @@ const FAQ = () => {
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => setSearchQueryAndUrl(e.target.value)}
                 placeholder="Search questions..."
                 className="w-full pl-12 pr-4 py-3 rounded-xl border border-border bg-background focus:border-secondary focus:ring-1 focus:ring-secondary outline-none transition-all"
               />

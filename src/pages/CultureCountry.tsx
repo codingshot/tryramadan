@@ -160,6 +160,13 @@ export default function CultureCountry() {
                 Discover Ramadan traditions, iftar and suhoor customs, traditional foods, and Islamic culture in {country.name}.
                 {country.traditions.length > 0 ? ` ${country.traditions.length} traditions.` : ""}
                 {country.foods.length > 0 ? ` Traditional foods include ${country.foods.slice(0, 3).join(", ")}.` : ""}
+                {recipesFromCountry.length > 0 && (
+                  <>{" "}
+                    <Link to={`/recipes?country=${country.id}`} className="text-secondary hover:underline font-medium">
+                      {recipesFromCountry.length} recipe{recipesFromCountry.length !== 1 ? "s" : ""} from this country
+                    </Link>.
+                  </>
+                )}
               </p>
             </header>
 
@@ -192,7 +199,16 @@ export default function CultureCountry() {
 
             <section className="mb-8" aria-labelledby="foods-heading">
               <h2 id="foods-heading" className="font-display font-bold text-lg mb-3">Traditional foods</h2>
-              <p className="text-muted-foreground">{country.foods.join(", ")}</p>
+              <div className="flex flex-wrap gap-2">
+                {country.foods.map((food) => (
+                  <span
+                    key={food}
+                    className="px-3 py-1.5 rounded-full text-sm bg-muted/70 text-foreground border border-border"
+                  >
+                    {food}
+                  </span>
+                ))}
+              </div>
             </section>
 
             {country.sources && country.sources.length > 0 && (
@@ -337,13 +353,24 @@ export default function CultureCountry() {
 
             {/* Recipes from this region */}
             <section aria-labelledby="recipes-heading">
-              <h2 id="recipes-heading" className="font-display font-bold text-lg mb-4 flex items-center gap-2">
-                <Globe className="w-5 h-5 text-secondary" aria-hidden />
-                Recipes from this region
-              </h2>
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <h2 id="recipes-heading" className="font-display font-bold text-lg flex items-center gap-2">
+                  <Globe className="w-5 h-5 text-secondary" aria-hidden />
+                  Recipes from this country
+                </h2>
+                {recipesFromCountry.length > 0 && country.regionName && (
+                  <Link
+                    to={`/recipes?region=${encodeURIComponent(country.regionName)}`}
+                    className="text-sm font-medium text-secondary hover:underline inline-flex items-center gap-1"
+                  >
+                    View all {country.regionName} recipes
+                    <ChevronRight className="w-4 h-4" aria-hidden />
+                  </Link>
+                )}
+              </div>
               {recipesFromCountry.length === 0 ? (
                 <p className="text-muted-foreground text-sm">
-                  No recipes are tagged with this region yet.{" "}
+                  No recipes are tagged with this country yet.{" "}
                   <Link to="/recipes" className="text-secondary hover:underline">
                     Browse all recipes
                   </Link>

@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
   ChevronLeft,
@@ -41,10 +41,12 @@ import {
   getDayTotalsFromFoodLog,
   normalizeDayFoodLog,
   clampCalories,
+  useDisplayTimezone,
   type MealCategory,
   type PlannedItem,
   type FoodLogEntry,
 } from "@/hooks/useLocalStorage";
+import { getTodayStringInTimezone, toLocalDateString } from "@/lib/utils";
 import recipesData from "@/data/recipes.json";
 import { parseNutrient } from "@/lib/cultureRecipes";
 import { resizeImageToDataUrl } from "@/lib/foodImage";
@@ -99,10 +101,30 @@ function MacroBar({ current, goal, label }: { current: number; goal: number; lab
   );
 }
 
+function isValidDateString(s: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const d = new Date(s + "T12:00:00");
+  return !isNaN(d.getTime()) && d.toISOString().startsWith(s);
+}
+
 export default function DashboardMacros() {
-  const todayStr = new Date().toISOString().split("T")[0];
-  const [selectedDate, setSelectedDate] = useState(todayStr);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const displayTimezone = useDisplayTimezone();
+  const todayStr = displayTimezone ? getTodayStringInTimezone(displayTimezone) : toLocalDateString(new Date());
+  const dateFromUrl = searchParams.get("date");
+  const initialDate = dateFromUrl && isValidDateString(dateFromUrl) ? dateFromUrl : todayStr;
+  const [selectedDate, setSelectedDate] = useState(initialDate);
   const [preferences] = useUserPreferences();
+
+  useEffect(() => {
+    const next = dateFromUrl && isValidDateString(dateFromUrl) ? dateFromUrl : todayStr;
+    setSelectedDate(next);
+  }, [dateFromUrl, todayStr]);
+
+  const setSelectedDateAndUrl = (dateStr: string) => {
+    setSelectedDate(dateStr);
+    setSearchParams(dateStr === todayStr ? {} : { date: dateStr }, { replace: true });
+  };
   const [dailyGoals, setDailyGoals] = useDailyGoals();
   const [planned, setPlanned] = useDayPlannedItems();
   const [foodLogs, setFoodLogs] = useDayFoodLog();
@@ -267,12 +289,12 @@ export default function DashboardMacros() {
   const goPrevDay = () => {
     const d = new Date(selectedDate + "T12:00:00");
     d.setDate(d.getDate() - 1);
-    setSelectedDate(d.toISOString().split("T")[0]);
+    setSelectedDateAndUrl(d.toISOString().split("T")[0]);
   };
   const goNextDay = () => {
     const d = new Date(selectedDate + "T12:00:00");
     d.setDate(d.getDate() + 1);
-    setSelectedDate(d.toISOString().split("T")[0]);
+    setSelectedDateAndUrl(d.toISOString().split("T")[0]);
   };
   const isToday = selectedDate === todayStr;
   const selectedDateObj = new Date(selectedDate + "T12:00:00");
@@ -758,7 +780,7 @@ export default function DashboardMacros() {
                         {entry.imageDataUrl ? (
                           <img src={entry.imageDataUrl} alt="" className="h-9 w-9 rounded object-cover shrink-0" />
                         ) : null}
-                        <button type="button" onClick={() => setSelectedDate(dateStr)} className="text-left font-medium text-foreground hover:text-secondary truncate min-w-0 flex-1">
+                        <button type="button" onClick={() => setSelectedDateAndUrl(dateStr)} className="text-left font-medium text-foreground hover:text-secondary truncate min-w-0 flex-1">
                           {entry.name}
                         </button>
                         <span className="text-muted-foreground shrink-0">{dateLabel}</span>
@@ -779,7 +801,7 @@ export default function DashboardMacros() {
                     <button
                       key={`${dateStr}-${entry.id}`}
                       type="button"
-                      onClick={() => setSelectedDate(dateStr)}
+                      onClick={() => setSelectedDateAndUrl(dateStr)}
                       className="rounded-xl border border-border overflow-hidden bg-muted/20 hover:bg-muted/40 text-left transition-colors"
                     >
                       <div className="aspect-square relative">

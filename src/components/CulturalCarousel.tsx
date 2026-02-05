@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight, ExternalLink, Keyboard } from "lucide-react";
+import { ChevronLeft, ChevronRight, ExternalLink, Keyboard, Utensils } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import culturalData from "@/data/cultural-traditions.json";
 
@@ -190,13 +190,22 @@ export const CulturalCarousel = () => {
           </div>
         </div>
 
-        <Link
-          to={`/culture/${currentCountry.id}`}
-          className="inline-flex items-center gap-2 text-sm font-medium text-secondary hover:underline"
-        >
-          Explore Ramadan in {currentCountry.name}
-          <ExternalLink className="w-4 h-4" aria-hidden />
-        </Link>
+        <div className="flex flex-wrap items-center gap-3">
+          <Link
+            to={`/culture/${currentCountry.id}`}
+            className="inline-flex items-center gap-2 text-sm font-medium text-secondary hover:underline"
+          >
+            Explore Ramadan in {currentCountry.name}
+            <ExternalLink className="w-4 h-4" aria-hidden />
+          </Link>
+          <Link
+            to={`/recipes?region=${encodeURIComponent(currentRegion.name)}`}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-secondary hover:underline"
+          >
+            <Utensils className="w-4 h-4" aria-hidden />
+            Recipes from {currentRegion.name}
+          </Link>
+        </div>
       </motion.div>
 
       {/* Region indicator dots */}

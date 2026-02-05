@@ -1,16 +1,15 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { 
   ArrowLeft, Clock, ShoppingCart, Sunrise, Sunset,
   Flame, Plus, Heart, Filter, Globe, BookOpen, ImagePlus, X
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import recipesData from "@/data/recipes.json";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRecipeFavorites, useRecentRecipes, useDayMealPlans, useDayFoodLog, normalizeDayFoodLog, clampCalories, useSuhoorLabel, useIftarLabel, useUserPreferences, useFastingProgress, isFastingToday } from "@/hooks/useLocalStorage";
-import { parseNutrient } from "@/lib/cultureRecipes";
+import { getRecipes, getAllRegions, parseNutrient, getIngredientName, type Recipe, type RecipeIngredient } from "@/lib/cultureRecipes";
 import { resizeImageToDataUrl } from "@/lib/foodImage";
 import { toast } from "sonner";
 import {
@@ -26,38 +25,67 @@ import { Label } from "@/components/ui/label";
 import { PageSEO } from "@/components/PageSEO";
 
 type MealType = "suhoor" | "iftar";
-type Recipe = {
-  id: number;
-  name: string;
-  region: string;
-  description: string;
-  ingredients: string[];
-  prepTime: string;
-  benefits: string;
-  tips: string;
-  nutrition?: { calories: number; protein: string; carbs: string; fat: string };
-  significance?: string;
-  dietary?: string[];
-  countryId?: string;
-};
 
-const allSuhoor = (recipesData as { suhoor: Recipe[]; iftar: Recipe[] }).suhoor;
-const allIftar = (recipesData as { suhoor: Recipe[]; iftar: Recipe[] }).iftar;
-const allRegions = [...new Set([...allSuhoor.map(r => r.region), ...allIftar.map(r => r.region)])].sort();
+/** All recipes from same source as /recipes page (cultureRecipes). */
+const allRecipesWithType = getRecipes();
+const allRegions = getAllRegions();
 const dietaryOptions = ["vegetarian", "vegan-option", "halal"] as const;
 
+function buildMealsSearchParams(meal: string, region: string, diet: string): Record<string, string> {
+  const next: Record<string, string> = {};
+  if (meal === "suhoor" || meal === "iftar") next.meal = meal;
+  if (region && region !== "all") next.region = region;
+  if (diet && diet !== "all" && dietaryOptions.includes(diet as (typeof dietaryOptions)[number])) next.diet = diet;
+  return next;
+}
+
 const DashboardMeals = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const mealFromUrl = searchParams.get("meal");
+  const regionFromUrl = searchParams.get("region");
+  const dietFromUrl = searchParams.get("diet");
+
   const [preferences] = useUserPreferences();
   const suhoorLabel = useSuhoorLabel();
   const iftarLabel = useIftarLabel();
-  const [activeTab, setActiveTab] = useState<MealType>("suhoor");
+  const [activeTab, setActiveTab] = useState<MealType>(() =>
+    mealFromUrl === "suhoor" || mealFromUrl === "iftar" ? mealFromUrl : "suhoor"
+  );
   const [selectedRecipes, setSelectedRecipes] = useState<number[]>([]);
   const [favorites, setFavorites] = useRecipeFavorites();
   const [recentRecipes, addRecentRecipe] = useRecentRecipes();
   const [mealPlans, setMealPlans] = useDayMealPlans();
   const [foodLogs, setFoodLogs] = useDayFoodLog();
-  const [regionFilter, setRegionFilter] = useState<string>("all");
-  const [dietaryFilter, setDietaryFilter] = useState<string>("all");
+  const [regionFilter, setRegionFilter] = useState<string>(() => regionFromUrl ?? "all");
+  const [dietaryFilter, setDietaryFilter] = useState<string>(() =>
+    dietFromUrl && dietaryOptions.includes(dietFromUrl as (typeof dietaryOptions)[number]) ? dietFromUrl : "all"
+  );
+  useEffect(() => {
+    setActiveTab(mealFromUrl === "suhoor" || mealFromUrl === "iftar" ? mealFromUrl : "suhoor");
+    setRegionFilter(regionFromUrl ?? "all");
+    setDietaryFilter(
+      dietFromUrl && dietaryOptions.includes(dietFromUrl as (typeof dietaryOptions)[number]) ? dietFromUrl : "all"
+    );
+  }, [mealFromUrl, regionFromUrl, dietFromUrl]);
+
+  const setActiveTabAndUrl = (value: MealType) => {
+    setActiveTab(value);
+    setSearchParams(buildMealsSearchParams(value, regionFilter, dietaryFilter), { replace: true });
+  };
+  const setRegionFilterAndUrl = (value: string) => {
+    setRegionFilter(value);
+    setSearchParams(buildMealsSearchParams(activeTab, value, dietaryFilter), { replace: true });
+  };
+  const setDietaryFilterAndUrl = (value: string) => {
+    setDietaryFilter(value);
+    setSearchParams(buildMealsSearchParams(activeTab, regionFilter, value), { replace: true });
+  };
+  const clearMealsFilters = () => {
+    setRegionFilter("all");
+    setDietaryFilter("all");
+    setSearchParams(buildMealsSearchParams(activeTab, "all", "all"), { replace: true });
+  };
+
   const [showCreateMeal, setShowCreateMeal] = useState(false);
   const [customMeal, setCustomMeal] = useState({
     name: "",
@@ -74,7 +102,10 @@ const DashboardMeals = () => {
   const [progress] = useFastingProgress();
   const fastingToday = isFastingToday(progress, today);
 
-  const baseRecipes = activeTab === "suhoor" ? allSuhoor : allIftar;
+  const baseRecipes = useMemo(
+    () => allRecipesWithType.filter((r) => r.mealType === activeTab).map((r) => r.recipe),
+    [activeTab]
+  );
   const recipes = useMemo(() => {
     let list = baseRecipes;
     if (regionFilter !== "all") list = list.filter(r => r.region === regionFilter);
@@ -111,7 +142,7 @@ const DashboardMeals = () => {
   // Grocery list from selected recipes (from current filtered list that user added)
   const groceryList = baseRecipes
     .filter(r => selectedRecipes.includes(r.id))
-    .flatMap(r => r.ingredients);
+    .flatMap(r => r.ingredients.map(getIngredientName));
   const uniqueGroceries = [...new Set(groceryList)];
 
   const copyGroceryList = () => {
@@ -276,7 +307,7 @@ const DashboardMeals = () => {
             className="flex gap-2 mb-8"
           >
             <button
-              onClick={() => setActiveTab('suhoor')}
+              onClick={() => setActiveTabAndUrl('suhoor')}
               className={`flex-1 p-4 rounded-2xl border-2 transition-all flex items-center justify-center gap-3 ${
                 activeTab === 'suhoor' 
                   ? 'border-secondary bg-secondary/10' 
@@ -291,7 +322,7 @@ const DashboardMeals = () => {
               </div>
             </button>
             <button
-              onClick={() => setActiveTab('iftar')}
+              onClick={() => setActiveTabAndUrl('iftar')}
               className={`flex-1 p-4 rounded-2xl border-2 transition-all flex items-center justify-center gap-3 ${
                 activeTab === 'iftar' 
                   ? 'border-secondary bg-secondary/10' 
@@ -317,7 +348,7 @@ const DashboardMeals = () => {
           >
             <div className="flex items-center gap-2">
               <Label htmlFor="filter-region" className="text-xs text-muted-foreground whitespace-nowrap">Region</Label>
-              <Select value={regionFilter} onValueChange={setRegionFilter}>
+              <Select value={regionFilter} onValueChange={setRegionFilterAndUrl}>
                 <SelectTrigger id="filter-region" className="w-[180px]" aria-label="Filter by region">
                   <SelectValue placeholder="All regions" />
                 </SelectTrigger>
@@ -331,7 +362,7 @@ const DashboardMeals = () => {
             </div>
             <div className="flex items-center gap-2">
               <Label htmlFor="filter-diet" className="text-xs text-muted-foreground whitespace-nowrap">Diet</Label>
-              <Select value={dietaryFilter} onValueChange={setDietaryFilter}>
+              <Select value={dietaryFilter} onValueChange={setDietaryFilterAndUrl}>
                 <SelectTrigger id="filter-diet" className="w-[160px]" aria-label="Filter by diet">
                   <SelectValue placeholder="All" />
                 </SelectTrigger>
@@ -351,7 +382,7 @@ const DashboardMeals = () => {
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() => { setRegionFilter("all"); setDietaryFilter("all"); }}
+                onClick={clearMealsFilters}
               >
                 Clear filters
               </Button>
@@ -549,8 +580,41 @@ const DashboardMeals = () => {
             </div>
           </motion.div>
           
-          {/* Recipe cards */}
-          <div className="space-y-4 mb-8">
+          {/* Selected for meal plan — compact strip so user doesn't scroll forever to see selection */}
+          {selectedRecipes.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-4 p-3 rounded-2xl bg-secondary/10 border border-secondary/30"
+            >
+              <p className="text-xs font-medium text-secondary mb-2">
+                Selected for meal plan ({selectedRecipes.length})
+              </p>
+              <div className="max-h-24 overflow-y-auto overflow-x-hidden flex flex-wrap gap-1.5">
+                {recipes
+                  .filter((r) => selectedRecipes.includes(r.id))
+                  .map((r) => (
+                    <span
+                      key={r.id}
+                      className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-background/80 text-sm border border-border"
+                    >
+                      {r.name}
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); toggleRecipe(r.id); }}
+                        className="shrink-0 rounded p-0.5 hover:bg-muted"
+                        aria-label={`Remove ${r.name} from selection`}
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </span>
+                  ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Recipe cards — extra bottom padding when sticky bar is shown so last card isn't hidden */}
+          <div className={`space-y-4 ${selectedRecipes.length > 0 ? "mb-28 md:mb-24" : "mb-8"}`}>
             {recipes.map((recipe, index) => (
               <motion.div
                 key={recipe.id}
@@ -653,7 +717,7 @@ const DashboardMeals = () => {
                 <div className="flex flex-wrap gap-2 mb-4">
                   {recipe.ingredients.slice(0, 5).map((ingredient, i) => (
                     <span key={i} className="px-2 py-1 rounded-full bg-muted text-xs">
-                      {ingredient}
+                      {getIngredientName(ingredient)}
                     </span>
                   ))}
                   {recipe.ingredients.length > 5 && (
@@ -723,21 +787,34 @@ const DashboardMeals = () => {
             </motion.div>
           )}
 
-          {/* Add selected to today's schedule */}
+          {/* Add selected to today's schedule — fixed on mobile (safe-area), in-flow on desktop */}
           {selectedRecipes.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mt-6"
-            >
-              <button
-                type="button"
-                onClick={addSelectedToTodaySchedule}
-                className="w-full py-3 px-4 rounded-2xl border-2 border-secondary bg-secondary/10 text-secondary font-medium hover:bg-secondary/20 transition-colors"
+            <>
+              <div className="hidden md:block mt-6" aria-hidden>
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="pt-4 pb-4">
+                  <button
+                    type="button"
+                    onClick={addSelectedToTodaySchedule}
+                    className="w-full py-3 px-4 rounded-2xl border-2 border-secondary bg-secondary text-secondary-foreground font-medium hover:bg-secondary/90 transition-colors shadow-lg"
+                  >
+                    Add {selectedRecipes.length} selected recipe{selectedRecipes.length !== 1 ? "s" : ""} to today&apos;s meal plan ({activeTab})
+                  </button>
+                </motion.div>
+              </div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="md:hidden fixed bottom-0 left-0 right-0 z-20 pt-3 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] bg-background/95 backdrop-blur border-t border-border shadow-[0_-4px_12px_rgba(0,0,0,0.06)]"
               >
-                Add selected recipes to today's meal plan ({activeTab})
-              </button>
-            </motion.div>
+                <button
+                  type="button"
+                  onClick={addSelectedToTodaySchedule}
+                  className="w-full py-3 px-4 rounded-2xl border-2 border-secondary bg-secondary text-secondary-foreground font-medium hover:bg-secondary/90 transition-colors shadow-lg min-h-[48px]"
+                >
+                  Add {selectedRecipes.length} to today&apos;s meal plan ({activeTab})
+                </button>
+              </motion.div>
+            </>
           )}
         </div>
       </main>

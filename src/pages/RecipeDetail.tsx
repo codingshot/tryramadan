@@ -1,12 +1,17 @@
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Coffee, Utensils, Clock, Globe, BookOpen, Flame, ListOrdered, ExternalLink } from "lucide-react";
+import { ArrowLeft, Coffee, Utensils, Clock, Globe, BookOpen, Flame, ListOrdered, ExternalLink, Users, ChevronRight } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { PageSEO } from "@/components/PageSEO";
 import {
   getRecipeWithType,
   getCountryForRecipe,
+  getIngredientDisplay,
+  getDefaultServings,
+  getRecipeIngredientStrings,
+  getSimilarRecipes,
   type MealType,
 } from "@/lib/cultureRecipes";
 import { useIftarLabel } from "@/hooks/useLocalStorage";
@@ -21,6 +26,9 @@ export default function RecipeDetail() {
   const result = meal && !isNaN(recipeId) ? getRecipeWithType(meal, recipeId) : undefined;
   const recipe = result?.recipe;
   const country = recipe ? getCountryForRecipe(recipe) : undefined;
+  const defaultServings = recipe ? getDefaultServings(recipe) : 4;
+  const [portions, setPortions] = useState(defaultServings);
+  const multiplier = recipe && defaultServings > 0 ? portions / defaultServings : 1;
 
   if (!recipe || !result) {
     return (
@@ -67,7 +75,7 @@ export default function RecipeDetail() {
     url: recipeUrl,
     recipeCategory: mealLabel,
     recipeCuisine: recipe.region ?? undefined,
-    ingredients: recipe.ingredients,
+    ingredients: getRecipeIngredientStrings(recipe, 1),
     steps: recipe.steps,
     prepTime: recipe.prepTime,
     cookTime: recipe.cookTime,
@@ -121,13 +129,20 @@ export default function RecipeDetail() {
                   {type === "suhoor" ? "Suhoor" : iftarLabel}
                 </span>
                 {recipe.region && (
-                  <span className="text-sm text-muted-foreground">{recipe.region}</span>
+                  <Link
+                    to={`/recipes?region=${encodeURIComponent(recipe.region)}`}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-sm font-medium bg-muted/60 text-muted-foreground hover:bg-secondary/20 hover:text-secondary border border-border/60 transition-colors"
+                    title={`Filter recipes by region: ${recipe.region}`}
+                  >
+                    <Globe className="w-3.5 h-3.5" aria-hidden />
+                    {recipe.region}
+                  </Link>
                 )}
               </div>
               <h1 className="text-xl sm:text-2xl md:text-4xl font-display font-bold break-words">{recipe.name}</h1>
               <p className="text-muted-foreground mt-2 sm:mt-3 text-sm sm:text-base max-w-2xl">
                 {recipe.name} is a {mealLabel.toLowerCase()} recipe for Ramadan{recipe.region ? ` from ${recipe.region}` : ""}. {recipe.description}
-                {recipe.ingredients.length > 0 && ` Ingredients include ${recipe.ingredients.slice(0, 4).join(", ")}.`}
+                {recipe.ingredients.length > 0 && ` Ingredients include ${getRecipeIngredientStrings(recipe, 1).slice(0, 4).join(", ")}.`}
               </p>
             </header>
 
@@ -159,10 +174,36 @@ export default function RecipeDetail() {
             )}
 
             <section className="mb-6" aria-labelledby="ingredients-heading">
-              <h2 id="ingredients-heading" className="font-display font-bold text-lg mb-3">Ingredients</h2>
+              <div className="flex flex-wrap items-center justify-between gap-4 mb-3">
+                <h2 id="ingredients-heading" className="font-display font-bold text-lg">Ingredients</h2>
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-muted-foreground" aria-hidden />
+                  <label htmlFor="recipe-portions" className="text-sm font-medium text-muted-foreground">
+                    Servings
+                  </label>
+                  <select
+                    id="recipe-portions"
+                    value={portions}
+                    onChange={(e) => setPortions(Number(e.target.value))}
+                    className="rounded-lg border border-border bg-background px-3 py-1.5 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
+                    aria-label="Number of servings"
+                  >
+                    {[1, 2, 3, 4, 5, 6, 8, 10, 12].map((n) => (
+                      <option key={n} value={n}>
+                        {n} {n === 1 ? "serving" : "servings"}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              {portions !== defaultServings && (
+                <p className="text-xs text-muted-foreground mb-2">
+                  Amounts scaled for {portions} {portions === 1 ? "serving" : "servings"} (recipe written for {defaultServings}).
+                </p>
+              )}
               <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                 {recipe.ingredients.map((ing, i) => (
-                  <li key={i}>{ing}</li>
+                  <li key={i}>{getIngredientDisplay(ing, multiplier)}</li>
                 ))}
               </ul>
             </section>
@@ -240,6 +281,35 @@ export default function RecipeDetail() {
                 </ul>
               </section>
             )}
+
+            {(() => {
+              const similar = getSimilarRecipes(recipe, type, recipe.id, 6);
+              if (similar.length === 0) return null;
+              return (
+                <section className="mt-8 pt-6 border-t border-border" aria-labelledby="similar-recipes-heading">
+                  <h2 id="similar-recipes-heading" className="font-display font-bold text-lg mb-3">
+                    Similar recipes
+                  </h2>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    More {type === "suhoor" ? "suhoor" : "iftar"} ideas from the same region, country, or with overlapping ingredients.
+                  </p>
+                  <ul className="space-y-2">
+                    {similar.map(({ mealType: mt, recipe: r }) => (
+                      <li key={`${mt}-${r.id}`}>
+                        <Link
+                          to={`/recipe/${mt}/${r.id}`}
+                          className="flex items-center gap-2 p-3 rounded-xl bg-card border border-border hover:border-secondary/50 transition-all group"
+                        >
+                          <span className="font-medium flex-1 min-w-0">{r.name}</span>
+                          {r.region && <span className="text-xs text-muted-foreground shrink-0">{r.region}</span>}
+                          <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-secondary shrink-0" aria-hidden />
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              );
+            })()}
           </motion.article>
         </div>
       </main>

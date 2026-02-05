@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import recipes from "@/data/recipes.json";
+import { getIngredientName } from "@/lib/cultureRecipes";
 import { ArabicTerm } from "./ArabicTerm";
 
 export const RecipeSection = () => {
@@ -58,9 +59,9 @@ export const RecipeSection = () => {
                   <p className="text-sm text-muted-foreground mb-4">{recipe.description}</p>
 
                   <div className="flex flex-wrap gap-1 mb-4">
-                    {recipe.ingredients.slice(0, 4).map((ingredient) => (
-                      <span key={ingredient} className="text-xs px-2 py-0.5 rounded bg-muted text-muted-foreground">
-                        {ingredient}
+                    {recipe.ingredients.slice(0, 4).map((ingredient, i) => (
+                      <span key={i} className="text-xs px-2 py-0.5 rounded bg-muted text-muted-foreground">
+                        {getIngredientName(ingredient)}
                       </span>
                     ))}
                     {recipe.ingredients.length > 4 && (
@@ -140,9 +141,9 @@ export const RecipeSection = () => {
                   <p className="text-sm text-muted-foreground mb-4">{recipe.description}</p>
 
                   <div className="flex flex-wrap gap-1 mb-4">
-                    {recipe.ingredients.slice(0, 4).map((ingredient) => (
-                      <span key={ingredient} className="text-xs px-2 py-0.5 rounded bg-muted text-muted-foreground">
-                        {ingredient}
+                    {recipe.ingredients.slice(0, 4).map((ingredient, i) => (
+                      <span key={i} className="text-xs px-2 py-0.5 rounded bg-muted text-muted-foreground">
+                        {getIngredientName(ingredient)}
                       </span>
                     ))}
                     {recipe.ingredients.length > 4 && (
