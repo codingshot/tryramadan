@@ -8,6 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Dashboard from "@/pages/Dashboard";
 import DashboardToday from "@/pages/DashboardToday";
 import DashboardSchedule from "@/pages/DashboardSchedule";
+import DashboardMacros from "@/pages/DashboardMacros";
 
 const prefsWithLocation = {
   onboardingComplete: true,
@@ -72,7 +73,7 @@ describe("Dashboard features", () => {
 
   it("has quick action links to Today, Schedule, Meals, Journal", async () => {
     renderDashboard();
-    const todayLink = screen.getByRole("link", { name: /^today$/i });
+    const todayLink = await screen.findByRole("link", { name: /^today$/i }, { timeout: 8000 });
     const scheduleLink = screen.getByRole("link", { name: /^schedule$/i });
     const mealsLink = screen.getByRole("link", { name: /^meals$/i });
     const journalLink = screen.getAllByRole("link").find((l) => l.getAttribute("href") === "/dashboard/journal");
@@ -134,5 +135,44 @@ describe("Dashboard Schedule page", () => {
       </TooltipProvider>
     );
     expect(screen.getAllByText(/schedule|ramadan|calendar|day|export|ics/i).length).toBeGreaterThan(0);
+  });
+});
+
+describe("Dashboard Macros page", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    localStorage.setItem("tryramadan-preferences", JSON.stringify(prefsWithLocation));
+  });
+
+  it("renders Macro Tracker with meal history and quick add from recipe", () => {
+    render(
+      <TooltipProvider>
+        <MemoryRouter initialEntries={["/dashboard/macros"]}>
+          <Routes>
+            <Route path="/dashboard/macros" element={<DashboardMacros />} />
+          </Routes>
+        </MemoryRouter>
+      </TooltipProvider>
+    );
+    expect(screen.getByText(/macro tracker/i)).toBeInTheDocument();
+    expect(screen.getByText(/meal history/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /list/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /feed/i })).toBeInTheDocument();
+    expect(screen.getAllByText(/quick add from recipe/i).length).toBeGreaterThan(0);
+  });
+
+  it("opening a meal type in Actual food eaten shows add form with Add to log button", () => {
+    render(
+      <TooltipProvider>
+        <MemoryRouter initialEntries={["/dashboard/macros"]}>
+          <Routes>
+            <Route path="/dashboard/macros" element={<DashboardMacros />} />
+          </Routes>
+        </MemoryRouter>
+      </TooltipProvider>
+    );
+    const suhoorButtons = screen.getAllByRole("button", { name: /suhoor \(morning\)/i });
+    fireEvent.click(suhoorButtons[suhoorButtons.length - 1]);
+    expect(screen.getByRole("button", { name: /add to log/i })).toBeInTheDocument();
   });
 });

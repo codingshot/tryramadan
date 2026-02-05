@@ -42,6 +42,12 @@ export default function CultureCountry() {
   if (!country) {
     return (
       <div className="min-h-screen bg-background">
+        <PageSEO
+          title="Country Not Found | TryRamadan.app"
+          description="This culture page could not be found. Explore Ramadan traditions by country from the cultural explorer."
+          path="/culture"
+          robots="noindex, nofollow"
+        />
         <Navbar />
         <main id="main-content" className="main-content container mx-auto px-4 max-w-4xl min-w-0">
           <h1 className="text-2xl font-display font-bold">Country not found</h1>
@@ -57,11 +63,33 @@ export default function CultureCountry() {
 
   const recipesFromCountry = getRecipes({ countryId: country.id });
   const title = `Ramadan in ${country.name} | ${iftarLabel} Traditions, Foods & Mosques | TryRamadan`;
-  const description =
-    country.specialNote ||
-    `Explore Ramadan traditions, foods, and customs in ${country.name}. ${country.traditions.length} traditions and ${country.foods.join(", ")}.`;
+  const foodsSnippet = country.foods.length > 0 ? country.foods.slice(0, 4).join(", ") : "";
+  const metaDescription =
+    (country.specialNote
+      ? `${country.specialNote.slice(0, 100)}. `
+      : "") +
+    `Ramadan in ${country.name}: iftar and suhoor traditions, foods${foodsSnippet ? ` (${foodsSnippet})` : ""}, and customs.`;
+  const metaDescriptionTruncated = metaDescription.slice(0, 157).trim() + (metaDescription.length > 157 ? "…" : "");
   const canonicalPath = `/culture/${country.id}`;
   const canonicalUrl = `${SITE_URL}${canonicalPath}`;
+
+  const placeSchema = {
+    "@type": "Place",
+    "@id": `${canonicalUrl}#place`,
+    name: country.name,
+    address: { "@type": "PostalAddress", addressCountry: country.name },
+    description: `Ramadan traditions, iftar and suhoor foods, and Islamic customs in ${country.name}. ${country.regionName}.`,
+  };
+
+  const breadcrumbList = {
+    "@type": "BreadcrumbList",
+    "@id": `${canonicalUrl}#breadcrumb`,
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "Ramadan Around the World", item: `${SITE_URL}/culture` },
+      { "@type": "ListItem", position: 3, name: `Ramadan in ${country.name}`, item: canonicalUrl },
+    ],
+  };
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -71,20 +99,19 @@ export default function CultureCountry() {
         "@id": `${canonicalUrl}#webpage`,
         url: canonicalUrl,
         name: title,
-        description: description.slice(0, 160),
+        description: metaDescriptionTruncated,
         isPartOf: { "@id": `${SITE_URL}#website` },
-        about: {
-          "@type": "Place",
-          name: country.name,
-          description: `Ramadan traditions and iftar customs in ${country.name}.`,
-        },
+        about: { "@id": `${canonicalUrl}#place` },
       },
+      placeSchema,
+      breadcrumbList,
       {
         "@type": "Article",
         "@id": `${canonicalUrl}#article`,
         headline: `Ramadan in ${country.name}`,
-        description: description.slice(0, 160),
+        description: metaDescriptionTruncated,
         mainEntityOfPage: { "@id": `${canonicalUrl}#webpage` },
+        about: { "@id": `${canonicalUrl}#place` },
         keywords,
       },
     ],
@@ -94,7 +121,7 @@ export default function CultureCountry() {
     <div className="min-h-screen bg-background">
       <PageSEO
         title={title}
-        description={description.slice(0, 160)}
+        description={metaDescriptionTruncated}
         path={canonicalPath}
         type="article"
       />
@@ -129,6 +156,11 @@ export default function CultureCountry() {
                 Ramadan in {country.name}
                 <span className="block font-arabic text-lg text-secondary mt-1">رمضان في {country.name}</span>
               </h1>
+              <p className="mt-3 text-muted-foreground text-sm sm:text-base max-w-2xl">
+                Discover Ramadan traditions, iftar and suhoor customs, traditional foods, and Islamic culture in {country.name}.
+                {country.traditions.length > 0 ? ` ${country.traditions.length} traditions.` : ""}
+                {country.foods.length > 0 ? ` Traditional foods include ${country.foods.slice(0, 3).join(", ")}.` : ""}
+              </p>
             </header>
 
             <section className="mb-8" aria-labelledby="traditions-heading">

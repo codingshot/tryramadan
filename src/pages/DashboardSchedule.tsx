@@ -25,6 +25,7 @@ import {
   ChevronDown,
   Moon,
   Sun,
+  ImagePlus,
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -83,6 +84,7 @@ import { getRecipes, getRecipe, parseNutrient, type MealType } from "@/lib/cultu
 import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
 import { EXTERNAL_LINKS } from "@/lib/config";
 import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
+import { resizeImageToDataUrl } from "@/lib/foodImage";
 import { PageSEO } from "@/components/PageSEO";
 import { LocationRequiredCTA } from "@/components/LocationRequiredCTA";
 import { TodayScheduleTimeline } from "@/components/TodayScheduleTimeline";
@@ -127,6 +129,9 @@ function FoodLogRow({
   const totalF = entry.fatPerPortion != null ? Math.round(entry.fatPerPortion * entry.portions) : null;
   return (
     <li className="flex flex-wrap items-center gap-2 text-sm py-1 border-b border-border/50 last:border-0">
+      {entry.imageDataUrl ? (
+        <img src={entry.imageDataUrl} alt="" className="h-10 w-10 rounded object-cover shrink-0 border border-border" />
+      ) : null}
       <span className="font-medium min-w-0 truncate">{entry.name}</span>
       <span className="text-muted-foreground shrink-0">
         <input
@@ -250,7 +255,8 @@ const DashboardSchedule = () => {
   const [showQuickActionsEditor, setShowQuickActionsEditor] = useState(false);
   const [quickActionOrder, setQuickActionOrder] = useDashboardQuickActions();
   const [addFoodMeal, setAddFoodMeal] = useState<MealType | null>(null);
-  const [addFoodCustomInputs, setAddFoodCustomInputs] = useState({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "" });
+  const [addFoodCustomInputs, setAddFoodCustomInputs] = useState({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "", imageDataUrl: "" });
+  const [addFoodImageResizing, setAddFoodImageResizing] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
   const [customEventTitle, setCustomEventTitle] = useState("");
   const [customEventTime, setCustomEventTime] = useState("18:00");
@@ -461,13 +467,14 @@ const DashboardSchedule = () => {
       proteinPerPortion: protein || undefined,
       carbsPerPortion: carbs || undefined,
       fatPerPortion: fat || undefined,
+      ...(addFoodCustomInputs.imageDataUrl ? { imageDataUrl: addFoodCustomInputs.imageDataUrl } : {}),
     };
     setFoodLogs((prev) => {
       const day = normalizeDayFoodLog(prev[selectedDate]);
       const list = mealType === "suhoor" ? [...day.suhoor, entry] : [...day.iftar, entry];
       return { ...prev, [selectedDate]: { ...day, [mealType]: list } };
     });
-    setAddFoodCustomInputs({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "" });
+    setAddFoodCustomInputs({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "", imageDataUrl: "" });
     setAddFoodMeal(null);
   };
 
@@ -2135,8 +2142,35 @@ const DashboardSchedule = () => {
                                   e.preventDefault();
                                   submitAddFoodCustom(addFoodMeal);
                                 }}
-                                className="contents"
+                                className="contents flex flex-wrap gap-2 items-end"
                               >
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  capture="environment"
+                                  className="hidden"
+                                  id="schedule-add-food-photo"
+                                  onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    if (!file) return;
+                                    setAddFoodImageResizing(true);
+                                    const dataUrl = await resizeImageToDataUrl(file);
+                                    setAddFoodImageResizing(false);
+                                    if (dataUrl) setAddFoodCustomInputs((c) => ({ ...c, imageDataUrl: dataUrl }));
+                                    e.target.value = "";
+                                  }}
+                                />
+                                <label htmlFor="schedule-add-food-photo" className="inline-flex items-center gap-1 min-h-[36px] px-2 py-1.5 rounded border border-border hover:bg-muted/50 cursor-pointer text-xs">
+                                  <ImagePlus className="w-3.5 h-3.5" /> {addFoodImageResizing ? "…" : "Photo"}
+                                </label>
+                                {addFoodCustomInputs.imageDataUrl ? (
+                                  <div className="relative inline-block">
+                                    <img src={addFoodCustomInputs.imageDataUrl} alt="" className="h-9 w-9 rounded object-cover border border-border" />
+                                    <button type="button" onClick={() => setAddFoodCustomInputs((c) => ({ ...c, imageDataUrl: "" }))} className="absolute -top-0.5 -right-0.5 rounded-full bg-destructive text-destructive-foreground w-4 h-4 flex items-center justify-center text-xs" aria-label="Remove photo">
+                                      <X className="w-2.5 h-2.5" />
+                                    </button>
+                                  </div>
+                                ) : null}
                                 <Input
                                   placeholder="Name"
                                   className="w-28 h-9"
@@ -2182,7 +2216,7 @@ const DashboardSchedule = () => {
                                 <Button type="submit" size="sm">
                                   Add this meal to food log
                                 </Button>
-                                <Button type="button" variant="ghost" size="sm" onClick={() => { setAddFoodMeal(null); setAddFoodCustomInputs({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "" }); }}>
+                                <Button type="button" variant="ghost" size="sm" onClick={() => { setAddFoodMeal(null); setAddFoodCustomInputs({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "", imageDataUrl: "" }); }}>
                                   Cancel (don't add)
                                 </Button>
                               </form>

@@ -3,14 +3,15 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { 
   ArrowLeft, Clock, ShoppingCart, Sunrise, Sunset,
-  Flame, Plus, Heart, Filter, Globe, BookOpen
+  Flame, Plus, Heart, Filter, Globe, BookOpen, ImagePlus, X
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import recipesData from "@/data/recipes.json";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useRecipeFavorites, useRecentRecipes, useDayMealPlans, useDayFoodLog, clampCalories, useSuhoorLabel, useIftarLabel, useUserPreferences, useFastingProgress, isFastingToday } from "@/hooks/useLocalStorage";
+import { useRecipeFavorites, useRecentRecipes, useDayMealPlans, useDayFoodLog, normalizeDayFoodLog, clampCalories, useSuhoorLabel, useIftarLabel, useUserPreferences, useFastingProgress, isFastingToday } from "@/hooks/useLocalStorage";
 import { parseNutrient } from "@/lib/cultureRecipes";
+import { resizeImageToDataUrl } from "@/lib/foodImage";
 import { toast } from "sonner";
 import {
   Select,
@@ -66,7 +67,9 @@ const DashboardMeals = () => {
     carbs: "",
     fat: "",
     portions: "1",
+    imageDataUrl: "",
   });
+  const [customMealImageResizing, setCustomMealImageResizing] = useState(false);
   const today = new Date().toISOString().split("T")[0];
   const [progress] = useFastingProgress();
   const fastingToday = isFastingToday(progress, today);
@@ -166,7 +169,7 @@ const DashboardMeals = () => {
       recipeId: `${mealType}-${recipe.id}`,
     };
     setFoodLogs((prev) => {
-      const day = prev[today] || { suhoor: [], iftar: [] };
+      const day = normalizeDayFoodLog(prev[today]);
       const list = mealType === "suhoor" ? [...day.suhoor, entry] : [...day.iftar, entry];
       return { ...prev, [today]: { ...day, [mealType]: list } };
     });
@@ -205,9 +208,10 @@ const DashboardMeals = () => {
       proteinPerPortion: protein || undefined,
       carbsPerPortion: carbs || undefined,
       fatPerPortion: fat || undefined,
+      ...(customMeal.imageDataUrl ? { imageDataUrl: customMeal.imageDataUrl } : {}),
     };
     setFoodLogs((prev) => {
-      const day = prev[today] || { suhoor: [], iftar: [] };
+      const day = normalizeDayFoodLog(prev[today]);
       const list = mealType === "suhoor" ? [...day.suhoor, entry] : [...day.iftar, entry];
       return { ...prev, [today]: { ...day, [mealType]: list } };
     });
@@ -217,7 +221,7 @@ const DashboardMeals = () => {
       const merged = existing ? `${existing}, ${name}` : name;
       return { ...prev, [today]: { ...current, [mealType]: merged } };
     });
-    setCustomMeal({ name: "", mealType: "suhoor", cal: "", protein: "", carbs: "", fat: "", portions: "1" });
+    setCustomMeal({ name: "", mealType: "suhoor", cal: "", protein: "", carbs: "", fat: "", portions: "1", imageDataUrl: "" });
     setShowCreateMeal(false);
     toast.success(`Added "${name}" to today's food log and meal plan.`);
   };
@@ -471,11 +475,44 @@ const DashboardMeals = () => {
                     />
                   </div>
                 </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground">Photo (optional)</Label>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      className="hidden"
+                      id="custom-meal-photo"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setCustomMealImageResizing(true);
+                        const dataUrl = await resizeImageToDataUrl(file);
+                        setCustomMealImageResizing(false);
+                        if (dataUrl) setCustomMeal((c) => ({ ...c, imageDataUrl: dataUrl }));
+                        e.target.value = "";
+                      }}
+                    />
+                    <label htmlFor="custom-meal-photo" className="inline-flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-lg border border-border bg-background hover:bg-muted/50 cursor-pointer text-sm">
+                      <ImagePlus className="w-4 h-4 text-muted-foreground" />
+                      {customMealImageResizing ? "Resizing…" : "Add photo"}
+                    </label>
+                    {customMeal.imageDataUrl && (
+                      <div className="relative inline-block">
+                        <img src={customMeal.imageDataUrl} alt="" className="h-14 w-14 object-cover rounded-lg border border-border" />
+                        <button type="button" onClick={() => setCustomMeal((c) => ({ ...c, imageDataUrl: "" }))} className="absolute -top-1 -right-1 rounded-full bg-destructive text-destructive-foreground w-5 h-5 flex items-center justify-center" aria-label="Remove photo">
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
                 <div className="flex gap-2">
                   <Button type="submit" size="sm">
                     Add to food log & meal plan
                   </Button>
-                  <Button type="button" variant="ghost" size="sm" onClick={() => setShowCreateMeal(false)}>
+                  <Button type="button" variant="ghost" size="sm" onClick={() => { setShowCreateMeal(false); setCustomMeal((c) => ({ ...c, imageDataUrl: "" })); }}>
                     Cancel (don't add)
                   </Button>
                 </div>

@@ -1080,17 +1080,18 @@ export function useDayPlannedItems() {
   return useLocalStorage<Record<string, DayPlannedItems>>('tryramadan-day-planned-items', {});
 }
 
-/** Get total calories and macros for a day from planned items */
+/** Get total calories and macros for a day from planned items. Returns zeros when dayPlanned is undefined. */
 export function getDayTotalsFromPlanned(dayPlanned: DayPlannedItems | undefined): DayNutrition {
-  if (!dayPlanned) return {};
+  if (!dayPlanned) return { calories: 0, protein: 0, carbs: 0, fat: 0 };
   const entries = [...dayPlanned.suhoor, ...dayPlanned.iftar, ...(dayPlanned.between ?? [])];
   let calories = 0, protein = 0, carbs = 0, fat = 0;
   for (const e of entries) {
-    const p = e.portions || 1;
-    calories += (e.caloriesPerPortion || 0) * p;
-    protein += (e.proteinPerPortion || 0) * p;
-    carbs += (e.carbsPerPortion || 0) * p;
-    fat += (e.fatPerPortion || 0) * p;
+    const p = Number(e.portions);
+    const portion = Number.isFinite(p) && p >= 0 ? p : 1;
+    calories += (Number(e.caloriesPerPortion) || 0) * portion;
+    protein += (Number(e.proteinPerPortion) || 0) * portion;
+    carbs += (Number(e.carbsPerPortion) || 0) * portion;
+    fat += (Number(e.fatPerPortion) || 0) * portion;
   }
   return { calories, protein, carbs, fat };
 }
@@ -1111,6 +1112,8 @@ export interface FoodLogEntry {
   fatPerPortion?: number;
   /** For recipe: "suhoor-1" / "iftar-2" for link */
   recipeId?: string;
+  /** Optional: JPEG data URL (resized) for meal photo */
+  imageDataUrl?: string;
 }
 
 export interface DayFoodLog {
@@ -1143,11 +1146,12 @@ export function getDayTotalsFromFoodLog(dayLog: DayFoodLog | undefined): DayNutr
   const entries = [...log.suhoor, ...log.iftar, ...log.between];
   let calories = 0, protein = 0, carbs = 0, fat = 0;
   for (const e of entries) {
-    const p = e.portions || 1;
-    calories += (e.caloriesPerPortion || 0) * p;
-    protein += (e.proteinPerPortion || 0) * p;
-    carbs += (e.carbsPerPortion || 0) * p;
-    fat += (e.fatPerPortion || 0) * p;
+    const p = Number(e.portions);
+    const portion = Number.isFinite(p) && p >= 0 ? p : 1;
+    calories += (Number(e.caloriesPerPortion) || 0) * portion;
+    protein += (Number(e.proteinPerPortion) || 0) * portion;
+    carbs += (Number(e.carbsPerPortion) || 0) * portion;
+    fat += (Number(e.fatPerPortion) || 0) * portion;
   }
   return { calories, protein, carbs, fat };
 }

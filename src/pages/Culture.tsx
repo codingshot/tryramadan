@@ -5,26 +5,64 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { CulturalCarousel } from "@/components/CulturalCarousel";
 import { PageSEO } from "@/components/PageSEO";
+import { getAllCountries } from "@/lib/cultureRecipes";
+
+const SITE_URL = "https://tryramadan.app";
+
+const CULTURE_META_DESCRIPTION =
+  "Ramadan around the world: explore iftar and suhoor traditions, foods, and customs by country. Cultural education for Ramadan fasting and interfaith understanding.";
 
 const Culture = () => {
+  const countries = getAllCountries();
+  const collectionJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": `${SITE_URL}/culture#collection`,
+    url: `${SITE_URL}/culture`,
+    name: "Ramadan Around the World | Cultural Explorer",
+    description: CULTURE_META_DESCRIPTION,
+    isPartOf: { "@id": `${SITE_URL}#website` },
+    mainEntity: {
+      "@type": "ItemList",
+      name: "Ramadan traditions by country",
+      numberOfItems: countries.length,
+      itemListElement: countries.slice(0, 50).map((c, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        item: {
+          "@type": "Place",
+          name: `Ramadan in ${c.name}`,
+          url: `${SITE_URL}/culture/${c.id}`,
+          description: `Ramadan traditions, iftar and suhoor foods, and customs in ${c.name}.`,
+        },
+      })),
+    },
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <PageSEO
-        title="Ramadan Around the World | TryRamadan.app"
-        description="Explore Ramadan traditions, foods, and customs from Muslim communities across the globe. Cultural education for interfaith understanding."
+        title="Ramadan Around the World | Culture & Traditions | TryRamadan.app"
+        description={CULTURE_META_DESCRIPTION}
         path="/culture"
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }}
+      />
       <Navbar />
-      <main id="main-content" className="main-content">
+      <main id="main-content" className="main-content" aria-label="Ramadan culture and traditions by country">
         <div className="container mx-auto px-4 sm:px-6 max-w-5xl min-w-0">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 min-h-[44px] items-center"
-          >
-            <ArrowLeft className="w-4 h-4 flex-shrink-0" />
-            <span>Back to Home</span>
-          </Link>
-          <motion.div
+          <nav aria-label="Breadcrumb" className="mb-6">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground min-h-[44px] items-center"
+            >
+              <ArrowLeft className="w-4 h-4 flex-shrink-0" aria-hidden />
+              <span>Back to Home</span>
+            </Link>
+          </nav>
+          <motion.header
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="mb-8 text-center sm:text-left"
@@ -33,10 +71,12 @@ const Culture = () => {
               Ramadan Around the World
             </h1>
             <p className="text-muted-foreground mt-2 text-sm sm:text-base max-w-2xl">
-              Explore traditions, foods, and customs from Muslim communities across the globe.
+              Explore iftar and suhoor traditions, foods, and customs from Muslim communities by country.
             </p>
-          </motion.div>
-          <CulturalCarousel />
+          </motion.header>
+          <section aria-label="Countries and regions">
+            <CulturalCarousel />
+          </section>
         </div>
       </main>
       <Footer />

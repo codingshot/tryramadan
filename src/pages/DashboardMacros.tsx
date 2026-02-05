@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
@@ -14,6 +14,9 @@ import {
   Calendar,
   X,
   Trash2,
+  ImagePlus,
+  LayoutList,
+  Grid3X3,
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -21,6 +24,13 @@ import { PageSEO } from "@/components/PageSEO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   useDailyGoals,
   useUserPreferences,
@@ -35,12 +45,41 @@ import {
   type PlannedItem,
   type FoodLogEntry,
 } from "@/hooks/useLocalStorage";
+import recipesData from "@/data/recipes.json";
+import { parseNutrient } from "@/lib/cultureRecipes";
+import { resizeImageToDataUrl } from "@/lib/foodImage";
+import { toast } from "sonner";
 
 const MEAL_LABELS: Record<MealCategory, { label: string; Icon: typeof Sunrise }> = {
   suhoor: { label: "Suhoor (morning)", Icon: Sunrise },
   iftar: { label: "Iftar (evening)", Icon: Sunset },
   between: { label: "Between meals", Icon: UtensilsCrossed },
 };
+
+type RecipeOption = { mealType: "suhoor" | "iftar"; id: number; name: string; calories: number; protein: number; carbs: number; fat: number };
+
+function buildRecipeOptions(): RecipeOption[] {
+  const data = recipesData as { suhoor: Array<{ id: number; name: string; nutrition?: { calories: number; protein?: string; carbs?: string; fat?: string } }>; iftar: Array<{ id: number; name: string; nutrition?: { calories: number; protein?: string; carbs?: string; fat?: string } }> };
+  const suhoor = (data.suhoor ?? []).map((r) => ({
+    mealType: "suhoor" as const,
+    id: r.id,
+    name: r.name,
+    calories: r.nutrition?.calories ?? 0,
+    protein: parseNutrient(r.nutrition?.protein) ?? 0,
+    carbs: parseNutrient(r.nutrition?.carbs) ?? 0,
+    fat: parseNutrient(r.nutrition?.fat) ?? 0,
+  }));
+  const iftar = (data.iftar ?? []).map((r) => ({
+    mealType: "iftar" as const,
+    id: r.id,
+    name: r.name,
+    calories: r.nutrition?.calories ?? 0,
+    protein: parseNutrient(r.nutrition?.protein) ?? 0,
+    carbs: parseNutrient(r.nutrition?.carbs) ?? 0,
+    fat: parseNutrient(r.nutrition?.fat) ?? 0,
+  }));
+  return [...suhoor, ...iftar];
+}
 
 function MacroBar({ current, goal, label }: { current: number; goal: number; label: string }) {
   const pct = goal > 0 ? Math.min(100, (current / goal) * 100) : 0;
@@ -94,7 +133,27 @@ export default function DashboardMacros() {
     carbs: string;
     fat: string;
     portions: string;
-  }>({ active: false, mealType: "suhoor", name: "", cal: "", protein: "", carbs: "", fat: "", portions: "1" });
+    imageDataUrl: string;
+  }>({ active: false, mealType: "suhoor", name: "", cal: "", protein: "", carbs: "", fat: "", portions: "1", imageDataUrl: "" });
+  const [selectedRecipe, setSelectedRecipe] = useState<{ mealType: "suhoor" | "iftar"; id: number } | null>(null);
+  const [mealHistoryView, setMealHistoryView] = useState<"list" | "feed">("list");
+  const [imageResizing, setImageResizing] = useState(false);
+
+  const recipeOptions = useMemo(() => buildRecipeOptions(), []);
+
+  /** All log entries across all days, newest first, for meal history. */
+  const mealHistoryEntries = useMemo(() => {
+    const out: { dateStr: string; mealType: MealCategory; entry: FoodLogEntry }[] = [];
+    Object.keys(foodLogs).sort().reverse().forEach((dateStr) => {
+      const day = normalizeDayFoodLog(foodLogs[dateStr]);
+      (["suhoor", "iftar", "between"] as const).forEach((mealType) => {
+        (day[mealType] ?? []).forEach((entry) => out.push({ dateStr, mealType, entry }));
+      });
+    });
+    return out;
+  }, [foodLogs]);
+
+  const mealHistoryWithImages = useMemo(() => mealHistoryEntries.filter((x) => x.entry.imageDataUrl), [mealHistoryEntries]);
 
   const addPlanned = () => {
     const name = planForm.name.trim() || "Planned item";
@@ -134,31 +193,58 @@ export default function DashboardMacros() {
 
   const addToLog = () => {
     if (!logForm.active) return;
-    const name = logForm.name.trim() || "Logged item";
-    const cal = parseInt(logForm.cal, 10) || 0;
     const portions = Math.max(0.1, parseFloat(logForm.portions) || 1);
-    const protein = parseFloat(logForm.protein) || 0;
-    const carbs = parseFloat(logForm.carbs) || 0;
-    const fat = parseFloat(logForm.fat) || 0;
     const mealType = logForm.mealType;
-    const entry: FoodLogEntry = {
-      id: `log-${Date.now()}`,
-      type: "custom",
-      mealType,
-      name,
-      portions,
-      caloriesPerPortion: clampCalories(cal),
-      proteinPerPortion: protein || undefined,
-      carbsPerPortion: carbs || undefined,
-      fatPerPortion: fat || undefined,
-    };
+
+    let entry: FoodLogEntry;
+    if (selectedRecipe) {
+      const recipe = recipeOptions.find((r) => r.mealType === selectedRecipe.mealType && r.id === selectedRecipe.id);
+      if (!recipe) {
+        setSelectedRecipe(null);
+        return;
+      }
+      entry = {
+        id: `log-${Date.now()}`,
+        type: "recipe",
+        mealType,
+        name: recipe.name,
+        portions,
+        caloriesPerPortion: clampCalories(recipe.calories),
+        proteinPerPortion: recipe.protein || undefined,
+        carbsPerPortion: recipe.carbs || undefined,
+        fatPerPortion: recipe.fat || undefined,
+        recipeId: `${selectedRecipe.mealType}-${selectedRecipe.id}`,
+        ...(logForm.imageDataUrl ? { imageDataUrl: logForm.imageDataUrl } : {}),
+      };
+    } else {
+      const name = logForm.name.trim() || "Logged item";
+      const cal = parseInt(logForm.cal, 10) || 0;
+      const protein = parseFloat(logForm.protein) || 0;
+      const carbs = parseFloat(logForm.carbs) || 0;
+      const fat = parseFloat(logForm.fat) || 0;
+      entry = {
+        id: `log-${Date.now()}`,
+        type: "custom",
+        mealType,
+        name,
+        portions,
+        caloriesPerPortion: clampCalories(cal),
+        proteinPerPortion: protein || undefined,
+        carbsPerPortion: carbs || undefined,
+        fatPerPortion: fat || undefined,
+        ...(logForm.imageDataUrl ? { imageDataUrl: logForm.imageDataUrl } : {}),
+      };
+    }
+
     const day = selectedLog;
     const list = [...(day[mealType] ?? []), entry];
     setFoodLogs((prev) => ({
       ...prev,
       [selectedDate]: { ...day, [mealType]: list },
     }));
-    setLogForm({ ...logForm, active: false, name: "", cal: "", protein: "", carbs: "", fat: "", portions: "1" });
+    setLogForm({ ...logForm, active: false, name: "", cal: "", protein: "", carbs: "", fat: "", portions: "1", imageDataUrl: "" });
+    setSelectedRecipe(null);
+    toast.success("Added to log");
   };
 
   const removeFromLog = (mealType: MealCategory, id: string) => {
@@ -315,6 +401,41 @@ export default function DashboardMacros() {
                 );
               })}
             </div>
+            <div className="space-y-2 mb-3">
+              <Label className="text-xs text-muted-foreground">Quick add from recipe</Label>
+              <Select
+                value=""
+                onValueChange={(value) => {
+                  if (!value) return;
+                  const [mealType, idStr] = value.split("-");
+                  const id = parseInt(idStr, 10);
+                  if ((mealType !== "suhoor" && mealType !== "iftar") || !Number.isFinite(id)) return;
+                  const recipe = recipeOptions.find((r) => r.mealType === mealType && r.id === id);
+                  if (recipe) {
+                    setPlanForm((f) => ({
+                      ...f,
+                      name: recipe.name,
+                      cal: String(recipe.calories),
+                      protein: recipe.protein ? String(recipe.protein) : "",
+                      carbs: recipe.carbs ? String(recipe.carbs) : "",
+                      fat: recipe.fat ? String(recipe.fat) : "",
+                      portions: "1",
+                    }));
+                  }
+                }}
+              >
+                <SelectTrigger className="w-full" aria-label="Choose a recipe to add to plan">
+                  <SelectValue placeholder="Select a recipe…" />
+                </SelectTrigger>
+                <SelectContent>
+                  {recipeOptions.map((r) => (
+                    <SelectItem key={`plan-${r.mealType}-${r.id}`} value={`${r.mealType}-${r.id}`}>
+                      {r.name} ({r.mealType === "suhoor" ? "Suhoor" : "Iftar"}) · {r.calories} cal
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
               <div>
                 <Label className="text-xs">Name</Label>
@@ -416,7 +537,7 @@ export default function DashboardMacros() {
                     variant="outline"
                     size="sm"
                     className="gap-1.5"
-                    onClick={() => setLogForm({ active: true, mealType: m, name: "", cal: "", protein: "", carbs: "", fat: "", portions: "1" })}
+                    onClick={() => { setSelectedRecipe(null); setLogForm({ active: true, mealType: m, name: "", cal: "", protein: "", carbs: "", fat: "", portions: "1", imageDataUrl: "" }); }}
                   >
                     <Icon className="w-4 h-4" />
                     {label}
@@ -438,14 +559,83 @@ export default function DashboardMacros() {
                     })()}
                     Add to {MEAL_LABELS[logForm.mealType].label}
                   </span>
-                  <button type="button" onClick={() => setLogForm((f) => ({ ...f, active: false }))} className="p-1 rounded hover:bg-muted" aria-label="Close">
+                  <button type="button" onClick={() => { setSelectedRecipe(null); setLogForm((f) => ({ ...f, active: false, imageDataUrl: "" })); }} className="p-1 rounded hover:bg-muted" aria-label="Close">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Quick add from recipe</Label>
+                  <Select
+                    value={selectedRecipe ? `${selectedRecipe.mealType}-${selectedRecipe.id}` : ""}
+                    onValueChange={(value) => {
+                      if (!value) { setSelectedRecipe(null); return; }
+                      const [mealType, idStr] = value.split("-");
+                      const id = parseInt(idStr, 10);
+                      if (mealType !== "suhoor" && mealType !== "iftar") return;
+                      const recipe = recipeOptions.find((r) => r.mealType === mealType && r.id === id);
+                      if (recipe) {
+                        setSelectedRecipe({ mealType, id });
+                        setLogForm((f) => ({
+                          ...f,
+                          name: recipe.name,
+                          cal: String(recipe.calories),
+                          protein: recipe.protein ? String(recipe.protein) : "",
+                          carbs: recipe.carbs ? String(recipe.carbs) : "",
+                          fat: recipe.fat ? String(recipe.fat) : "",
+                          portions: "1",
+                        }));
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="w-full" aria-label="Choose a recipe to fill the form">
+                      <SelectValue placeholder="Select a recipe…" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {recipeOptions.map((r) => (
+                        <SelectItem key={`${r.mealType}-${r.id}`} value={`${r.mealType}-${r.id}`}>
+                          {r.name} ({r.mealType === "suhoor" ? "Suhoor" : "Iftar"}) · {r.calories} cal
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-muted-foreground">Photo (optional)</Label>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      className="hidden"
+                      id="log-form-photo"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setImageResizing(true);
+                        const dataUrl = await resizeImageToDataUrl(file);
+                        setImageResizing(false);
+                        if (dataUrl) setLogForm((f) => ({ ...f, imageDataUrl: dataUrl }));
+                        e.target.value = "";
+                      }}
+                    />
+                    <label htmlFor="log-form-photo" className="inline-flex items-center gap-2 min-h-[44px] px-3 py-2 rounded-lg border border-border bg-background hover:bg-muted/50 cursor-pointer text-sm">
+                      <ImagePlus className="w-4 h-4 text-muted-foreground" />
+                      {imageResizing ? "Resizing…" : "Add photo"}
+                    </label>
+                    {logForm.imageDataUrl && (
+                      <div className="relative inline-block">
+                        <img src={logForm.imageDataUrl} alt="" className="h-14 w-14 object-cover rounded-lg border border-border" />
+                        <button type="button" onClick={() => setLogForm((f) => ({ ...f, imageDataUrl: "" }))} className="absolute -top-1 -right-1 rounded-full bg-destructive text-destructive-foreground w-5 h-5 flex items-center justify-center text-xs" aria-label="Remove photo">
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <Input placeholder="Name" value={logForm.name} onChange={(e) => setLogForm((f) => ({ ...f, name: e.target.value }))} />
+                  <Input placeholder="Name" value={logForm.name} onChange={(e) => { setSelectedRecipe(null); setLogForm((f) => ({ ...f, name: e.target.value })); }} />
                   <Input type="number" placeholder="Cal" value={logForm.cal} onChange={(e) => setLogForm((f) => ({ ...f, cal: e.target.value }))} />
-                  <Input type="number" step="0.5" placeholder="Portions" value={logForm.portions} onChange={(e) => setLogForm((f) => ({ ...f, portions: e.target.value }))} />
+                  <Input type="number" step="0.5" min={0.1} placeholder="Portions" value={logForm.portions} onChange={(e) => setLogForm((f) => ({ ...f, portions: e.target.value }))} />
                   <div className="flex gap-1">
                     <Input type="number" placeholder="P" value={logForm.protein} onChange={(e) => setLogForm((f) => ({ ...f, protein: e.target.value }))} className="w-12 text-center" />
                     <Input type="number" placeholder="C" value={logForm.carbs} onChange={(e) => setLogForm((f) => ({ ...f, carbs: e.target.value }))} className="w-12 text-center" />
@@ -475,6 +665,9 @@ export default function DashboardMacros() {
                           const totalCal = Math.round((e.caloriesPerPortion || 0) * e.portions);
                           return (
                             <li key={e.id} className="flex flex-wrap items-center gap-2 text-sm py-1 border-b border-border/50">
+                              {e.imageDataUrl ? (
+                                <img src={e.imageDataUrl} alt="" className="h-10 w-10 rounded object-cover shrink-0 border border-border" />
+                              ) : null}
                               <span className="font-medium">{e.name}</span>
                               <input
                                 type="number"
@@ -507,7 +700,7 @@ export default function DashboardMacros() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.16 }}
-            className="mb-8 p-4 rounded-2xl bg-card border border-border"
+            className="mb-6 p-4 rounded-2xl bg-card border border-border"
           >
             <h2 className="font-display font-bold mb-3">This day: planned vs actual vs goals</h2>
             <div className="space-y-4">
@@ -517,6 +710,90 @@ export default function DashboardMacros() {
               <MacroBar current={actualTotals.carbs ?? 0} goal={dailyGoals.carbs} label="Actual carbs (g)" />
               <MacroBar current={actualTotals.fat ?? 0} goal={dailyGoals.fat} label="Actual fat (g)" />
             </div>
+          </motion.div>
+
+          {/* Meal history: list or feed (image) mode */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18 }}
+            className="mb-8 p-4 rounded-2xl bg-card border border-border"
+          >
+            <h2 className="font-display font-bold mb-3">Meal history</h2>
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <span className="text-sm text-muted-foreground">View:</span>
+              <div className="flex rounded-lg border border-border p-0.5">
+                <button
+                  type="button"
+                  onClick={() => setMealHistoryView("list")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-colors ${mealHistoryView === "list" ? "bg-secondary text-secondary-foreground" : "hover:bg-muted/50"}`}
+                  aria-pressed={mealHistoryView === "list"}
+                >
+                  <LayoutList className="w-4 h-4" />
+                  List
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMealHistoryView("feed")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-colors ${mealHistoryView === "feed" ? "bg-secondary text-secondary-foreground" : "hover:bg-muted/50"}`}
+                  aria-pressed={mealHistoryView === "feed"}
+                  title="Entries with photos only"
+                >
+                  <Grid3X3 className="w-4 h-4" />
+                  Feed
+                </button>
+              </div>
+            </div>
+
+            {mealHistoryView === "list" ? (
+              mealHistoryEntries.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No meals logged yet. Add food above to see history here.</p>
+              ) : (
+                <ul className="space-y-2 max-h-[320px] overflow-y-auto">
+                  {mealHistoryEntries.slice(0, 50).map(({ dateStr, mealType, entry }) => {
+                    const totalCal = Math.round((entry.caloriesPerPortion || 0) * entry.portions);
+                    const dateLabel = new Date(dateStr + "T12:00:00").toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric" });
+                    return (
+                      <li key={`${dateStr}-${entry.id}`} className="flex items-center gap-2 text-sm py-2 border-b border-border/50 last:border-0">
+                        {entry.imageDataUrl ? (
+                          <img src={entry.imageDataUrl} alt="" className="h-9 w-9 rounded object-cover shrink-0" />
+                        ) : null}
+                        <button type="button" onClick={() => setSelectedDate(dateStr)} className="text-left font-medium text-foreground hover:text-secondary truncate min-w-0 flex-1">
+                          {entry.name}
+                        </button>
+                        <span className="text-muted-foreground shrink-0">{dateLabel}</span>
+                        <span className="text-muted-foreground shrink-0">{MEAL_LABELS[mealType].label}</span>
+                        <span className="shrink-0">{totalCal} cal</span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )
+            ) : mealHistoryWithImages.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No meals with photos yet. Add a photo when logging food to see them in feed mode.</p>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {mealHistoryWithImages.map(({ dateStr, mealType, entry }) => {
+                  const dateLabel = new Date(dateStr + "T12:00:00").toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric" });
+                  return (
+                    <button
+                      key={`${dateStr}-${entry.id}`}
+                      type="button"
+                      onClick={() => setSelectedDate(dateStr)}
+                      className="rounded-xl border border-border overflow-hidden bg-muted/20 hover:bg-muted/40 text-left transition-colors"
+                    >
+                      <div className="aspect-square relative">
+                        <img src={entry.imageDataUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                      </div>
+                      <div className="p-2">
+                        <p className="font-medium text-sm truncate">{entry.name}</p>
+                        <p className="text-xs text-muted-foreground">{dateLabel} · {MEAL_LABELS[mealType].label}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </motion.div>
         </div>
       </main>

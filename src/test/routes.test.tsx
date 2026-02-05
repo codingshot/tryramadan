@@ -65,6 +65,7 @@ export const ROUTES = [
   "/guides",
   "/personas",
   "/personas/non-muslim-curious",
+  "/compare",
 ] as const;
 
 describe("Routes", () => {

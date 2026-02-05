@@ -282,6 +282,47 @@ function writeForDateCache(
   }
 }
 
+/** Fetch prayer times for a single date and location (async). Uses cache when available. For compare page / bulk lookups. */
+export async function fetchPrayerTimesForDateAsync(
+  lat: number,
+  lng: number,
+  isoDate: string
+): Promise<PrayerTimes | null> {
+  const cached = readForDateCache(isoDate, lat, lng);
+  if (cached) return cached.prayerTimes;
+
+  const dateStr = toAladhanDate(isoDate);
+  try {
+    const response = await fetch(
+      `${API_CONFIG.aladhan}/v1/timings/${dateStr}?latitude=${lat}&longitude=${lng}&method=2`
+    );
+    if (!response.ok) return null;
+    const data: AladhanResponse = await response.json();
+    if (data.code !== 200) return null;
+    const t = data.data.timings;
+    const times: PrayerTimes = {
+      fajr: stripTimeSuffix(t.Fajr ?? ''),
+      sunrise: stripTimeSuffix(t.Sunrise ?? ''),
+      dhuhr: stripTimeSuffix(t.Dhuhr ?? ''),
+      asr: stripTimeSuffix(t.Asr ?? ''),
+      maghrib: stripTimeSuffix(t.Maghrib ?? ''),
+      isha: stripTimeSuffix(t.Isha ?? ''),
+      imsak: stripTimeSuffix(t.Imsak ?? ''),
+      date: data.data.date.readable,
+    };
+    const hijri = {
+      day: data.data.date.hijri.day,
+      month: data.data.date.hijri.month.en,
+      monthAr: data.data.date.hijri.month.ar,
+      year: data.data.date.hijri.year,
+    };
+    writeForDateCache(isoDate, lat, lng, times, hijri);
+    return times;
+  } catch {
+    return null;
+  }
+}
+
 /** Fetch prayer times for a specific date (ISO YYYY-MM-DD). Used for day view / click-through days. Cached in localStorage for offline. */
 export function usePrayerTimesForDate(
   lat: number | null,

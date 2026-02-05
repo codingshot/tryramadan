@@ -67,6 +67,9 @@ export const Footer = () => {
               <li>
                 <Link to="/health-safety" className="inline-block py-2 sm:py-0 text-primary-foreground/70 hover:text-secondary transition-colors text-sm min-h-[44px] sm:min-h-0 flex items-center">Health Benefits</Link>
               </li>
+              <li>
+                <Link to="/compare" className="inline-block py-2 sm:py-0 text-primary-foreground/70 hover:text-secondary transition-colors text-sm min-h-[44px] sm:min-h-0 flex items-center">Compare fasting times</Link>
+              </li>
             </ul>
           </div>
 
