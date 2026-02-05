@@ -329,8 +329,10 @@ const Dashboard = () => {
   const todayLog = getTodayFastingLog(progress, todayStr);
   const recentLog = (progress.fastingLog || []).slice(-7).reverse();
   const streak = calculateStreak(progress, todayStr);
-  const totalDays = ramadanRange.totalDays;
-  const completedInRange = progress.completedDays.filter((d) => d >= ramadanRange.startStr && d <= ramadanRange.endStr);
+  const totalDays = ramadanRange.totalDays ?? 30;
+  const ramadanStart = ramadanRange.startStr ?? "";
+  const ramadanEnd = ramadanRange.endStr ?? "";
+  const completedInRange = (progress.completedDays ?? []).filter((d) => d >= ramadanStart && d <= ramadanEnd);
   const ramadanCompletionPct = totalDays > 0 ? Math.round((completedInRange.length / totalDays) * 100) : 0;
   const factDay = Math.min(30, Math.max(1, (new Date().getDate() % 30) || 30));
   const dailyFact = dailyFactsData.facts.find((f) => f.day === factDay) || dailyFactsData.facts[0];

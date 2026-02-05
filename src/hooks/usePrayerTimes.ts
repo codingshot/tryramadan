@@ -431,14 +431,16 @@ function getRamadanPrayersCache(): Record<string, RamadanPrayersCacheEntry> {
   }
 }
 
-/** Keep only entries for current and next Ramadan year to limit cache size. */
+/** Keep only entries for current and next Ramadan year to limit cache size. Keys may be lat_lng_year or lat_lng_startStr_endStr. */
 function trimRamadanPrayersCache(cache: Record<string, RamadanPrayersCacheEntry>, year?: number): Record<string, RamadanPrayersCacheEntry> {
   const y = year ?? getRamadanDateRange().year;
   const keepYears = [y, y + 1];
   const trimmed: Record<string, RamadanPrayersCacheEntry> = {};
   for (const [key, entry] of Object.entries(cache)) {
-    const match = key.match(/_(\d{4})$/);
-    const entryYear = match ? parseInt(match[1], 10) : y;
+    const parts = key.split('_');
+    const rest = parts.length >= 3 ? parts[2] : '';
+    const yearMatch = rest.match(/^(\d{4})/);
+    const entryYear = yearMatch ? parseInt(yearMatch[1], 10) : y;
     if (keepYears.includes(entryYear)) trimmed[key] = entry;
   }
   return trimmed;
@@ -475,9 +477,10 @@ export async function fetchRamadanPrayerTimes(
   return out;
 }
 
-/** Cache key for Ramadan prayer times (location + Ramadan year). */
-export function getRamadanPrayersCacheKey(lat: number, lng: number, ramadanYear: number): string {
-  return `${lat.toFixed(4)}_${lng.toFixed(4)}_${ramadanYear}`;
+/** Cache key for Ramadan prayer times (location + range so overrides get correct data). */
+export function getRamadanPrayersCacheKey(lat: number, lng: number, ramadanYear: number, startStr?: string, endStr?: string): string {
+  const range = startStr && endStr ? `${startStr}_${endStr}` : String(ramadanYear);
+  return `${lat.toFixed(4)}_${lng.toFixed(4)}_${range}`;
 }
 
 /** Hook: Ramadan prayer times for the full month. Caches in localStorage by location + Ramadan year. Uses effective range from preferences when set. */
@@ -489,7 +492,7 @@ export function useRamadanPrayerTimes(lat: number | null, lng: number | null) {
 
   const range = getRamadanDateRange(preferences);
   const { startStr, endStr, year } = range;
-  const cacheKey = lat != null && lng != null ? getRamadanPrayersCacheKey(lat, lng, year) : null;
+  const cacheKey = lat != null && lng != null ? getRamadanPrayersCacheKey(lat, lng, year, startStr, endStr) : null;
 
   const fetchAndCache = useCallback(async () => {
     if (lat == null || lng == null) return;

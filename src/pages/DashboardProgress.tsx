@@ -9,7 +9,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useFastingProgress, getTodayFastingLog, getBrokenReasonLabel, isFastingToday, useLocalStorage, calculateStreak, getLongestStreak, getJournalStreak, getMindfulEatingStreak, useDayMealPlans, useDayFoodLog, useUserPreferences, useDisplayTimezone } from "@/hooks/useLocalStorage";
 import { useRamadanRange } from "@/hooks/useRamadanRange";
-import { getTodayStringInTimezone } from "@/lib/utils";
+import { getTodayStringInTimezone, toLocalDateString } from "@/lib/utils";
 import type { EnergyEntry } from "@/hooks/useLocalStorage";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
@@ -26,16 +26,16 @@ const DashboardProgress = () => {
   const [mealPlans] = useDayMealPlans();
   const [foodLogs] = useDayFoodLog();
   const displayTimezone = useDisplayTimezone();
-  const todayStr = displayTimezone ? getTodayStringInTimezone(displayTimezone) : undefined;
+  const todayStr = displayTimezone ? getTodayStringInTimezone(displayTimezone) : toLocalDateString(new Date());
   const showStreakAndAchievements = preferences.showStreakAndAchievements !== false;
   const journalStreak = getJournalStreak(journalEntries);
   const mindfulEatingStreak = getMindfulEatingStreak(foodLogs, mealPlans);
 
   const exportCsv = useCallback(() => {
-    const totalDays = ramadanRange.totalDays;
-    const completedInRange = progress.completedDays.filter((d) => d >= ramadanRange.startStr && d <= ramadanRange.endStr);
+    const totalDays = ramadanRange.totalDays || 30;
+    const completedInRange = (progress.completedDays || []).filter((d) => d >= ramadanRange.startStr && d <= ramadanRange.endStr);
     const completedDays = completedInRange.length;
-    const completionRate = Math.round((completedDays / totalDays) * 100);
+    const completionRate = totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0;
     const rows = [
       ["TryRamadan Progress Report", ""],
       ["Generated", new Date().toISOString().split("T")[0]],
@@ -65,8 +65,8 @@ const DashboardProgress = () => {
     a.click();
     URL.revokeObjectURL(url);
   }, [progress, ramadanRange]);
-  const fastingToday = isFastingToday(progress);
-  const todayLog = getTodayFastingLog(progress);
+  const fastingToday = isFastingToday(progress, todayStr);
+  const todayLog = getTodayFastingLog(progress, todayStr);
   const recentLog = (progress.fastingLog || []).slice(-14).reverse();
 
   // Energy over time: last 7 days from tryramadan-today
@@ -84,8 +84,10 @@ const DashboardProgress = () => {
   })();
 
   // Calculate stats (Ramadan-scoped from effective range)
-  const totalDays = ramadanRange.totalDays;
-  const completedDays = progress.completedDays.filter((d) => d >= ramadanRange.startStr && d <= ramadanRange.endStr).length;
+  const totalDays = ramadanRange.totalDays ?? 30;
+  const startStr = ramadanRange.startStr ?? "";
+  const endStr = ramadanRange.endStr ?? "";
+  const completedDays = (progress.completedDays ?? []).filter((d) => d >= startStr && d <= endStr).length;
   const completionRate = totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0;
   
   const currentStreak = calculateStreak(progress, todayStr);

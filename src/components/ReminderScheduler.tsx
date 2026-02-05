@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
-import { useUserPreferences, useIftarLabel, useIftarLabelShort } from "@/hooks/useLocalStorage";
-import { useNotificationSettings } from "@/hooks/useLocalStorage";
+import { useUserPreferences, useNotificationSettings, useDisplayTimezone, useIftarLabel, useIftarLabelShort } from "@/hooks/useLocalStorage";
 import { usePrayerTimes, getSunnahFastingInfo } from "@/hooks/usePrayerTimes";
 import { useRamadanRange } from "@/hooks/useRamadanRange";
+import { getTodayStringInTimezone, toLocalDateString, getNowInTimezone } from "@/lib/utils";
 
 const REMINDERS_SENT_KEY = "tryramadan-reminders-sent";
 
@@ -45,16 +45,19 @@ function timeToMinutes(timeStr: string): number {
 export function ReminderScheduler() {
   const [preferences] = useUserPreferences();
   const [notifSettings] = useNotificationSettings();
+  const displayTimezone = useDisplayTimezone();
   const ramadanRange = useRamadanRange();
   const iftarLabel = useIftarLabel();
   const iftarLabelShort = useIftarLabelShort();
   const { prayerTimes } = usePrayerTimes(
     preferences.locationCoords?.lat ?? null,
-    preferences.locationCoords?.lng ?? null
+    preferences.locationCoords?.lng ?? null,
+    displayTimezone
   );
   const sentRef = useRef<Record<string, ReminderType[]>>(getRemindersSent());
 
   useEffect(() => {
+    if (!preferences.notificationsEnabled) return;
     if (!prayerTimes) return;
     if (!("Notification" in window)) return;
     if (Notification.permission !== "granted") return;
@@ -62,8 +65,9 @@ export function ReminderScheduler() {
     const checkAndNotify = () => {
       sentRef.current = getRemindersSent();
       const now = new Date();
-      const todayStr = now.toISOString().split("T")[0];
-      const nowMinutes = now.getHours() * 60 + now.getMinutes();
+      const todayStr = displayTimezone ? getTodayStringInTimezone(displayTimezone) : toLocalDateString(now);
+      const nowInTz = displayTimezone ? getNowInTimezone(displayTimezone) : { hours: now.getHours(), minutes: now.getMinutes(), seconds: now.getSeconds() };
+      const nowMinutes = nowInTz.hours * 60 + nowInTz.minutes;
       let sent = (sentRef.current[todayStr] ?? []) as ReminderType[];
 
       const addSent = (type: ReminderType) => {
@@ -151,7 +155,7 @@ export function ReminderScheduler() {
     checkAndNotify();
     const interval = setInterval(checkAndNotify, 60 * 1000);
     return () => clearInterval(interval);
-  }, [preferences.userType, prayerTimes, notifSettings.suhoorEnabled, notifSettings.iftarEnabled, notifSettings.suhoorMinutesBefore, notifSettings.iftarMinutesBefore, preferences.hydrationReminderEnabled, preferences.hydrationReminderTimes, iftarLabel, iftarLabelShort]);
+  }, [preferences.notificationsEnabled, preferences.userType, displayTimezone, prayerTimes, notifSettings.suhoorEnabled, notifSettings.iftarEnabled, notifSettings.suhoorMinutesBefore, notifSettings.iftarMinutesBefore, preferences.hydrationReminderEnabled, preferences.hydrationReminderTimes, iftarLabel, iftarLabelShort]);
 
   return null;
 }

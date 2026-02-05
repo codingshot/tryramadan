@@ -92,7 +92,7 @@ export function FastingBottomBar() {
             {iftarPast ? `Iftar ${prayerTimes?.maghrib ?? "—"}` : `Iftar in ${iftarText}`}
           </span>
           <span className="text-xs text-muted-foreground shrink-0">
-            · {progress.completedDays.length} days
+            · {(progress.completedDays ?? []).length} days
           </span>
         </div>
         {/* Quick controls */}

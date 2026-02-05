@@ -28,11 +28,13 @@ const Index = () => {
   const today = new Date();
   const todayRamadanDay = ramadanRange.getRamadanDayNumber(today);
   const currentDay = todayRamadanDay ?? progress.currentDay ?? 1;
-  const completedInRange = progress.completedDays.filter((d) => d >= ramadanRange.startStr && d <= ramadanRange.endStr);
+  const ramadanStart = ramadanRange.startStr ?? "";
+  const ramadanEnd = ramadanRange.endStr ?? "";
+  const completedInRange = (progress.completedDays ?? []).filter((d) => d >= ramadanStart && d <= ramadanEnd);
   const completedDayNumbers = completedInRange
     .map((d) => ramadanRange.getRamadanDayNumber(new Date(d + "T12:00:00")))
     .filter((n): n is number => n != null);
-  const TOTAL_DAYS = ramadanRange.totalDays;
+  const TOTAL_DAYS = ramadanRange.totalDays ?? 30;
   const streak = calculateStreak(progress);
   const totalHoursFasted = getTotalHoursFasted(progress);
   const onboardingComplete = preferences.onboardingComplete ?? false;

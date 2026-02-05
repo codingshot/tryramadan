@@ -347,9 +347,10 @@ export const defaultProgress: FastingProgress = {
 
 /** Normalize progress so no date is in both completedDays and skippedDays (skipped wins). See FALL-OFF-AND-RETURN-FLOWS §3. */
 export function normalizeProgressSameDayConflict(p: FastingProgress): FastingProgress {
+  const completedDays = Array.isArray(p.completedDays) ? p.completedDays : [];
   const skipped = new Set(p.skippedDays ?? []);
-  const completed = (p.completedDays ?? []).filter((d) => !skipped.has(d));
-  if (completed.length === (p.completedDays ?? []).length) return p;
+  const completed = completedDays.filter((d) => !skipped.has(d));
+  if (completed.length === completedDays.length && Array.isArray(p.completedDays)) return p;
   return { ...p, completedDays: completed };
 }
 
@@ -360,6 +361,7 @@ export function useFastingProgress() {
     const migrated: FastingProgress = {
       ...defaultProgress,
       ...stored,
+      completedDays: Array.isArray(stored.completedDays) ? stored.completedDays : [],
       fastingLog: Array.isArray(stored.fastingLog) ? stored.fastingLog : [],
       skippedDays: Array.isArray(stored.skippedDays) ? stored.skippedDays : [],
     };

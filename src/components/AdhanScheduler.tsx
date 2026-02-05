@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useUserPreferences } from "@/hooks/useLocalStorage";
+import { useUserPreferences, useDisplayTimezone } from "@/hooks/useLocalStorage";
 import { usePrayerTimes } from "@/hooks/usePrayerTimes";
 import {
   usePrayerNotificationPrefs,
@@ -7,6 +7,7 @@ import {
   useAdhanNotifiedToday,
 } from "@/hooks/useLocalStorage";
 import { playAdhan } from "@/lib/adhanAudio";
+import { getTodayStringInTimezone, toLocalDateString, getNowInTimezone } from "@/lib/utils";
 
 const PRAYER_NAMES = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"] as const;
 
@@ -22,9 +23,11 @@ function timeToMinutes(timeStr: string): number {
  */
 export function AdhanScheduler() {
   const [preferences] = useUserPreferences();
+  const displayTimezone = useDisplayTimezone();
   const { prayerTimes } = usePrayerTimes(
     preferences.locationCoords?.lat ?? null,
-    preferences.locationCoords?.lng ?? null
+    preferences.locationCoords?.lng ?? null,
+    displayTimezone
   );
   const [prayerNotifications] = usePrayerNotificationPrefs();
   const [adhanSoundEnabled] = useAdhanSoundEnabled();
@@ -35,6 +38,7 @@ export function AdhanScheduler() {
 
   useEffect(() => {
     if (preferences.userType !== "muslim") return; // Prayer alarms only for Muslim users
+    if (!preferences.notificationsEnabled) return;
     if (!prayerTimes) return;
 
     const fireAdhan = (name: string, timeStr: string, todayStr: string) => {
@@ -59,8 +63,9 @@ export function AdhanScheduler() {
 
     const checkAndNotify = () => {
       const now = new Date();
-      const todayStr = now.toISOString().split("T")[0];
-      const nowMinutes = now.getHours() * 60 + now.getMinutes();
+      const todayStr = displayTimezone ? getTodayStringInTimezone(displayTimezone) : toLocalDateString(now);
+      const nowInTz = displayTimezone ? getNowInTimezone(displayTimezone) : { hours: now.getHours(), minutes: now.getMinutes(), seconds: now.getSeconds() };
+      const nowMinutes = nowInTz.hours * 60 + nowInTz.minutes;
       const store = notifiedStoreRef.current;
 
       for (const name of PRAYER_NAMES) {
@@ -98,7 +103,7 @@ export function AdhanScheduler() {
     checkAndNotify();
     const interval = setInterval(checkAndNotify, 60 * 1000);
     return () => clearInterval(interval);
-  }, [preferences.userType, prayerTimes, prayerNotifications, adhanSoundEnabled, setAdhanNotifiedToday]);
+  }, [preferences.userType, preferences.notificationsEnabled, displayTimezone, prayerTimes, prayerNotifications, adhanSoundEnabled, setAdhanNotifiedToday]);
 
   return null;
 }

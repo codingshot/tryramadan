@@ -15,8 +15,10 @@ export default function DashboardAchievements() {
   const [learnRead] = useLocalStorage<string[]>("tryramadan-learn-read", []);
   const displayTimezone = useDisplayTimezone();
   const todayStr = displayTimezone ? getTodayStringInTimezone(displayTimezone) : undefined;
-  const completedDays = progress.completedDays.filter((d) => d >= ramadanRange.startStr && d <= ramadanRange.endStr).length;
-  const totalDays = ramadanRange.totalDays;
+  const ramadanStart = ramadanRange.startStr ?? "";
+  const ramadanEnd = ramadanRange.endStr ?? "";
+  const completedDays = (progress.completedDays ?? []).filter((d) => d >= ramadanStart && d <= ramadanEnd).length;
+  const totalDays = ramadanRange.totalDays ?? 30;
   const eagerLearnerUnlocked = learnRead.length >= 10;
   const currentStreak = calculateStreak(progress, todayStr);
 

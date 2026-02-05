@@ -15,7 +15,7 @@ export const Navbar = () => {
   const [progress] = useFastingProgress();
   const { location: autoLocation } = useAutoLocation();
   const fastingToday = isFastingToday(progress);
-  const daysFasting = progress.completedDays.length;
+  const daysFasting = (progress.completedDays ?? []).length;
 
   const displayLocation = preferences.location || (autoLocation ? autoLocation.displayName : null);
   const locationShort = displayLocation ? displayLocation.split(",").slice(0, 2).join(",").trim() : "Set location";

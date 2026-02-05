@@ -690,8 +690,8 @@ const DashboardSchedule = () => {
         endStr = toLocalDateString(end);
       } else {
         // Ramadan: use effective range (includes user overrides from Settings) for accurate export
-        startStr = ramadanRange.startStr;
-        endStr = ramadanRange.endStr;
+        startStr = ramadanRange.startStr ?? toLocalDateString(ramadanRange.start);
+        endStr = ramadanRange.endStr ?? toLocalDateString(ramadanRange.end);
         start = new Date(startStr + "T00:00:00");
         end = new Date(endStr + "T23:59:59");
       }
