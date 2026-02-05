@@ -116,4 +116,43 @@ describe("Calendar / month view", () => {
     renderSchedule();
     expect(screen.getByRole("button", { name: /previous month/i })).toBeInTheDocument();
   });
+
+  it("shows Export to calendar section with Download .ics and Sync Ramadan", () => {
+    renderSchedule();
+    expect(screen.getByRole("heading", { name: /export to calendar/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /download.*current month/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /ramadan only/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /sync ramadan to calendar/i })).toBeInTheDocument();
+  });
+
+  it("shows Default event durations (minutes) when expanded", () => {
+    renderSchedule();
+    const summary = screen.getByText(/default event durations \(minutes\)/i);
+    expect(summary).toBeInTheDocument();
+    fireEvent.click(summary);
+    expect(screen.getByText(/used when you sync ramadan/i)).toBeInTheDocument();
+  });
+
+  it("shows Ramadan daily schedule section when location is set", () => {
+    renderSchedule();
+    expect(screen.getByRole("heading", { name: /ramadan daily schedule/i })).toBeInTheDocument();
+  });
+
+  it("shows stats: Ramadan days, Sunnah, completed, hours fasted", () => {
+    renderSchedule();
+    expect(screen.getByText(/ramadan days this month/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/sunnah \(mon\/thu\)/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/completed/i).length).toBeGreaterThan(0);
+  });
+
+  it("shows Dashboard quick access config", () => {
+    renderSchedule();
+    expect(screen.getByText(/dashboard quick access/i)).toBeInTheDocument();
+  });
+
+  it("shows What to include in calendar with eat times and prayer options", () => {
+    renderSchedule();
+    expect(screen.getByText(/what to include in calendar/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/suhoor end/i).length).toBeGreaterThan(0);
+  });
 });

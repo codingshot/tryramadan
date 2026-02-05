@@ -56,6 +56,7 @@ import {
   useCalendarEvents,
   usePrayerTimeOverrides,
   useDefaultPrayerDurations,
+  useCalendarIncludeTypes,
   getDefaultDurationForType,
   useDashboardQuickActions,
   DASHBOARD_QUICK_ACTIONS,
@@ -196,6 +197,7 @@ const DashboardSchedule = () => {
   const [calendarEvents, setCalendarEvents] = useCalendarEvents();
   const [prayerTimeOverrides, setPrayerTimeOverrides] = usePrayerTimeOverrides();
   const [defaultDurations, setDefaultDurations] = useDefaultPrayerDurations();
+  const [calendarIncludeTypes, setCalendarIncludeTypes] = useCalendarIncludeTypes();
   const locationCoords = preferences.locationCoords;
   const lat = locationCoords?.lat ?? null;
   const lng = locationCoords?.lng ?? null;
@@ -268,6 +270,11 @@ const DashboardSchedule = () => {
   const { prayerTimes: tomorrowPrayerTimes } = usePrayerTimesForDate(lat, lng, tomorrowStr);
   const imsakTomorrow = tomorrowPrayerTimes?.imsak ?? todayPrayerTimes?.imsak;
   const { prayerTimes: selectedDayPrayerTimes } = usePrayerTimesForDate(lat, lng, selectedDate);
+  /** Today's prayer times with overrides applied (for countdown and fasting status). */
+  const effectiveTodayPrayerTimes = useMemo(
+    () => getEffectivePrayerTimes(todayPrayerTimes ?? null, todayStr ? prayerTimeOverrides[todayStr] : undefined),
+    [todayPrayerTimes, todayStr, prayerTimeOverrides]
+  );
 
   const getDaysInMonth = (date: Date) =>
     new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -312,13 +319,13 @@ const DashboardSchedule = () => {
   };
 
   const goToToday = useCallback(() => {
-    const now = new Date();
-    const str = toLocalDateString(now);
-    setCurrentMonth(new Date(now.getFullYear(), now.getMonth(), 1));
+    const str = displayTimezone ? getTodayStringInTimezone(displayTimezone) : toLocalDateString(new Date());
+    const d = new Date(str + "T12:00:00");
+    setCurrentMonth(new Date(d.getFullYear(), d.getMonth(), 1));
     setSelectedDate(str);
     setNoteInput(scheduleNotes[str] || "");
     setSearchParams({ date: str }, { replace: true });
-  }, [scheduleNotes, setSearchParams]);
+  }, [displayTimezone, scheduleNotes, setSearchParams]);
 
   const goToRamadan = useCallback(() => {
     const start = ramadanRange.start;
@@ -527,24 +534,36 @@ const DashboardSchedule = () => {
     });
   };
 
-  /** Effective prayer times for every Ramadan day (for table and sync). */
+  /** Effective prayer times for every Ramadan day (for table and sync). Uses startStr/endStr; ensures every day has times (fallback to previous day if API missing). */
   const effectiveRamadanTimesMap = useMemo(() => {
     const map: Record<string, import("@/hooks/usePrayerTimes").PrayerTimes> = {};
-    const start = ramadanRange.start;
-    const end = ramadanRange.end;
-    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-      const dateStr = toLocalDateString(new Date(d));
+    const startStr = ramadanRange.startStr ?? toLocalDateString(ramadanRange.start);
+    const endStr = ramadanRange.endStr ?? toLocalDateString(ramadanRange.end);
+    const [sy, sm, sd] = startStr.split("-").map(Number);
+    const [ey, em, ed] = endStr.split("-").map(Number);
+    let d = new Date(sy, sm - 1, sd);
+    const end = new Date(ey, em - 1, ed);
+    let lastEffective: import("@/hooks/usePrayerTimes").PrayerTimes | null = null;
+    while (d.getTime() <= end.getTime()) {
+      const dateStr = toLocalDateString(d);
       const api = ramadanPrayerTimesMap[dateStr];
-      const effective = getEffectivePrayerTimes(api ?? null, prayerTimeOverrides[dateStr]);
-      if (effective) map[dateStr] = effective;
+      let effective = getEffectivePrayerTimes(api ?? null, prayerTimeOverrides[dateStr]);
+      if (!effective && lastEffective) {
+        effective = { ...lastEffective, date: dateStr };
+      }
+      if (effective) {
+        map[dateStr] = effective;
+        lastEffective = effective;
+      }
+      d.setDate(d.getDate() + 1);
     }
     return map;
-  }, [ramadanRange.start, ramadanRange.end, ramadanPrayerTimesMap, prayerTimeOverrides]);
+  }, [ramadanRange.startStr, ramadanRange.endStr, ramadanRange.start, ramadanRange.end, ramadanPrayerTimesMap, prayerTimeOverrides]);
 
-  /** Sync Ramadan: add Suhoor end + Iftar (and optionally all prayers) as calendar events for each day. Skips days that already have that event type. */
+  /** Sync Ramadan: add only selected types (eat times + prayers) as calendar events for each day. Skips days that already have that event type. */
   const syncRamadanToCalendar = useCallback(async () => {
     if (!lat || !lng) return;
-    const typesToSync: { type: CalendarEventType; title: string; timeKey: keyof import("@/hooks/usePrayerTimes").PrayerTimes; durationKey: CalendarEventType }[] = [
+    const allTypes: { type: CalendarEventType; title: string; timeKey: keyof import("@/hooks/usePrayerTimes").PrayerTimes; durationKey: CalendarEventType }[] = [
       { type: "suhoor", title: "Suhoor ends (eat before)", timeKey: "imsak", durationKey: "suhoor" },
       { type: "iftar", title: iftarLabelShort, timeKey: "maghrib", durationKey: "iftar" },
       { type: "fajr", title: "Fajr", timeKey: "fajr", durationKey: "fajr" },
@@ -553,6 +572,7 @@ const DashboardSchedule = () => {
       { type: "maghrib", title: "Maghrib", timeKey: "maghrib", durationKey: "maghrib" },
       { type: "isha", title: "Isha", timeKey: "isha", durationKey: "isha" },
     ];
+    const typesToSync = allTypes.filter((t) => calendarIncludeTypes[t.type] !== false);
     setCalendarEvents((prev) => {
       const next = { ...prev };
       Object.entries(effectiveRamadanTimesMap).forEach(([dateStr, pt]) => {
@@ -574,11 +594,23 @@ const DashboardSchedule = () => {
           next[dateStr] = dayEvents;
           existingTypes.add(type);
         });
+        if (calendarIncludeTypes.taraweeh !== false && pt.isha) {
+          if (!existingTypes.has("taraweeh")) {
+            const [ih, im] = pt.isha.split(":").map(Number);
+            const tm = (im || 0) + 30;
+            const tHour = (ih ?? 20) + 1 + Math.floor(tm / 60);
+            const tMin = tm % 60;
+            const tStr = `${tHour.toString().padStart(2, "0")}:${tMin.toString().padStart(2, "0")}`;
+            const duration = getDefaultDurationForType("taraweeh", defaultDurations);
+            dayEvents = [...dayEvents, { id: eventId(), title: "Taraweeh (optional)", type: "taraweeh", time: tStr, durationMinutes: duration, date: dateStr }];
+            next[dateStr] = dayEvents;
+          }
+        }
       });
       return next;
     });
     toast.success("Ramadan days synced to calendar. Export .ics to add to your calendar app.");
-  }, [lat, lng, effectiveRamadanTimesMap, defaultDurations, iftarLabel, iftarLabelShort, setCalendarEvents]);
+  }, [lat, lng, effectiveRamadanTimesMap, defaultDurations, calendarIncludeTypes, iftarLabel, iftarLabelShort, setCalendarEvents]);
 
   const selectedDayCalendarEvents = selectedDate ? (calendarEvents[selectedDate] ?? []) : [];
 
@@ -605,15 +637,16 @@ const DashboardSchedule = () => {
     });
   }, [setCalendarEvents]);
 
-  // Live countdown when viewing today (same logic as Dashboard)
+  // Live countdown when viewing today (same logic as Dashboard). Use effective today times so overrides apply.
   const tickFastingAndCountdown = useCallback(() => {
-    if (!todayPrayerTimes?.imsak || !todayPrayerTimes?.maghrib) return;
-    const suhoorForTomorrow = imsakTomorrow ?? todayPrayerTimes.imsak;
+    const pt = effectiveTodayPrayerTimes ?? todayPrayerTimes;
+    if (!pt?.imsak || !pt?.maghrib) return;
+    const suhoorForTomorrow = imsakTomorrow ?? pt.imsak;
     if (displayTimezone) {
       const nowSeconds = getNowSecondsSinceMidnightInTimezone(displayTimezone);
-      const imsakSeconds = timeStringToSecondsSinceMidnight(todayPrayerTimes.imsak);
+      const imsakSeconds = timeStringToSecondsSinceMidnight(pt.imsak);
       const imsakTomorrowSeconds = timeStringToSecondsSinceMidnight(suhoorForTomorrow);
-      const maghribSeconds = timeStringToSecondsSinceMidnight(todayPrayerTimes.maghrib);
+      const maghribSeconds = timeStringToSecondsSinceMidnight(pt.maghrib);
       const fasting = nowSeconds >= imsakSeconds && nowSeconds < maghribSeconds;
       setIsFasting(fasting);
       if (fasting) {
@@ -624,7 +657,7 @@ const DashboardSchedule = () => {
           s: diff % 60,
         });
       } else {
-        const diff = secondsUntilTimeInTimezone(nowSeconds, timeStringToSecondsSinceMidnight(suhoorForTomorrow));
+        const diff = secondsUntilTimeInTimezone(nowSeconds, imsakTomorrowSeconds);
         setCountdownToSuhoor({
           h: Math.floor(diff / 3600),
           m: Math.floor((diff % 3600) / 60),
@@ -633,8 +666,8 @@ const DashboardSchedule = () => {
       }
     } else {
       const now = new Date();
-      const imsakStr = (todayPrayerTimes.imsak ?? "").trim().split(" ")[0] || "05:00";
-      const maghribStr = (todayPrayerTimes.maghrib ?? "").trim().split(" ")[0] || "18:00";
+      const imsakStr = (pt.imsak ?? "").trim().split(" ")[0] || "05:00";
+      const maghribStr = (pt.maghrib ?? "").trim().split(" ")[0] || "18:00";
       const imsakTomorrowStr = (suhoorForTomorrow ?? "").trim().split(" ")[0] || "05:00";
       const imsakTime = new Date(todayStr + "T" + (imsakStr.length === 5 ? imsakStr + ":00" : imsakStr + ":00"));
       const maghribTime = new Date(todayStr + "T" + (maghribStr.length === 5 ? maghribStr + ":00" : maghribStr + ":00"));
@@ -657,7 +690,7 @@ const DashboardSchedule = () => {
         });
       }
     }
-  }, [todayPrayerTimes, imsakTomorrow, displayTimezone, todayStr, tomorrowStr]);
+  }, [effectiveTodayPrayerTimes, todayPrayerTimes, imsakTomorrow, displayTimezone, todayStr, tomorrowStr]);
 
   useEffect(() => {
     tickFastingAndCountdown();
@@ -711,13 +744,20 @@ const DashboardSchedule = () => {
         const effective = getEffectivePrayerTimes(prayerTimesMap[dateStr], prayerTimeOverrides[dateStr]);
         if (effective) prayerTimesMap[dateStr] = effective;
       });
+      const exportTimezone =
+        preferences.timezone?.trim() ||
+        displayTimezone?.trim() ||
+        (typeof Intl !== "undefined" && Intl.DateTimeFormat?.().resolvedOptions?.().timeZone) ||
+        undefined;
       const ics = buildIcalContent({
         prayerTimesMap,
         customEvents: calendarEvents,
         dateRange: [startStr, endStr],
-        includeTaraweeh: true,
+        includeTaraweeh: calendarIncludeTypes.taraweeh !== false,
         includePrayers: true,
-        timezone: preferences.timezone ?? undefined,
+        timezone: exportTimezone,
+        includeTypes: calendarIncludeTypes,
+        eventDurations: defaultDurations,
       });
       downloadIcal(ics, `tryramadan-${startStr}-to-${endStr}.ics`);
       toast.success("Calendar exported successfully");
@@ -752,7 +792,7 @@ const DashboardSchedule = () => {
               Fasting Schedule
             </h1>
             <p className="text-muted-foreground mt-2">
-              Click a calendar day to view or edit its meal plan and food log. Hover stats and labels for tips.
+              Click a calendar day to view or edit its meal plan, food log, and prayer times. Times vary daily by location. Hover stats and labels for tips.
             </p>
           </motion.div>
 
@@ -945,6 +985,43 @@ const DashboardSchedule = () => {
                 className="mt-2"
               />
             )}
+            <div className="mt-3 pt-3 border-t border-border">
+              <p className="text-sm font-medium mb-2">What to include in calendar</p>
+              <p className="text-xs text-muted-foreground mb-2">Choose which events to sync and export. Eat times (Suhoor end, {iftarLabelShort}) and prayer times use your custom durations below.</p>
+              <div className="flex flex-wrap gap-x-6 gap-y-2 mb-3">
+                {(["suhoor", "iftar"] as const).map((t) => (
+                  <label key={t} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={calendarIncludeTypes[t] !== false}
+                      onChange={(e) => setCalendarIncludeTypes((prev) => ({ ...prev, [t]: e.target.checked }))}
+                      className="rounded border-border"
+                    />
+                    <span className="text-sm">{t === "suhoor" ? "Suhoor end" : iftarLabelShort}</span>
+                  </label>
+                ))}
+                {(["fajr", "dhuhr", "asr", "maghrib", "isha"] as const).map((t) => (
+                  <label key={t} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={calendarIncludeTypes[t] !== false}
+                      onChange={(e) => setCalendarIncludeTypes((prev) => ({ ...prev, [t]: e.target.checked }))}
+                      className="rounded border-border"
+                    />
+                    <span className="text-sm capitalize">{t}</span>
+                  </label>
+                ))}
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={calendarIncludeTypes.taraweeh !== false}
+                    onChange={(e) => setCalendarIncludeTypes((prev) => ({ ...prev, taraweeh: e.target.checked }))}
+                    className="rounded border-border"
+                  />
+                  <span className="text-sm">Taraweeh</span>
+                </label>
+              </div>
+            </div>
             <div className="mt-3 pt-3 border-t border-border flex flex-wrap gap-2">
               <Button
                 variant="outline"
@@ -957,7 +1034,7 @@ const DashboardSchedule = () => {
                 Sync Ramadan to calendar
               </Button>
               <span className="text-xs text-muted-foreground self-center">
-                Adds Suhoor end + Iftar + all 5 prayers for each Ramadan day (only where not already added). Then export .ics.
+                Adds only the selected events above for each Ramadan day (only where not already added). Then export .ics.
               </span>
             </div>
             <details className="mt-3 pt-3 border-t border-border">
@@ -994,7 +1071,7 @@ const DashboardSchedule = () => {
                 Ramadan daily schedule
               </h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Eating cutoff (Suhoor end) and break fast times for each day of Ramadan, from prayer times. Override any date in the day panel below.
+                Eating cutoff (Suhoor end) and break fast times for each day of Ramadan. Prayer times change every day and are calculated for your location. Override any date in the day panel below.
               </p>
               {ramadanPrayersLoading ? (
                 <p className="text-sm text-muted-foreground py-4">Loading prayer times…</p>

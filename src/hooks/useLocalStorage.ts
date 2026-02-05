@@ -804,6 +804,24 @@ export function usePrayerTimeOverrides() {
   return useLocalStorage<PrayerTimeOverrides>('tryramadan-prayer-time-overrides', {});
 }
 
+/** Which event types to include when syncing Ramadan to calendar and when exporting .ics (eat times + prayer times). */
+export type CalendarIncludeTypes = Partial<Record<CalendarEventType, boolean>>;
+
+const DEFAULT_CALENDAR_INCLUDE_TYPES: CalendarIncludeTypes = {
+  suhoor: true,
+  iftar: true,
+  fajr: true,
+  dhuhr: true,
+  asr: true,
+  maghrib: true,
+  isha: true,
+  taraweeh: true,
+};
+
+export function useCalendarIncludeTypes() {
+  return useLocalStorage<CalendarIncludeTypes>('tryramadan-calendar-include-types', DEFAULT_CALENDAR_INCLUDE_TYPES);
+}
+
 /** Default duration in minutes per event type (for sync-to-calendar). */
 export type DefaultPrayerDurations = Partial<Record<CalendarEventType, number>>;
 
@@ -1135,8 +1153,10 @@ export function getDayTotalsFromFoodLog(dayLog: DayFoodLog | undefined): DayNutr
 }
 
 /** Get fasting log entry for a date (for hours fasted) */
+/** Latest fasting log entry for the given date (there should be at most one per day; returns last if duplicates exist). */
 export function getFastingLogForDate(progress: FastingProgress, dateStr: string): FastingLogEntry | undefined {
-  return progress.fastingLog?.find((e) => e.date === dateStr);
+  const matches = (progress.fastingLog ?? []).filter((e) => e.date === dateStr);
+  return matches.length > 0 ? matches[matches.length - 1] : undefined;
 }
 
 /** Consecutive days ending on the given date where each day is completed or excused (excused days do not break the streak). Pass todayOverride when using location-based "today" so streak matches Dashboard. */

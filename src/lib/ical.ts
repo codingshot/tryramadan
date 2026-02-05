@@ -4,8 +4,19 @@
  */
 
 import type { PrayerTimes } from "@/hooks/usePrayerTimes";
-import type { CalendarEvent } from "@/hooks/useLocalStorage";
+import type { CalendarEvent, CalendarEventType } from "@/hooks/useLocalStorage";
 import { toLocalDateString } from "@/lib/utils";
+
+/** Map event type → summary and prayer time key for building ical from prayer times. */
+const TYPE_TO_SUMMARY_AND_KEY: Array<{ type: CalendarEventType; summary: string; timeKey: keyof PrayerTimes }> = [
+  { type: "suhoor", summary: "Suhoor ends (Imsak) • سحور", timeKey: "imsak" },
+  { type: "iftar", summary: "Iftar (Maghrib) • إفطار", timeKey: "maghrib" },
+  { type: "fajr", summary: "Fajr • الفجر", timeKey: "fajr" },
+  { type: "dhuhr", summary: "Dhuhr • الظهر", timeKey: "dhuhr" },
+  { type: "asr", summary: "Asr • العصر", timeKey: "asr" },
+  { type: "maghrib", summary: "Maghrib • المغرب", timeKey: "maghrib" },
+  { type: "isha", summary: "Isha • العشاء", timeKey: "isha" },
+];
 
 const ICS_HEADER = [
   "BEGIN:VCALENDAR",
@@ -17,12 +28,24 @@ const ICS_HEADER = [
 
 const ICS_FOOTER = "END:VCALENDAR";
 
-/** Format date + time for iCal DTSTART/DTEND (local). YYYYMMDDTHHmmss */
+/** Strip optional suffix from time string (e.g. "05:15 (EAT)" → "05:15") so parsing is safe. */
+function parseTimeForIcal(timeStr: string): { hour: number; min: number } {
+  const clean = (timeStr ?? "").trim().split(" ")[0] ?? "";
+  const parts = clean.split(":").map((p) => parseInt(p, 10));
+  const hour = Number.isFinite(parts[0]) ? Math.max(0, Math.min(23, parts[0])) : 0;
+  const min = Number.isFinite(parts[1]) ? Math.max(0, Math.min(59, parts[1])) : 0;
+  return { hour, min };
+}
+
+/** Format date + time for iCal DTSTART/DTEND (local). YYYYMMDDTHHmmss. Defensive against invalid date/time. */
 function formatIcalDateTime(dateStr: string, timeStr: string, durationMinutes: number = 0): { start: string; end: string } {
-  const [y, m, d] = dateStr.split("-").map(Number);
-  const [hour, min] = timeStr.split(":").map(Number);
-  const start = new Date(y, m - 1, d, hour, min, 0);
-  const end = new Date(start.getTime() + durationMinutes * 60 * 1000);
+  const [y, m, d] = dateStr.split("-").map((p) => parseInt(p, 10));
+  const { hour, min } = parseTimeForIcal(timeStr);
+  const year = Number.isFinite(y) ? y : new Date().getFullYear();
+  const month = Number.isFinite(m) ? Math.max(1, Math.min(12, m)) - 1 : 0;
+  const day = Number.isFinite(d) ? Math.max(1, Math.min(31, d)) : 1;
+  const start = new Date(year, month, day, hour, min, 0);
+  const end = new Date(start.getTime() + Math.max(0, durationMinutes) * 60 * 1000);
   const pad = (n: number) => n.toString().padStart(2, "0");
   return {
     start: `${start.getFullYear()}${pad(start.getMonth() + 1)}${pad(start.getDate())}T${pad(start.getHours())}${pad(start.getMinutes())}${pad(start.getSeconds())}`,
@@ -103,31 +126,77 @@ export interface ExportOptions {
   includePrayers?: boolean;
   /** IANA timezone (e.g. America/New_York) so events show in user's local time in calendar apps */
   timezone?: string | null;
-  /** "fasting" = Suhoor end + Iftar only; "full" = all five prayers + Taraweeh (default) */
+  /** "fasting" = Suhoor end + Iftar only; "full" = all five prayers + Taraweeh (default). Ignored when includeTypes is set. */
   exportMode?: ExportMode;
+  /** When set, only these event types are included from prayer times; uses eventDurations for minutes. */
+  includeTypes?: Partial<Record<CalendarEventType, boolean>>;
+  /** Duration in minutes per type (used when includeTypes is set). */
+  eventDurations?: Partial<Record<CalendarEventType, number>>;
 }
+
+const DEFAULT_DURATION: Partial<Record<CalendarEventType, number>> = {
+  suhoor: 5, iftar: 10, fajr: 5, dhuhr: 5, asr: 5, maghrib: 5, isha: 5, taraweeh: 60,
+};
 
 /** Generate .ics file content. When timezone (IANA) is provided, events use TZID so Google/Apple Calendar show local time. */
 export function buildIcalContent(options: ExportOptions): string {
-  const { prayerTimesMap, customEvents, dateRange, includeTaraweeh = true, includePrayers = true, timezone, exportMode = "full" } = options;
+  const {
+    prayerTimesMap,
+    customEvents,
+    dateRange,
+    includeTaraweeh = true,
+    includePrayers = true,
+    timezone,
+    exportMode = "full",
+    includeTypes,
+    eventDurations,
+  } = options;
   const [startStr, endStr] = dateRange;
-  const start = new Date(startStr + "T00:00:00");
-  const end = new Date(endStr + "T23:59:59");
+  if (!startStr || !endStr) return [ICS_HEADER, ICS_FOOTER].join("\r\n");
+  const start = new Date(startStr + "T12:00:00");
+  const end = new Date(endStr + "T12:00:00");
+  if (!Number.isFinite(start.getTime()) || !Number.isFinite(end.getTime()) || start.getTime() > end.getTime()) {
+    return [ICS_HEADER, ICS_FOOTER].join("\r\n");
+  }
   const events: string[] = [];
   const tz = timezone && timezone.trim() ? timezone.trim() : undefined;
+  const durations = { ...DEFAULT_DURATION, ...eventDurations };
 
-  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+  let d = new Date(start);
+  d.setHours(0, 0, 0, 0);
+  const endDay = new Date(end);
+  endDay.setHours(23, 59, 59, 999);
+  while (d.getTime() <= endDay.getTime()) {
     const dateStr = toLocalDateString(d);
     const pt = prayerTimesMap[dateStr];
     if (includePrayers && pt) {
-      prayerTimesToEvents(dateStr, pt, includeTaraweeh, exportMode).forEach((e) => {
-        events.push(eventToIcal(e.summary, dateStr, e.time, e.durationMinutes, tz));
-      });
+      if (includeTypes) {
+        TYPE_TO_SUMMARY_AND_KEY.forEach(({ type, summary, timeKey }) => {
+          if (includeTypes[type] !== false) {
+            const time = (pt as Record<string, string>)[timeKey] ?? "";
+            if (time && time.trim())
+              events.push(eventToIcal(summary, dateStr, time, durations[type] ?? 5, tz));
+          }
+        });
+        if (includeTypes.taraweeh !== false && pt.isha) {
+          const [ih, im] = pt.isha.split(":").map(Number);
+          const tm = (im || 0) + 30;
+          const tHour = ih + 1 + Math.floor(tm / 60);
+          const tMin = tm % 60;
+          const tStr = `${tHour.toString().padStart(2, "0")}:${tMin.toString().padStart(2, "0")}`;
+          events.push(eventToIcal("Taraweeh (optional) • تراويح", dateStr, tStr, durations.taraweeh ?? 60, tz));
+        }
+      } else {
+        prayerTimesToEvents(dateStr, pt, includeTaraweeh, exportMode).forEach((e) => {
+          if (e.time && e.time.trim()) events.push(eventToIcal(e.summary, dateStr, e.time, e.durationMinutes, tz));
+        });
+      }
     }
     const dayEvents = customEvents[dateStr] ?? [];
     dayEvents.forEach((e) => {
-      events.push(eventToIcal(e.title, dateStr, e.time, e.durationMinutes ?? 15, tz));
+      if (e.time && e.time.trim()) events.push(eventToIcal(e.title, dateStr, e.time, e.durationMinutes ?? 15, tz));
     });
+    d.setDate(d.getDate() + 1);
   }
 
   return [ICS_HEADER, ...events, ICS_FOOTER].join("\r\n");

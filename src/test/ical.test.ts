@@ -129,4 +129,67 @@ describe("buildIcalContent", () => {
 
     expect(ics).toContain("Break fast early");
   });
+
+  it("uses per-day prayer times when map has different times per date", () => {
+    const prayerTimesMap: Record<string, PrayerTimes> = {
+      "2025-03-01": { ...mockPrayerTimes, imsak: "05:00", maghrib: "18:40", date: "01 Mar 2025" },
+      "2025-03-02": { ...mockPrayerTimes, imsak: "04:58", maghrib: "18:42", date: "02 Mar 2025" },
+      "2025-03-03": { ...mockPrayerTimes, imsak: "04:55", maghrib: "18:44", date: "03 Mar 2025" },
+    };
+    const ics = buildIcalContent({
+      prayerTimesMap,
+      customEvents: {},
+      dateRange: ["2025-03-01", "2025-03-03"],
+      exportMode: "fasting",
+    });
+    expect(ics).toContain("Suhoor ends (Imsak)");
+    expect(ics).toContain("Iftar (Maghrib)");
+    const eventCount = (ics.match(/BEGIN:VEVENT/g) ?? []).length;
+    expect(eventCount).toBe(6);
+    expect(ics).toMatch(/20250301T\d{6}/);
+    expect(ics).toMatch(/20250302T\d{6}/);
+    expect(ics).toMatch(/20250303T\d{6}/);
+  });
+
+  it("respects includeTypes and eventDurations when provided", () => {
+    const startStr = "2025-03-01";
+    const endStr = "2025-03-01";
+    const prayerTimesMap = makePrayerTimesMap(startStr, endStr);
+    const ics = buildIcalContent({
+      prayerTimesMap,
+      customEvents: {},
+      dateRange: [startStr, endStr],
+      includePrayers: true,
+      includeTypes: { suhoor: true, iftar: true, fajr: false, dhuhr: false, asr: false, maghrib: false, isha: false, taraweeh: false },
+      eventDurations: { suhoor: 15, iftar: 20 },
+    });
+    expect(ics).toContain("Suhoor ends (Imsak)");
+    expect(ics).toContain("Iftar (Maghrib)");
+    expect(ics).not.toContain("Fajr •");
+    expect(ics).not.toContain("Dhuhr •");
+    const eventCount = (ics.match(/BEGIN:VEVENT/g) ?? []).length;
+    expect(eventCount).toBe(2);
+  });
+
+  it("returns valid empty calendar for invalid or empty date range", () => {
+    const icsEmpty = buildIcalContent({
+      prayerTimesMap: {},
+      customEvents: {},
+      dateRange: ["", ""],
+      includePrayers: true,
+    });
+    expect(icsEmpty).toContain("BEGIN:VCALENDAR");
+    expect(icsEmpty).toContain("END:VCALENDAR");
+    expect((icsEmpty.match(/BEGIN:VEVENT/g) ?? []).length).toBe(0);
+
+    const icsBad = buildIcalContent({
+      prayerTimesMap: {},
+      customEvents: {},
+      dateRange: ["2025-03-30", "2025-03-01"],
+      includePrayers: true,
+    });
+    expect(icsBad).toContain("BEGIN:VCALENDAR");
+    expect(icsBad).toContain("END:VCALENDAR");
+    expect((icsBad.match(/BEGIN:VEVENT/g) ?? []).length).toBe(0);
+  });
 });
