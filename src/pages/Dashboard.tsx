@@ -44,6 +44,7 @@ import {
   getStreakDays,
   getBrokenFastDays,
   getExcusedFastDays,
+  getSunnahDaysCompleted,
   useNotificationSettings,
   usePrayerNotificationPrefs,
   useDayFoodLog,
@@ -938,6 +939,7 @@ const Dashboard = () => {
           {(() => {
             const streakDaysList = getStreakDays(progress, todayStr);
             const totalDaysList = [...progress.completedDays].sort().reverse();
+            const sunnahDaysCount = getSunnahDaysCompleted(progress);
             const sunnahDaysList = progress.completedDays.filter((d) => {
               const day = new Date(d + "T12:00:00").getDay();
               return day === 1 || day === 4;
@@ -1032,20 +1034,20 @@ const Dashboard = () => {
                   <TooltipTrigger asChild>
                     <button
                       type="button"
-                      onClick={() => progress.sunnahDaysCompleted > 0 && setStatsDialog("sunnah")}
-                      className={`p-3 sm:p-4 md:p-4 rounded-2xl bg-card border border-border min-h-[100px] sm:h-[100px] md:min-h-[108px] flex flex-col items-center justify-center transition-colors text-left w-full ${progress.sunnahDaysCompleted > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
+                      onClick={() => sunnahDaysCount > 0 && setStatsDialog("sunnah")}
+                      className={`p-3 sm:p-4 md:p-4 rounded-2xl bg-card border border-border min-h-[100px] sm:h-[100px] md:min-h-[108px] flex flex-col items-center justify-center transition-colors text-left w-full ${sunnahDaysCount > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
                     >
                       <div className="flex flex-col items-center gap-1.5 sm:gap-2">
                         <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
                           <Moon className="w-5 h-5 text-foreground" aria-hidden />
                         </div>
-                        <span className="text-xl sm:text-2xl font-bold">{progress.sunnahDaysCompleted}</span>
+                        <span className="text-xl sm:text-2xl font-bold">{sunnahDaysCount}</span>
                         <span className="text-xs text-muted-foreground">Sunnah Days</span>
                       </div>
                     </button>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs p-3">
-                    <p>{progress.sunnahDaysCompleted > 0 ? "Click to see which days" : "Voluntary (Mon/Thu) days completed."}</p>
+                    <p>{sunnahDaysCount > 0 ? "Click to see which days" : "Voluntary (Mon/Thu) days completed."}</p>
                   </TooltipContent>
                 </Tooltip>
 

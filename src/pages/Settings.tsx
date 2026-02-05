@@ -23,6 +23,7 @@ import {
   getTotalHoursFasted,
   calculateStreak,
   getLongestStreak,
+  getSunnahDaysCompleted,
   getSuggestedCalories,
   getRecommendedCaloriesFromPreferences,
   useDailyGoals,
@@ -1227,7 +1228,7 @@ const Settings = () => {
                     <li>Current streak: <span className="font-medium text-foreground">{calculateStreak(progress, todayStr)}</span> days</li>
                     <li>Longest streak: <span className="font-medium text-foreground">{getLongestStreak(progress)}</span> days</li>
                     <li>Total hours fasted: <span className="font-medium text-foreground">{getTotalHoursFasted(progress).toFixed(1)}</span>h</li>
-                    <li>Sunnah days completed: <span className="font-medium text-foreground">{progress.sunnahDaysCompleted ?? 0}</span></li>
+                    <li>Sunnah days completed: <span className="font-medium text-foreground">{getSunnahDaysCompleted(progress)}</span></li>
                     {(progress.fastingLog?.length ?? 0) > 0 && (
                       <li>Fasting log entries: <span className="font-medium text-foreground">{progress.fastingLog?.length ?? 0}</span></li>
                     )}

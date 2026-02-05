@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { toLocalDateString } from '@/lib/utils';
+import { toLocalDateString, getTodayStringInTimezone } from '@/lib/utils';
 import { getTimezoneFromCoords } from '@/hooks/useLocation';
 import { getRamadanStartForYear, getRamadanEndForYear } from '@/lib/ramadan';
 
@@ -1209,6 +1209,15 @@ export function getExcusedFastDays(progress: FastingProgress): string[] {
     .reverse();
 }
 
+/** Count of completed days that fall on Monday (1) or Thursday (4) — Sunnah voluntary fasting days. Derived from completedDays; prefer this over stored sunnahDaysCompleted. */
+export function getSunnahDaysCompleted(progress: FastingProgress): number {
+  const days = progress.completedDays || [];
+  return days.filter((d) => {
+    const day = new Date(d + 'T12:00:00').getDay();
+    return day === 1 || day === 4;
+  }).length;
+}
+
 /** Longest consecutive streak: longest run of calendar days where each day is completed or excused. */
 export function getLongestStreak(progress: FastingProgress): number {
   const excusedSet = new Set(getExcusedFastDays(progress));
@@ -1363,7 +1372,7 @@ export function getDailyMissions(params: {
   ];
 }
 
-/** Hook: today's daily missions and completion count. Uses progress, meal plans, food log, schedule notes, Quran verse and hadith viewed. */
+/** Hook: today's daily missions and completion count. Uses progress, meal plans, food log, schedule notes, Quran verse and hadith viewed. Uses display timezone when set so "today" matches Dashboard. */
 export function useDailyMissions(): { missions: DailyMission[]; completedCount: number; totalCount: number } {
   const [progress] = useFastingProgress();
   const [mealPlans] = useDayMealPlans();
@@ -1371,9 +1380,10 @@ export function useDailyMissions(): { missions: DailyMission[]; completedCount: 
   const [scheduleNotes] = useLocalStorage<Record<string, string>>(SCHEDULE_NOTES_KEY, {});
   const [quranVerseViewedDates] = useQuranVerseViewedDates();
   const [hadithViewedDates] = useHadithViewedDates();
+  const displayTimezone = useDisplayTimezone();
   const iftarLabelShort = useIftarLabelShort();
   const suhoorLabelShort = useSuhoorLabelShort();
-  const todayStr = getTodayDateString();
+  const todayStr = displayTimezone ? getTodayStringInTimezone(displayTimezone) : getTodayDateString();
   const missions = getDailyMissions({
     todayStr,
     progress,
