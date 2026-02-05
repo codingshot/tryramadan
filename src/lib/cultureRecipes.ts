@@ -27,6 +27,8 @@ export interface Recipe {
   dietary?: string[];
   /** Step-by-step instructions (optional). When present, shown on recipe detail page. */
   steps?: string[];
+  /** Optional hyperlink sources for authenticity and discovery. */
+  sources?: SourceLink[];
 }
 
 export interface CityPractice {
@@ -50,13 +52,19 @@ export interface MajorMosque {
   appleMapsUrl?: string;
 }
 
+/** Optional source link for fact-checking and discovery. */
+export interface SourceLink {
+  title: string;
+  url: string;
+}
+
 export interface Country {
   id: string;
   name: string;
   flag: string;
   regionId: string;
   regionName: string;
-  traditions: { name: string; arabicName?: string; transliteration?: string; description: string }[];
+  traditions: { name: string; arabicName?: string; transliteration?: string; description: string; sources?: SourceLink[] }[];
   foods: string[];
   specialNote: string;
   cities?: CityPractice[];
@@ -65,6 +73,8 @@ export interface Country {
   /** Short note on Muslim community (e.g. "World's largest Muslim-majority country") */
   muslimPopulationNote?: string;
   majorMosques?: MajorMosque[];
+  /** Optional hyperlink sources for traditions and culture (fact-checking, SEO). */
+  sources?: SourceLink[];
 }
 
 const recipes = recipesData as { suhoor: Recipe[]; iftar: Recipe[] };
@@ -83,6 +93,7 @@ const culture = culturalData as {
       muslimPopulation?: string;
       muslimPopulationNote?: string;
       majorMosques?: MajorMosque[];
+      sources?: SourceLink[];
     }[];
   }[];
 };
@@ -103,6 +114,7 @@ export function getAllCountries(): Country[] {
       muslimPopulation: c.muslimPopulation,
       muslimPopulationNote: c.muslimPopulationNote,
       majorMosques: c.majorMosques,
+      sources: c.sources,
     }))
   );
 }

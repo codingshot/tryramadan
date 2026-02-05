@@ -25,6 +25,7 @@ export const FastingPrograms = ({ onSelectProgram, selectedProgram = "traditiona
             onClick={() => onSelectProgram?.(program.id)}
             className={`
               card-cultural cursor-pointer relative overflow-hidden
+              ${programs.length === 1 ? "md:col-span-3" : ""}
               ${selectedProgram === program.id 
                 ? "ring-2 ring-secondary shadow-gold" 
                 : "hover:shadow-elevated"

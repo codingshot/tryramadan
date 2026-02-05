@@ -173,6 +173,18 @@ export default function CultureCountry() {
                       <p className="text-sm text-secondary font-arabic">{t.arabicName}</p>
                     )}
                     <p className="text-sm text-muted-foreground mt-1">{t.description}</p>
+                    {t.sources && t.sources.length > 0 && (
+                      <ul className="mt-2 flex flex-wrap gap-2">
+                        {t.sources.map((s, j) => (
+                          <li key={j}>
+                            <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-xs text-secondary hover:underline inline-flex items-center gap-1">
+                              <ExternalLink className="w-3 h-3" aria-hidden />
+                              {s.title}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -182,6 +194,25 @@ export default function CultureCountry() {
               <h2 id="foods-heading" className="font-display font-bold text-lg mb-3">Traditional foods</h2>
               <p className="text-muted-foreground">{country.foods.join(", ")}</p>
             </section>
+
+            {country.sources && country.sources.length > 0 && (
+              <section className="mb-8 p-5 rounded-2xl bg-muted/30 border border-border" aria-labelledby="sources-heading">
+                <h2 id="sources-heading" className="font-display font-bold text-lg mb-3 flex items-center gap-2">
+                  <ExternalLink className="w-5 h-5 text-secondary" aria-hidden />
+                  Sources & further reading
+                </h2>
+                <ul className="space-y-2">
+                  {country.sources.map((s, i) => (
+                    <li key={i}>
+                      <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-sm text-secondary hover:underline inline-flex items-center gap-1.5">
+                        <ExternalLink className="w-4 h-4 flex-shrink-0" aria-hidden />
+                        {s.title}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
 
             {(country.muslimPopulation || country.muslimPopulationNote) && (
               <section className="mb-8 p-5 rounded-2xl bg-card border border-border" aria-labelledby="population-heading">

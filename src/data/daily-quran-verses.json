@@ -1,0 +1,76 @@
+{
+  "verses": [
+    {
+      "id": 1,
+      "surah": "Al-Baqarah",
+      "surahNumber": 2,
+      "verseNumber": 183,
+      "reference": "2:183",
+      "text": "O you who have believed, decreed upon you is fasting as it was decreed upon those before you that you may become righteous.",
+      "topic": "Fasting prescribed"
+    },
+    {
+      "id": 2,
+      "surah": "Al-Baqarah",
+      "surahNumber": 2,
+      "verseNumber": 184,
+      "reference": "2:184",
+      "text": "[Fasting for] a limited number of days. So whoever among you is ill or on a journey—then an equal number of days [are to be made up]. And upon those who are able [to fast]—a ransom [as substitute] of feeding a poor person [each day]. And whoever volunteers good—it is better for him. But to fast is best for you, if you only knew.",
+      "topic": "Flexibility in fasting"
+    },
+    {
+      "id": 3,
+      "surah": "Al-Baqarah",
+      "surahNumber": 2,
+      "verseNumber": 185,
+      "reference": "2:185",
+      "text": "The month of Ramadan [is that] in which was revealed the Qur'an, a guidance for the people and clear proofs of guidance and criterion. So whoever sights [the new moon of] the month, let him fast it; and whoever is ill or on a journey—then an equal number of other days. Allah intends for you ease and does not intend for you hardship and [wants] for you to complete the period and to glorify Allah for that [to] which He has guided you; and perhaps you will be grateful.",
+      "topic": "Ramadan and the Quran"
+    },
+    {
+      "id": 4,
+      "surah": "Al-Baqarah",
+      "surahNumber": 2,
+      "verseNumber": 186,
+      "reference": "2:186",
+      "text": "And when My servants ask you concerning Me—indeed I am near. I respond to the invocation of the supplicant when he calls upon Me. So let them respond to Me and believe in Me that they may be guided.",
+      "topic": "Prayer and nearness to Allah"
+    },
+    {
+      "id": 5,
+      "surah": "Al-Baqarah",
+      "surahNumber": 2,
+      "verseNumber": 187,
+      "reference": "2:187",
+      "text": "It has been made permissible for you the night of fasting to have sexual relations with your wives. They are clothing for you and you are clothing for them. So approach them and seek what Allah has ordained for you, and eat and drink until the white thread of dawn becomes distinct to you from the black thread.",
+      "topic": "Nights of fasting"
+    },
+    {
+      "id": 6,
+      "surah": "Al-Baqarah",
+      "surahNumber": 2,
+      "verseNumber": 153,
+      "reference": "2:153",
+      "text": "O you who have believed, seek help through patience and prayer. Indeed, Allah is with the patient.",
+      "topic": "Patience and prayer"
+    },
+    {
+      "id": 7,
+      "surah": "Al-Baqarah",
+      "surahNumber": 2,
+      "verseNumber": 286,
+      "reference": "2:286",
+      "text": "Allah does not burden a soul beyond that it can bear. For it is what it has earned, and against it is what it has committed.",
+      "topic": "No burden beyond capacity"
+    },
+    {
+      "id": 8,
+      "surah": "Adh-Dhariyat",
+      "surahNumber": 51,
+      "verseNumber": 56,
+      "reference": "51:56",
+      "text": "And I did not create the jinn and mankind except to worship Me.",
+      "topic": "Purpose of creation"
+    }
+  ]
+}

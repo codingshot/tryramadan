@@ -16,6 +16,8 @@ export const DailyHadith = () => {
   }, []);
 
   const hadith = hadiths.hadiths[currentIndex];
+  const displayDate = new Date();
+  const dateLabel = displayDate.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric", year: "numeric" });
 
   return (
     <motion.div
@@ -34,7 +36,7 @@ export const DailyHadith = () => {
       <div className="relative z-10">
         <Tooltip delayDuration={200}>
           <TooltipTrigger asChild>
-            <span className="inline-block px-3 py-1 rounded-full bg-secondary/20 text-secondary text-xs font-medium mb-4">
+            <span className="inline-block px-3 py-1 rounded-full bg-secondary/20 text-secondary text-xs font-medium mb-2">
               Daily Hadith
             </span>
           </TooltipTrigger>
@@ -42,6 +44,9 @@ export const DailyHadith = () => {
             <p>View this hadith on Sunnah.com</p>
           </TooltipContent>
         </Tooltip>
+        <p className="text-xs text-primary-foreground/70 mb-4" aria-label={`Date: ${dateLabel}`}>
+          {dateLabel}
+        </p>
 
         <blockquote className="text-lg md:text-xl leading-relaxed mb-6 font-display">
           "{hadith.text}"

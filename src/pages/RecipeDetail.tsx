@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Coffee, Utensils, Clock, Globe, BookOpen, Flame, ListOrdered } from "lucide-react";
+import { ArrowLeft, Coffee, Utensils, Clock, Globe, BookOpen, Flame, ListOrdered, ExternalLink } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { PageSEO } from "@/components/PageSEO";
@@ -10,7 +10,7 @@ import {
   type MealType,
 } from "@/lib/cultureRecipes";
 import { useIftarLabel } from "@/hooks/useLocalStorage";
-import { buildRecipeSchema } from "@/lib/jsonld";
+import { buildRecipeSchema, buildBreadcrumbSchema } from "@/lib/jsonld";
 
 export default function RecipeDetail() {
   const { mealType, id } = useParams<{ mealType: string; id: string }>();
@@ -25,6 +25,11 @@ export default function RecipeDetail() {
   if (!recipe || !result) {
     return (
       <div className="min-h-screen bg-background">
+        <PageSEO
+          title="Recipe not found | TryRamadan"
+          description="The recipe you're looking for doesn't exist or was removed. Browse Ramadan suhoor and iftar recipes."
+          robots="noindex, follow"
+        />
         <Navbar />
         <main id="main-content" className="main-content container mx-auto px-4 max-w-4xl min-w-0">
           <h1 className="text-2xl font-display font-bold">Recipe not found</h1>
@@ -39,31 +44,56 @@ export default function RecipeDetail() {
   }
 
   const { mealType: type } = result;
-  const title = `${recipe.name} | ${type === "suhoor" ? "Suhoor" : iftarLabel} Recipe | TryRamadan`;
+  const mealLabel = type === "suhoor" ? "Suhoor" : iftarLabel;
+  const title = `${recipe.name} | ${mealLabel} Recipe | Ramadan | TryRamadan`;
   const description =
     recipe.significance || recipe.description;
+  const metaDesc = [
+    recipe.name,
+    mealLabel,
+    "Ramadan recipe",
+    recipe.region && `from ${recipe.region}`,
+    "—",
+    description.slice(0, 100),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .slice(0, 160);
   const recipePath = `/recipe/${type}/${recipe.id}`;
+  const recipeUrl = `https://tryramadan.app${recipePath}`;
   const recipeJsonLd = buildRecipeSchema({
     name: recipe.name,
     description: description.slice(0, 160),
-    url: `https://tryramadan.app${recipePath}`,
-    recipeCategory: type === "suhoor" ? "Suhoor" : iftarLabel,
+    url: recipeUrl,
+    recipeCategory: mealLabel,
     recipeCuisine: recipe.region ?? undefined,
+    ingredients: recipe.ingredients,
+    steps: recipe.steps,
+    prepTime: recipe.prepTime,
+    cookTime: recipe.cookTime,
+    totalTime: recipe.totalTime,
     calories: recipe.nutrition?.calories,
     protein: recipe.nutrition?.protein,
     carbs: recipe.nutrition?.carbs,
     fat: recipe.nutrition?.fat,
   });
+  const breadcrumbJsonLd = buildBreadcrumbSchema([
+    { name: "Home", url: "/" },
+    { name: "Recipes", url: "/recipes" },
+    { name: recipe.name, url: recipePath },
+  ]);
 
   return (
     <div className="min-h-screen bg-background">
       <PageSEO
         title={title}
-        description={description.slice(0, 160)}
+        description={metaDesc}
         path={recipePath}
         type="article"
+        imageAlt={`${recipe.name} — ${mealLabel} recipe for Ramadan from TryRamadan`}
       />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(recipeJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <Navbar />
       <main id="main-content" className="main-content" aria-label="Recipe">
         <div className="container mx-auto px-4 max-w-3xl min-w-0">
@@ -95,7 +125,10 @@ export default function RecipeDetail() {
                 )}
               </div>
               <h1 className="text-xl sm:text-2xl md:text-4xl font-display font-bold break-words">{recipe.name}</h1>
-              <p className="text-muted-foreground mt-2">{recipe.description}</p>
+              <p className="text-muted-foreground mt-2 sm:mt-3 text-sm sm:text-base max-w-2xl">
+                {recipe.name} is a {mealLabel.toLowerCase()} recipe for Ramadan{recipe.region ? ` from ${recipe.region}` : ""}. {recipe.description}
+                {recipe.ingredients.length > 0 && ` Ingredients include ${recipe.ingredients.slice(0, 4).join(", ")}.`}
+              </p>
             </header>
 
             {recipe.significance && (
@@ -187,6 +220,25 @@ export default function RecipeDetail() {
               <p className="text-xs text-muted-foreground">
                 Dietary: {recipe.dietary.map((d) => d.replace("-", " ")).join(", ")}
               </p>
+            )}
+
+            {recipe.sources && recipe.sources.length > 0 && (
+              <section className="mt-6 p-4 rounded-2xl bg-muted/30 border border-border" aria-labelledby="recipe-sources-heading">
+                <h2 id="recipe-sources-heading" className="font-display font-bold text-sm mb-2 flex items-center gap-2">
+                  <ExternalLink className="w-4 h-4 text-secondary" aria-hidden />
+                  Sources & further reading
+                </h2>
+                <ul className="space-y-1.5">
+                  {recipe.sources.map((s, i) => (
+                    <li key={i}>
+                      <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-sm text-secondary hover:underline inline-flex items-center gap-1.5">
+                        <ExternalLink className="w-3.5 h-3.5 flex-shrink-0" aria-hidden />
+                        {s.title}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </section>
             )}
           </motion.article>
         </div>

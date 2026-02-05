@@ -305,21 +305,6 @@ export const FastingTimer = ({
               </>
             )}
           </div>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span className="text-sm text-primary-foreground/70 cursor-help border-b border-dotted border-primary-foreground/20">
-                {isEatingPeriod ? "Time left to eat until Suhoor end (cut-off)" : `Time until ${iftarLabel} (break fast)`}
-              </span>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="max-w-xs bg-card border-border p-3">
-              <p className="font-semibold text-sm">
-                {isEatingPeriod ? EATING_TIME_TOOLTIPS.untilSuhoor.title : EATING_TIME_TOOLTIPS.untilIftar.title}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {isEatingPeriod ? EATING_TIME_TOOLTIPS.untilSuhoor.body : EATING_TIME_TOOLTIPS.untilIftar.body}
-              </p>
-            </TooltipContent>
-          </Tooltip>
         </div>
 
         {/* Main timer display — live region for screen readers */}
@@ -410,7 +395,7 @@ export const FastingTimer = ({
                     <p className="font-arabic text-xs text-muted-foreground mt-1" dir="rtl">{(EATING_TIME_TOOLTIPS.iftar as { bodyAr?: string }).bodyAr}</p>
                   </TooltipContent>
                 </Tooltip>
-                {" "}(break fast) at {nextTimeStr || iftarTime}
+                {" "}at {nextTimeStr || iftarTime}
               </>
             )}
           </span>
@@ -512,7 +497,11 @@ export const FastingTimer = ({
             />
           ) : (
             <p className="text-center text-xs text-primary-foreground/60">
-              {locationShort ? `Prayer times for ${locationShort}` : "Prayer times for your location"} · <Link to="/settings" className="underline hover:text-primary-foreground/90">Update</Link>
+              {locationShort ? (
+                <>Prayer times for <Link to="/settings" className="underline hover:text-primary-foreground/90 font-medium" aria-label={`${locationShort}. Tap to change location.`}>{locationShort}</Link></>
+              ) : (
+                <>Prayer times for your location · <Link to="/settings" className="underline hover:text-primary-foreground/90">Set location</Link></>
+              )}
             </p>
           )}
         </div>

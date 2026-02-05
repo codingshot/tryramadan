@@ -252,6 +252,9 @@
       "significance": "Harira is the iconic iftar soup in Morocco, often served with dates and chebakia during Ramadan.",
       "dietary": ["vegetarian"],
       "countryId": "morocco",
+      "sources": [
+        {"title": "UNESCO – Iftar and its socio-cultural traditions", "url": "https://ich.unesco.org/en/RL/iftar-eftari-iftar-iftor-and-its-socio-cultural-traditions-01984"}
+      ],
       "steps": [
         "Sauté 2 stalks chopped celery, 1 large chopped onion, and 1 tbsp grated ginger in 2 tbsp olive oil 5–6 min until soft. Add 4–5 chopped tomatoes (or 1 can) and cook 5–7 min until broken down.",
         "Add 1/2 cup red lentils, 1 cup cooked chickpeas, 6 cups water or broth, 1/2 tsp turmeric, 1/2 tsp cinnamon, 1/4 tsp pepper, and 1 tbsp tomato paste. Bring to a boil (2 min), then simmer 25–30 min until lentils are tender.",
@@ -271,6 +274,9 @@
       "benefits": "Hydrating fruits with electrolytes and vitamins",
       "tips": "Use a variety of colorful fruits for maximum nutrition",
       "countryId": "pakistan",
+      "sources": [
+        {"title": "Rooh Afza and Ramadan – Dawn", "url": "https://www.dawn.com/news/1265248"}
+      ],
       "steps": [
         "Wash and dry seasonal fruits: 1 apple, 1–2 bananas, 1 mango, 1/2 papaya, 1 cup grapes, 1/2 cup pomegranate seeds, 1 orange (segmented), 1 cup melon cubes (2 min). Cut into bite-sized pieces (5 min).",
         "Combine all fruit in a large bowl. Squeeze juice of 1–2 limes over the fruit and toss gently (1 min).",
@@ -290,6 +296,9 @@
       "benefits": "Traditional celebration dessert (enjoy in moderation)",
       "tips": "Balance sweet treats with protein-rich main dishes",
       "countryId": "egypt",
+      "sources": [
+        {"title": "Knafeh – Wikipedia", "url": "https://en.wikipedia.org/wiki/Knafeh"}
+      ],
       "steps": [
         "Thaw 1 lb (450g) kadaif (shredded phyllo) if frozen (about 30 min). Separate strands gently, mix with 1/2 cup melted butter until evenly coated (2 min). Press half into a greased 9x13 inch baking dish.",
         "Layer 12–14 oz (350–400g) akkawi or mild white cheese (rinsed if salty) over the kadaif. Top with the remaining kadaif and press gently to seal (2 min).",
@@ -328,6 +337,9 @@
       "benefits": "Hydrating salad and sweet drink; jallab is a Ramadan staple in Lebanon",
       "tips": "Jallab is often served with ice and pine nuts; break fast with dates first",
       "countryId": "lebanon",
+      "sources": [
+        {"title": "Iftar cannon – Wikipedia", "url": "https://en.wikipedia.org/wiki/Iftar_Cannon"}
+      ],
       "steps": [
         "Fattoush: Chop cucumber, tomatoes, radish, lettuce, and scallions into a bowl (5 min). Add chopped mint and parsley. Toss with sumac, a little salt, and olive oil (1 min).",
         "Toast or fry pita 2–3 min until crisp; break into pieces. Add pita to the salad just before serving. Dress with pomegranate molasses and lemon juice; taste and adjust salt (1 min).",
@@ -348,6 +360,9 @@
       "tips": "Eaten communally at Ramadan gatherings; symbolizes hospitality",
       "significance": "Mansaf is central to Jordanian identity and is often served at special Ramadan and Eid gatherings.",
       "countryId": "jordan",
+      "sources": [
+        {"title": "Mansaf – Wikipedia", "url": "https://en.wikipedia.org/wiki/Mansaf"}
+      ],
       "steps": [
         "Soak jameed (dried yogurt balls) in warm water 2–3 hours; blend or mash until smooth (5 min). If using jameed paste, dilute with water.",
         "In a large pot, brown lamb pieces in ghee or butter 5–7 min. Add water, bay leaf, and onion; simmer 1–1½ hours until lamb is tender. Add the jameed mixture and cook on low 20–30 min until the sauce thickens. Season with salt and a little allspice.",
@@ -367,6 +382,9 @@
       "benefits": "Quick energy and hydration; popular takjil (iftar snack) in Indonesia",
       "tips": "Kolak is one of the most common iftar sweets during Ramadan in Indonesia",
       "countryId": "indonesia",
+      "sources": [
+        {"title": "Takjil – Indonesian Ramadan tradition", "url": "https://manual.co.id/article/takjil-ramadan/"}
+      ],
       "steps": [
         "Peel and cube sweet potato (3 min); boil in water 10 min until tender. Drain and set aside.",
         "In a pot, combine coconut milk, water, palm sugar (or brown sugar), a pinch of salt, and a knotted pandan leaf. Heat gently 3–4 min until sugar dissolves; do not boil hard.",
@@ -462,6 +480,9 @@
       "benefits": "Rehydrating and protein-rich; traditional Algerian iftar starter",
       "tips": "Chorba is the centerpiece of Algerian Ramadan; serve with dates and bourek",
       "countryId": "algeria",
+      "sources": [
+        {"title": "Ramadan in Algeria – About Algeria", "url": "https://www.aboutalgeria.com/2017/11/ramadan-in-algeria.html"}
+      ],
       "steps": [
         "In a large pot, brown 1 lb (450g) lamb pieces in 2 tbsp oil 5–7 min. Add 1 chopped onion, 2 cloves minced garlic; sauté 3 min. Add 4 chopped tomatoes, 1 tbsp tomato paste; cook 5 min.",
         "Add 1 cup soaked or canned chickpeas, 2 tsp ras el hanout (or cumin, coriander, cinnamon), 1/2 tsp turmeric, 6 cups water or broth. Bring to a boil, then simmer 45 min until lamb is tender.",
@@ -500,6 +521,9 @@
       "benefits": "Complete meal with protein and vegetables; central to Senegalese Ramadan",
       "tips": "Thieb (ceebu jën) is served at ndogou (breaking fast); use firm white fish",
       "countryId": "senegal",
+      "sources": [
+        {"title": "UNESCO – Iftar and its socio-cultural traditions", "url": "https://ich.unesco.org/en/RL/iftar-eftari-iftar-iftor-and-its-socio-cultural-traditions-01984"}
+      ],
       "steps": [
         "Season 2 lbs (900g) fish (tilapia, grouper, or sea bass) with salt, pepper, and 1 tbsp mustard. Heat 1/4 cup oil in a large pot; fry fish 4–5 min per side. Set aside.",
         "In same pot, sauté 2 chopped onions 5 min. Add 3 tbsp tomato paste, 2 chopped tomatoes, 1 tbsp fish paste (optional), 1 tsp garlic. Cook 10 min. Add 1/2 head cabbage (quartered), 3 carrots, 1 eggplant (chunks), 2 cups water. Simmer 20 min.",

@@ -11,6 +11,7 @@ import {
   type MealType,
   type Recipe,
 } from "@/lib/cultureRecipes";
+import { buildRecipeListSchema } from "@/lib/jsonld";
 import {
   Select,
   SelectContent,
@@ -46,13 +47,27 @@ export default function Recipes() {
     });
   }, [countryFilter, mealFilter]);
 
+  const listSchema = useMemo(
+    () =>
+      buildRecipeListSchema(
+        filtered.map(({ mealType, recipe }) => ({
+          name: recipe.name,
+          url: `/recipe/${mealType}/${recipe.id}`,
+          mealType: mealType === "suhoor" ? "Suhoor" : "Iftar",
+        })),
+        "/recipes"
+      ),
+    [filtered]
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <PageSEO
         title="Ramadan Recipes | Suhoor & Iftar by Culture | TryRamadan"
-        description="Discover suhoor and iftar recipes from around the world. Filter by culture and region. TryRamadan helps you plan meals for Ramadan fasting."
+        description="Discover suhoor and iftar recipes from around the world. Ramadan meal ideas by culture: Middle East, South Asia, Turkey, and more. Filter by meal type. TryRamadan."
         path="/recipes"
       />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(listSchema) }} />
       <Navbar />
       <main id="main-content" className="main-content" aria-label="Recipes">
         <div className="container mx-auto px-4 max-w-4xl min-w-0">
@@ -72,8 +87,8 @@ export default function Recipes() {
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-display font-bold">
               Ramadan Recipes
             </h1>
-            <p className="text-muted-foreground mt-2">
-              Suhoor (pre-dawn) and Iftar (evening break-fast) recipes from Muslim communities worldwide. Filter by culture or meal type; open any recipe for ingredients and steps.
+            <p className="text-muted-foreground mt-2 max-w-2xl">
+              Suhoor (pre-dawn) and Iftar (evening break-fast) recipes from Muslim communities worldwide. Ramadan meal ideas by culture: Middle East, South Asia, Turkey, Southeast Asia, Levant, and more. Filter by culture or meal type; open any recipe for ingredients, steps, and nutrition.
             </p>
             <div className="flex flex-wrap gap-3 mt-4">
               <Link

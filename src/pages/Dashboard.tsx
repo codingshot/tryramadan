@@ -978,7 +978,7 @@ const Dashboard = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-2 gap-3 sm:gap-4 md:mb-0"
+                className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-2 gap-3 gap-y-4 sm:gap-4 md:gap-x-5 md:gap-y-6 lg:gap-y-8 md:mb-0"
               >
                 {/* Streak — hidden when showStreakAndAchievements is off */}
                 {preferences.showStreakAndAchievements !== false && (
@@ -987,9 +987,9 @@ const Dashboard = () => {
                       <button
                         type="button"
                         onClick={() => streak > 0 && setStatsDialog("streak")}
-                        className={`p-3 sm:p-4 rounded-2xl bg-card border border-border h-[100px] flex flex-col items-center justify-center transition-colors text-left w-full ${streak > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
+                        className={`p-3 sm:p-4 md:p-4 rounded-2xl bg-card border border-border min-h-[100px] sm:h-[100px] md:min-h-[108px] flex flex-col items-center justify-center transition-colors text-left w-full ${streak > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
                       >
-                        <div className="flex flex-col items-center gap-2">
+                        <div className="flex flex-col items-center gap-1.5 sm:gap-2">
                           <div className="w-10 h-10 rounded-full bg-gradient-gold flex items-center justify-center">
                             <Flame className="w-5 h-5 text-foreground" />
                           </div>
@@ -1011,9 +1011,9 @@ const Dashboard = () => {
                     <button
                       type="button"
                       onClick={() => progress.completedDays.length > 0 && setStatsDialog("total")}
-                      className={`p-3 sm:p-4 rounded-2xl bg-card border border-border h-[100px] flex flex-col items-center justify-center transition-colors text-left w-full ${progress.completedDays.length > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
+                      className={`p-3 sm:p-4 md:p-4 rounded-2xl bg-card border border-border min-h-[100px] sm:h-[100px] md:min-h-[108px] flex flex-col items-center justify-center transition-colors text-left w-full ${progress.completedDays.length > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
                     >
-                      <div className="flex flex-col items-center gap-2">
+                      <div className="flex flex-col items-center gap-1.5 sm:gap-2">
                         <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
                           <Calendar className="w-5 h-5 text-foreground" />
                         </div>
@@ -1033,9 +1033,9 @@ const Dashboard = () => {
                     <button
                       type="button"
                       onClick={() => progress.sunnahDaysCompleted > 0 && setStatsDialog("sunnah")}
-                      className={`p-3 sm:p-4 rounded-2xl bg-card border border-border h-[100px] flex flex-col items-center justify-center transition-colors text-left w-full ${progress.sunnahDaysCompleted > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
+                      className={`p-3 sm:p-4 md:p-4 rounded-2xl bg-card border border-border min-h-[100px] sm:h-[100px] md:min-h-[108px] flex flex-col items-center justify-center transition-colors text-left w-full ${progress.sunnahDaysCompleted > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
                     >
-                      <div className="flex flex-col items-center gap-2">
+                      <div className="flex flex-col items-center gap-1.5 sm:gap-2">
                         <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
                           <Moon className="w-5 h-5 text-foreground" aria-hidden />
                         </div>
@@ -1055,9 +1055,9 @@ const Dashboard = () => {
                     <button
                       type="button"
                       onClick={() => brokenDaysList.length > 0 && setStatsDialog("broken")}
-                      className={`p-3 sm:p-4 rounded-2xl bg-card border border-border h-[100px] flex flex-col items-center justify-center transition-colors text-left w-full ${brokenDaysList.length > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
+                      className={`p-3 sm:p-4 md:p-4 rounded-2xl bg-card border border-border min-h-[100px] sm:h-[100px] md:min-h-[108px] flex flex-col items-center justify-center transition-colors text-left w-full ${brokenDaysList.length > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
                     >
-                      <div className="flex flex-col items-center gap-2">
+                      <div className="flex flex-col items-center gap-1.5 sm:gap-2">
                         <div className="w-10 h-10 rounded-full bg-destructive/20 flex items-center justify-center">
                           <AlertTriangle className="w-5 h-5 text-destructive" aria-hidden />
                         </div>
