@@ -180,6 +180,16 @@ function isValidDateString(s: string): boolean {
   return Number.isFinite(t);
 }
 
+/** Fasting hours for a day from imsak (suhoor end) to maghrib (iftar). Returns null if times missing or invalid. */
+function getFastingHoursForDay(imsak: string | undefined, maghrib: string | undefined): number | null {
+  if (!imsak?.trim() || !maghrib?.trim()) return null;
+  const imsakSec = timeStringToSecondsSinceMidnight(imsak.trim().split(" ")[0] ?? imsak);
+  const maghribSec = timeStringToSecondsSinceMidnight(maghrib.trim().split(" ")[0] ?? maghrib);
+  const diffSec = maghribSec - imsakSec;
+  if (diffSec <= 0) return null;
+  return Math.round((diffSec / 3600) * 10) / 10;
+}
+
 const DashboardSchedule = () => {
   const [preferences] = useUserPreferences();
   const [progress, setProgress] = useFastingProgress();
@@ -1079,13 +1089,14 @@ const DashboardSchedule = () => {
                 <p className="text-sm text-muted-foreground py-4">Set your location in Settings to see times.</p>
               ) : (
                 <div className="overflow-x-auto -mx-2">
-                  <table className="w-full min-w-[320px] text-sm border-collapse">
+                  <table className="w-full min-w-[380px] text-sm border-collapse">
                     <thead>
                       <tr className="border-b border-border">
                         <th className="text-left py-2 px-2 font-medium">Date</th>
                         <th className="text-left py-2 px-2 font-medium">Day</th>
                         <th className="text-right py-2 px-2 font-medium">Eating cutoff</th>
                         <th className="text-right py-2 px-2 font-medium">Break fast</th>
+                        <th className="text-right py-2 px-2 font-medium">Fasting hrs</th>
                         <th className="w-8" />
                       </tr>
                     </thead>
@@ -1096,6 +1107,7 @@ const DashboardSchedule = () => {
                           const d = new Date(dateStr + "T12:00:00");
                           const dayNum = ramadanRange.getRamadanDayNumber(d);
                           const isSelected = selectedDate === dateStr;
+                          const fastingHrs = getFastingHoursForDay(pt.imsak, pt.maghrib);
                           return (
                             <tr
                               key={dateStr}
@@ -1107,6 +1119,9 @@ const DashboardSchedule = () => {
                               <td className="py-2 px-2 text-muted-foreground">R{dayNum ?? "—"}</td>
                               <td className="py-2 px-2 text-right font-mono tabular-nums">{pt.imsak || "—"}</td>
                               <td className="py-2 px-2 text-right font-mono tabular-nums">{pt.maghrib || "—"}</td>
+                              <td className="py-2 px-2 text-right font-mono tabular-nums">
+                                {fastingHrs != null ? `${fastingHrs}h` : "—"}
+                              </td>
                               <td className="py-2 px-2">
                                 <Button
                                   variant="ghost"
@@ -1314,11 +1329,16 @@ const DashboardSchedule = () => {
                       {date.toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
                       {isToday && " · Today"}
                       {isRamadan && ramadanDay != null && ` · Ramadan Day ${ramadanDay} (of 30)`}
-                      {isRamadan && effectiveRamadanTimesMap[dateStr] && (
-                        <span className="block mt-1 text-xs">
-                          Cutoff {effectiveRamadanTimesMap[dateStr].imsak} · Break fast {effectiveRamadanTimesMap[dateStr].maghrib}
-                        </span>
-                      )}
+                      {isRamadan && effectiveRamadanTimesMap[dateStr] && (() => {
+                        const pt = effectiveRamadanTimesMap[dateStr];
+                        const hrs = getFastingHoursForDay(pt.imsak, pt.maghrib);
+                        return (
+                          <span className="block mt-1 text-xs">
+                            Cutoff {pt.imsak} · Break fast {pt.maghrib}
+                            {hrs != null && ` · ${hrs}h fast`}
+                          </span>
+                        );
+                      })()}
                       {isSpecialNight && " · Laylat al-Qadr"}
                       {isSunnah && !isRamadan && (isToday ? " · Today is a Sunnah fasting day (Mon/Thu)" : " · Sunnah day (Mon/Thu)")}
                       {completed && " · Completed ✓"}
@@ -1500,6 +1520,14 @@ const DashboardSchedule = () => {
                           <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Break fast ({iftarLabelShort})</p>
                           <p className="font-mono text-lg font-bold text-secondary tabular-nums">{effectiveSelectedDayPrayerTimes.maghrib || "—"}</p>
                         </div>
+                        {getFastingHoursForDay(effectiveSelectedDayPrayerTimes.imsak, effectiveSelectedDayPrayerTimes.maghrib) != null && (
+                          <div className="sm:col-span-2">
+                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Total fasting hours (this day)</p>
+                            <p className="font-mono text-lg font-bold text-secondary tabular-nums">
+                              {getFastingHoursForDay(effectiveSelectedDayPrayerTimes.imsak, effectiveSelectedDayPrayerTimes.maghrib)}h
+                            </p>
+                          </div>
+                        )}
                         {selectedDate && (prayerTimeOverrides[selectedDate]?.imsak != null || prayerTimeOverrides[selectedDate]?.maghrib != null) && (
                           <div className="sm:col-span-2 flex gap-2 items-end flex-wrap">
                             <Label className="text-xs w-full sm:w-auto">Override Imsak</Label>
