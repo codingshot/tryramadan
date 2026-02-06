@@ -314,7 +314,7 @@ const DashboardToday = () => {
             <BreakFastReasonDialog
               open={showBreakFastDialog}
               onOpenChange={setShowBreakFastDialog}
-              onSelectReason={(reasonId) => breakFastingToday(progress, setProgress, reasonId, todayStr)}
+              onSelectReason={(reasonId, brokeAt) => breakFastingToday(progress, setProgress, reasonId, todayStr, brokeAt)}
               userType={preferences.userType}
               notInFastingPeriod={isFastingWindow === false}
             />

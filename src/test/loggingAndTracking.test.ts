@@ -17,6 +17,7 @@ import {
   normalizeDayFoodLog,
   getDayTotalsFromFoodLog,
   hoursBetween,
+  breakFastingToday,
   updateBrokenReason,
   setBrokenDayToCompleted,
   setBrokenDayToInProgress,
@@ -244,6 +245,48 @@ describe("normalizeProgressSameDayConflict", () => {
     const out = normalizeProgressSameDayConflict(progress);
     expect(out.completedDays).toEqual(["2025-03-01"]);
     expect(out).toBe(progress);
+  });
+});
+
+describe("breakFastingToday", () => {
+  it("uses brokeAt when provided and computes hoursFasted from startedAt to brokeAt", () => {
+    const dateStr = "2025-03-15";
+    const startedAt = "2025-03-15T05:00:00.000Z";
+    const brokeAt = "2025-03-15T12:30:00.000Z"; // 7.5h later
+    const progress: FastingProgress = {
+      ...defaultProgress,
+      fastingLog: [{ date: dateStr, startedAt, status: "in_progress" }],
+    };
+    let next: FastingProgress = progress;
+    const setProgress = (v: FastingProgress | ((p: FastingProgress) => FastingProgress)) => {
+      next = typeof v === "function" ? v(next) : v;
+    };
+    breakFastingToday(next, setProgress, "illness", dateStr, brokeAt);
+    const entry = next.fastingLog?.find((e) => e.date === dateStr);
+    expect(entry?.status).toBe("broken");
+    expect(entry?.completedAt).toBe(brokeAt);
+    expect(entry?.brokenReason).toBe("illness");
+    expect(entry?.hoursFasted).toBe(7.5);
+  });
+
+  it("uses current time when brokeAt is omitted", () => {
+    const dateStr = toLocalDateString(new Date());
+    const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString();
+    const progress: FastingProgress = {
+      ...defaultProgress,
+      fastingLog: [{ date: dateStr, startedAt: sixHoursAgo, status: "in_progress" }],
+    };
+    let next: FastingProgress = progress;
+    const setProgress = (v: FastingProgress | ((p: FastingProgress) => FastingProgress)) => {
+      next = typeof v === "function" ? v(next) : v;
+    };
+    breakFastingToday(next, setProgress, "other", dateStr);
+    const entry = next.fastingLog?.find((e) => e.date === dateStr);
+    expect(entry?.status).toBe("broken");
+    expect(entry?.completedAt).toBeDefined();
+    expect(entry?.hoursFasted).toBeDefined();
+    expect(entry!.hoursFasted!).toBeGreaterThanOrEqual(5);
+    expect(entry!.hoursFasted!).toBeLessThanOrEqual(7);
   });
 });
 

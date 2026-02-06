@@ -483,25 +483,26 @@ export function completeFastingToday(
   console.log(`${LOG_PREFIX} Fast completed. ${today} logged at ${now}. Total days: ${completedDays.length}`);
 }
 
-/** Mark today's fast as broken (e.g. early break): update log, optionally remove from completedDays. Reason is a predetermined id from BROKEN_FAST_REASONS. Pass todayOverride when using location-based "today". */
+/** Mark today's fast as broken (e.g. early break): update log, remove from completedDays. Reason is a predetermined id from BROKEN_FAST_REASONS. brokeAt: ISO datetime when they broke (default: now). Pass todayOverride when using location-based "today". */
 export function breakFastingToday(
   progress: FastingProgress,
   setProgress: (value: FastingProgress | ((prev: FastingProgress) => FastingProgress)) => void,
   reason?: string,
-  todayOverride?: string
+  todayOverride?: string,
+  brokeAt?: string
 ): void {
   const today = todayOverride ?? getTodayDateString();
-  const now = new Date().toISOString();
+  const completedAt = (brokeAt && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(brokeAt)) ? brokeAt : new Date().toISOString();
   const entry = progress.fastingLog?.find((e) => e.date === today);
-  const startedAt = entry?.startedAt || now;
-  const hoursFasted = hoursBetween(startedAt, now);
+  const startedAt = entry?.startedAt || completedAt;
+  const hoursFasted = hoursBetween(startedAt, completedAt);
   const reasonId = reason && BROKEN_FAST_REASONS.some((r) => r.id === reason) ? reason : 'other';
 
   const updatedLog = (progress.fastingLog || []).map((e) =>
-    e.date === today ? { ...e, completedAt: now, status: 'broken' as const, hoursFasted, brokenReason: reasonId } : e
+    e.date === today ? { ...e, completedAt, status: 'broken' as const, hoursFasted, brokenReason: reasonId } : e
   );
   if (!updatedLog.some((e) => e.date === today)) {
-    updatedLog.push({ date: today, startedAt, completedAt: now, status: 'broken', hoursFasted, brokenReason: reasonId });
+    updatedLog.push({ date: today, startedAt, completedAt, status: 'broken', hoursFasted, brokenReason: reasonId });
   }
 
   setProgress({
@@ -510,7 +511,7 @@ export function breakFastingToday(
     completedDays: progress.completedDays.filter((d) => d !== today),
   });
 
-  console.log(`${LOG_PREFIX} Fast broken (${getBrokenReasonLabel(reasonId)}). ${today} at ${now}.`);
+  console.log(`${LOG_PREFIX} Fast broken (${getBrokenReasonLabel(reasonId)}). ${today} at ${completedAt}. Hours fasted: ${hoursFasted}`);
 }
 
 /** Unmark today's fast (undo complete): remove from completedDays, set log to in_progress. Pass todayOverride when using location-based "today". */

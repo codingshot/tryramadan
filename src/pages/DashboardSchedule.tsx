@@ -1855,8 +1855,8 @@ const DashboardSchedule = () => {
                     <BreakFastReasonDialog
                       open={showBreakFastDialog}
                       onOpenChange={setShowBreakFastDialog}
-                      onSelectReason={(reasonId) => {
-                        breakFastingToday(progress, setProgress, reasonId, todayStr);
+                      onSelectReason={(reasonId, brokeAt) => {
+                        breakFastingToday(progress, setProgress, reasonId, todayStr, brokeAt);
                         setShowBreakFastDialog(false);
                         toast.success("Fast logged as broken");
                       }}
@@ -1975,7 +1975,14 @@ const DashboardSchedule = () => {
                           {selectedCompleted
                             ? "Completed (full day dawn to sunset)"
                             : selectedFastingLog?.status === "broken"
-                              ? `Broke fast — ${getBrokenReasonLabel(selectedFastingLog.brokenReason)}. ${selectedFastingLog.hoursFasted != null ? `${selectedFastingLog.hoursFasted}h fasted` : ""}`
+                              ? (() => {
+                                  const reason = getBrokenReasonLabel(selectedFastingLog.brokenReason);
+                                  const atTime = selectedFastingLog.completedAt
+                                    ? new Date(selectedFastingLog.completedAt).toLocaleTimeString("en", { hour: "numeric", minute: "2-digit", hour12: true })
+                                    : "";
+                                  const hours = selectedFastingLog.hoursFasted != null ? `${selectedFastingLog.hoursFasted}h fasted` : "";
+                                  return `Broke fast${atTime ? ` at ${atTime}` : ""} — ${reason}${hours ? `. ${hours}` : ""}`;
+                                })()
                               : selectedFastingLog?.startedAt
                                 ? "Started fasting (not completed)"
                                 : "No fast logged"}

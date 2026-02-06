@@ -40,12 +40,21 @@ function renderNotFound() {
 
 /** User flow checks: critical paths render and key links exist. */
 describe("User flow checks", () => {
-  it("home page has Start your journey link and links to programs", () => {
+  it("home page has Start your journey link and links to programs when onboarding not complete", () => {
+    localStorage.setItem("tryramadan-preferences", JSON.stringify({ onboardingComplete: false }));
     renderAt("/", <Index />);
     const startLink = screen.queryByRole("link", { name: /start your journey/i });
     expect(startLink).toBeInTheDocument();
     expect(startLink).toHaveAttribute("href", "/onboarding/welcome");
     expect(screen.getByText(/choose your/i)).toBeInTheDocument();
+  });
+
+  it("home page shows Go to dashboard and links to dashboard when onboarding complete", () => {
+    localStorage.setItem("tryramadan-preferences", JSON.stringify({ onboardingComplete: true }));
+    renderAt("/", <Index />);
+    const dashboardLink = screen.queryByRole("link", { name: /go to dashboard/i });
+    expect(dashboardLink).toBeInTheDocument();
+    expect(dashboardLink).toHaveAttribute("href", "/dashboard");
   });
 
   it("terms page has back to home and links to privacy and legal", () => {

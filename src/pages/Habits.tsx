@@ -106,18 +106,19 @@ export default function Habits() {
     [habitsForUser]
   );
 
-  const habitStreak = useMemo(() => getHabitLogStreak(habitLog, todayStr), [habitLog, todayStr]);
-  const totalCheckmarks = useMemo(() => getTotalHabitCheckmarks(habitLog), [habitLog]);
-  const perHabitCounts = useMemo(() => getPerHabitCounts(habitLog), [habitLog]);
+  const safeHabitLog = useMemo(() => (habitLog && typeof habitLog === "object" && !Array.isArray(habitLog) ? habitLog : {}), [habitLog]);
+  const habitStreak = useMemo(() => getHabitLogStreak(safeHabitLog, todayStr), [safeHabitLog, todayStr]);
+  const totalCheckmarks = useMemo(() => getTotalHabitCheckmarks(safeHabitLog), [safeHabitLog]);
+  const perHabitCounts = useMemo(() => getPerHabitCounts(safeHabitLog), [safeHabitLog]);
   const recentLogEntries = useMemo(() => {
-    const dates = Object.keys(habitLog).filter((d) => habitLog[d] && Object.values(habitLog[d]).some(Boolean));
+    const dates = Object.keys(safeHabitLog).filter((d) => safeHabitLog[d] && typeof safeHabitLog[d] === "object" && Object.values(safeHabitLog[d]).some(Boolean));
     dates.sort((a, b) => b.localeCompare(a));
     return dates.slice(0, RECENT_LOG_DAYS).map((dateStr) => {
-      const day = habitLog[dateStr];
-      const ids = Object.entries(day).filter(([, v]) => v).map(([id]) => id);
+      const day = safeHabitLog[dateStr];
+      const ids = typeof day === "object" && day ? Object.entries(day).filter(([, v]) => v).map(([id]) => id) : [];
       return { dateStr, labels: getShortLabelsForHabitIds(ids) };
     });
-  }, [habitLog]);
+  }, [safeHabitLog]);
   const topHabits = useMemo(() => {
     return Object.entries(perHabitCounts)
       .map(([id, count]) => ({ id, count, label: getHabitById(id)?.shortLabel ?? id }))

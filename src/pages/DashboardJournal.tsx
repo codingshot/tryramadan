@@ -526,8 +526,8 @@ export default function DashboardJournal() {
               <ul className="space-y-3">
                 {displayEntries.map((entry) => {
                   const isExpanded = expandedDate === entry.date;
-                  const dayHabits = habitLog[entry.date];
-                  const checkedHabitIds = dayHabits ? Object.entries(dayHabits).filter(([, v]) => v).map(([id]) => id) : [];
+                  const dayHabits = habitLog && typeof habitLog === "object" ? habitLog[entry.date] : undefined;
+                  const checkedHabitIds = dayHabits && typeof dayHabits === "object" ? Object.entries(dayHabits).filter(([, v]) => v).map(([id]) => id) : [];
                   const habitLabels = getShortLabelsForHabitIds(checkedHabitIds);
                   return (
                     <li

@@ -17,8 +17,8 @@ const Emergency = () => {
   const [progress, setProgress] = useFastingProgress();
   const [showReasonDialog, setShowReasonDialog] = useState(false);
 
-  const handleBreakFastWithReason = (reasonId: string) => {
-    breakFastingToday(progress, setProgress, reasonId);
+  const handleBreakFastWithReason = (reasonId: string, brokeAt?: string) => {
+    breakFastingToday(progress, setProgress, reasonId, undefined, brokeAt);
     navigate("/dashboard");
   };
   

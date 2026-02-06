@@ -1,7 +1,11 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight, Users, Heart, Shield, Moon } from "lucide-react";
+import { useUserPreferences } from "@/hooks/useLocalStorage";
+
 export const CTASection = () => {
+  const [preferences] = useUserPreferences();
+  const onboardingComplete = preferences.onboardingComplete === true;
   return (
     <>
       <section className="py-24 relative overflow-hidden">
@@ -37,12 +41,12 @@ export const CTASection = () => {
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
               <Link 
-                to="/onboarding/welcome"
+                to={onboardingComplete ? "/dashboard" : "/onboarding/welcome"}
                 className="btn-hero group flex items-center gap-2"
-                aria-label="Begin your Ramadan journey — it's free"
+                aria-label={onboardingComplete ? "Go to dashboard" : "Begin your Ramadan journey — it's free"}
               >
                 <Moon className="w-5 h-5" />
-                <span>Begin your Ramadan journey — it's free</span>
+                <span>{onboardingComplete ? "Go to dashboard" : "Begin your Ramadan journey — it's free"}</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link 

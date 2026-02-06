@@ -946,7 +946,7 @@ const Dashboard = () => {
             <BreakFastReasonDialog
               open={showBreakFastDialog}
               onOpenChange={setShowBreakFastDialog}
-              onSelectReason={(reasonId) => breakFastingToday(progress, setProgress, reasonId, todayStr)}
+              onSelectReason={(reasonId, brokeAt) => breakFastingToday(progress, setProgress, reasonId, todayStr, brokeAt)}
               userType={preferences.userType}
               notInFastingPeriod={!isFasting}
             />
@@ -1017,7 +1017,7 @@ const Dashboard = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="flex flex-wrap gap-1.5 sm:gap-2 mb-3"
+                className="flex flex-wrap items-start gap-1.5 sm:gap-2 mb-3"
               >
                 {/* Streak — hidden when showStreakAndAchievements is off */}
                 {preferences.showStreakAndAchievements !== false && (
@@ -1026,7 +1026,7 @@ const Dashboard = () => {
                       <button
                         type="button"
                         onClick={() => streak > 0 && setStatsDialog("streak")}
-                        className={`flex-1 min-w-0 p-2 rounded-xl bg-card border border-border flex flex-col items-center justify-center transition-colors ${streak > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
+                        className={`flex-1 min-w-0 min-h-0 p-2 rounded-xl bg-card border border-border flex flex-col items-center justify-center transition-colors ${streak > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
                       >
                         <div className="w-6 h-6 rounded-full bg-gradient-gold flex items-center justify-center shrink-0">
                           <Flame className="w-3.5 h-3.5 text-foreground" />
@@ -1048,7 +1048,7 @@ const Dashboard = () => {
                     <button
                       type="button"
                       onClick={() => progress.completedDays.length > 0 && setStatsDialog("total")}
-                      className={`flex-1 min-w-0 p-2 rounded-xl bg-card border border-border flex flex-col items-center justify-center transition-colors ${progress.completedDays.length > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
+                      className={`flex-1 min-w-0 min-h-0 p-2 rounded-xl bg-card border border-border flex flex-col items-center justify-center transition-colors ${progress.completedDays.length > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
                     >
                       <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center shrink-0">
                         <Calendar className="w-3.5 h-3.5 text-foreground" />
@@ -1068,7 +1068,7 @@ const Dashboard = () => {
                     <button
                       type="button"
                       onClick={() => sunnahDaysCount > 0 && setStatsDialog("sunnah")}
-                      className={`flex-1 min-w-0 p-2 rounded-xl bg-card border border-border flex flex-col items-center justify-center transition-colors ${sunnahDaysCount > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
+                      className={`flex-1 min-w-0 min-h-0 p-2 rounded-xl bg-card border border-border flex flex-col items-center justify-center transition-colors ${sunnahDaysCount > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
                     >
                       <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
                         <Moon className="w-3.5 h-3.5 text-foreground" aria-hidden />
@@ -1088,7 +1088,7 @@ const Dashboard = () => {
                     <button
                       type="button"
                       onClick={() => brokenDaysList.length > 0 && setStatsDialog("broken")}
-                      className={`flex-1 min-w-0 p-2 rounded-xl bg-card border border-border flex flex-col items-center justify-center transition-colors ${brokenDaysList.length > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
+                      className={`flex-1 min-w-0 min-h-0 p-2 rounded-xl bg-card border border-border flex flex-col items-center justify-center transition-colors ${brokenDaysList.length > 0 ? "cursor-pointer hover:border-secondary/50" : "cursor-default"}`}
                     >
                       <div className="w-6 h-6 rounded-full bg-destructive/20 flex items-center justify-center shrink-0">
                         <AlertTriangle className="w-3.5 h-3.5 text-destructive" aria-hidden />
@@ -1099,6 +1099,15 @@ const Dashboard = () => {
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs p-3">
                     <p>{brokenDaysList.length > 0 ? "Click to see which days" : "Days you broke fast early."}</p>
+                    {brokenDaysList.length > 0 && (() => {
+                      const brokenEntries = (progress.fastingLog || []).filter((e) => e.status === "broken");
+                      const totalHours = brokenEntries.reduce((sum, e) => sum + (e.hoursFasted ?? 0), 0);
+                      return totalHours > 0 ? (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {totalHours.toFixed(1)}h total fasted before breaking.
+                        </p>
+                      ) : null;
+                    })()}
                     {excusedDaysList.length > 0 && (
                       <p className="text-xs text-muted-foreground mt-1">{excusedDaysList.length} of these are excused (e.g. illness, travel).</p>
                     )}

@@ -16,6 +16,7 @@ export const HeroSection = () => {
   const { location: autoLocation } = useAutoLocation();
   const ramadanRange = useRamadanRange();
   const hasLocation = !!(preferences.locationCoords || (autoLocation?.lat != null && autoLocation?.lng != null));
+  const onboardingComplete = preferences.onboardingComplete === true;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const inRamadan = ramadanRange.isRamadanDay(today);
@@ -120,21 +121,23 @@ export const HeroSection = () => {
               className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-12"
             >
               <Link 
-                to="/onboarding/welcome"
+                to={onboardingComplete ? "/dashboard" : "/onboarding/welcome"}
                 className="btn-hero group flex items-center justify-center gap-2 w-full sm:w-auto min-h-[48px] px-6 py-3"
-                aria-label="Start your Ramadan journey"
+                aria-label={onboardingComplete ? "Go to dashboard" : "Start your Ramadan journey"}
               >
-                Start your journey
+                {onboardingComplete ? "Go to dashboard" : "Start your journey"}
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform shrink-0" />
               </Link>
-              <Link 
-                to="/onboarding/mode"
-                state={{ preSelectMuslim: true }}
-                className="btn-hero-outline w-full sm:w-auto flex items-center justify-center gap-2 min-h-[48px] px-6 py-3"
-                aria-label="I'm Muslim — skip to Muslim mode"
-              >
-                I'm Muslim
-              </Link>
+              {!onboardingComplete && (
+                <Link 
+                  to="/onboarding/mode"
+                  state={{ preSelectMuslim: true }}
+                  className="btn-hero-outline w-full sm:w-auto flex items-center justify-center gap-2 min-h-[48px] px-6 py-3"
+                  aria-label="I'm Muslim — skip to Muslim mode"
+                >
+                  I'm Muslim
+                </Link>
+              )}
             </motion.div>
             {!hasLocation && (
               <p className="text-xs text-primary-foreground/60 text-center -mt-8 mb-4">

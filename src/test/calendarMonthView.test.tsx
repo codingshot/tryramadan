@@ -140,9 +140,9 @@ describe("Calendar / month view", () => {
 
   it("shows stats: Ramadan days, Sunnah, completed, hours fasted", () => {
     renderSchedule();
-    expect(screen.getByText(/ramadan days this month/i)).toBeInTheDocument();
+    expect(screen.getByText(/ramadan this month/i)).toBeInTheDocument();
     expect(screen.getAllByText(/sunnah \(mon\/thu\)/i).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/completed/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/days completed|completed/i).length).toBeGreaterThan(0);
   });
 
   it("shows Dashboard quick access config", () => {
