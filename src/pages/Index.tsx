@@ -109,8 +109,8 @@ const Index = () => {
       </section>
 
       {/* Progress Preview – real data when available, CTA to Dashboard */}
-      <section className="py-16 bg-muted/30">
-        <div className="container mx-auto px-4">
+      <section className="py-8 sm:py-10 bg-muted/30">
+        <div className="container mx-auto px-3 sm:px-4">
           <Link
             to={hasRealProgress ? "/dashboard/progress" : "/dashboard"}
             className="block max-w-2xl mx-auto group"
@@ -119,13 +119,13 @@ const Index = () => {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="p-6 md:p-8 rounded-2xl bg-card border border-border hover:border-secondary/50 transition-all shadow-sm hover:shadow-md"
+              className="p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl bg-card border border-border hover:border-secondary/50 transition-all shadow-sm hover:shadow-md"
             >
-              <div className="text-center mb-6">
-                <h3 className="text-2xl font-display font-bold mb-2 group-hover:text-secondary transition-colors">
+              <div className="text-center mb-4 sm:mb-5">
+                <h3 className="text-xl sm:text-2xl font-display font-bold mb-1 sm:mb-2 group-hover:text-secondary transition-colors">
                   Track Your Journey
                 </h3>
-                <p className="text-muted-foreground text-sm">
+                <p className="text-muted-foreground text-xs sm:text-sm">
                   {useRealData
                     ? hasRealProgress
                       ? "See your progress and log your fasts in the Dashboard"
@@ -141,11 +141,11 @@ const Index = () => {
                 totalHoursFasted={useRealData ? totalHoursFasted : undefined}
                 isPlaceholder={!useRealData}
               />
-              <div className="mt-6 flex items-center justify-center gap-2 text-secondary font-medium text-sm">
+              <div className="mt-4 sm:mt-5 flex items-center justify-center gap-2 text-secondary font-medium text-xs sm:text-sm">
                 <span>
                   {useRealData ? "View your progress on dashboard" : "Go to dashboard (see today & progress)"}
                 </span>
-                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform shrink-0" />
               </div>
             </motion.div>
           </Link>

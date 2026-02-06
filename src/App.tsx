@@ -10,9 +10,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { OnboardingProvider } from "@/contexts/OnboardingContext";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
-import DashboardSchedule from "./pages/DashboardSchedule";
 import { SkeletonCard } from "./components/SkeletonCard";
 
+const DashboardSchedule = lazy(() => import("./pages/DashboardSchedule").then((m) => ({ default: m.default })));
 const DashboardToday = lazy(() => import("./pages/DashboardToday").then((m) => ({ default: m.default })));
 const DashboardPrayers = lazy(() => import("./pages/DashboardPrayers").then((m) => ({ default: m.default })));
 const DashboardLearn = lazy(() => import("./pages/DashboardLearn").then((m) => ({ default: m.default })));
@@ -195,7 +195,14 @@ const App = () => (
           <Route path="/prayers" element={<Navigate to="/dashboard/prayers" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/today" element={<Suspense fallback={<PageFallback />}><DashboardToday /></Suspense>} />
-          <Route path="/dashboard/schedule" element={<DashboardSchedule />} />
+          <Route
+            path="/dashboard/schedule"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <DashboardSchedule />
+              </Suspense>
+            }
+          />
           <Route path="/dashboard/prayers" element={<Suspense fallback={<PageFallback />}><DashboardPrayers /></Suspense>} />
           <Route
             path="/dashboard/meals"

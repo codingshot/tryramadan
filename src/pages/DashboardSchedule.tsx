@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import {
@@ -274,6 +274,8 @@ const DashboardSchedule = () => {
   const [countdownToIftar, setCountdownToIftar] = useState({ h: 0, m: 0, s: 0 });
   const [countdownToSuhoor, setCountdownToSuhoor] = useState({ h: 0, m: 0, s: 0 });
   const [copyMealsFromOpen, setCopyMealsFromOpen] = useState(false);
+  const dayDetailPanelRef = useRef<HTMLDivElement>(null);
+  const isInitialSelectionRef = useRef(true);
 
   const [journalEntries] = useLocalStorage<{ date: string; content?: string; gratitude?: string }[]>("tryramadan-journal", []);
   const journalDates = new Set(journalEntries.map((e) => e.date));
@@ -363,6 +365,19 @@ const DashboardSchedule = () => {
     },
     [scheduleNotes, setSearchParams]
   );
+
+  // Scroll day detail panel into view when user selects a different day (skip on initial load)
+  useEffect(() => {
+    if (!selectedDate) return;
+    if (isInitialSelectionRef.current) {
+      isInitialSelectionRef.current = false;
+      return;
+    }
+    const t = setTimeout(() => {
+      dayDetailPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 150);
+    return () => clearTimeout(t);
+  }, [selectedDate]);
 
   /** Last 5 days of Ramadan (day 26–30) for quick "Plan last days" links */
   const lastFiveRamadanDates = useMemo(() => {
@@ -891,12 +906,12 @@ const DashboardSchedule = () => {
             Back to Dashboard
           </Link>
 
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6" role="region" aria-label="Schedule intro">
-            <h1 className="text-2xl md:text-3xl font-display font-bold">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-4 sm:mb-6" role="region" aria-label="Schedule intro">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-display font-bold">
               Fasting Schedule
             </h1>
-            <p className="text-muted-foreground mt-2">
-              Click a calendar day to view or edit its meal plan, food log, and prayer times. Times vary daily by location. Hover stats and labels for tips.
+            <p className="text-sm sm:text-base text-muted-foreground mt-1.5 sm:mt-2">
+              Tap a day to view or edit meal plan, food log, and prayer times. Times vary by location.
             </p>
           </motion.div>
 
@@ -925,8 +940,9 @@ const DashboardSchedule = () => {
           {/* Configure dashboard quick access */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.06 }}
-            className="mb-6 p-4 rounded-2xl bg-card border border-border"
+            className="mb-4 sm:mb-6 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-card border border-border"
           >
             <button
               type="button"
@@ -1039,14 +1055,15 @@ const DashboardSchedule = () => {
           {/* Export to calendar (.ics) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.07 }}
-            className="mb-6 p-4 rounded-2xl bg-card border border-border"
+            className="mb-4 sm:mb-6 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-card border border-border"
           >
-            <h3 className="font-display font-bold mb-2 flex items-center gap-2">
-              <Download className="w-5 h-5 text-secondary" />
+            <h3 className="font-display font-bold text-base sm:text-lg mb-1.5 sm:mb-2 flex items-center gap-2">
+              <Download className="w-4 h-4 sm:w-5 sm:h-5 text-secondary shrink-0" />
               Export to calendar
             </h3>
-            <p className="text-sm text-muted-foreground mb-3">
+            <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3">
               Download an .ics file with Suhoor, {iftarLabel}, all prayers, optional Taraweeh, and any events you add. Import into Google Calendar, Apple Calendar, or Outlook.
             </p>
             <div className="flex flex-wrap gap-2">
@@ -1167,6 +1184,7 @@ const DashboardSchedule = () => {
           {(lat != null && lng != null) && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.065 }}
               className="mb-6 p-4 rounded-2xl bg-card border border-border"
             >
@@ -1239,14 +1257,15 @@ const DashboardSchedule = () => {
           {/* Stats: Ramadan, Sunnah, completed, hours fasted */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6"
+            className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6"
           >
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="p-4 rounded-2xl bg-secondary/10 border border-secondary/20 text-center cursor-help">
-                  <span className="text-2xl md:text-3xl font-bold text-secondary">{ramadanDaysInMonth}</span>
-                  <span className="block text-xs text-muted-foreground">Ramadan days this month</span>
+                <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-secondary/10 border border-secondary/20 text-center cursor-help">
+                  <span className="text-xl sm:text-2xl md:text-3xl font-bold text-secondary tabular-nums">{ramadanDaysInMonth}</span>
+                  <span className="block text-[10px] sm:text-xs text-muted-foreground mt-0.5">Ramadan this month</span>
                 </div>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
@@ -1256,9 +1275,9 @@ const DashboardSchedule = () => {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20 text-center cursor-help">
-                  <span className="text-2xl md:text-3xl font-bold">{sunnahDaysInMonth}</span>
-                  <span className="block text-xs text-muted-foreground">Sunnah (Mon/Thu)</span>
+                <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-primary/10 border border-primary/20 text-center cursor-help">
+                  <span className="text-xl sm:text-2xl md:text-3xl font-bold tabular-nums">{sunnahDaysInMonth}</span>
+                  <span className="block text-[10px] sm:text-xs text-muted-foreground mt-0.5">Sunnah (Mon/Thu)</span>
                 </div>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs p-3">
@@ -1268,9 +1287,9 @@ const DashboardSchedule = () => {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="p-4 rounded-2xl bg-card border border-border text-center cursor-help">
-                  <span className="text-2xl md:text-3xl font-bold text-secondary">{completedCount}</span>
-                  <span className="block text-xs text-muted-foreground">Days completed</span>
+                <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-card border border-border text-center cursor-help">
+                  <span className="text-xl sm:text-2xl md:text-3xl font-bold text-secondary tabular-nums">{completedCount}</span>
+                  <span className="block text-[10px] sm:text-xs text-muted-foreground mt-0.5">Days completed</span>
                 </div>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
@@ -1280,9 +1299,9 @@ const DashboardSchedule = () => {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="p-4 rounded-2xl bg-card border border-border text-center cursor-help">
-                  <span className="text-2xl md:text-3xl font-bold">{totalHoursFasted > 0 ? totalHoursFasted.toFixed(1) : "—"}</span>
-                  <span className="block text-xs text-muted-foreground">Total hours fasted</span>
+                <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-card border border-border text-center cursor-help">
+                  <span className="text-xl sm:text-2xl md:text-3xl font-bold tabular-nums">{totalHoursFasted > 0 ? totalHoursFasted.toFixed(1) : "—"}</span>
+                  <span className="block text-[10px] sm:text-xs text-muted-foreground mt-0.5">Hours fasted</span>
                 </div>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs p-3">
@@ -1295,40 +1314,41 @@ const DashboardSchedule = () => {
           {/* Calendar */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="p-6 rounded-2xl bg-card border border-border"
+            className="p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-card border border-border"
           >
-            <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
+              <div className="flex items-center justify-between gap-2">
                 <button
                   onClick={prevMonth}
-                  className="p-2 rounded-lg hover:bg-muted transition-colors"
+                  className="p-2 rounded-lg hover:bg-muted transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                   aria-label="Previous month"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
-                <h3 className="font-display font-bold text-base sm:text-lg min-w-0 text-center">
+                <h3 className="font-display font-bold text-base sm:text-lg min-w-0 text-center flex-1">
                   {monthName}
                 </h3>
                 <button
                   onClick={nextMonth}
-                  className="p-2 rounded-lg hover:bg-muted transition-colors"
+                  className="p-2 rounded-lg hover:bg-muted transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
                   aria-label="Next month"
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
-              <div className="flex gap-2 flex-wrap">
-                <Button variant="outline" size="sm" onClick={goToRamadan} className="gap-2">
-                  <CalendarDays className="w-4 h-4" />
-                  Jump to Ramadan in calendar
+              <div className="flex gap-2 flex-wrap justify-center sm:justify-end">
+                <Button variant="outline" size="sm" onClick={goToRamadan} className="gap-2 flex-1 sm:flex-initial min-h-[40px]">
+                  <CalendarDays className="w-4 h-4 shrink-0" />
+                  <span className="truncate">Jump to Ramadan</span>
                 </Button>
-                <Button variant="outline" size="sm" onClick={goToToday} className="gap-2">
-                  Jump to today in calendar
+                <Button variant="outline" size="sm" onClick={goToToday} className="gap-2 flex-1 sm:flex-initial min-h-[40px]">
+                  Jump to today
                 </Button>
               </div>
             </div>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
               Click any day to view meal plan, food log, and fasting log for that day. Past days are read-only.
             </p>
 
@@ -1372,9 +1392,11 @@ const DashboardSchedule = () => {
                       <button
                         type="button"
                         onClick={() => selectDay(dateStr)}
+                        aria-label={`${date.toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric" })}${isToday ? ", Today" : ""}${isSelected ? ", selected" : ""}`}
+                        aria-pressed={isSelected}
                         className={`
                           aspect-square rounded-lg flex flex-col items-center justify-center text-sm relative
-                          transition-all min-h-[44px] cursor-pointer
+                          transition-all min-h-[44px] min-w-[36px] sm:min-w-0 cursor-pointer
                           ${isToday ? "ring-2 ring-secondary" : ""}
                           ${isSelected ? "ring-2 ring-primary bg-primary/10" : ""}
                           ${completed ? "bg-secondary text-secondary-foreground" : ""}
@@ -1449,14 +1471,17 @@ const DashboardSchedule = () => {
             <AnimatePresence>
               {selectedDate && (
                 <motion.div
+                  ref={dayDetailPanelRef}
+                  id="schedule-day-detail"
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   className="mt-6 overflow-hidden"
+                  aria-label={`Details for ${selectedDateObj?.toLocaleDateString("en", { weekday: "long", month: "long", day: "numeric" })}`}
                 >
-                  <div className="p-4 rounded-2xl bg-muted/50 border border-border space-y-4">
+                  <div className="p-4 sm:p-5 rounded-xl sm:rounded-2xl bg-muted/50 border border-border space-y-4">
                     <div className="flex items-center justify-between flex-wrap gap-2">
-                      <h4 className="font-display font-bold flex items-center gap-2 flex-wrap">
+                      <h4 className="font-display font-bold text-base sm:text-lg flex items-center gap-2 flex-wrap">
                         {selectedDateObj?.toLocaleDateString("en", {
                           weekday: "long",
                           month: "long",
@@ -1466,7 +1491,7 @@ const DashboardSchedule = () => {
                         {selectedRamadanDay != null && (
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <span className="text-sm font-normal text-secondary cursor-help border-b border-dotted border-secondary/50">
+                              <span className="text-xs sm:text-sm font-normal text-secondary cursor-help border-b border-dotted border-secondary/50">
                                 Ramadan Day {selectedRamadanDay} (of 30)
                               </span>
                             </TooltipTrigger>
@@ -1477,14 +1502,21 @@ const DashboardSchedule = () => {
                           </Tooltip>
                         )}
                       </h4>
-                      <button
-                        type="button"
-                        onClick={() => { setSelectedDate(todayStr); setNoteInput(scheduleNotes[todayStr] || ""); setSearchParams({ date: todayStr }, { replace: true }); }}
-                        className="p-1 rounded hover:bg-muted"
-                        aria-label="Back to today"
-                      >
-                        <X className="w-5 h-5" />
-                      </button>
+                      {selectedDate !== todayStr ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => { setSelectedDate(todayStr); setNoteInput(scheduleNotes[todayStr] || ""); setSearchParams({ date: todayStr }, { replace: true }); }}
+                          className="gap-1.5 shrink-0"
+                          aria-label="Go to today"
+                        >
+                          Today
+                          <X className="w-3.5 h-3.5 shrink-0" />
+                        </Button>
+                      ) : (
+                        <span className="text-xs font-medium text-secondary px-2 py-1 rounded-md bg-secondary/10 shrink-0">Today</span>
+                      )}
                     </div>
 
                     {/* Today's live status: countdown + I'm fasting / Break fast / I didn't fast (same as Dashboard) */}

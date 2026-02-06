@@ -30,27 +30,23 @@ export const ProgressTracker = ({
   const daysToShow = Array.from({ length: endDay - startDay + 1 }, (_, i) => startDay + i);
 
   return (
-    <div className="space-y-6">
-      {/* Header with Arabic */}
+    <div className="space-y-3 sm:space-y-4">
+      {/* Header – compact on mobile */}
       <div className="text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/10 text-secondary text-sm font-medium mb-2">
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-secondary/10 text-secondary text-xs sm:text-sm font-medium">
           <span aria-hidden>📅</span>
           Ramadan Calendar
         </div>
         {isPlaceholder && (
-          <p className="text-xs text-muted-foreground mt-1">Sample preview — get started to track your own</p>
+          <p className="text-[10px] sm:text-xs text-muted-foreground mt-1">Sample preview — get started to track your own</p>
         )}
       </div>
 
       {/* Overall progress bar */}
-      <div className="space-y-2">
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">
-            Progress
-          </span>
-          <span className="font-semibold text-secondary">
-            Day {currentDay} of {totalDays}
-          </span>
+      <div className="space-y-1.5">
+        <div className="flex justify-between text-xs sm:text-sm">
+          <span className="text-muted-foreground">Progress</span>
+          <span className="font-semibold text-secondary tabular-nums">Day {currentDay} of {totalDays}</span>
         </div>
         <div className="progress-ramadan">
           <motion.div 
@@ -60,14 +56,14 @@ export const ProgressTracker = ({
             transition={{ duration: 1, ease: "easeOut" }}
           />
         </div>
-        <div className="flex justify-between text-xs text-muted-foreground">
+        <div className="flex justify-between text-[10px] sm:text-xs text-muted-foreground">
           <span>{completedDays.length} completed</span>
           <span>{totalDays - completedDays.length} remaining</span>
         </div>
       </div>
 
-      {/* Day indicators */}
-      <div className="flex items-center justify-center gap-2 flex-wrap">
+      {/* Day indicators – smaller on mobile, no labels under circles to save space */}
+      <div className="flex items-center justify-center gap-1 sm:gap-2 flex-wrap">
         {daysToShow.map((day, index) => {
           const isCompleted = completedDays.includes(day);
           const isCurrent = day === currentDay;
@@ -80,7 +76,7 @@ export const ProgressTracker = ({
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.05 }}
               className={`
-                relative w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium
+                relative w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium
                 transition-all duration-300 cursor-pointer
                 ${isCurrent 
                   ? "bg-gradient-gold text-foreground shadow-gold glow-pulse" 
@@ -91,41 +87,37 @@ export const ProgressTracker = ({
                       : "bg-muted text-muted-foreground"
                 }
               `}
+              title={`Day ${day}`}
             >
               {isCompleted ? (
-                <span aria-hidden>✅</span>
+                <span aria-hidden className="text-[10px] sm:text-xs">✅</span>
               ) : isCurrent ? (
-                <span aria-hidden>⭐</span>
+                <span aria-hidden className="text-xs sm:text-sm">⭐</span>
               ) : (
                 day
               )}
-              
-              {/* Day label */}
-              <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-xs text-muted-foreground">
-                {day}
-              </span>
             </motion.div>
           );
         })}
       </div>
 
-      {/* Streak counter */}
-      <div className="flex items-center justify-center gap-2 pt-4 flex-wrap">
+      {/* Streak + hours – single row, compact */}
+      <div className="flex items-center justify-center gap-1.5 sm:gap-2 pt-2 sm:pt-3 flex-wrap">
         <motion.div 
-          className="flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-gold text-foreground"
+          className="flex items-center gap-1.5 sm:gap-2 px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-gradient-gold text-foreground"
           animate={displayStreak > 0 ? { scale: [1, 1.02, 1] } : {}}
           transition={{ duration: 2, repeat: displayStreak > 0 ? Infinity : 0 }}
         >
-          <span className="text-2xl">🔥</span>
-          <span className="font-bold">
+          <span className="text-base sm:text-xl md:text-2xl">🔥</span>
+          <span className="font-bold text-xs sm:text-sm">
             {displayStreak > 0 ? `${displayStreak} Day Streak!` : "No streak yet"}
           </span>
         </motion.div>
         {displayStreak === 0 && (
-          <p className="text-xs text-muted-foreground w-full text-center mt-1">Log your first fast to start</p>
+          <p className="text-[10px] sm:text-xs text-muted-foreground w-full text-center sm:w-auto sm:mt-0">Log your first fast to start</p>
         )}
         {showHoursFasted && (
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted text-foreground text-sm font-medium">
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-muted text-foreground text-xs sm:text-sm font-medium">
             <span aria-hidden>⏱</span>
             <span>{totalHoursFasted.toFixed(1)}h fasted</span>
           </div>

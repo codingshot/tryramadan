@@ -4,6 +4,7 @@ Project-scoped skills for improving and maintaining the app. Use when the task m
 
 | Skill | When to use |
 |-------|-------------|
+| **tryramadan-project** | Performance, build/Vite, external resources (APIs, config), project structure, localStorage keys; cross-cutting changes. |
 | **islamic-content-authenticity** | Adding or editing Quran verses, hadiths, glossary terms, Arabic text; verify sources and wording. |
 | **culture-recipes-authenticity** | Fact-check and source culture pages, traditions, and recipes; add hyperlinks; verify authenticity of cultural and culinary content. |
 | **timezone-and-countdown** | Changing timer, countdowns, prayer times, or location-based current time; cache-first behavior for today and Ramadan. |
