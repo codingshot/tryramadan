@@ -10,7 +10,9 @@
 | [content-types.md](./content-types.md) | What to post: pillars, 30-day prompts, formats by channel |
 | [social-announcements.md](./social-announcements.md) | Platform-specific announcement templates |
 | [pitch-and-messaging.md](./pitch-and-messaging.md) | Elevator pitch, value props, taglines |
-| [marketing-ideas.md](./marketing-ideas.md) | Campaign ideas, growth tactics, partnerships, creative angles |
+| [marketing-ideas.md](./marketing-ideas.md) | Campaign ideas, content series, growth tactics, partnerships, creative angles |
+| [daily-ramadan-tips.md](./daily-ramadan-tips.md) | 54 daily tips: suhoor, iftar, hydration, mindset, prayer, culture, work — for “tip of the day” content |
+| [social-copy-bank.md](./social-copy-bank.md) | Ready-to-use one-liners, hooks, CTAs, captions, bios, Story text, hashtags |
 | [seasonal-calendar.md](./seasonal-calendar.md) | When to run what: pre-Ramadan, countdown, day 1, mid, last 10, Eid, off-season |
 | [quick-reference.md](./quick-reference.md) | One-page cheat sheet: messages, CTAs, hashtags, links |
 

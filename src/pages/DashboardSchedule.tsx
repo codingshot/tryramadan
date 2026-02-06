@@ -274,6 +274,7 @@ const DashboardSchedule = () => {
   const [countdownToIftar, setCountdownToIftar] = useState({ h: 0, m: 0, s: 0 });
   const [countdownToSuhoor, setCountdownToSuhoor] = useState({ h: 0, m: 0, s: 0 });
   const [copyMealsFromOpen, setCopyMealsFromOpen] = useState(false);
+  const [scheduleTableSort, setScheduleTableSort] = useState<"date" | "hoursAsc" | "hoursDesc">("date");
   const dayDetailPanelRef = useRef<HTMLDivElement>(null);
   const isInitialSelectionRef = useRef(true);
 
@@ -379,6 +380,33 @@ const DashboardSchedule = () => {
     return () => clearTimeout(t);
   }, [selectedDate]);
 
+  // Keyboard: arrow keys change selected day (within ~3 months of today to avoid infinite range)
+  useEffect(() => {
+    if (!selectedDate) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest("input, textarea, select, [contenteditable=true]")) return;
+      const step = e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : 0;
+      if (step === 0) return;
+      const days = e.key === "ArrowUp" || e.key === "ArrowDown" ? 7 : 1;
+      const d = new Date(selectedDate + "T12:00:00");
+      d.setDate(d.getDate() + step * days);
+      const min = new Date(ramadanRange.start);
+      min.setDate(min.getDate() - 14);
+      const max = new Date(ramadanRange.end);
+      max.setDate(max.getDate() + 14);
+      if (d.getTime() < min.getTime() || d.getTime() > max.getTime()) return;
+      e.preventDefault();
+      const nextStr = toLocalDateString(d);
+      setCurrentMonth(new Date(d.getFullYear(), d.getMonth(), 1));
+      setSelectedDate(nextStr);
+      setNoteInput(scheduleNotes[nextStr] || "");
+      setSearchParams({ date: nextStr }, { replace: true });
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [selectedDate, scheduleNotes, ramadanRange.start, ramadanRange.end, setSearchParams]);
+
   /** Last 5 days of Ramadan (day 26–30) for quick "Plan last days" links */
   const lastFiveRamadanDates = useMemo(() => {
     const start = new Date(ramadanRange.start.getTime());
@@ -390,6 +418,20 @@ const DashboardSchedule = () => {
     }
     return dates;
   }, [ramadanRange.start]);
+
+  /** Copy selected day's eating cutoff and break-fast times to clipboard. */
+  const copySelectedDayTimes = useCallback(() => {
+    if (!selectedDate || !effectiveSelectedDayPrayerTimes) return;
+    const pt = effectiveSelectedDayPrayerTimes;
+    const d = new Date(selectedDate + "T12:00:00");
+    const dateLabel = d.toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+    const hrs = getFastingHoursForDay(pt.imsak, pt.maghrib);
+    const line = `${dateLabel}: ${suhoorLabel} end ${pt.imsak ?? "—"}, ${iftarLabel} ${pt.maghrib ?? "—"}${hrs != null ? ` (${hrs}h fast)` : ""}`;
+    navigator.clipboard.writeText(line).then(
+      () => toast.success("Times copied to clipboard"),
+      () => toast.error("Could not copy")
+    );
+  }, [selectedDate, effectiveSelectedDayPrayerTimes, suhoorLabel, iftarLabel]);
 
   const copyMealsFromDay = useCallback(
     (sourceDateStr: string) => {
@@ -491,6 +533,19 @@ const DashboardSchedule = () => {
   const totalHoursFasted = useMemo(() => {
     return (progress.fastingLog ?? []).reduce((sum, e) => sum + (e.hoursFasted ?? (e.startedAt && e.completedAt ? hoursBetween(e.startedAt, e.completedAt) : 0)), 0);
   }, [progress.fastingLog]);
+
+  /** Longest and shortest fasting hours in the currently viewed month (from Ramadan table data). */
+  const monthFastRange = useMemo(() => {
+    const entries = Object.entries(effectiveRamadanTimesMap).filter(([dateStr]) => {
+      const d = new Date(dateStr + "T12:00:00");
+      return d.getFullYear() === currentMonth.getFullYear() && d.getMonth() === currentMonth.getMonth();
+    });
+    const hours = entries
+      .map(([, pt]) => getFastingHoursForDay(pt.imsak, pt.maghrib))
+      .filter((h): h is number => h != null);
+    if (hours.length === 0) return null;
+    return { min: Math.min(...hours), max: Math.max(...hours) };
+  }, [effectiveRamadanTimesMap, currentMonth]);
 
   const selectedDayMeals = selectedDate ? mealPlans[selectedDate] : undefined;
   const selectedDayNutrition = selectedDate ? nutrition[selectedDate] : undefined;
@@ -820,8 +875,14 @@ const DashboardSchedule = () => {
     return () => clearInterval(t);
   }, [tickFastingAndCountdown]);
 
-  const handleExportIcal = async (range: "month" | "30days" | "ramadan") => {
+  const handleExportIcal = async (range: "month" | "30days" | "ramadan" | "day") => {
     if (!lat || !lng) return;
+    if (range === "day") {
+      if (!selectedDate || !effectiveSelectedDayPrayerTimes) {
+        toast.info("Select a day in the calendar to export that day’s times.");
+        return;
+      }
+    }
     setExportLoading(true);
     try {
       const now = new Date();
@@ -829,7 +890,12 @@ const DashboardSchedule = () => {
       let end: Date;
       let startStr: string;
       let endStr: string;
-      if (range === "month") {
+      let prayerTimesMap: Record<string, import("@/hooks/usePrayerTimes").PrayerTimes> = {};
+      if (range === "day" && selectedDate && effectiveSelectedDayPrayerTimes) {
+        startStr = selectedDate;
+        endStr = selectedDate;
+        prayerTimesMap = { [selectedDate]: effectiveSelectedDayPrayerTimes };
+      } else if (range === "month") {
         start = new Date(now.getFullYear(), now.getMonth(), 1);
         end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
         startStr = toLocalDateString(start);
@@ -847,22 +913,25 @@ const DashboardSchedule = () => {
         start = new Date(startStr + "T00:00:00");
         end = new Date(endStr + "T23:59:59");
       }
-      const prayerTimesMap: Record<string, import("@/hooks/usePrayerTimes").PrayerTimes> = {};
-      const startYear = start.getFullYear();
-      const endYear = end.getFullYear();
-      for (let y = startYear; y <= endYear; y++) {
-        for (let m = 1; m <= 12; m++) {
-          const monthStart = new Date(y, m - 1, 1);
-          const monthEnd = new Date(y, m, 0);
-          if (monthEnd < start || monthStart > end) continue;
-          const data = await fetchPrayerTimesForMonth(lat, lng, y, m);
-          Object.assign(prayerTimesMap, data);
+      if (Object.keys(prayerTimesMap).length === 0) {
+        const startDate = new Date(startStr + "T12:00:00");
+        const endDate = new Date(endStr + "T12:00:00");
+        const startYear = startDate.getFullYear();
+        const endYear = endDate.getFullYear();
+        for (let y = startYear; y <= endYear; y++) {
+          for (let m = 1; m <= 12; m++) {
+            const monthStart = new Date(y, m - 1, 1);
+            const monthEnd = new Date(y, m, 0);
+            if (monthEnd < startDate || monthStart > endDate) continue;
+            const data = await fetchPrayerTimesForMonth(lat, lng, y, m);
+            Object.assign(prayerTimesMap, data);
+          }
         }
+        Object.keys(prayerTimesMap).forEach((dateStr) => {
+          const effective = getEffectivePrayerTimes(prayerTimesMap[dateStr], prayerTimeOverrides[dateStr]);
+          if (effective) prayerTimesMap[dateStr] = effective;
+        });
       }
-      Object.keys(prayerTimesMap).forEach((dateStr) => {
-        const effective = getEffectivePrayerTimes(prayerTimesMap[dateStr], prayerTimeOverrides[dateStr]);
-        if (effective) prayerTimesMap[dateStr] = effective;
-      });
       const exportTimezone =
         preferences.timezone?.trim() ||
         displayTimezone?.trim() ||
@@ -911,7 +980,7 @@ const DashboardSchedule = () => {
               Fasting Schedule
             </h1>
             <p className="text-sm sm:text-base text-muted-foreground mt-1.5 sm:mt-2">
-              Tap a day to view or edit meal plan, food log, and prayer times. Times vary by location.
+              Tap a day to view or edit meal plan, food log, and prayer times. Use arrow keys to move the selected day. Times vary by location.
             </p>
           </motion.div>
 
@@ -1098,6 +1167,16 @@ const DashboardSchedule = () => {
               >
                 Download .ics: Ramadan only
               </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleExportIcal("day")}
+                disabled={exportLoading || !lat || !lng || !selectedDate || !effectiveSelectedDayPrayerTimes}
+                className="gap-2"
+                aria-label="Download .ics file for selected day only"
+              >
+                Download .ics: selected day
+              </Button>
             </div>
             {(!lat || !lng) && (
               <LocationRequiredCTA
@@ -1200,6 +1279,20 @@ const DashboardSchedule = () => {
               ) : Object.keys(effectiveRamadanTimesMap).length === 0 ? (
                 <p className="text-sm text-muted-foreground py-4">Set your location in Settings to see times.</p>
               ) : (
+                <>
+                  <div className="flex flex-wrap items-center gap-2 mb-3">
+                    <span className="text-xs text-muted-foreground">Sort:</span>
+                    <div className="flex gap-1">
+                      <Button variant={scheduleTableSort === "date" ? "secondary" : "ghost"} size="sm" className="h-8 text-xs" onClick={() => setScheduleTableSort("date")}>Date</Button>
+                      <Button variant={scheduleTableSort === "hoursDesc" ? "secondary" : "ghost"} size="sm" className="h-8 text-xs" onClick={() => setScheduleTableSort("hoursDesc")}>Longest first</Button>
+                      <Button variant={scheduleTableSort === "hoursAsc" ? "secondary" : "ghost"} size="sm" className="h-8 text-xs" onClick={() => setScheduleTableSort("hoursAsc")}>Shortest first</Button>
+                    </div>
+                    {monthFastRange && (
+                      <span className="text-xs text-muted-foreground ml-auto">
+                        This month: longest {monthFastRange.max}h, shortest {monthFastRange.min}h
+                      </span>
+                    )}
+                  </div>
                 <div className="overflow-x-auto -mx-2">
                   <table className="w-full min-w-[380px] text-sm border-collapse">
                     <thead>
@@ -1214,7 +1307,12 @@ const DashboardSchedule = () => {
                     </thead>
                     <tbody>
                       {Object.entries(effectiveRamadanTimesMap)
-                        .sort(([a], [b]) => a.localeCompare(b))
+                        .sort(([a, ptA], [b, ptB]) => {
+                          if (scheduleTableSort === "date") return a.localeCompare(b);
+                          const hrsA = getFastingHoursForDay(ptA.imsak, ptA.maghrib) ?? 0;
+                          const hrsB = getFastingHoursForDay(ptB.imsak, ptB.maghrib) ?? 0;
+                          return scheduleTableSort === "hoursDesc" ? hrsB - hrsA : hrsA - hrsB;
+                        })
                         .map(([dateStr, pt]) => {
                           const d = new Date(dateStr + "T12:00:00");
                           const dayNum = ramadanRange.getRamadanDayNumber(d);
@@ -1250,6 +1348,7 @@ const DashboardSchedule = () => {
                     </tbody>
                   </table>
                 </div>
+                </>
               )}
             </motion.div>
           )}
@@ -1654,6 +1753,12 @@ const DashboardSchedule = () => {
                             </p>
                           </div>
                         )}
+                        <div className="sm:col-span-2">
+                          <Button variant="outline" size="sm" onClick={copySelectedDayTimes} className="gap-2" aria-label="Copy eating cutoff and break fast times to clipboard">
+                            <Copy className="w-4 h-4" />
+                            Copy times
+                          </Button>
+                        </div>
                         {selectedDate && (prayerTimeOverrides[selectedDate]?.imsak != null || prayerTimeOverrides[selectedDate]?.maghrib != null) && (
                           <div className="sm:col-span-2 flex gap-2 items-end flex-wrap">
                             <Label className="text-xs w-full sm:w-auto">Override Imsak</Label>

@@ -124,4 +124,95 @@
 4. Collect 3–5 testimonials or quotes; use in social and app store.
 5. One “how to try Ramadan fasting” blog or video for SEO and shares.
 
+---
+
+## More campaign ideas
+
+### 9. “Tip of the day” (30-day series)
+
+- **Idea:** One Ramadan tip per day — suhoor, iftar, hydration, mindset, culture. Pull from **daily-ramadan-tips.md**. Light product mention every 5th or 10th post.
+- **Assets:** Short graphic or text card per tip. Can reuse as Stories, tweet, or email line.
+- **Channels:** Instagram grid + Stories, Twitter, optional email. Low effort if tips are pre-written.
+- **CTA:** “Get reminders and countdown in TryRamadan” (every few days).
+
+### 10. “Ramadan glossary” (education series)
+
+- **Idea:** One term per post — Suhoor, Iftar, Imsak, Laylat al-Qadr, Ramadan Mubarak, etc. One sentence definition + optional Arabic. Builds authority and helps curious non-Muslims.
+- **Assets:** Carousel or single image per term. Can mirror in-app glossary.
+- **Channels:** Instagram, Twitter thread (e.g. “Ramadan in 10 terms”), blog or LinkedIn.
+- **CTA:** “Explore the full glossary in the app.”
+
+### 11. “Behind the fast” (human stories)
+
+- **Idea:** Short, respectful stories or quotes from people who fast — first-timers, parents, students, converts. With permission only. No heavy sell.
+- **Assets:** Quote graphic, 30–60 sec video, or short written post. Diversity of voices.
+- **Channels:** Instagram, Facebook, blog. Partner with one or two community figures if possible.
+- **CTA:** “What’s your Ramadan story? TryRamadan is here for the whole month.”
+
+### 12. “Ramadan at work” (employers + ERGs)
+
+- **Idea:** One-pager or short deck: “Supporting Ramadan at work” — flexible hours, prayer space, iftar together, and “Share TryRamadan for prayer times and fasting support.” Position as a resource, not an ad.
+- **Assets:** PDF one-pager, 3-slide deck, or single LinkedIn post. Link to app in footer.
+- **Channels:** LinkedIn, HR/DEI newsletters, ERG Slack or intranet.
+- **CTA:** “TryRamadan — free app to share with colleagues.”
+
+### 13. “Recipes from the app” (food series)
+
+- **Idea:** One suhoor or iftar recipe per week (or per day if capacity allows). Pull from in-app recipes; credit region/culture. Photo + short copy + “Find more in TryRamadan.”
+- **Assets:** Recipe card (image + ingredients + 2–3 steps), Reel or TikTok “make with me.”
+- **Channels:** Instagram, Pinterest, TikTok, YouTube Shorts.
+- **CTA:** “Plan your suhoor and iftar in TryRamadan — recipes by region.”
+
+### 14. “Countdown to Maghrib” (moment marketing)
+
+- **Idea:** On key days (e.g. day 1, 15, 27), post a “X minutes until iftar” style post at a set time. Creates urgency and habit (“Check the app for your local time”).
+- **Assets:** Simple graphic or short video with countdown feel. Or live-tweet/Story: “Iftar in 10 — open TryRamadan for your city’s time.”
+- **Channels:** Twitter, Instagram Stories, TikTok. Time the post for late afternoon in a key timezone.
+- **CTA:** “Get your personal countdown in TryRamadan.”
+
+### 15. “New to Ramadan?” (onboarding content)
+
+- **Idea:** One piece of content that walks through “What is Ramadan, when do you eat, what’s suhoor/iftar, and how can I try it?” Link to app at the end. Evergreen; update each year.
+- **Assets:** Blog post, carousel (10 slides), or 2–3 min video. No religious depth — just clear, respectful basics.
+- **Channels:** Blog/SEO, YouTube, Instagram carousel, Pinterest. Target “try Ramadan” and “first Ramadan fast” queries.
+- **CTA:** “TryRamadan — set your location and we’ll show you when to eat and when to break the fast.”
+
+---
+
+## Content series (reusable formats)
+
+| Series name       | What it is                          | Frequency   | Best channel      |
+|-------------------|-------------------------------------|------------|-------------------|
+| Tip of the day    | One tip from daily-ramadan-tips.md  | Daily      | Stories, Twitter  |
+| Word of the day   | One glossary term                   | Daily      | Grid, Twitter     |
+| Recipe of the day | One suhoor/iftar recipe from app    | Daily or 2–3×/week | IG, Pinterest |
+| Country of the day| One tradition/country (culture)     | Daily      | Carousel, Stories |
+| Feature Friday    | One app feature spotlight           | Weekly     | All               |
+| User story        | Quote or short story (with permission) | 1–2×/week | IG, blog          |
+| Countdown to iftar| “Iftar in X” moment                 | Key days   | Stories, Twitter  |
+| Last 10 nights    | Reflective, prayer times, du’a      | Days 21–29 | All               |
+
+---
+
+## Ideas by channel
+
+- **Instagram:** Carousels (tips, glossary, how-to), Reels (recipes, “day in my life,” countdown), Stories (polls, countdown, tip of the day), single image (quote, Ramadan Mubarak).
+- **TikTok:** Short tips, “getting ready for iftar,” “what I eat for suhoor,” “trying Ramadan for a day,” countdown moment. Sound and trend-aware.
+- **Twitter/X:** Short copy + link, threads (glossary, 10 tips, how to support colleagues), quote cards, moment tweets (“Iftar in 10 — link in bio for your time”).
+- **Facebook:** Longer posts, events (e.g. “Ramadan starts — get the app”), groups (share in Ramadan/Islamic groups with permission), link posts.
+- **LinkedIn:** DEI/employer angle, “Supporting Ramadan at work,” product update (one per month), no heavy sell.
+- **Pinterest:** Recipes, “Ramadan tips,” “suhoor ideas,” “iftar recipes by country.” Link to app or blog.
+- **YouTube:** How-to (“How to try Ramadan fasting”), recipe, “my Ramadan setup,” app walkthrough. SEO-friendly title and description.
+- **Email (if list exists):** Pre-Ramadan (get ready), day 1 (Ramadan Mubarak), weekly tip digest, mid-Ramadan (you’re halfway), last 10 nights, Eid (thank you).
+
+---
+
+## Stretch ideas (when you have more capacity)
+
+- **Podcast or interview:** One episode with a community figure or wellness expert: “Ramadan, fasting, and one app that helps.” Link in show notes.
+- **Live Q&A:** “New to Ramadan? We’re answering questions live.” Use TryRamadan as the resource for times and tips.
+- **Collaborative calendar:** With a mosque or MSA: “This Ramadan we’re using TryRamadan for prayer times — join us.”
+- **Merch or printable:** Simple “Ramadan Mubarak” or “Iftar o’clock” printable; QR code to app. Hand out at events or offer as download.
+- **Ambassador program:** 5–10 micro-influencers or community members who post 2–3 times during Ramadan in exchange for early access or feature. Clear disclosure.
+
 Do not publish this file. Use as an internal idea bank.
