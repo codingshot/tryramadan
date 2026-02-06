@@ -1029,6 +1029,17 @@ const Settings = () => {
                 aria-label="Show streak and achievements"
               />
             </div>
+            <div className="mt-4 pt-4 border-t border-border flex items-center justify-between gap-4">
+              <div>
+                <p className="font-medium text-sm">Hide habits from onboarding</p>
+                <p className="text-xs text-muted-foreground mt-0.5">When on, the Ramadan habits link will not be shown on the onboarding Goals step.</p>
+              </div>
+              <Switch
+                checked={preferences.hideHabitsFromOnboarding === true}
+                onCheckedChange={(checked) => setPreferences({ ...preferences, hideHabitsFromOnboarding: checked })}
+                aria-label="Hide habits from onboarding"
+              />
+            </div>
           </motion.div>
 
           {/* Ramadan dates (match community) */}

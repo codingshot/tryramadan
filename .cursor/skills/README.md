@@ -18,5 +18,6 @@ Project-scoped skills for improving and maintaining the app. Use when the task m
 | **offline-and-degraded-network** | Adding/changing API usage, caching, or behavior when prayer times/location/timezone APIs fail or are offline. |
 | **performance-cwv** | Changing critical path, images, fonts, or layout; LCP, INP, CLS. |
 | **streaks-stats-gamification** | Changing streak calculation, excused days, badges, showStreakAndAchievements, non-fasting achievements. |
+| **habits-page-and-tracker** | Habits page (/habits), habit data (Quran/hadith), journal habit tracker, habit log (tryramadan-habit-log), hideHabitsFromOnboarding. |
 
 Each skill lives in its own folder with a `SKILL.md` (and optional reference files). Descriptions are in the YAML frontmatter for agent discovery. Docs referenced in skills live in **`docs/`** (e.g. QA-BUG-REPORT-FORMAT-AND-CHECKLIST.md, STATE-TRANSITION-TESTING-FASTING.md, PERFORMANCE.md).

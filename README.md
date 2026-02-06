@@ -14,10 +14,10 @@
 | **Prayer & times** | Location-based prayer times (Aladhan), per-day times, Suhoor/Iftar reminders (configurable mins before), Adhan notifications (Muslim mode), timezone-aware .ics export |
 | **Dashboard** | Day selector (arrows + date), compact Ramadan/Sunnah badge, current fast status + countdown, schedule strip (Suhoor end / Iftar), FastingTimer, quick actions (Today, Schedule, Meals, Journal, Prayers, Learn), streak/total/Sunnah stats, day plan & meal fields |
 | **Schedule** | Calendar view, meal plans & notes, food log, quick-add events (Suhoor, Iftar, prayers, Taraweeh, custom), export .ics (this month / next 30 / Ramadan) |
-| **Content** | Quran reading plan (juz per day, Quran.com), Islamic glossary (Arabic + transliteration), daily hadith & Ramadan facts, fasting rules (Quran 2:183–187 + hadith links), cultural traditions by country, recipes |
-| **Onboarding** | Welcome → Mode (Muslim skips knowledge) → Knowledge → Health → Location → Schedule → Notifications → Priorities → Goals; all persisted locally |
+| **Content** | Quran reading plan (juz per day, Quran.com), Islamic glossary (Arabic + transliteration), daily hadith & Ramadan facts, **Ramadan habits** (good/bad from Quran & hadith, tags: everyone vs Muslim), fasting rules (Quran 2:183–187 + hadith links), cultural traditions by country, recipes |
+| **Onboarding** | Welcome → Mode (Muslim skips knowledge) → Knowledge → Health → Location → Schedule → Notifications → Priorities → Goals (optional habits link); all persisted locally. **Hide habits from onboarding** in Settings. |
 | **UX** | User guides (/guides), personas (/personas), keyboard shortcuts (g+d, g+t, g+q, etc.), PWA, mobile bottom bar when fasting, accessibility (skip link, aria-live, focus, axe tests) |
-| **Settings** | Location (search + auto-detect), theme, Suhoor/Iftar minutes before, prayer notifications (Muslim only), priorities (learning, culture, Quran, macros), dashboard quick actions order |
+| **Settings** | Location (search + auto-detect), theme, Suhoor/Iftar minutes before, prayer notifications (Muslim only), priorities (learning, culture, Quran, macros), dashboard quick actions order, hide habits from onboarding |
 
 ---
 
@@ -33,7 +33,8 @@
 - **Personas (/personas)** – Personas and user journeys based on onboarding flows; each persona has a detail page with journey, resources, and links.
 - **Quran & Glossary** – Quran reading plan at `/dashboard/quran`, Islamic glossary at `/dashboard/glossary` and `/learn/glossary`.
 - **Macro tracker (/dashboard/macros)** – Plan meals and track calories/protein/carbs/fat; optional per your priorities.
-- **Journal** – Mood (1–5), write for any date, calendar of entries, export journal as JSON.
+- **Journal** – Mood (1–5), write for any date, **daily habit tracker** (sunnah habits from Quran/hadith, stored locally), calendar of entries, export journal as JSON.
+- **Ramadan habits (/habits)** – Good and bad habits from the Quran and hadith: quote first, then source links (Quran.com, Sunnah.com), then explanation. Tagged **Everyone** (non-Muslims too) or **Muslim** (e.g. prayer, Taraweeh). Track sunnah habits daily in the journal.
 - **Calendar** – Shared Ramadan dates (multi-year), “Go to Ramadan” and “Go to today” next to date, journal dots on schedule. “This Week” links to full calendar.
 - **Add to calendar & export .ics** – Quick-add Suhoor, Iftar, all prayers, Taraweeh, “Get food,” and custom events per day. Export to **Google Calendar, Apple Calendar, or Outlook** (This month, Next 30 days, or Ramadan).
 - **Fasting rules sources** – Quran (Surah Al-Baqarah 2:183–187) and Hadith (Bukhari, Muslim Book of Fasting) linked on the fasting rules section.
@@ -88,6 +89,7 @@
 - **📆 Add to calendar & export .ics** - Quick-add Suhoor, Iftar, Fajr, Dhuhr, Asr, Maghrib, Isha, Taraweeh, “Get food,” and custom events per day. Export **This month**, **Next 30 days**, or **Ramadan** as .ics for Google Calendar, Apple Calendar, or Outlook
 
 ### Educational Content
+- **📋 Ramadan Habits (/habits)** - Good and bad habits from the Quran and hadith: each habit shows **quote first**, then **source links** (Quran.com, Sunnah.com), then explanation. Tagged **Everyone** (applies to non-Muslims trying Ramadan) or **Muslim** (e.g. neglecting prayer, Taraweeh). Comprehensive list with SEO-optimized page.
 - **📚 Daily Hadith** - Curated hadith about fasting from authentic sources
 - **🌍 Cultural Traditions** - Explore Ramadan customs from 20+ countries
 - **🍽️ Recipes** - Traditional Suhoor and Iftar recipes from various cultures
@@ -100,7 +102,7 @@
 - **💾 Local Storage** - All preferences, progress, calendar events, journal, and notification settings saved locally
 - **🌐 Bilingual** - English and Arabic (hover for translations). **Tooltips** on Suhoor, Iftar, Fajr, Maghrib, etc. (see `data/eating-times-tooltips.ts`) for learning.
 - **🎨 Design** - Islamic-inspired aesthetics with emerald, gold, and burgundy palette; mobile-first with safe areas and touch targets
-- **📓 Journal** - Mood (1–5), date picker to write for any day, calendar showing days with entries, export journal as JSON
+- **📓 Journal** - Mood (1–5), date picker to write for any day, **daily habit tracker** (check off sunnah habits per day, stored in `tryramadan-habit-log`), calendar showing days with entries, export journal as JSON
 - **📅 Robust calendar** - Shared Ramadan dates (2024–2031), “Go to Ramadan” and “Go to today” next to date on Dashboard, journal-entry dots on calendar days
 - **🌙 Fasting bar (mobile)** - When fasting, bottom bar shows Iftar countdown and quick links (Today, Meals, Break). Navbar shows “Fasting · X days” tag.
 

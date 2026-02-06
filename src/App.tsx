@@ -59,6 +59,7 @@ const GuidePage = lazy(() => import("./pages/GuidePage").then((m) => ({ default:
 const Personas = lazy(() => import("./pages/Personas").then((m) => ({ default: m.default })));
 const PersonaPage = lazy(() => import("./pages/PersonaPage").then((m) => ({ default: m.default })));
 const RamadanCompare = lazy(() => import("./pages/RamadanCompare").then((m) => ({ default: m.default })));
+const Habits = lazy(() => import("./pages/Habits").then((m) => ({ default: m.default })));
 const NotFound = lazy(() => import("./pages/NotFound").then((m) => ({ default: m.default })));
 import { AdhanScheduler } from "./components/AdhanScheduler";
 import { FastingBottomBar } from "./components/FastingBottomBar";
@@ -266,6 +267,7 @@ const App = () => (
           <Route path="/terms" element={<Suspense fallback={<PageFallback />}><Terms /></Suspense>} />
           <Route path="/legal" element={<Suspense fallback={<PageFallback />}><Legal /></Suspense>} />
           <Route path="/privacy" element={<Suspense fallback={<PageFallback />}><Privacy /></Suspense>} />
+          <Route path="/habits" element={<Suspense fallback={<PageFallback />}><Habits /></Suspense>} />
           <Route path="/guides" element={<Suspense fallback={<PageFallback />}><Guides /></Suspense>} />
           <Route path="/guides/:slug" element={<Suspense fallback={<PageFallback />}><GuidePage /></Suspense>} />
           <Route path="/personas" element={<Suspense fallback={<PageFallback />}><Personas /></Suspense>} />

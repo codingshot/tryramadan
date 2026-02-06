@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Check } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, Check, BookOpen } from "lucide-react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { useUserPreferences, getQuickActionOrderFromPriorities, persistPreferencesSync, persistQuickActionsSync } from "@/hooks/useLocalStorage";
 import { useDashboardQuickActions } from "@/hooks/useLocalStorage";
@@ -100,6 +100,23 @@ export default function OnboardingGoals() {
       <p className="text-muted-foreground mb-6">
         Set your personal focus for this fasting journey. Optional but helps us tailor content.
       </p>
+      {!preferences.hideHabitsFromOnboarding && (
+        <div className="mb-6 p-4 rounded-xl border border-border bg-card">
+          <h3 className="font-medium text-sm mb-1 flex items-center gap-2">
+            <BookOpen className="w-4 h-4 text-secondary" />
+            Ramadan habits (Quran & hadith)
+          </h3>
+          <p className="text-xs text-muted-foreground mb-3">
+            Learn good habits to follow and habits to avoid during Ramadan, with direct links to the Quran and hadith.
+          </p>
+          <Link
+            to="/habits"
+            className="inline-flex items-center gap-1 text-sm font-medium text-secondary hover:underline"
+          >
+            View habits page →
+          </Link>
+        </div>
+      )}
       {state.mode === "muslim" && (
         <button
           type="button"

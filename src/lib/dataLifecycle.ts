@@ -50,6 +50,7 @@ export const TRYRAMADAN_LOCALSTORAGE_KEYS = [
   "tryramadan-pwa-install-dismissed",
   "tryramadan-dismissed-location-banner",
   "tryramadan-journal-notice-dismissed",
+  "tryramadan-habit-log",
 ] as const;
 
 /**

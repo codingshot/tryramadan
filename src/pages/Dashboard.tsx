@@ -51,7 +51,9 @@ import {
   normalizeDayFoodLog,
   getDayTotalsFromFoodLog,
   useDisplayTimezone,
+  useHabitLog,
 } from "@/hooks/useLocalStorage";
+import { getHabitLogStreak, getTotalHabitCheckmarks } from "@/data/ramadan-habits";
 import { toLocalDateString, getTodayStringInTimezone, getNowSecondsSinceMidnightInTimezone, timeStringToSecondsSinceMidnight, secondsUntilTimeInTimezone } from "@/lib/utils";
 import { BreakFastReasonDialog } from "@/components/BreakFastReasonDialog";
 import { usePrayerTimes, usePrayerTimesForDate, getSunnahFastingInfo, checkAyyamAlBeed } from "@/hooks/usePrayerTimes";
@@ -151,6 +153,9 @@ const Dashboard = () => {
   const [dayNutrition, setDayNutrition] = useDayNutrition();
   const [quickActionOrder] = useDashboardQuickActions();
   const [journalEntries, setJournalEntries] = useLocalStorage<JournalEntry[]>("tryramadan-journal", []);
+  const [habitLog] = useHabitLog();
+  const habitStreak = useMemo(() => getHabitLogStreak(habitLog, todayStr), [habitLog, todayStr]);
+  const habitTotalCheckmarks = useMemo(() => getTotalHabitCheckmarks(habitLog), [habitLog]);
   const iftarLabel = useIftarLabel();
   const iftarLabelShort = useIftarLabelShort();
   const suhoorLabelShort = useSuhoorLabelShort();
@@ -947,6 +952,21 @@ const Dashboard = () => {
             />
             <div className="mt-6">
               <DailyMissionsCard />
+            </div>
+            {/* Habit tracking summary */}
+            <div className="mt-4 rounded-xl border border-border bg-card p-4">
+              <h3 className="font-display font-semibold text-sm flex items-center gap-2 mb-2">
+                <Target className="w-4 h-4 text-secondary" />
+                Habit tracking
+              </h3>
+              <div className="flex items-center gap-4 text-sm">
+                <span className="tabular-nums font-medium text-secondary">{habitStreak} day streak</span>
+                <span className="tabular-nums text-muted-foreground">{habitTotalCheckmarks} total checkmarks</span>
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                <Link to="/habits" className="text-xs font-medium text-secondary hover:underline">View habits</Link>
+                <Link to="/dashboard/journal" className="text-xs font-medium text-secondary hover:underline">Log in journal</Link>
+              </div>
             </div>
           </motion.div>
             </div>

@@ -99,6 +99,8 @@ export interface UserPreferences {
   ramadanStartOverride: string | null;
   /** Custom Ramadan end (YYYY-MM-DD); null = use app calendar. */
   ramadanEndOverride: string | null;
+  /** When true, hide the habits / Ramadan habits step or link from onboarding flows. */
+  hideHabitsFromOnboarding: boolean;
 }
 
 export const defaultPreferences: UserPreferences = {
@@ -139,6 +141,7 @@ export const defaultPreferences: UserPreferences = {
   symptomRetentionDays: null,
   ramadanStartOverride: null,
   ramadanEndOverride: null,
+  hideHabitsFromOnboarding: false,
 };
 
 const PREFERENCES_KEY = 'tryramadan-preferences';
@@ -1288,6 +1291,12 @@ export function getMindfulEatingStreak(
 // --- Daily missions (today's actionable tasks) ---
 
 export const SCHEDULE_NOTES_KEY = 'tryramadan-schedule-notes';
+
+/** Habit tracker: date -> { habitId: true }. Stored in tryramadan-habit-log. */
+export const HABIT_LOG_KEY = 'tryramadan-habit-log';
+export function useHabitLog(): [Record<string, Record<string, boolean>>, (value: Record<string, Record<string, boolean>> | ((prev: Record<string, Record<string, boolean>>) => Record<string, Record<string, boolean>>)) => void] {
+  return useLocalStorage<Record<string, Record<string, boolean>>>(HABIT_LOG_KEY, {});
+}
 export const HADITH_VIEWED_DATES_KEY = 'tryramadan-hadith-viewed-dates';
 const HADITH_VIEWED_MAX_DAYS = 60;
 

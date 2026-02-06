@@ -9,6 +9,7 @@ import Privacy from "@/pages/Privacy";
 import FAQ from "@/pages/FAQ";
 import HealthSafety from "@/pages/HealthSafety";
 import Health from "@/pages/Health";
+import Habits from "@/pages/Habits";
 import NotFound from "@/pages/NotFound";
 
 function renderWithProviders(ui: React.ReactElement, { route = "/" }: { route?: string } = {}) {
@@ -62,6 +63,7 @@ export const ROUTES = [
   "/onboarding/priorities",
   "/onboarding/goals",
   "/dashboard/glossary",
+  "/habits",
   "/guides",
   "/personas",
   "/personas/non-muslim-curious",
@@ -137,6 +139,16 @@ describe("Routes", () => {
       { route: "/health-safety" }
     );
     expect(screen.getByRole("heading", { name: /health & safety/i })).toBeInTheDocument();
+  });
+
+  it("renders Habits at /habits", () => {
+    renderWithProviders(
+      <Routes>
+        <Route path="/habits" element={<Habits />} />
+      </Routes>,
+      { route: "/habits" }
+    );
+    expect(screen.getByRole("heading", { name: /ramadan habits/i })).toBeInTheDocument();
   });
 
   it("renders NotFound for unknown path", () => {

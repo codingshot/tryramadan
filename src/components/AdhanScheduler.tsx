@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useUserPreferences, useDisplayTimezone } from "@/hooks/useLocalStorage";
 import { usePrayerTimes } from "@/hooks/usePrayerTimes";
 import {
@@ -8,6 +8,7 @@ import {
 } from "@/hooks/useLocalStorage";
 import { playAdhan } from "@/lib/adhanAudio";
 import { getTodayStringInTimezone, toLocalDateString, getNowInTimezone } from "@/lib/utils";
+import { IftarDuaDialog } from "@/components/IftarDuaDialog";
 
 const PRAYER_NAMES = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"] as const;
 
@@ -18,8 +19,8 @@ function timeToMinutes(timeStr: string): number {
 
 /**
  * When the app is open, checks every 60 seconds if current time matches a prayer time.
- * If the prayer's notification is enabled and we haven't notified for it today,
- * shows a browser notification and optionally plays adhan sound.
+ * At Maghrib (iftar): shows Iftar Dua popup and plays adhan for everyone (if adhan sound enabled).
+ * For Muslim users with notifications: also shows browser notification for each prayer.
  */
 export function AdhanScheduler() {
   const [preferences] = useUserPreferences();
@@ -35,39 +36,53 @@ export function AdhanScheduler() {
   const notifiedRef = useRef<Set<string>>(new Set());
   const notifiedStoreRef = useRef(adhanNotifiedToday);
   notifiedStoreRef.current = adhanNotifiedToday;
+  const iftarPopupShownForDayRef = useRef<string | null>(null);
+  const [showIftarPopup, setShowIftarPopup] = useState(false);
 
   useEffect(() => {
-    if (preferences.userType !== "muslim") return; // Prayer alarms only for Muslim users
-    if (!preferences.notificationsEnabled) return;
     if (!prayerTimes) return;
 
-    const fireAdhan = (name: string, timeStr: string, todayStr: string) => {
-      if (typeof window !== "undefined" && "Notification" in window) {
-        const doNotify = () => {
-          new Notification(`Adhan • ${name} • أذان`, {
-            body: `Time for ${name} prayer. ${timeStr}`,
-            icon: "/favicon.png",
-            tag: `adhan-${todayStr}-${name}`,
-          });
-          if (adhanSoundEnabled) playAdhan();
-        };
-        if (Notification.permission === "default") {
-          Notification.requestPermission().then((perm) => {
-            if (perm === "granted") doNotify();
-          });
-        } else if (Notification.permission === "granted") {
-          doNotify();
-        }
-      }
-    };
-
-    const checkAndNotify = () => {
+    const checkIftarAndNotify = () => {
       const now = new Date();
       const todayStr = displayTimezone ? getTodayStringInTimezone(displayTimezone) : toLocalDateString(now);
       const nowInTz = displayTimezone ? getNowInTimezone(displayTimezone) : { hours: now.getHours(), minutes: now.getMinutes(), seconds: now.getSeconds() };
       const nowMinutes = nowInTz.hours * 60 + nowInTz.minutes;
-      const store = notifiedStoreRef.current;
 
+      // At iftar time (within 2 min of Maghrib): show Iftar Dua popup and play adhan (once per day, for everyone)
+      if (prayerTimes.maghrib) {
+        const maghribMinutes = timeToMinutes(prayerTimes.maghrib);
+        const diff = Math.abs(nowMinutes - maghribMinutes);
+        if (diff <= 2 && iftarPopupShownForDayRef.current !== todayStr) {
+          iftarPopupShownForDayRef.current = todayStr;
+          setShowIftarPopup(true);
+          if (adhanSoundEnabled) playAdhan();
+        }
+      }
+
+      // Prayer notifications (Muslim users only)
+      if (preferences.userType !== "muslim" || !preferences.notificationsEnabled) return;
+
+      const fireAdhan = (name: string, timeStr: string, dayStr: string) => {
+        if (typeof window !== "undefined" && "Notification" in window) {
+          const doNotify = () => {
+            new Notification(`Adhan • ${name} • أذان`, {
+              body: `Time for ${name} prayer. ${timeStr}`,
+              icon: "/favicon.png",
+              tag: `adhan-${dayStr}-${name}`,
+            });
+            if (adhanSoundEnabled) playAdhan();
+          };
+          if (Notification.permission === "default") {
+            Notification.requestPermission().then((perm) => {
+              if (perm === "granted") doNotify();
+            });
+          } else if (Notification.permission === "granted") {
+            doNotify();
+          }
+        }
+      };
+
+      const store = notifiedStoreRef.current;
       for (const name of PRAYER_NAMES) {
         if (prayerNotifications[name] === false) continue;
         const timeStr =
@@ -100,10 +115,14 @@ export function AdhanScheduler() {
       }
     };
 
-    checkAndNotify();
-    const interval = setInterval(checkAndNotify, 60 * 1000);
+    checkIftarAndNotify();
+    const interval = setInterval(checkIftarAndNotify, 60 * 1000);
     return () => clearInterval(interval);
   }, [preferences.userType, preferences.notificationsEnabled, displayTimezone, prayerTimes, prayerNotifications, adhanSoundEnabled, setAdhanNotifiedToday]);
 
-  return null;
+  return (
+    <>
+      <IftarDuaDialog open={showIftarPopup} onOpenChange={setShowIftarPopup} />
+    </>
+  );
 }

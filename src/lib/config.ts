@@ -21,4 +21,6 @@ export const API_CONFIG = {
 export const EXTERNAL_LINKS = {
   quran: "https://quran.com",
   sunnah: "https://sunnah.com",
+  /** Iftar dua hadith (Sunan Abi Dawud 2358) */
+  iftarDuaHadith: "https://sunnah.com/abudawud:2358",
 } as const;

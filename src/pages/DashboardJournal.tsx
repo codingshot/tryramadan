@@ -11,11 +11,13 @@ import {
   Calendar as CalendarIcon,
   Smile,
   Trash2,
+  CheckSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { useLocalStorage, useUserPreferences } from "@/hooks/useLocalStorage";
+import { useLocalStorage, useUserPreferences, useHabitLog } from "@/hooks/useLocalStorage";
+import { getHabitsForUser, getShortLabelsForHabitIds } from "@/data/ramadan-habits";
 import { Calendar } from "@/components/ui/calendar";
 import { PageSEO } from "@/components/PageSEO";
 
@@ -63,7 +65,12 @@ export function getPromptForDate(isoDate: string, userType?: string): string {
 export default function DashboardJournal() {
   const [preferences] = useUserPreferences();
   const [entries, setEntries] = useLocalStorage<JournalEntry[]>("tryramadan-journal", []);
+  const [habitLog, setHabitLog] = useHabitLog();
   const today = new Date().toISOString().split("T")[0];
+  const trackableHabits = useMemo(
+    () => getHabitsForUser(preferences.userType).filter((h) => h.type === "sunnah"),
+    [preferences.userType]
+  );
 
   const [writeDate, setWriteDate] = useState(today);
   const [content, setContent] = useState("");
@@ -439,6 +446,43 @@ export default function DashboardJournal() {
               placeholder="e.g. Family, health, this moment..."
               className="w-full p-3 rounded-xl border border-border bg-background text-sm focus:ring-2 focus:ring-secondary outline-none"
             />
+            {trackableHabits.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-border">
+                <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                  <CheckSquare className="w-4 h-4 text-secondary" />
+                  Habits for this day (optional)
+                </h4>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Sunnah habits from the Quran and hadith. Check what you did. <Link to="/habits" className="text-secondary hover:underline">See all habits</Link>
+                </p>
+                <ul className="space-y-2">
+                  {trackableHabits.map((habit) => {
+                    const checked = !!habitLog[writeDate]?.[habit.id];
+                    return (
+                      <li key={habit.id}>
+                        <label className="flex items-center gap-2 text-sm cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={(e) => {
+                              setHabitLog((prev) => ({
+                                ...prev,
+                                [writeDate]: {
+                                  ...(prev[writeDate] ?? {}),
+                                  [habit.id]: e.target.checked,
+                                },
+                              }));
+                            }}
+                            className="rounded border-border"
+                          />
+                          <span>{habit.shortLabel}</span>
+                        </label>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
             <button
               onClick={handleSave}
               className="mt-4 py-2 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90"
@@ -482,6 +526,9 @@ export default function DashboardJournal() {
               <ul className="space-y-3">
                 {displayEntries.map((entry) => {
                   const isExpanded = expandedDate === entry.date;
+                  const dayHabits = habitLog[entry.date];
+                  const checkedHabitIds = dayHabits ? Object.entries(dayHabits).filter(([, v]) => v).map(([id]) => id) : [];
+                  const habitLabels = getShortLabelsForHabitIds(checkedHabitIds);
                   return (
                     <li
                       key={entry.date}
@@ -498,6 +545,16 @@ export default function DashboardJournal() {
                       <p className={`text-sm mt-1 ${isExpanded ? "" : "line-clamp-2"}`}>
                         {entry.content}
                       </p>
+                      {habitLabels.length > 0 && (
+                        <p className="text-xs text-muted-foreground mt-2 flex flex-wrap gap-1 items-center">
+                          <span className="font-medium text-foreground">Habits:</span>
+                          {habitLabels.map((l) => (
+                            <span key={l} className="px-1.5 py-0.5 rounded bg-secondary/10 text-secondary text-xs">
+                              {l}
+                            </span>
+                          ))}
+                        </p>
+                      )}
                       {entry.gratitude && (
                         <p className="text-xs text-secondary mt-2">Grateful: {entry.gratitude}</p>
                       )}
