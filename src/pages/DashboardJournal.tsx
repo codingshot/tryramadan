@@ -54,7 +54,7 @@ const PROMPTS_NON_MUSLIM = [
 const MOOD_LABELS = ["Low", "Okay", "Good", "Great", "Amazing"];
 const MOOD_EMOJI = ["😢", "😐", "🙂", "😊", "😄"];
 
-function getPromptForDate(isoDate: string, userType?: string): string {
+export function getPromptForDate(isoDate: string, userType?: string): string {
   const day = parseInt(isoDate.slice(8, 10), 10) || 1;
   const prompts = userType === "muslim" ? PROMPTS_MUSLIM : PROMPTS_NON_MUSLIM;
   return prompts[(day - 1) % prompts.length];

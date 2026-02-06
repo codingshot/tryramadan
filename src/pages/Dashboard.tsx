@@ -12,7 +12,7 @@ import { ArabicHover } from "@/components/ArabicHover";
 import { ProgressRing } from "@/components/ProgressRing";
 import dailyFactsData from "@/data/daily-facts.json";
 import { SunnahFastingBadge } from "@/components/SunnahFastingBadge";
-import { DailyHadith } from "@/components/DailyHadith";
+import { HeroDailySlider } from "@/components/HeroDailySlider";
 import { DailyMissionsCard } from "@/components/DailyMissionsCard";
 import { TodayScheduleTimeline } from "@/components/TodayScheduleTimeline";
 import { LocationDisplay } from "@/components/LocationDisplay";
@@ -64,11 +64,15 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
 import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
 import { Footer } from "@/components/Footer";
 import { PageSEO } from "@/components/PageSEO";
 import { toast } from "sonner";
+import { getPromptForDate } from "@/pages/DashboardJournal";
+import type { JournalEntry } from "@/pages/DashboardJournal";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -88,6 +92,9 @@ const Dashboard = () => {
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [addFoodMeal, setAddFoodMeal] = useState<"suhoor" | "iftar" | null>(null);
   const [addFoodInputs, setAddFoodInputs] = useState({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "" });
+  const [quickJournalOpen, setQuickJournalOpen] = useState(false);
+  const [quickJournalContent, setQuickJournalContent] = useState("");
+  const [quickJournalGratitude, setQuickJournalGratitude] = useState("");
   const [notifSettings] = useNotificationSettings();
   const [prayerPrefs] = usePrayerNotificationPrefs();
   const [locationBannerDismissed, setLocationBannerDismissed] = useState(() =>
@@ -143,7 +150,7 @@ const Dashboard = () => {
   const [foodLogs, setFoodLogs] = useDayFoodLog();
   const [dayNutrition, setDayNutrition] = useDayNutrition();
   const [quickActionOrder] = useDashboardQuickActions();
-  const [journalEntries] = useLocalStorage<{ date: string; prompt?: string; content: string; gratitude?: string }[]>("tryramadan-journal", []);
+  const [journalEntries, setJournalEntries] = useLocalStorage<JournalEntry[]>("tryramadan-journal", []);
   const iftarLabel = useIftarLabel();
   const iftarLabelShort = useIftarLabelShort();
   const suhoorLabelShort = useSuhoorLabelShort();
@@ -1268,6 +1275,92 @@ const Dashboard = () => {
                 </DialogContent>
               </Dialog>
 
+              {/* Quick journal popup: quick entry for today + link to full journal */}
+              <Dialog
+                open={quickJournalOpen}
+                onOpenChange={(open) => {
+                  setQuickJournalOpen(open);
+                  if (!open) {
+                    setQuickJournalContent("");
+                    setQuickJournalGratitude("");
+                  }
+                }}
+              >
+                <DialogContent className="max-w-md">
+                  <DialogTitle>Quick journal</DialogTitle>
+                  <p className="text-xs text-muted-foreground">Save a short reflection for today. You can add more on the full journal page.</p>
+                  <form
+                    className="grid gap-3 pt-2"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const content = quickJournalContent.trim();
+                      if (!content) {
+                        toast.error("Write something before saving. A few words are enough.");
+                        return;
+                      }
+                      const now = new Date().toISOString();
+                      const existing = journalEntries.find((e) => e.date === todayStr);
+                      const newEntry: JournalEntry = {
+                        date: todayStr,
+                        prompt: getPromptForDate(todayStr, preferences.userType),
+                        content,
+                        gratitude: quickJournalGratitude.trim() || undefined,
+                        createdAt: existing?.createdAt ?? now,
+                        updatedAt: now,
+                      };
+                      setJournalEntries((prev) => {
+                        const rest = prev.filter((e) => e.date !== todayStr);
+                        return [...rest, newEntry].sort((a, b) => b.date.localeCompare(a.date));
+                      });
+                      toast.success("Entry saved");
+                      setQuickJournalOpen(false);
+                      setQuickJournalContent("");
+                      setQuickJournalGratitude("");
+                    }}
+                  >
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="quick-journal-content">Today&apos;s reflection</Label>
+                      <Textarea
+                        id="quick-journal-content"
+                        placeholder="How did today go? What are you grateful for?"
+                        value={quickJournalContent}
+                        onChange={(e) => setQuickJournalContent(e.target.value)}
+                        rows={3}
+                        className="resize-y min-h-[80px]"
+                      />
+                    </div>
+                    <div className="grid gap-1.5">
+                      <Label htmlFor="quick-journal-gratitude" className="text-muted-foreground font-normal text-xs">Gratitude (optional)</Label>
+                      <Input
+                        id="quick-journal-gratitude"
+                        placeholder="One thing you're grateful for"
+                        value={quickJournalGratitude}
+                        onChange={(e) => setQuickJournalGratitude(e.target.value)}
+                      />
+                    </div>
+                    <div className="flex gap-2 justify-end pt-1">
+                      <Button type="submit" size="sm">
+                        Save entry
+                      </Button>
+                    </div>
+                  </form>
+                  <div className="border-t border-border pt-3 mt-1">
+                    <Link
+                      to="/dashboard/journal"
+                      className="text-sm text-secondary hover:underline font-medium flex items-center gap-1.5 w-fit"
+                      onClick={() => {
+                        setQuickJournalOpen(false);
+                        setQuickJournalContent("");
+                        setQuickJournalGratitude("");
+                      }}
+                    >
+                      <BookOpen className="w-4 h-4" />
+                      Go to journal page
+                    </Link>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
               {/* Total calories from food items; optional override; show vs recommended when gender/weight set */}
               <div className="mb-4">
                 <div className="p-3 rounded-xl bg-muted/30 border border-border flex flex-wrap items-baseline gap-2">
@@ -1305,7 +1398,24 @@ const Dashboard = () => {
 
               {/* Journal for day */}
               <div className="mb-4">
-                <span className="text-xs font-medium text-muted-foreground block mb-1">Journal</span>
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <span className="text-xs font-medium text-muted-foreground">Journal</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => {
+                      const todayEntry = journalEntries.find((e) => e.date === todayStr);
+                      setQuickJournalContent(todayEntry?.content ?? "");
+                      setQuickJournalGratitude(todayEntry?.gratitude ?? "");
+                      setQuickJournalOpen(true);
+                    }}
+                  >
+                    <PenLine className="w-3.5 h-3.5 mr-1.5" />
+                    Quick entry
+                  </Button>
+                </div>
                 {selectedDayJournal ? (
                   <Link
                     to="/dashboard/journal"
@@ -1656,14 +1766,15 @@ const Dashboard = () => {
             </motion.div>
           )}
           
-          {/* Daily Hadith */}
+          {/* Daily Hadith & Quran slider (dark wrapper for contrast) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="mb-8"
+            className="mb-8 rounded-2xl bg-primary/95 text-primary-foreground p-4"
+            aria-label="Daily Hadith and Quran verse"
           >
-            <DailyHadith />
+            <HeroDailySlider />
           </motion.div>
           
           {/* Fasting History/Calendar Preview */}
@@ -1703,14 +1814,14 @@ const Dashboard = () => {
                         className={`flex-1 min-w-0 p-2 rounded-xl text-center transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                           isSelected ? 'ring-2 ring-secondary bg-secondary/20' : ''
                         } ${isToday && !isSelected ? 'ring-2 ring-secondary/60' : ''} ${
-                          !isSelected && !isToday ? (isComplete ? 'bg-secondary/20' : 'bg-muted/50') : ''
-                        } ${isSelected ? 'bg-secondary/20' : ''}`}
+                          !isSelected ? (isComplete ? 'bg-emerald-500/20 dark:bg-emerald-400/20' : 'bg-muted/50') : ''
+                        }`}
                         aria-label={`${dayName} ${date.getDate()} — ${isComplete ? 'Fast completed' : 'View day'}`}
                         aria-pressed={isSelected}
                       >
                         <span className="text-xs text-muted-foreground block">{dayName}</span>
                         <span className="text-sm font-bold block">{date.getDate()}</span>
-                        {isComplete && <Check className="w-3 h-3 text-secondary mx-auto mt-1" />}
+                        {isComplete && <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400 mx-auto mt-1" />}
                       </button>
                     </TooltipTrigger>
                     <TooltipContent>
