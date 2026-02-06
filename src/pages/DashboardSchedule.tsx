@@ -881,8 +881,8 @@ const DashboardSchedule = () => {
       />
       <Navbar />
 
-      <main id="main-content" className="main-content">
-        <div className="container mx-auto px-4 max-w-4xl min-w-0">
+      <main id="main-content" className="main-content" aria-label="Fasting schedule">
+        <div className="container mx-auto px-4 max-w-4xl min-w-0 min-h-[50vh]">
           <Link
             to="/dashboard"
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
@@ -891,7 +891,7 @@ const DashboardSchedule = () => {
             Back to Dashboard
           </Link>
 
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6" role="region" aria-label="Schedule intro">
             <h1 className="text-2xl md:text-3xl font-display font-bold">
               Fasting Schedule
             </h1>

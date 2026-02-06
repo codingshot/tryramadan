@@ -49,9 +49,10 @@ export const Navbar = () => {
 
   const navLinks = [
     { name: "Programs", nameAr: "البرامج", to: "/programs" },
-    { name: "Health", nameAr: "الصحة", to: "/health" },
+    { name: "Track meals", nameAr: "تتبع الوجبات", to: "/dashboard/meals" },
     { name: "Recipes", nameAr: "وصفات", to: "/recipes" },
     { name: "Culture", nameAr: "الثقافة", to: "/culture" },
+    { name: "Journal", nameAr: "يوميات", to: "/dashboard/journal" },
   ];
 
   const scrollToTop = () => {

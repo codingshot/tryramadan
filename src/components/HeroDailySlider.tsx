@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, Quote, BookOpen } from "lucide-react";
 import hadiths from "@/data/hadiths.json";
 import dailyQuran from "@/data/daily-quran-verses.json";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { HadithSunnahLink } from "@/components/HadithSunnahLink";
 import { EXTERNAL_LINKS } from "@/lib/config";
 
@@ -44,13 +44,32 @@ export const HeroDailySlider = () => {
   });
 
   const isToday = dayOffset === 0;
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const el = sectionRef.current;
+      if (!el || !el.contains(document.activeElement)) return;
+      if (e.key === "ArrowLeft") {
+        setMode("hadith");
+        e.preventDefault();
+      } else if (e.key === "ArrowRight") {
+        setMode("quran");
+        e.preventDefault();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <motion.div
+      ref={sectionRef}
+      tabIndex={-1}
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.35 }}
-      className="w-full max-w-2xl mx-auto rounded-2xl bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 overflow-hidden"
+      className="w-full max-w-2xl mx-auto rounded-2xl bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
     >
       {/* Toggle: Daily Hadith | Daily Quran */}
       <div className="flex border-b border-primary-foreground/20">
