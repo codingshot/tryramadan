@@ -34,6 +34,13 @@ describe("Meal logger", () => {
     expect(screen.getByRole("button", { name: /iftar/i })).toBeInTheDocument();
   });
 
+  it("reads meal=iftar from URL and shows Iftar tab as active", () => {
+    renderMeals(["/dashboard/meals?meal=iftar"]);
+    const iftarBtn = screen.getByRole("button", { name: /iftar/i });
+    expect(iftarBtn).toBeInTheDocument();
+    expect(iftarBtn).toHaveClass("border-secondary");
+  });
+
   it("adding a recipe to today persists to meal plan or food log", () => {
     renderMeals();
     const addButtons = screen.getAllByRole("button", { name: /add to today|log|add to food log/i });

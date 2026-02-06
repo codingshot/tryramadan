@@ -6,7 +6,7 @@ import { HeroSection } from "@/components/HeroSection";
 import { FeaturesSection } from "@/components/FeaturesSection";
 import { CulturalCarousel } from "@/components/CulturalCarousel";
 import { HealthBenefits } from "@/components/HealthBenefits";
-import { DailyHadith } from "@/components/DailyHadith";
+import { HeroDailySlider } from "@/components/HeroDailySlider";
 import { FastingRulesSection } from "@/components/FastingRulesSection";
 import { RecipeSection } from "@/components/RecipeSection";
 import { ProgressTracker } from "@/components/ProgressTracker";
@@ -152,8 +152,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Daily Hadith */}
-      <section className="py-16">
+      {/* Daily Hadith & Quran — above Fasting Rules (dark wrapper so slider text stays readable) */}
+      <section className="py-16 bg-primary/95 text-primary-foreground" aria-label="Daily Hadith and Quran verse">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -161,7 +161,7 @@ const Index = () => {
             viewport={{ once: true }}
             className="max-w-3xl mx-auto"
           >
-            <DailyHadith />
+            <HeroDailySlider />
           </motion.div>
         </div>
       </section>

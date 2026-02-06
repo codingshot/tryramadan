@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 import { FastingTimer } from "./FastingTimer";
-import { HeroDailySlider } from "./HeroDailySlider";
 import logo from "@/assets/logo.png";
 import { useUserPreferences } from "@/hooks/useLocalStorage";
 import { useAutoLocation } from "@/hooks/useLocation";
@@ -142,11 +141,6 @@ export const HeroSection = () => {
                 Both paths set your location for accurate times.
               </p>
             )}
-
-            {/* Daily Hadith / Daily Quran slider with date and prev/next */}
-            <div className="mb-8">
-              <HeroDailySlider />
-            </div>
 
             {/* Timer preview — min-height reserves space to avoid CLS while timer loads */}
             <motion.div
