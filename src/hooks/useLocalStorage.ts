@@ -8,7 +8,10 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T 
   const [storedValue, setStoredValue] = React.useState<T>(() => {
     try {
       const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
+      if (!item) return initialValue;
+      const parsed = JSON.parse(item);
+      if (parsed === null || parsed === undefined) return initialValue;
+      return parsed as T;
     } catch (error) {
       console.error(`Error reading localStorage key "${key}":`, error);
       return initialValue;
@@ -822,7 +825,9 @@ const DEFAULT_CALENDAR_INCLUDE_TYPES: CalendarIncludeTypes = {
 };
 
 export function useCalendarIncludeTypes() {
-  return useLocalStorage<CalendarIncludeTypes>('tryramadan-calendar-include-types', DEFAULT_CALENDAR_INCLUDE_TYPES);
+  const [value, setValue] = useLocalStorage<CalendarIncludeTypes>('tryramadan-calendar-include-types', DEFAULT_CALENDAR_INCLUDE_TYPES);
+  const safe = React.useMemo(() => (value && typeof value === 'object' && !Array.isArray(value) ? { ...DEFAULT_CALENDAR_INCLUDE_TYPES, ...value } : DEFAULT_CALENDAR_INCLUDE_TYPES), [value]);
+  return [safe, setValue] as const;
 }
 
 /** Default duration in minutes per event type (for sync-to-calendar). */
@@ -842,7 +847,9 @@ const DEFAULT_PRAYER_DURATIONS: DefaultPrayerDurations = {
 };
 
 export function useDefaultPrayerDurations() {
-  return useLocalStorage<DefaultPrayerDurations>('tryramadan-default-prayer-durations', DEFAULT_PRAYER_DURATIONS);
+  const [value, setValue] = useLocalStorage<DefaultPrayerDurations>('tryramadan-default-prayer-durations', DEFAULT_PRAYER_DURATIONS);
+  const safe = React.useMemo(() => (value && typeof value === 'object' && !Array.isArray(value) ? { ...DEFAULT_PRAYER_DURATIONS, ...value } : DEFAULT_PRAYER_DURATIONS), [value]);
+  return [safe, setValue] as const;
 }
 
 export function getDefaultDurationForType(type: CalendarEventType, durations: DefaultPrayerDurations): number {

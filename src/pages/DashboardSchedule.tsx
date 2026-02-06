@@ -220,6 +220,32 @@ const DashboardSchedule = () => {
   const lng = locationCoords?.lng ?? null;
   const { prayerTimesMap: ramadanPrayerTimesMap, loading: ramadanPrayersLoading, refetch: refetchRamadanPrayers } = useRamadanPrayerTimes(lat, lng);
 
+  /** Effective prayer times for every Ramadan day (for table and sync). Uses startStr/endStr; ensures every day has times (fallback to previous day if API missing). */
+  const effectiveRamadanTimesMap = useMemo(() => {
+    const map: Record<string, import("@/hooks/usePrayerTimes").PrayerTimes> = {};
+    const startStr = ramadanRange.startStr ?? toLocalDateString(ramadanRange.start);
+    const endStr = ramadanRange.endStr ?? toLocalDateString(ramadanRange.end);
+    const [sy, sm, sd] = startStr.split("-").map(Number);
+    const [ey, em, ed] = endStr.split("-").map(Number);
+    let d = new Date(sy, sm - 1, sd);
+    const end = new Date(ey, em - 1, ed);
+    let lastEffective: import("@/hooks/usePrayerTimes").PrayerTimes | null = null;
+    while (d.getTime() <= end.getTime()) {
+      const dateStr = toLocalDateString(d);
+      const api = ramadanPrayerTimesMap[dateStr];
+      let effective = getEffectivePrayerTimes(api ?? null, prayerTimeOverrides[dateStr]);
+      if (!effective && lastEffective) {
+        effective = { ...lastEffective, date: dateStr };
+      }
+      if (effective) {
+        map[dateStr] = effective;
+        lastEffective = effective;
+      }
+      d.setDate(d.getDate() + 1);
+    }
+    return map;
+  }, [ramadanRange.startStr, ramadanRange.endStr, ramadanRange.start, ramadanRange.end, ramadanPrayerTimesMap, prayerTimeOverrides]);
+
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const todayStrForInit = toLocalDateString(new Date());
@@ -293,6 +319,11 @@ const DashboardSchedule = () => {
   const { prayerTimes: tomorrowPrayerTimes } = usePrayerTimesForDate(lat, lng, tomorrowStr);
   const imsakTomorrow = tomorrowPrayerTimes?.imsak ?? todayPrayerTimes?.imsak;
   const { prayerTimes: selectedDayPrayerTimes } = usePrayerTimesForDate(lat, lng, selectedDate);
+  /** Effective prayer times for selected day (API + overrides). */
+  const effectiveSelectedDayPrayerTimes = useMemo(
+    () => getEffectivePrayerTimes(selectedDayPrayerTimes ?? null, selectedDate ? prayerTimeOverrides[selectedDate] : undefined),
+    [selectedDayPrayerTimes, selectedDate, prayerTimeOverrides]
+  );
   /** Today's prayer times with overrides applied (for countdown and fasting status). */
   const effectiveTodayPrayerTimes = useMemo(
     () => getEffectivePrayerTimes(todayPrayerTimes ?? null, todayStr ? prayerTimeOverrides[todayStr] : undefined),
@@ -758,32 +789,6 @@ const DashboardSchedule = () => {
     });
   };
 
-  /** Effective prayer times for every Ramadan day (for table and sync). Uses startStr/endStr; ensures every day has times (fallback to previous day if API missing). */
-  const effectiveRamadanTimesMap = useMemo(() => {
-    const map: Record<string, import("@/hooks/usePrayerTimes").PrayerTimes> = {};
-    const startStr = ramadanRange.startStr ?? toLocalDateString(ramadanRange.start);
-    const endStr = ramadanRange.endStr ?? toLocalDateString(ramadanRange.end);
-    const [sy, sm, sd] = startStr.split("-").map(Number);
-    const [ey, em, ed] = endStr.split("-").map(Number);
-    let d = new Date(sy, sm - 1, sd);
-    const end = new Date(ey, em - 1, ed);
-    let lastEffective: import("@/hooks/usePrayerTimes").PrayerTimes | null = null;
-    while (d.getTime() <= end.getTime()) {
-      const dateStr = toLocalDateString(d);
-      const api = ramadanPrayerTimesMap[dateStr];
-      let effective = getEffectivePrayerTimes(api ?? null, prayerTimeOverrides[dateStr]);
-      if (!effective && lastEffective) {
-        effective = { ...lastEffective, date: dateStr };
-      }
-      if (effective) {
-        map[dateStr] = effective;
-        lastEffective = effective;
-      }
-      d.setDate(d.getDate() + 1);
-    }
-    return map;
-  }, [ramadanRange.startStr, ramadanRange.endStr, ramadanRange.start, ramadanRange.end, ramadanPrayerTimesMap, prayerTimeOverrides]);
-
   /** Sync Ramadan: add only selected types (eat times + prayers) as calendar events for each day. Skips days that already have that event type. */
   const syncRamadanToCalendar = useCallback(async () => {
     if (!lat || !lng) return;
@@ -837,12 +842,6 @@ const DashboardSchedule = () => {
   }, [lat, lng, effectiveRamadanTimesMap, defaultDurations, calendarIncludeTypes, iftarLabel, iftarLabelShort, setCalendarEvents]);
 
   const selectedDayCalendarEvents = selectedDate ? (calendarEvents[selectedDate] ?? []) : [];
-
-  /** Effective prayer times for selected day (API + overrides). */
-  const effectiveSelectedDayPrayerTimes = useMemo(
-    () => getEffectivePrayerTimes(selectedDayPrayerTimes ?? null, selectedDate ? prayerTimeOverrides[selectedDate] : undefined),
-    [selectedDayPrayerTimes, selectedDate, prayerTimeOverrides]
-  );
 
   const setOverrideForDate = useCallback((dateStr: string, field: "imsak" | "maghrib" | "fajr" | "dhuhr" | "asr" | "isha", value: string) => {
     setPrayerTimeOverrides((prev) => ({

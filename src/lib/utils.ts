@@ -54,5 +54,12 @@ export function secondsUntilTimeInTimezone(nowSecondsSinceMidnight: number, time
 
 /** Today's date as YYYY-MM-DD in the given IANA timezone. Use when "today" should follow location, not system clock. */
 export function getTodayStringInTimezone(timeZone: string): string {
-  return new Date().toLocaleDateString("en-CA", { timeZone });
+  if (!timeZone || typeof timeZone !== "string" || !timeZone.trim()) {
+    return toLocalDateString(new Date());
+  }
+  try {
+    return new Date().toLocaleDateString("en-CA", { timeZone });
+  } catch {
+    return toLocalDateString(new Date());
+  }
 }
