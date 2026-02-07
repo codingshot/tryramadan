@@ -21,7 +21,7 @@ interface BreakFastReasonDialogProps {
   /** Optional title override */
   title?: string;
   /** When non-Muslim, show tooltip on Travel reason (COPY-AUDIT) */
-  userType?: "muslim" | "non-muslim";
+  userType?: "muslim" | "non-muslim" | "new" | null;
   /** When true, show reminder that it's not fasting period and they're logging a break during the fasting window */
   notInFastingPeriod?: boolean;
 }

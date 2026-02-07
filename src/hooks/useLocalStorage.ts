@@ -706,33 +706,33 @@ export function useTodayData() {
   };
 
   const setIntention = React.useCallback((intention: string) => {
-    setStore((prev) => ({ ...prev, [today]: { ...(prev[today] || {}), intention } }));
+    setStore((prev) => {
+      const existing = prev[today] || { intention: "", hydrationGlasses: 0, hydrationEntries: [], energyEntries: [] };
+      return { ...prev, [today]: { ...existing, intention } };
+    });
   }, [today, setStore]);
 
   const setHydrationGlasses = React.useCallback((glasses: number) => {
-    setStore((prev) => ({ ...prev, [today]: { ...(prev[today] || {}), hydrationGlasses: Math.max(0, glasses) } }));
+    setStore((prev) => {
+      const existing = prev[today] || { intention: "", hydrationGlasses: 0, hydrationEntries: [], energyEntries: [] };
+      return { ...prev, [today]: { ...existing, hydrationGlasses: Math.max(0, glasses) } };
+    });
   }, [today, setStore]);
 
   const addHydrationEntry = React.useCallback((amountMl: number) => {
     const entry: HydrationEntry = { time: new Date().toISOString(), amountMl };
-    setStore((prev) => ({
-      ...prev,
-      [today]: {
-        ...(prev[today] || {}),
-        hydrationEntries: [...(prev[today]?.hydrationEntries || []), entry],
-      },
-    }));
+    setStore((prev) => {
+      const existing = prev[today] || { intention: "", hydrationGlasses: 0, hydrationEntries: [], energyEntries: [] };
+      return { ...prev, [today]: { ...existing, hydrationEntries: [...(existing.hydrationEntries || []), entry] } };
+    });
   }, [today, setStore]);
 
   const addEnergyEntry = React.useCallback((level: 1 | 2 | 3 | 4 | 5) => {
     const entry: EnergyEntry = { time: new Date().toISOString(), level };
-    setStore((prev) => ({
-      ...prev,
-      [today]: {
-        ...(prev[today] || {}),
-        energyEntries: [...(prev[today]?.energyEntries || []), entry],
-      },
-    }));
+    setStore((prev) => {
+      const existing = prev[today] || { intention: "", hydrationGlasses: 0, hydrationEntries: [], energyEntries: [] };
+      return { ...prev, [today]: { ...existing, energyEntries: [...(existing.energyEntries || []), entry] } };
+    });
   }, [today, setStore]);
 
   const hydrationEntries = todayData.hydrationEntries || [];
@@ -985,7 +985,7 @@ export const DASHBOARD_QUICK_ACTIONS: { id: DashboardQuickActionId; label: strin
   { id: 'achievements', label: 'Achievements', path: '/dashboard/achievements' },
 ];
 
-const defaultQuickActionOrder: string[] = [...DASHBOARD_QUICK_ACTION_IDS];
+const defaultQuickActionOrder: DashboardQuickActionId[] = [...DASHBOARD_QUICK_ACTION_IDS];
 
 const QUICK_ACTIONS_KEY = 'tryramadan-dashboard-quick-actions';
 
@@ -1029,10 +1029,10 @@ export function getQuickActionOrderFromPriorities(prefs: Pick<UserPreferences, '
   return priority;
 }
 
-export function useDashboardQuickActions() {
-  const [order, setOrder] = useLocalStorage<string[]>(QUICK_ACTIONS_KEY, defaultQuickActionOrder);
-  const seen = new Set<string>();
-  const validOrder = order.filter((id) => {
+export function useDashboardQuickActions(): readonly [DashboardQuickActionId[], (order: DashboardQuickActionId[]) => void] {
+  const [order, setOrder] = useLocalStorage<DashboardQuickActionId[]>(QUICK_ACTIONS_KEY, defaultQuickActionOrder);
+  const seen = new Set<DashboardQuickActionId>();
+  const validOrder = order.filter((id): id is DashboardQuickActionId => {
     if (!DASHBOARD_QUICK_ACTION_IDS.includes(id as DashboardQuickActionId)) return false;
     if (seen.has(id)) return false;
     seen.add(id);

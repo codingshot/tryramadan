@@ -42,7 +42,7 @@ function timeToMinutes(timeStr: string): number {
  * and today's prayer times (imsak = suhoor end, maghrib = iftar). Fires browser notifications
  * and marks them sent per day so we don't double-fire.
  */
-export function ReminderScheduler() {
+export function ReminderScheduler(): null {
   const [preferences] = useUserPreferences();
   const [notifSettings] = useNotificationSettings();
   const displayTimezone = useDisplayTimezone();

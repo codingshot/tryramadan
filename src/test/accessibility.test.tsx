@@ -19,7 +19,7 @@ describe("Accessibility (axe-core)", () => {
       </TooltipProvider>
     );
     const results = await axe(container);
-    expect(results).toHaveNoViolations();
+    expect((results as { violations: unknown[] }).violations).toHaveLength(0);
   });
 
   it("OnboardingWelcome has no axe violations", async () => {
@@ -31,7 +31,7 @@ describe("Accessibility (axe-core)", () => {
       </TooltipProvider>
     );
     const results = await axe(container);
-    expect(results).toHaveNoViolations();
+    expect((results as { violations: unknown[] }).violations).toHaveLength(0);
   });
 
   it("StatsShareCard has no axe violations", async () => {
@@ -54,7 +54,7 @@ describe("Accessibility (axe-core)", () => {
       </TooltipProvider>
     );
     const results = await axe(container);
-    expect(results).toHaveNoViolations();
+    expect((results as { violations: unknown[] }).violations).toHaveLength(0);
   });
 
   it("ArabicHover and ArabicTerm have no axe violations", async () => {
@@ -67,7 +67,7 @@ describe("Accessibility (axe-core)", () => {
       </TooltipProvider>
     );
     const results = await axe(container);
-    expect(results).toHaveNoViolations();
+    expect((results as { violations: unknown[] }).violations).toHaveLength(0);
   });
 });
 

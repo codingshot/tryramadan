@@ -35,7 +35,7 @@ export function QuranLink({ chapterNumber, children, className = "" }: QuranLink
           setHoverContent("Read this surah on Quran.com");
         }
       } else {
-        const res = await fetch(`${QURAN_API}/chapters`);
+        const res = await fetch(`${API_CONFIG.quranApi}/chapters`);
         const data = await res.json();
         const chapters = data?.chapters ?? [];
         const count = chapters.length;

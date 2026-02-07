@@ -202,9 +202,9 @@ describe("daily goals and calorie helpers (persisted via useDailyGoals)", () => 
   });
 
   it("getRecommendedCaloriesFromPreferences uses prefs", () => {
-    const prefs = { sexForCalories: "male" as const, bodyWeightKg: null };
+    const prefs: { sexForCalories: "male" | "female" | null; bodyWeightKg: number | null } = { sexForCalories: "male" as const, bodyWeightKg: null };
     expect(getRecommendedCaloriesFromPreferences(prefs)).toBe(2200);
-    const prefs2 = { sexForCalories: "female" as const, bodyWeightKg: 60 };
+    const prefs2: { sexForCalories: "male" | "female" | null; bodyWeightKg: number | null } = { sexForCalories: "female" as const, bodyWeightKg: 60 };
     expect(getRecommendedCaloriesFromPreferences(prefs2)).toBe(60 * 26);
   });
 

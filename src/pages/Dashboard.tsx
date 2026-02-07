@@ -75,7 +75,7 @@ import { PageSEO } from "@/components/PageSEO";
 import { toast } from "sonner";
 import { getPromptForDate } from "@/pages/DashboardJournal";
 import type { JournalEntry } from "@/pages/DashboardJournal";
-import { getRecipes, getRecipe, parseNutrient, getAllCountries } from "@/lib/cultureRecipes";
+import { getRecipes, getRecipe, parseNutrient, getAllCountries, type MealType, type Recipe } from "@/lib/cultureRecipes";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -309,10 +309,10 @@ const Dashboard = () => {
 
   const allRecipesForAddFood = useMemo(() => getRecipes(), []);
   const allCulturalFoods = useMemo(() => [...new Set(getAllCountries().flatMap((c) => c.foods ?? []))].filter(Boolean), []);
-  const addFoodSuggestions = useMemo(() => {
-    if (!addFoodMeal) return [];
+  const addFoodSuggestions = useMemo((): { recipes: { mealType: MealType; recipe: Recipe; }[]; foods: string[]; } => {
+    if (!addFoodMeal) return { recipes: [], foods: [] };
     const q = addFoodInputs.name.trim().toLowerCase();
-    if (!q || q.length < 1) return [];
+    if (!q || q.length < 1) return { recipes: [], foods: [] };
     const recipes = allRecipesForAddFood
       .filter((r) => r.mealType === addFoodMeal && r.recipe.name.toLowerCase().includes(q))
       .slice(0, 6);
@@ -709,7 +709,7 @@ const Dashboard = () => {
                         {isFasting ? GENERAL_TOOLTIPS.fastingPeriod.title : "Not fasting"}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {isFasting ? GENERAL_TOOLTIPS.fastingPeriod.body : preferences.userType === "non-muslim"
+                        {isFasting ? GENERAL_TOOLTIPS.fastingPeriod.body : preferences.userType === "new"
                                 ? `You're in the eating window—between sunset (Maghrib) and the next dawn (Fajr). You can eat and drink. The timer shows time until suhoor end (suhoor = last meal before dawn; after that, fasting starts).`
                                 : `You're in the eating window—between sunset (Maghrib) and the next dawn (Fajr). You can eat and drink. The timer below shows time until ${suhoorLabelShort} end (cut-off).`}
                       </p>
@@ -805,7 +805,7 @@ const Dashboard = () => {
                       </div>
                     </TooltipTrigger>
                     <TooltipContent className="max-w-xs p-3">
-                      {preferences.userType === "non-muslim" ? (
+                      {preferences.userType === "new" ? (
                         <>
                           <p className="text-sm text-foreground">Suhoor = last meal before dawn (after this time, fasting starts).</p>
                           <p className="text-xs text-muted-foreground mt-1">This is Fajr (dawn) prayer time—the cutoff for eating and drinking.</p>
@@ -853,7 +853,7 @@ const Dashboard = () => {
                         <TooltipContent side="bottom" className="max-w-xs p-3">
                           <p className="font-semibold text-sm">I&apos;m fasting (after {suhoorLabelShort})</p>
                           <p className="text-xs text-muted-foreground mt-1">
-                            {preferences.userType === "non-muslim"
+                            {preferences.userType === "new"
                               ? "Tap after your pre-dawn meal (suhoor) when the fast has started."
                               : "Tap when you've finished your pre-dawn meal and started your fast."}
                           </p>

@@ -27,7 +27,7 @@ export interface PageSEOProps {
  */
 const DEFAULT_OG_IMAGE_ALT = "TryRamadan.app — Fast like a Muslim for the holy month of Ramadan. Prayer times, suhoor & iftar, cultural education.";
 
-export function PageSEO({ title, description, path = "", image, imageAlt = DEFAULT_OG_IMAGE_ALT, type = "website", robots }: PageSEOProps) {
+export function PageSEO({ title, description, path = "", image, imageAlt = DEFAULT_OG_IMAGE_ALT, type = "website", robots }: PageSEOProps): null {
   const url = path ? `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}` : SITE_URL;
   const imageUrl = image ? (image.startsWith("http") ? image : `${SITE_URL}${image}`) : `${SITE_URL}/og-image.jpg`;
   const metaDescription =

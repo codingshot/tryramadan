@@ -53,7 +53,7 @@ export function reportWebVitals(onReport?: ReportCallback) {
       rating: getRating(name, value),
       delta: value,
       id: `v1-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-      navigationType: window.performance.getEntriesByType?.('navigation')[0]?.type,
+      navigationType: (window.performance.getEntriesByType?.('navigation')[0] as PerformanceNavigationTiming | undefined)?.type,
     };
     onReport?.(payload);
     reportToAnalytics(payload);

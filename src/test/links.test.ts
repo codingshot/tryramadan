@@ -81,7 +81,7 @@ describe("Broken links check", () => {
       "/dashboard/prayers",
       "/dashboard/learn",
     ];
-    const routeSet = new Set(ROUTES);
+    const routeSet = new Set([...ROUTES] as string[]);
     for (const path of required) {
       expect(routeSet.has(path), `Missing route: ${path}`).toBe(true);
     }

@@ -776,7 +776,7 @@ const DashboardSchedule = () => {
     const pt = effectiveSelectedDayPrayerTimes ?? selectedDayPrayerTimes;
     let time = "06:00";
     if (pt && template.timeKey in pt) {
-      time = (pt as Record<string, string>)[template.timeKey] ?? time;
+      time = (pt as unknown as Record<string, string>)[template.timeKey] ?? time;
       if (template.type === "taraweeh" && pt.isha) {
         const [h, m] = pt.isha.split(":").map(Number);
         const th = h + 1;
@@ -828,7 +828,7 @@ const DashboardSchedule = () => {
         const existingTypes = new Set(dayEvents.map((e) => e.type));
         typesToSync.forEach(({ type, title, timeKey, durationKey }) => {
           if (existingTypes.has(type)) return;
-          const time = (pt as Record<string, string>)[timeKey] ?? "06:00";
+          const time = (pt as unknown as Record<string, string>)[timeKey] ?? "06:00";
           const duration = getDefaultDurationForType(durationKey, defaultDurations);
           const entry: CalendarEvent = {
             id: eventId(),

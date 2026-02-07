@@ -362,7 +362,7 @@ const DashboardToday = () => {
                   </div>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="max-w-xs p-3">
-                  {preferences.userType === "non-muslim" ? (
+                  {preferences.userType === "new" ? (
                     <>
                       <p className="font-semibold text-sm">Until suhoor end</p>
                       <p className="text-xs text-muted-foreground mt-1">Suhoor = last meal before dawn (after this time, fasting starts). This is Fajr (dawn)—the cutoff for eating and drinking.</p>
