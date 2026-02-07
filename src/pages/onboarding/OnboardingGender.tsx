@@ -32,7 +32,7 @@ export default function OnboardingGender() {
         }}
         className="flex flex-col min-h-0 flex-1"
       >
-        <div className="flex-1 min-h-0 overflow-y-auto">
+        <div className="flex-1 min-h-0 overflow-y-auto pb-24 sm:pb-0">
           <Link
             to="/onboarding/health"
             className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground mb-6"
@@ -68,13 +68,15 @@ export default function OnboardingGender() {
           </div>
         </div>
 
-        <div className="sticky bottom-0 left-0 right-0 z-10 bg-background border-t border-border pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] -mx-4 px-4 mt-4 sm:static sm:border-0 sm:pt-0 sm:pb-0 sm:mx-0 sm:px-0 sm:mt-0">
-          <button
-            type="submit"
-            className="w-full min-h-[44px] py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2 cursor-pointer"
-          >
-            Continue <ArrowRight className="w-5 h-5" />
-          </button>
+        <div className="fixed bottom-0 left-0 right-0 z-20 bg-background border-t border-border pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] px-4 sm:static sm:border-0 sm:pt-4 sm:pb-0 sm:px-0 sm:z-0">
+          <div className="max-w-lg mx-auto">
+            <button
+              type="submit"
+              className="w-full min-h-[44px] py-3 px-6 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 flex items-center justify-center gap-2 cursor-pointer"
+            >
+              Continue <ArrowRight className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </form>
     </motion.div>
