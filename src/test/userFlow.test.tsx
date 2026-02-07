@@ -52,9 +52,10 @@ describe("User flow checks", () => {
   it("home page shows Go to dashboard and links to dashboard when onboarding complete", () => {
     localStorage.setItem("tryramadan-preferences", JSON.stringify({ onboardingComplete: true }));
     renderAt("/", <Index />);
-    const dashboardLink = screen.queryByRole("link", { name: /go to dashboard/i });
-    expect(dashboardLink).toBeInTheDocument();
-    expect(dashboardLink).toHaveAttribute("href", "/dashboard");
+    // Use getAllByRole to handle multiple "Go to dashboard" links (nav, hero, dark mode button)
+    const dashboardLinks = screen.getAllByRole("link", { name: /go to dashboard/i });
+    expect(dashboardLinks.length).toBeGreaterThan(0);
+    expect(dashboardLinks.some((el) => el.getAttribute("href") === "/dashboard")).toBe(true);
   });
 
   it("terms page has back to home and links to privacy and legal", () => {
