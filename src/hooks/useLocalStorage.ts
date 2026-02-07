@@ -1273,6 +1273,50 @@ export function getJournalStreak(entries: { date: string }[]): number {
   return count;
 }
 
+/** Prayer tracker: date -> { Fajr: true, Dhuhr: true, ... }. Stored in tryramadan-prayer-tracker. */
+export const PRAYER_TRACKER_KEY = 'tryramadan-prayer-tracker';
+const PRAYER_NAMES = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as const;
+
+function getDayPrayers(tracker: Record<string, Record<string, boolean>>, dateStr: string): Record<string, boolean> {
+  const day = tracker[dateStr];
+  return day && typeof day === "object" && !Array.isArray(day) ? day : {};
+}
+
+/** Check if all 5 daily prayers were completed for a date. */
+export function didCompleteAllPrayers(tracker: Record<string, Record<string, boolean>>, dateStr: string): boolean {
+  const day = getDayPrayers(tracker, dateStr);
+  return PRAYER_NAMES.every((name) => !!day[name]);
+}
+
+/** Count completed prayers for a date (0-5). */
+export function getPrayerCountForDate(tracker: Record<string, Record<string, boolean>>, dateStr: string): number {
+  const day = getDayPrayers(tracker, dateStr);
+  return PRAYER_NAMES.filter((name) => !!day[name]).length;
+}
+
+/** Consecutive days ending today where all 5 prayers were completed. todayOverride for display timezone. */
+export function getPrayerStreak(tracker: Record<string, Record<string, boolean>>, todayOverride?: string): number {
+  const today = todayOverride ?? toLocalDateString(new Date());
+  let count = 0;
+  const d = new Date(today + 'T12:00:00');
+  while (true) {
+    const dayStr = toLocalDateString(d);
+    if (didCompleteAllPrayers(tracker, dayStr)) {
+      count++;
+      d.setDate(d.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  return count;
+}
+
+/** Total prayer count across all dates (sum of completed prayers per day). */
+export function getTotalPrayerCount(tracker: Record<string, Record<string, boolean>>): number {
+  if (!tracker || typeof tracker !== "object" || Array.isArray(tracker)) return 0;
+  return Object.keys(tracker).reduce((sum, dateStr) => sum + getPrayerCountForDate(tracker, dateStr), 0);
+}
+
 /** Consecutive days ending today with both suhoor and iftar logged (meal plan or food log). For mindful-eating achievement. */
 export function getMindfulEatingStreak(
   foodLog: Record<string, DayFoodLog>,

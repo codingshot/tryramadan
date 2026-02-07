@@ -3,17 +3,18 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { 
   ArrowLeft, TrendingUp, Flame, Calendar, Trophy, 
-  BookOpen, ChevronRight, Download, FileText, Utensils
+  BookOpen, ChevronRight, Download, FileText, Utensils, Landmark
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { useFastingProgress, getTodayFastingLog, getBrokenReasonLabel, isFastingToday, useLocalStorage, calculateStreak, getLongestStreak, getJournalStreak, getMindfulEatingStreak, useDayMealPlans, useDayFoodLog, useUserPreferences, useDisplayTimezone } from "@/hooks/useLocalStorage";
+import { useFastingProgress, getTodayFastingLog, getBrokenReasonLabel, isFastingToday, useLocalStorage, calculateStreak, getLongestStreak, getJournalStreak, getMindfulEatingStreak, getPrayerStreak, getTotalPrayerCount, useDayMealPlans, useDayFoodLog, useUserPreferences, useDisplayTimezone } from "@/hooks/useLocalStorage";
 import { useRamadanRange } from "@/hooks/useRamadanRange";
 import { getTodayStringInTimezone, toLocalDateString } from "@/lib/utils";
 import type { EnergyEntry } from "@/hooks/useLocalStorage";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { PageSEO } from "@/components/PageSEO";
+import { StatsShareCard } from "@/components/StatsShareCard";
 
 type TodayStore = Record<string, { energyEntries?: EnergyEntry[] }>;
 
@@ -30,6 +31,10 @@ const DashboardProgress = () => {
   const showStreakAndAchievements = preferences.showStreakAndAchievements !== false;
   const journalStreak = getJournalStreak(journalEntries);
   const mindfulEatingStreak = getMindfulEatingStreak(foodLogs, mealPlans);
+  const [prayerTracker] = useLocalStorage<Record<string, Record<string, boolean>>>("tryramadan-prayer-tracker", {});
+  const prayerStreak = getPrayerStreak(prayerTracker, todayStr);
+  const totalPrayers = getTotalPrayerCount(prayerTracker);
+  const isMuslim = preferences.userType === "muslim";
 
   const exportCsv = useCallback(() => {
     const totalDays = ramadanRange.totalDays || 30;
@@ -194,23 +199,31 @@ const DashboardProgress = () => {
             )}
           </motion.div>
 
-          {/* Non-fasting wins: journal streak, mindful eating */}
+          {/* Non-fasting wins: journal streak, mindful eating, prayer (Muslim) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.12 }}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8"
+            className={`grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8 ${isMuslim ? "md:grid-cols-3" : ""}`}
           >
             <div className="p-4 rounded-2xl bg-card border border-border text-center">
-              <BookOpen className="w-6 h-6 text-secondary mx-auto mb-2" />
+              <BookOpen className="w-6 h-6 text-secondary mx-auto mb-2" aria-hidden />
               <span className="text-xl sm:text-2xl font-bold">{journalStreak}</span>
               <span className="block text-sm text-muted-foreground">Journal streak (days)</span>
             </div>
             <div className="p-4 rounded-2xl bg-card border border-border text-center">
-              <Utensils className="w-6 h-6 text-amber-500 mx-auto mb-2" />
+              <Utensils className="w-6 h-6 text-amber-500 mx-auto mb-2" aria-hidden />
               <span className="text-xl sm:text-2xl font-bold">{mindfulEatingStreak}</span>
               <span className="block text-sm text-muted-foreground">Both meals logged (days in a row)</span>
             </div>
+            {isMuslim && (
+              <div className="p-4 rounded-2xl bg-secondary/10 border border-secondary/20 text-center">
+                <Landmark className="w-6 h-6 text-secondary mx-auto mb-2" aria-hidden />
+                <span className="text-xl sm:text-2xl font-bold text-secondary">{prayerStreak}</span>
+                <span className="block text-sm text-muted-foreground">Prayer streak (all 5/day)</span>
+                <span className="mt-1 block text-xs text-muted-foreground">{totalPrayers} prayers total</span>
+              </div>
+            )}
           </motion.div>
           
           {/* Progress bar */}
@@ -383,6 +396,29 @@ const DashboardProgress = () => {
               </div>
             </motion.div>
           )}
+          
+          {/* Unified stats: share, screenshot, graphs */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.35 }}
+            className="mt-8 mb-8"
+          >
+            <StatsShareCard
+              completedDays={completedDays}
+              totalDays={totalDays}
+              completionRate={completionRate}
+              currentStreak={currentStreak}
+              journalStreak={journalStreak}
+              mindfulEatingStreak={mindfulEatingStreak}
+              prayerStreak={prayerStreak}
+              totalPrayers={totalPrayers}
+              isMuslim={isMuslim}
+              completedDates={(progress.completedDays ?? []).filter((d) => d >= startStr && d <= endStr)}
+              ramadanStart={startStr || new Date().toISOString().split("T")[0]}
+              ramadanEnd={endStr || new Date().toISOString().split("T")[0]}
+            />
+          </motion.div>
           
           {/* Export & Journal */}
           <motion.div

@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useLocalStorage, useUserPreferences, useHabitLog } from "@/hooks/useLocalStorage";
+import { Clock } from "lucide-react";
 import { getHabitsForUser, getShortLabelsForHabitIds } from "@/data/ramadan-habits";
 import { Calendar } from "@/components/ui/calendar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -74,6 +75,7 @@ export default function DashboardJournal() {
   const [preferences] = useUserPreferences();
   const [entries, setEntries] = useLocalStorage<JournalEntry[]>("tryramadan-journal", []);
   const [habitLog, setHabitLog] = useHabitLog();
+  const [prayerTracker, setPrayerTracker] = useLocalStorage<Record<string, Record<string, boolean>>>("tryramadan-prayer-tracker", {});
   const today = new Date().toISOString().split("T")[0];
   const dateFromUrl = searchParams.get("date");
   const initialDate = dateFromUrl && isValidDateString(dateFromUrl) ? dateFromUrl : today;
@@ -463,6 +465,39 @@ export default function DashboardJournal() {
               placeholder="e.g. Family, health, this moment..."
               className="w-full p-3 rounded-xl border border-border bg-background text-sm focus:ring-2 focus:ring-secondary outline-none"
             />
+            {preferences.userType === "muslim" && (
+              <div className="mt-4 pt-4 border-t border-border">
+                <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-secondary" />
+                  Prayers completed ({writeDate})
+                </h4>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Mark which prayers you completed for this day.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  {['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'].map((name) => {
+                    const done = (prayerTracker[writeDate] ?? {})[name] ?? false;
+                    return (
+                      <label key={name} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={done}
+                          onChange={(e) => {
+                            setPrayerTracker((prev) => ({
+                              ...prev,
+                              [writeDate]: { ...(prev[writeDate] ?? {}), [name]: e.target.checked },
+                            }));
+                          }}
+                          className="rounded border-border"
+                          aria-label={`Mark ${name} as ${done ? "not " : ""}completed`}
+                        />
+                        <span className="text-sm font-medium">{name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
             {trackableHabits.length > 0 && (
               <div className="mt-4 pt-4 border-t border-border">
                 <h4 className="text-sm font-medium mb-2 flex items-center gap-2">

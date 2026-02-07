@@ -7,6 +7,7 @@ import { ArabicHover } from "@/components/ArabicHover";
 import { ArabicTerm } from "@/components/ArabicTerm";
 import { HeroSection } from "@/components/HeroSection";
 import OnboardingWelcome from "@/pages/onboarding/OnboardingWelcome";
+import { StatsShareCard } from "@/components/StatsShareCard";
 
 describe("Accessibility (axe-core)", () => {
   it("HeroSection has no axe violations", async () => {
@@ -27,6 +28,29 @@ describe("Accessibility (axe-core)", () => {
         <MemoryRouter>
           <OnboardingWelcome />
         </MemoryRouter>
+      </TooltipProvider>
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
+  });
+
+  it("StatsShareCard has no axe violations", async () => {
+    const { container } = render(
+      <TooltipProvider>
+        <StatsShareCard
+          completedDays={5}
+          totalDays={30}
+          completionRate={17}
+          currentStreak={2}
+          journalStreak={3}
+          mindfulEatingStreak={1}
+          prayerStreak={1}
+          totalPrayers={10}
+          isMuslim={true}
+          completedDates={["2025-03-01", "2025-03-02", "2025-03-03", "2025-03-04", "2025-03-05"]}
+          ramadanStart="2025-03-01"
+          ramadanEnd="2025-03-30"
+        />
       </TooltipProvider>
     );
     const results = await axe(container);

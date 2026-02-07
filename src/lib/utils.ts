@@ -52,6 +52,16 @@ export function secondsUntilTimeInTimezone(nowSecondsSinceMidnight: number, time
   return diff;
 }
 
+/** Format seconds as "Xh Xm" or "Xm" for display. past=true for "ago" label. */
+export function formatSecondsAsTimeLabel(seconds: number, past = false): string {
+  const abs = Math.abs(seconds);
+  if (past && abs < 60) return "just now";
+  const h = Math.floor(abs / 3600);
+  const m = Math.floor((abs % 3600) / 60);
+  if (h > 0) return past ? `${h}h ${m}m ago` : `in ${h}h ${m}m`;
+  return past ? `${m}m ago` : `in ${m}m`;
+}
+
 /** Today's date as YYYY-MM-DD in the given IANA timezone. Use when "today" should follow location, not system clock. */
 export function getTodayStringInTimezone(timeZone: string): string {
   if (!timeZone || typeof timeZone !== "string" || !timeZone.trim()) {

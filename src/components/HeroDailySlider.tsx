@@ -69,7 +69,7 @@ export const HeroDailySlider = () => {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.35 }}
-      className="w-full max-w-2xl mx-auto rounded-2xl bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
+      className="w-full rounded-2xl bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
     >
       {/* Toggle: Daily Hadith | Daily Quran */}
       <div className="flex border-b border-primary-foreground/20">

@@ -48,7 +48,7 @@ import {
 } from "@/hooks/useLocalStorage";
 import { getTodayStringInTimezone, toLocalDateString } from "@/lib/utils";
 import recipesData from "@/data/recipes.json";
-import { parseNutrient } from "@/lib/cultureRecipes";
+import { parseNutrient, getAllCountries } from "@/lib/cultureRecipes";
 import { resizeImageToDataUrl } from "@/lib/foodImage";
 import { toast } from "sonner";
 
@@ -162,6 +162,20 @@ export default function DashboardMacros() {
   const [imageResizing, setImageResizing] = useState(false);
 
   const recipeOptions = useMemo(() => buildRecipeOptions(), []);
+  const macrosCulturalFoods = useMemo(() => [...new Set(getAllCountries().flatMap((c) => c.foods ?? []))].filter(Boolean), []);
+  const macrosLogFormSuggestions = useMemo(() => {
+    if (!logForm.active) return { recipes: [], foods: [] };
+    const q = logForm.name.trim().toLowerCase();
+    if (!q || q.length < 1) return { recipes: [], foods: [] };
+    const mt = logForm.mealType;
+    const recipes = recipeOptions
+      .filter((r) => (mt === "between" || r.mealType === mt) && r.name.toLowerCase().includes(q))
+      .slice(0, 6);
+    const foods = macrosCulturalFoods
+      .filter((f) => f.toLowerCase().includes(q) && !recipes.some((r) => r.name.toLowerCase() === f.toLowerCase()))
+      .slice(0, 4);
+    return { recipes, foods };
+  }, [logForm.active, logForm.mealType, logForm.name, recipeOptions, macrosCulturalFoods]);
 
   /** All log entries across all days, newest first, for meal history. */
   const mealHistoryEntries = useMemo(() => {
@@ -655,7 +669,52 @@ export default function DashboardMacros() {
                   </div>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  <Input placeholder="Name" value={logForm.name} onChange={(e) => { setSelectedRecipe(null); setLogForm((f) => ({ ...f, name: e.target.value })); }} />
+                  <div className="relative col-span-2 sm:col-span-1">
+                    <Input
+                      placeholder="Name"
+                      value={logForm.name}
+                      onChange={(e) => { setSelectedRecipe(null); setLogForm((f) => ({ ...f, name: e.target.value })); }}
+                      autoComplete="off"
+                    />
+                    {macrosLogFormSuggestions.recipes.length > 0 || macrosLogFormSuggestions.foods.length > 0 ? (
+                      <ul className="absolute top-full left-0 right-0 mt-0.5 rounded-lg border border-border bg-background shadow-lg max-h-40 overflow-auto z-10" role="listbox" aria-label="Recipe and food suggestions">
+                        {macrosLogFormSuggestions.recipes.map((r) => (
+                          <li key={`${r.mealType}-${r.id}`}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedRecipe({ mealType: r.mealType, id: r.id });
+                                setLogForm((f) => ({
+                                  ...f,
+                                  name: r.name,
+                                  cal: String(r.calories),
+                                  protein: r.protein ? String(r.protein) : "",
+                                  carbs: r.carbs ? String(r.carbs) : "",
+                                  fat: r.fat ? String(r.fat) : "",
+                                  portions: "1",
+                                }));
+                              }}
+                              className="w-full text-left px-3 py-2 text-sm hover:bg-muted flex items-center justify-between gap-2"
+                            >
+                              <span>{r.name}</span>
+                              <span className="text-xs text-muted-foreground">{r.calories} cal</span>
+                            </button>
+                          </li>
+                        ))}
+                        {macrosLogFormSuggestions.foods.map((f) => (
+                          <li key={f}>
+                            <button
+                              type="button"
+                              onClick={() => setLogForm((lf) => ({ ...lf, name: f }))}
+                              className="w-full text-left px-3 py-2 text-sm hover:bg-muted"
+                            >
+                              {f}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </div>
                   <Input type="number" placeholder="Cal" value={logForm.cal} onChange={(e) => setLogForm((f) => ({ ...f, cal: e.target.value }))} />
                   <Input type="number" step="0.5" min={0.1} placeholder="Portions" value={logForm.portions} onChange={(e) => setLogForm((f) => ({ ...f, portions: e.target.value }))} />
                   <div className="flex gap-1">

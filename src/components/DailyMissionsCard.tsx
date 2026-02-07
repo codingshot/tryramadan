@@ -125,7 +125,7 @@ export const DailyMissionsCard = memo(function DailyMissionsCard() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.14 }}
-      className="p-4 rounded-2xl bg-card border border-border"
+      className="p-4 rounded-2xl bg-card border border-border w-full min-w-0"
     >
       <div className="flex items-center justify-between mb-3">
         <Tooltip>

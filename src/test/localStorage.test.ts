@@ -14,6 +14,9 @@ import {
   clampCalories,
   getSuggestedCalories,
   getRecommendedCaloriesFromPreferences,
+  PRAYER_TRACKER_KEY,
+  getPrayerStreak,
+  getTotalPrayerCount,
   type UserPreferences,
 } from "@/hooks/useLocalStorage";
 
@@ -143,6 +146,34 @@ describe("useLocalStorage hook", () => {
     expect(localStorage.getItem(KEY)).toBe(JSON.stringify("hello"));
     const parsed = JSON.parse(localStorage.getItem(KEY)!);
     expect(parsed).toBe("hello");
+  });
+});
+
+describe("prayer tracker persistence", () => {
+  beforeEach(() => {
+    localStorage.removeItem(PRAYER_TRACKER_KEY);
+  });
+
+  afterEach(() => {
+    localStorage.removeItem(PRAYER_TRACKER_KEY);
+  });
+
+  it("round-trip: prayer tracker persists and helpers read correctly", () => {
+    const { result } = renderHook(() =>
+      useLocalStorage<Record<string, Record<string, boolean>>>(PRAYER_TRACKER_KEY, {})
+    );
+    const tracker = {
+      "2025-03-15": { Fajr: true, Dhuhr: true, Asr: true, Maghrib: true, Isha: true },
+      "2025-03-16": { Fajr: true, Dhuhr: false, Asr: false, Maghrib: false, Isha: false },
+    };
+    act(() => {
+      result.current[1](tracker);
+    });
+    expect(result.current[0]).toEqual(tracker);
+    expect(JSON.parse(localStorage.getItem(PRAYER_TRACKER_KEY)!)).toEqual(tracker);
+    expect(getPrayerStreak(result.current[0], "2025-03-15")).toBe(1);
+    expect(getPrayerStreak(result.current[0], "2025-03-16")).toBe(0);
+    expect(getTotalPrayerCount(result.current[0])).toBe(6);
   });
 });
 

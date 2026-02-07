@@ -67,6 +67,23 @@ describe("Stats dashboard", () => {
     expect(exportBtn).toBeInTheDocument();
   });
 
+  it("shows StatsShareCard with Share and Save image buttons", () => {
+    renderProgress();
+    expect(screen.getByRole("button", { name: /share/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /save.*image/i })).toBeInTheDocument();
+  });
+
+  it("shows prayer stats for Muslim user when prayer tracker has data", () => {
+    const today = new Date().toISOString().split("T")[0];
+    localStorage.setItem(
+      "tryramadan-prayer-tracker",
+      JSON.stringify({ [today]: { Fajr: true, Dhuhr: true, Asr: true, Maghrib: true, Isha: true } })
+    );
+    renderProgress();
+    const prayerTexts = screen.getAllByText(/prayer streak|prayers total|Prayers \(.*day streak\)/i);
+    expect(prayerTexts.length).toBeGreaterThan(0);
+  });
+
   it("shows fasting log section when there are log entries", () => {
     const today = new Date().toISOString().split("T")[0];
     localStorage.setItem(

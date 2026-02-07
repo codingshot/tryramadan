@@ -22,6 +22,10 @@ import {
   setBrokenDayToCompleted,
   setBrokenDayToInProgress,
   normalizeProgressSameDayConflict,
+  didCompleteAllPrayers,
+  getPrayerCountForDate,
+  getPrayerStreak,
+  getTotalPrayerCount,
   type FastingProgress,
   type DayFoodLog,
 } from "@/hooks/useLocalStorage";
@@ -343,5 +347,107 @@ describe("State transition: broken day (E8, B→C, B→I)", () => {
     const entry = next.fastingLog?.find((e) => e.date === dateStr);
     expect(entry?.status).toBe("in_progress");
     expect(entry?.completedAt).toBeUndefined();
+  });
+});
+
+describe("Prayer completion helpers", () => {
+  const tracker = (dates: Record<string, Partial<Record<string, boolean>>>): Record<string, Record<string, boolean>> =>
+    Object.fromEntries(
+      Object.entries(dates).map(([d, prayers]) => [
+        d,
+        Object.fromEntries(
+          ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"].map((p) => [p, !!prayers[p as keyof typeof prayers]])
+        ),
+      ])
+    );
+
+  it("didCompleteAllPrayers returns true when all 5 prayers done for date", () => {
+    const t = tracker({ "2025-03-15": { Fajr: true, Dhuhr: true, Asr: true, Maghrib: true, Isha: true } });
+    expect(didCompleteAllPrayers(t, "2025-03-15")).toBe(true);
+  });
+
+  it("didCompleteAllPrayers returns false when any prayer missing", () => {
+    const t = tracker({ "2025-03-15": { Fajr: true, Dhuhr: true, Asr: false, Maghrib: true, Isha: true } });
+    expect(didCompleteAllPrayers(t, "2025-03-15")).toBe(false);
+  });
+
+  it("didCompleteAllPrayers returns false for unknown date", () => {
+    const t = tracker({});
+    expect(didCompleteAllPrayers(t, "2025-03-15")).toBe(false);
+  });
+
+  it("getPrayerCountForDate returns 0-5", () => {
+    const t = tracker({
+      "2025-03-15": { Fajr: true, Dhuhr: true, Asr: true, Maghrib: true, Isha: true },
+      "2025-03-16": { Fajr: true, Dhuhr: false, Asr: false, Maghrib: false, Isha: false },
+    });
+    expect(getPrayerCountForDate(t, "2025-03-15")).toBe(5);
+    expect(getPrayerCountForDate(t, "2025-03-16")).toBe(1);
+    expect(getPrayerCountForDate(t, "2025-03-17")).toBe(0);
+  });
+
+  it("getPrayerStreak counts consecutive days with all 5 prayers", () => {
+    const t = tracker({
+      "2025-03-14": { Fajr: true, Dhuhr: true, Asr: true, Maghrib: true, Isha: true },
+      "2025-03-15": { Fajr: true, Dhuhr: true, Asr: true, Maghrib: true, Isha: true },
+      "2025-03-16": { Fajr: true, Dhuhr: true, Asr: true, Maghrib: true, Isha: true },
+      "2025-03-17": { Fajr: true, Dhuhr: false, Asr: true, Maghrib: true, Isha: true },
+    });
+    expect(getPrayerStreak(t, "2025-03-16")).toBe(3);
+    expect(getPrayerStreak(t, "2025-03-17")).toBe(0);
+    expect(getPrayerStreak(t, "2025-03-15")).toBe(2);
+  });
+
+  it("getTotalPrayerCount sums all completed prayers across dates", () => {
+    const t = tracker({
+      "2025-03-15": { Fajr: true, Dhuhr: true, Asr: true, Maghrib: true, Isha: true },
+      "2025-03-16": { Fajr: true, Dhuhr: false, Asr: false, Maghrib: false, Isha: false },
+    });
+    expect(getTotalPrayerCount(t)).toBe(6);
+  });
+
+  it("getTotalPrayerCount returns 0 for empty tracker", () => {
+    expect(getTotalPrayerCount({})).toBe(0);
+  });
+
+  it("getPrayerStreak returns 0 for empty tracker", () => {
+    expect(getPrayerStreak({}, "2025-03-15")).toBe(0);
+  });
+
+  it("getPrayerCountForDate ignores extra keys and counts only Fajr/Dhuhr/Asr/Maghrib/Isha", () => {
+    const t: Record<string, Record<string, boolean>> = {
+      "2025-03-15": {
+        Fajr: true,
+        Dhuhr: true,
+        Asr: true,
+        Maghrib: true,
+        Isha: true,
+        Other: true,
+      } as Record<string, boolean>,
+    };
+    expect(getPrayerCountForDate(t, "2025-03-15")).toBe(5);
+  });
+
+  it("didCompleteAllPrayers requires all 5; extra keys do not satisfy", () => {
+    const t: Record<string, Record<string, boolean>> = {
+      "2025-03-15": {
+        Fajr: true,
+        Dhuhr: true,
+        Asr: true,
+        Maghrib: true,
+        Other: true,
+      } as Record<string, boolean>,
+    };
+    expect(didCompleteAllPrayers(t, "2025-03-15")).toBe(false);
+  });
+
+  it("getTotalPrayerCount returns 0 for malformed tracker (null, array)", () => {
+    expect(getTotalPrayerCount(null as unknown as Record<string, Record<string, boolean>>)).toBe(0);
+    expect(getTotalPrayerCount([] as unknown as Record<string, Record<string, boolean>>)).toBe(0);
+  });
+
+  it("getPrayerCountForDate handles malformed day object (string) as empty", () => {
+    const t = { "2025-03-15": "invalid" as unknown as Record<string, boolean> };
+    expect(getPrayerCountForDate(t, "2025-03-15")).toBe(0);
   });
 });

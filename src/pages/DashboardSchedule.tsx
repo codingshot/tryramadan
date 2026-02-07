@@ -82,7 +82,7 @@ import {
 import { usePrayerTimes, usePrayerTimesForDate, getEffectivePrayerTimes, useRamadanPrayerTimes } from "@/hooks/usePrayerTimes";
 import { buildIcalContent, downloadIcal } from "@/lib/ical";
 import { fetchPrayerTimesForMonth } from "@/hooks/usePrayerTimes";
-import { getRecipes, getRecipe, parseNutrient, type MealType } from "@/lib/cultureRecipes";
+import { getRecipes, getRecipe, parseNutrient, getAllCountries, type MealType } from "@/lib/cultureRecipes";
 import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
 import { EXTERNAL_LINKS } from "@/lib/config";
 import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
@@ -687,6 +687,20 @@ const DashboardSchedule = () => {
     });
     setAddFoodMeal(null);
   };
+
+  const scheduleAddFoodCulturalFoods = useMemo(() => [...new Set(getAllCountries().flatMap((c) => c.foods ?? []))].filter(Boolean), []);
+  const scheduleAddFoodSuggestions = useMemo(() => {
+    if (!addFoodMeal) return { recipes: [], foods: [] };
+    const q = addFoodCustomInputs.name.trim().toLowerCase();
+    if (!q || q.length < 1) return { recipes: [], foods: [] };
+    const recipes = allRecipesForPicker
+      .filter((r) => r.mealType === addFoodMeal && r.recipe.name.toLowerCase().includes(q))
+      .slice(0, 6);
+    const foods = scheduleAddFoodCulturalFoods
+      .filter((f) => f.toLowerCase().includes(q) && !recipes.some((r) => r.recipe.name.toLowerCase() === f.toLowerCase()))
+      .slice(0, 4);
+    return { recipes, foods };
+  }, [addFoodMeal, addFoodCustomInputs.name, scheduleAddFoodCulturalFoods]);
 
   const submitAddFoodCustom = (mealType: MealType) => {
     if (!selectedDate) return;
@@ -2674,12 +2688,45 @@ const DashboardSchedule = () => {
                                     </button>
                                   </div>
                                 ) : null}
-                                <Input
-                                  placeholder="Name"
-                                  className="w-28 h-9"
-                                  value={addFoodCustomInputs.name}
-                                  onChange={(e) => setAddFoodCustomInputs((c) => ({ ...c, name: e.target.value }))}
-                                />
+                                <div className="relative">
+                                  <Input
+                                    placeholder="Name"
+                                    className="w-28 h-9"
+                                    value={addFoodCustomInputs.name}
+                                    onChange={(e) => setAddFoodCustomInputs((c) => ({ ...c, name: e.target.value }))}
+                                    autoComplete="off"
+                                  />
+                                  {scheduleAddFoodSuggestions.recipes.length > 0 || scheduleAddFoodSuggestions.foods.length > 0 ? (
+                                    <ul className="absolute top-full left-0 mt-0.5 rounded-lg border border-border bg-background shadow-lg max-h-40 overflow-auto z-20 min-w-[180px]" role="listbox" aria-label="Recipe and food suggestions">
+                                      {scheduleAddFoodSuggestions.recipes.map(({ mealType, recipe }) => (
+                                        <li key={`${mealType}-${recipe.id}`}>
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              addFoodFromRecipe(addFoodMeal, `${mealType}-${recipe.id}`);
+                                              setAddFoodCustomInputs({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "", imageDataUrl: "" });
+                                            }}
+                                            className="w-full text-left px-3 py-2 text-sm hover:bg-muted flex items-center justify-between gap-2"
+                                          >
+                                            <span>{recipe.name}</span>
+                                            <span className="text-xs text-muted-foreground">{recipe.nutrition?.calories ?? "?"} cal</span>
+                                          </button>
+                                        </li>
+                                      ))}
+                                      {scheduleAddFoodSuggestions.foods.map((f) => (
+                                        <li key={f}>
+                                          <button
+                                            type="button"
+                                            onClick={() => setAddFoodCustomInputs((c) => ({ ...c, name: f }))}
+                                            className="w-full text-left px-3 py-2 text-sm hover:bg-muted"
+                                          >
+                                            {f}
+                                          </button>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  ) : null}
+                                </div>
                                 <Input
                                   type="number"
                                   placeholder="Cal/portion"

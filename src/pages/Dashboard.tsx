@@ -54,7 +54,7 @@ import {
   useHabitLog,
 } from "@/hooks/useLocalStorage";
 import { getHabitLogStreak, getTotalHabitCheckmarks } from "@/data/ramadan-habits";
-import { toLocalDateString, getTodayStringInTimezone, getNowSecondsSinceMidnightInTimezone, timeStringToSecondsSinceMidnight, secondsUntilTimeInTimezone } from "@/lib/utils";
+import { toLocalDateString, getTodayStringInTimezone, getNowSecondsSinceMidnightInTimezone, timeStringToSecondsSinceMidnight, secondsUntilTimeInTimezone, formatSecondsAsTimeLabel } from "@/lib/utils";
 import { BreakFastReasonDialog } from "@/components/BreakFastReasonDialog";
 import { usePrayerTimes, usePrayerTimesForDate, getSunnahFastingInfo, checkAyyamAlBeed } from "@/hooks/usePrayerTimes";
 import { getDaysUntilRamadan, getCurrentRamadanStart } from "@/lib/ramadan";
@@ -75,6 +75,7 @@ import { PageSEO } from "@/components/PageSEO";
 import { toast } from "sonner";
 import { getPromptForDate } from "@/pages/DashboardJournal";
 import type { JournalEntry } from "@/pages/DashboardJournal";
+import { getRecipes, getRecipe, parseNutrient, getAllCountries } from "@/lib/cultureRecipes";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -90,6 +91,7 @@ const Dashboard = () => {
   const [showBreakFastDialog, setShowBreakFastDialog] = useState(false);
   const [showBreakFastConfirm, setShowBreakFastConfirm] = useState(false);
   const [datePopoverOpen, setDatePopoverOpen] = useState(false);
+  const [prayerTimesPopoverOpen, setPrayerTimesPopoverOpen] = useState(false);
   const [statsDialog, setStatsDialog] = useState<"streak" | "total" | "sunnah" | "broken" | null>(null);
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [addFoodMeal, setAddFoodMeal] = useState<"suhoor" | "iftar" | null>(null);
@@ -153,6 +155,7 @@ const Dashboard = () => {
   const [dayNutrition, setDayNutrition] = useDayNutrition();
   const [quickActionOrder] = useDashboardQuickActions();
   const [journalEntries, setJournalEntries] = useLocalStorage<JournalEntry[]>("tryramadan-journal", []);
+  const [prayerTracker, setPrayerTracker] = useLocalStorage<Record<string, Record<string, boolean>>>("tryramadan-prayer-tracker", {});
   const [habitLog] = useHabitLog();
   const habitStreak = useMemo(() => getHabitLogStreak(habitLog, todayStr), [habitLog, todayStr]);
   const habitTotalCheckmarks = useMemo(() => getTotalHabitCheckmarks(habitLog), [habitLog]);
@@ -302,6 +305,50 @@ const Dashboard = () => {
     } else {
       completeFastingToday(progress, setProgress, todayStr);
     }
+  };
+
+  const allRecipesForAddFood = useMemo(() => getRecipes(), []);
+  const allCulturalFoods = useMemo(() => [...new Set(getAllCountries().flatMap((c) => c.foods ?? []))].filter(Boolean), []);
+  const addFoodSuggestions = useMemo(() => {
+    if (!addFoodMeal) return [];
+    const q = addFoodInputs.name.trim().toLowerCase();
+    if (!q || q.length < 1) return [];
+    const recipes = allRecipesForAddFood
+      .filter((r) => r.mealType === addFoodMeal && r.recipe.name.toLowerCase().includes(q))
+      .slice(0, 6);
+    const foods = allCulturalFoods
+      .filter((f) => f.toLowerCase().includes(q) && !recipes.some((r) => r.recipe.name.toLowerCase() === f.toLowerCase()))
+      .slice(0, 4);
+    return { recipes, foods };
+  }, [addFoodMeal, addFoodInputs.name, allRecipesForAddFood, allCulturalFoods]);
+
+  const quickAddRecipe = (mealType: "suhoor" | "iftar", mealTypeKey: string, recipeId: number) => {
+    const recipe = getRecipe(mealType, recipeId);
+    if (!recipe) return;
+    const cal = recipe.nutrition?.calories ?? 0;
+    const protein = parseNutrient(recipe.nutrition?.protein);
+    const carbs = parseNutrient(recipe.nutrition?.carbs);
+    const fat = parseNutrient(recipe.nutrition?.fat);
+    const entry = {
+      id: `recipe-${Date.now()}-${mealTypeKey}-${recipeId}`,
+      type: "recipe" as const,
+      mealType,
+      name: recipe.name,
+      portions: 1,
+      caloriesPerPortion: cal,
+      proteinPerPortion: protein,
+      carbsPerPortion: carbs,
+      fatPerPortion: fat,
+      recipeId: `${mealTypeKey}-${recipeId}`,
+    };
+    setFoodLogs((prev) => {
+      const d = normalizeDayFoodLog(prev[selectedDate]);
+      const list = mealType === "suhoor" ? [...d.suhoor, entry] : [...d.iftar, entry];
+      return { ...prev, [selectedDate]: { ...d, [mealType]: list } };
+    });
+    setAddFoodInputs({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "" });
+    setAddFoodMeal(null);
+    toast.success(`Added ${recipe.name}`);
   };
 
   const submitAddFood = (mealType: "suhoor" | "iftar") => {
@@ -630,15 +677,15 @@ const Dashboard = () => {
           </motion.div>
           
           {/* Desktop: two columns — left: fast status + checklist; right: streak/total/sunnah/broken */}
-          <div className="grid grid-cols-1 md:grid-cols-[1fr,minmax(240px,280px)] gap-6 lg:gap-8 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr,minmax(220px,1fr)] gap-6 lg:gap-8 mb-6">
             {/* Left column: Current Fast Status + Suhoor/Iftar + Today's schedule + Daily missions */}
-            <div className="min-w-0 space-y-4">
+            <div className="min-w-0 space-y-4 w-full">
           {/* Current Fast Status Card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.08 }}
-            className={`p-4 sm:p-5 rounded-2xl border-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 ${
+            className={`p-4 sm:p-5 rounded-2xl border-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 w-full min-w-0 ${
               isFasting ? "bg-primary/10 border-primary/30" : "bg-muted/50 border-border"
             }`}
           >
@@ -748,7 +795,7 @@ const Dashboard = () => {
               >
                 <Link
                   to="/dashboard/schedule"
-                  className="block p-3 sm:p-4 rounded-2xl bg-card border border-border grid grid-cols-2 gap-2 sm:gap-3 hover:border-secondary/50 transition-colors"
+                  className="block p-3 sm:p-4 rounded-2xl bg-card border border-border grid grid-cols-2 gap-2 sm:gap-3 hover:border-secondary/50 transition-colors w-full min-w-0"
                 >
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -954,7 +1001,7 @@ const Dashboard = () => {
               <DailyMissionsCard />
             </div>
             {/* Habit tracking summary */}
-            <div className="mt-4 rounded-xl border border-border bg-card p-4">
+            <div className="mt-4 rounded-xl border border-border bg-card p-4 w-full min-w-0">
               <h3 className="font-display font-semibold text-sm flex items-center gap-2 mb-2">
                 <Target className="w-4 h-4 text-secondary" />
                 Habit tracking
@@ -973,6 +1020,7 @@ const Dashboard = () => {
 
             {/* Right column (desktop): Streak, Total, Sunnah, Broken */}
           {/* Quick Actions Grid — Streak, Total, Sunnah, Broken (click to see days) */}
+          <div className="min-w-0 w-full flex flex-col">
           {(() => {
             const streakDaysList = getStreakDays(progress, todayStr);
             const totalDaysList = [...progress.completedDays].sort().reverse();
@@ -1017,7 +1065,7 @@ const Dashboard = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="flex flex-wrap items-start gap-1.5 sm:gap-2 mb-3"
+                className="grid grid-cols-2 gap-2 w-full mb-3"
               >
                 {/* Streak — hidden when showStreakAndAchievements is off */}
                 {preferences.showStreakAndAchievements !== false && (
@@ -1126,13 +1174,14 @@ const Dashboard = () => {
             );
           })()}
           </div>
+          </div>
 
             {/* Day view: meal plan, calories, prayer times, journal for selected day */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.18 }}
-              className="mb-8 p-4 sm:p-6 rounded-2xl bg-card border border-border"
+              className="mb-8 p-4 sm:p-6 rounded-2xl bg-card border border-border w-full min-w-0"
             >
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -1235,11 +1284,43 @@ const Dashboard = () => {
                     }}
                     className="grid gap-2 pt-2"
                   >
-                    <Input
-                      placeholder="e.g. Oats & dates"
-                      value={addFoodInputs.name}
-                      onChange={(e) => setAddFoodInputs((p) => ({ ...p, name: e.target.value }))}
-                    />
+                    <div className="relative">
+                      <Input
+                        placeholder="e.g. Oats & dates"
+                        value={addFoodInputs.name}
+                        onChange={(e) => setAddFoodInputs((p) => ({ ...p, name: e.target.value }))}
+                        autoComplete="off"
+                      />
+                      {addFoodSuggestions.recipes.length > 0 || addFoodSuggestions.foods.length > 0 ? (
+                        <ul className="absolute top-full left-0 right-0 mt-0.5 rounded-lg border border-border bg-background shadow-lg max-h-48 overflow-auto z-10" role="listbox" aria-label="Recipe and food suggestions">
+                          {addFoodSuggestions.recipes.map(({ mealType, recipe }) => (
+                            <li key={`${mealType}-${recipe.id}`}>
+                              <button
+                                type="button"
+                                onClick={() => quickAddRecipe(mealType as "suhoor" | "iftar", mealType, recipe.id)}
+                                className="w-full text-left px-3 py-2 text-sm hover:bg-muted flex items-center justify-between gap-2"
+                              >
+                                <span>{recipe.name}</span>
+                                <span className="text-xs text-muted-foreground">
+                                  {recipe.nutrition?.calories ?? "?"} cal
+                                </span>
+                              </button>
+                            </li>
+                          ))}
+                          {addFoodSuggestions.foods.map((f) => (
+                            <li key={f}>
+                              <button
+                                type="button"
+                                onClick={() => setAddFoodInputs((p) => ({ ...p, name: f }))}
+                                className="w-full text-left px-3 py-2 text-sm hover:bg-muted"
+                              >
+                                {f}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </div>
                     <div className="flex flex-wrap gap-2">
                       <Input
                         type="number"
@@ -1494,7 +1575,7 @@ const Dashboard = () => {
             </motion.div>
 
             {/* Progress Ring — days completed (ring fill = % of 30) */}
-            <div className="p-4 rounded-2xl bg-card border border-border flex flex-col items-center">
+            <div className="p-4 rounded-2xl bg-card border border-border flex flex-col items-center w-full min-w-0">
               <ProgressRing
                 value={ramadanCompletionPct}
                 size={80}
@@ -1605,7 +1686,7 @@ const Dashboard = () => {
                 </span>
               )}
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2">
               {(() => {
                 const byId = new Map(DASHBOARD_QUICK_ACTIONS.map((a) => [a.id, a]));
                 return quickActionOrder
@@ -1656,15 +1737,59 @@ const Dashboard = () => {
               className="mb-8"
             >
               <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-                <Link
-                  to="/dashboard/prayers"
-                  className="font-display font-bold flex items-center gap-2 hover:text-secondary transition-colors"
-                >
-                  <Clock className="w-5 h-5 text-secondary" />
-                  Today&apos;s Prayer Times
-                </Link>
+                <Popover open={prayerTimesPopoverOpen} onOpenChange={setPrayerTimesPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className="font-display font-bold flex items-center gap-2 hover:text-secondary transition-colors text-left"
+                      aria-expanded={prayerTimesPopoverOpen}
+                      aria-haspopup="dialog"
+                    >
+                      <Clock className="w-5 h-5 text-secondary" />
+                      Today&apos;s Prayer Times
+                      <span className="text-xs font-normal text-muted-foreground">(click for time until/ago)</span>
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent align="start" className="w-72 p-4">
+                    <p className="text-xs font-medium text-muted-foreground mb-3">Time until or time ago for each prayer</p>
+                    <ul className="space-y-2" aria-label="Prayer times with countdown">
+                      {(() => {
+                        const nowSec = displayTimezone ? getNowSecondsSinceMidnightInTimezone(displayTimezone) : (() => {
+                          const n = new Date();
+                          return n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds();
+                        })();
+                        return [
+                          { name: 'Fajr', nameAr: 'الفجر', time: prayerTimes.fajr },
+                          { name: 'Sunrise', nameAr: 'الشروق', time: prayerTimes.sunrise },
+                          { name: 'Dhuhr', nameAr: 'الظهر', time: prayerTimes.dhuhr },
+                          { name: 'Asr', nameAr: 'العصر', time: prayerTimes.asr },
+                          { name: 'Maghrib', nameAr: 'المغرب', time: prayerTimes.maghrib },
+                          { name: 'Isha', nameAr: 'العشاء', time: prayerTimes.isha },
+                        ].map((p) => {
+                          const prayerSec = timeStringToSecondsSinceMidnight(p.time);
+                          const isPast = nowSec >= prayerSec;
+                          const diff = isPast ? nowSec - prayerSec : secondsUntilTimeInTimezone(nowSec, prayerSec);
+                          const label = formatSecondsAsTimeLabel(diff, isPast);
+                          return (
+                            <li key={p.name} className="flex items-center justify-between text-sm">
+                              <span><span className="font-medium">{p.name}</span> <span className="text-muted-foreground font-arabic" dir="rtl">({p.nameAr})</span></span>
+                              <span className={isPast ? "text-muted-foreground" : "text-secondary font-medium"}>{label}</span>
+                            </li>
+                          );
+                        });
+                      })()}
+                    </ul>
+                    <Link
+                      to="/dashboard/prayers"
+                      onClick={() => setPrayerTimesPopoverOpen(false)}
+                      className="text-xs text-secondary hover:underline font-medium mt-3 block"
+                    >
+                      Full prayer page →
+                    </Link>
+                  </PopoverContent>
+                </Popover>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2 sm:gap-3 w-full">
                 {[
                   { name: 'Fajr', nameAr: 'الفجر', time: prayerTimes.fajr, highlight: true, Icon: Sunrise },
                   { name: 'Sunrise', nameAr: 'الشروق', time: prayerTimes.sunrise, Icon: Sun },
@@ -1674,10 +1799,18 @@ const Dashboard = () => {
                   { name: 'Isha', nameAr: 'العشاء', time: prayerTimes.isha, Icon: Moon },
                 ].map((prayer) => {
                   const PrayerIcon = prayer.Icon;
+                  const nowSec = displayTimezone ? getNowSecondsSinceMidnightInTimezone(displayTimezone) : (() => {
+                    const n = new Date();
+                    return n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds();
+                  })();
+                  const prayerSec = timeStringToSecondsSinceMidnight(prayer.time);
+                  const isPast = nowSec >= prayerSec;
+                  const diff = isPast ? nowSec - prayerSec : secondsUntilTimeInTimezone(nowSec, prayerSec);
+                  const timeLabel = formatSecondsAsTimeLabel(diff, isPast);
                   return (
                   <Tooltip key={prayer.name}>
                     <TooltipTrigger asChild>
-                      <div className={`p-3 rounded-xl text-center ${
+                      <div className={`p-3 rounded-xl text-center cursor-help ${
                         prayer.highlight 
                           ? 'bg-secondary/20 border border-secondary/30' 
                           : 'bg-card border border-border'
@@ -1700,26 +1833,49 @@ const Dashboard = () => {
                       </div>
                     </TooltipTrigger>
                     <TooltipContent className="max-w-xs p-3">
+                      <p className="font-medium text-sm">{timeLabel}</p>
                       {prayer.name === 'Fajr' && (
-                        <>
-                          <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.fajr.title}</p>
-                          <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.fajr.body}</p>
-                        </>
+                        <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.fajr.body}</p>
                       )}
                       {prayer.name === 'Maghrib' && (
-                        <>
-                          <p className="font-semibold text-sm">{EATING_TIME_TOOLTIPS.maghrib.title}</p>
-                          <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.maghrib.body}</p>
-                        </>
+                        <p className="text-xs text-muted-foreground mt-1">{EATING_TIME_TOOLTIPS.maghrib.body}</p>
                       )}
                       {!['Fajr', 'Maghrib'].includes(prayer.name) && (
-                        <p className="text-sm">{prayer.name} prayer time</p>
+                        <p className="text-xs text-muted-foreground mt-1">{prayer.name} prayer time</p>
                       )}
+                      <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Click header for all</p>
                     </TooltipContent>
                   </Tooltip>
                   );
                 })}
               </div>
+              {preferences.userType === "muslim" && (
+                <div className="mt-4 p-3 rounded-xl border border-border bg-card">
+                  <p className="text-xs font-medium text-muted-foreground mb-2">Prayers completed today</p>
+                  <div className="flex flex-wrap gap-3">
+                    {['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'].map((name) => {
+                      const done = (prayerTracker[todayStr] ?? {})[name] ?? false;
+                      return (
+                        <label key={name} className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={done}
+                            onChange={(e) => {
+                              setPrayerTracker((prev) => ({
+                                ...prev,
+                                [todayStr]: { ...(prev[todayStr] ?? {}), [name]: e.target.checked },
+                              }));
+                            }}
+                            className="rounded border-border"
+                            aria-label={`Mark ${name} as ${done ? "not " : ""}completed`}
+                          />
+                          <span className="text-sm font-medium">{name}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </motion.div>
           )}
           

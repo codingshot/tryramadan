@@ -33,6 +33,16 @@ Object.defineProperty(window, "IntersectionObserver", {
   value: MockIntersectionObserver,
 });
 
+class MockResizeObserver implements ResizeObserver {
+  observe = () => {};
+  unobserve = () => {};
+  disconnect = () => {};
+}
+Object.defineProperty(window, "ResizeObserver", {
+  writable: true,
+  value: MockResizeObserver,
+});
+
 if (typeof URL.createObjectURL === "undefined") {
   URL.createObjectURL = () => "blob:mock-url";
 }
