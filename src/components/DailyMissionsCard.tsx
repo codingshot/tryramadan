@@ -2,7 +2,16 @@ import { motion } from "framer-motion";
 import { memo } from "react";
 import { Link } from "react-router-dom";
 import { Target, Check, Circle, ChevronRight } from "lucide-react";
-import { useDailyMissions, useUserPreferences, type DailyMission } from "@/hooks/useLocalStorage";
+import {
+  useDailyMissions,
+  useUserPreferences,
+  useFastingProgress,
+  useDisplayTimezone,
+  getTodayDateString,
+  startFastingToday,
+  type DailyMission,
+} from "@/hooks/useLocalStorage";
+import { getTodayStringInTimezone } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
 
@@ -21,8 +30,17 @@ function getMissionTooltip(missionId: string, userType?: string): string | undef
   return tips[missionId];
 }
 
-const MissionRow = memo(function MissionRow({ mission, userType }: { mission: DailyMission; userType?: string }) {
+const MissionRow = memo(function MissionRow({
+  mission,
+  userType,
+  onStartFasting,
+}: {
+  mission: DailyMission;
+  userType?: string;
+  onStartFasting?: () => void;
+}) {
   const tip = getMissionTooltip(mission.id, userType);
+  const canQuickStart = mission.id === "start_fasting" && !mission.completed && onStartFasting;
   const content = (
     <span className="flex items-center gap-2 text-sm">
       {mission.completed ? (
@@ -33,24 +51,45 @@ const MissionRow = memo(function MissionRow({ mission, userType }: { mission: Da
       {tip ? (
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className={`cursor-help border-b border-dotted border-muted-foreground/30 ${mission.completed ? "text-muted-foreground line-through" : ""}`}>
+            <span
+              className={`${canQuickStart ? "cursor-pointer hover:text-secondary" : "cursor-help border-b border-dotted border-muted-foreground/30"} ${mission.completed ? "text-muted-foreground line-through" : ""}`}
+            >
               {mission.label}
             </span>
           </TooltipTrigger>
           <TooltipContent side="right" className="max-w-xs">
-            <p className="text-xs text-muted-foreground">{tip}</p>
+            <p className="text-xs text-muted-foreground">
+              {canQuickStart
+                ? "Tap here or \"I'm fasting\" on the dashboard to mark that you've started today's fast."
+                : tip}
+            </p>
           </TooltipContent>
         </Tooltip>
       ) : (
-        <span className={mission.completed ? "text-muted-foreground line-through" : ""}>
+        <span
+          className={`${canQuickStart ? "cursor-pointer hover:text-secondary" : ""} ${mission.completed ? "text-muted-foreground line-through" : ""}`}
+        >
           {mission.label}
         </span>
       )}
-      {mission.path && !mission.completed && (
+      {(mission.path || canQuickStart) && !mission.completed && (
         <ChevronRight className="w-3.5 h-3.5 text-muted-foreground ml-auto shrink-0" aria-hidden />
       )}
     </span>
   );
+
+  if (canQuickStart) {
+    return (
+      <button
+        type="button"
+        onClick={onStartFasting}
+        className="block w-full text-left py-2 px-3 rounded-lg hover:bg-muted/50 transition-colors"
+        aria-label="Mark that you have started fasting today"
+      >
+        {content}
+      </button>
+    );
+  }
 
   if (mission.path && !mission.completed) {
     return (
@@ -72,7 +111,14 @@ const MissionRow = memo(function MissionRow({ mission, userType }: { mission: Da
 
 export const DailyMissionsCard = memo(function DailyMissionsCard() {
   const [preferences] = useUserPreferences();
+  const [progress, setProgress] = useFastingProgress();
+  const displayTimezone = useDisplayTimezone();
   const { missions, completedCount, totalCount } = useDailyMissions();
+  const todayStr = displayTimezone ? getTodayStringInTimezone(displayTimezone) : getTodayDateString();
+
+  const handleStartFasting = () => {
+    startFastingToday(progress, setProgress, todayStr);
+  };
 
   return (
     <motion.div
@@ -107,12 +153,16 @@ export const DailyMissionsCard = memo(function DailyMissionsCard() {
         </Tooltip>
       </div>
       <p className="text-xs text-muted-foreground mb-3">
-        Small steps for your fasting day. Tap an item to open the right page.
+        Small steps for your fasting day. Tap Start fasting to mark it, or tap an item to open the right page.
       </p>
       <ul className="space-y-0.5">
         {missions.map((m) => (
           <li key={m.id}>
-            <MissionRow mission={m} userType={preferences?.userType} />
+            <MissionRow
+              mission={m}
+              userType={preferences?.userType}
+              onStartFasting={m.id === "start_fasting" ? handleStartFasting : undefined}
+            />
           </li>
         ))}
       </ul>

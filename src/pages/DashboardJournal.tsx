@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
   BookOpen,
@@ -19,6 +19,7 @@ import { Footer } from "@/components/Footer";
 import { useLocalStorage, useUserPreferences, useHabitLog } from "@/hooks/useLocalStorage";
 import { getHabitsForUser, getShortLabelsForHabitIds } from "@/data/ramadan-habits";
 import { Calendar } from "@/components/ui/calendar";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { PageSEO } from "@/components/PageSEO";
 
 export interface JournalEntry {
@@ -62,17 +63,26 @@ export function getPromptForDate(isoDate: string, userType?: string): string {
   return prompts[(day - 1) % prompts.length];
 }
 
+function isValidDateString(s: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const d = new Date(s + "T12:00:00");
+  return !isNaN(d.getTime()) && d.toISOString().startsWith(s);
+}
+
 export default function DashboardJournal() {
+  const [searchParams] = useSearchParams();
   const [preferences] = useUserPreferences();
   const [entries, setEntries] = useLocalStorage<JournalEntry[]>("tryramadan-journal", []);
   const [habitLog, setHabitLog] = useHabitLog();
   const today = new Date().toISOString().split("T")[0];
+  const dateFromUrl = searchParams.get("date");
+  const initialDate = dateFromUrl && isValidDateString(dateFromUrl) ? dateFromUrl : today;
   const trackableHabits = useMemo(
     () => getHabitsForUser(preferences.userType).filter((h) => h.type === "sunnah"),
     [preferences.userType]
   );
 
-  const [writeDate, setWriteDate] = useState(today);
+  const [writeDate, setWriteDate] = useState(initialDate);
   const [content, setContent] = useState("");
   const [gratitude, setGratitude] = useState("");
   const [mood, setMood] = useState<number | undefined>(undefined);
@@ -82,6 +92,13 @@ export default function DashboardJournal() {
   const hasTodayEntry = entries.some((e) => e.date === today);
   const isFutureDate = writeDate > today;
   const showWriteTodayPrompt = isFutureDate && !hasTodayEntry;
+
+  useEffect(() => {
+    const urlDate = searchParams.get("date");
+    if (urlDate && isValidDateString(urlDate)) {
+      setWriteDate(urlDate);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const entry = entries.find((e) => e.date === writeDate);
@@ -475,7 +492,21 @@ export default function DashboardJournal() {
                             }}
                             className="rounded border-border"
                           />
-                          <span>{habit.shortLabel}</span>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="cursor-help border-b border-dotted border-transparent hover:border-muted-foreground/40">
+                                {habit.shortLabel}
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent side="right" className="max-w-sm p-3">
+                              <p className="font-medium mb-1">{habit.title}</p>
+                              <blockquote className="text-xs text-muted-foreground italic border-l-2 border-secondary/50 pl-2 my-1">
+                                &ldquo;{habit.quote}&rdquo;
+                              </blockquote>
+                              <p className="text-xs text-muted-foreground mt-1">{habit.sourceLabel}</p>
+                              <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{habit.explanation}</p>
+                            </TooltipContent>
+                          </Tooltip>
                         </label>
                       </li>
                     );

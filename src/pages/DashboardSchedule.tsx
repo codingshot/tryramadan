@@ -27,6 +27,7 @@ import {
   Sun,
   ImagePlus,
   Copy,
+  Zap,
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -113,6 +114,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { BreakFastReasonDialog } from "@/components/BreakFastReasonDialog";
+import { CatchUpDialog } from "@/components/CatchUpDialog";
 
 const allRecipesForPicker = getRecipes();
 
@@ -286,6 +288,8 @@ const DashboardSchedule = () => {
   const [addFoodCustomInputs, setAddFoodCustomInputs] = useState({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "", imageDataUrl: "" });
   const [addFoodImageResizing, setAddFoodImageResizing] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
+  const [exportTimeRange, setExportTimeRange] = useState<"month" | "30days" | "ramadan" | "day">("month");
+  const [exportTypePreset, setExportTypePreset] = useState<"fasting" | "full" | "custom">("full");
   const [customEventTitle, setCustomEventTitle] = useState("");
   const [customEventTime, setCustomEventTime] = useState("18:00");
   const [editReasonOpen, setEditReasonOpen] = useState(false);
@@ -300,6 +304,7 @@ const DashboardSchedule = () => {
   const [countdownToIftar, setCountdownToIftar] = useState({ h: 0, m: 0, s: 0 });
   const [countdownToSuhoor, setCountdownToSuhoor] = useState({ h: 0, m: 0, s: 0 });
   const [copyMealsFromOpen, setCopyMealsFromOpen] = useState(false);
+  const [catchUpOpen, setCatchUpOpen] = useState(false);
   const [scheduleTableSort, setScheduleTableSort] = useState<"date" | "hoursAsc" | "hoursDesc">("date");
   const [scheduleTableMonthOnly, setScheduleTableMonthOnly] = useState(false);
   const dayDetailPanelRef = useRef<HTMLDivElement>(null);
@@ -924,7 +929,8 @@ const DashboardSchedule = () => {
     return () => clearInterval(t);
   }, [tickFastingAndCountdown]);
 
-  const handleExportIcal = async (range: "month" | "30days" | "ramadan" | "day") => {
+  const handleExportIcal = async () => {
+    const range = exportTimeRange;
     if (!lat || !lng) return;
     if (range === "day") {
       if (!selectedDate || !effectiveSelectedDayPrayerTimes) {
@@ -986,14 +992,16 @@ const DashboardSchedule = () => {
         displayTimezone?.trim() ||
         (typeof Intl !== "undefined" && Intl.DateTimeFormat?.().resolvedOptions?.().timeZone) ||
         undefined;
+      const isCustom = exportTypePreset === "custom";
       const ics = buildIcalContent({
         prayerTimesMap,
         customEvents: calendarEvents,
         dateRange: [startStr, endStr],
-        includeTaraweeh: calendarIncludeTypes.taraweeh !== false,
+        includeTaraweeh: isCustom ? calendarIncludeTypes.taraweeh !== false : exportTypePreset === "full",
         includePrayers: true,
         timezone: exportTimezone,
-        includeTypes: calendarIncludeTypes,
+        exportMode: isCustom ? undefined : exportTypePreset === "fasting" ? "fasting" : "full",
+        includeTypes: isCustom ? calendarIncludeTypes : undefined,
         eventDurations: defaultDurations,
       });
       downloadIcal(ics, `tryramadan-${startStr}-to-${endStr}.ics`);
@@ -1031,6 +1039,17 @@ const DashboardSchedule = () => {
             <p className="text-sm sm:text-base text-muted-foreground mt-1.5 sm:mt-2">
               Tap a day to view or edit meal plan, food log, and prayer times. Use arrow keys to move the selected day. Times vary by location.
             </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setCatchUpOpen(true)}
+              className="mt-3 gap-2"
+              aria-label="Catch up on past days"
+            >
+              <Zap className="w-4 h-4" aria-hidden />
+              Catch up on past days
+            </Button>
           </motion.div>
 
           {/* Set location for prayer/fasting times — shown when location not set so page still has clear next step */}
@@ -1077,6 +1096,8 @@ const DashboardSchedule = () => {
               type="button"
               onClick={() => setShowQuickActionsEditor(!showQuickActionsEditor)}
               className="w-full flex items-center justify-between font-medium"
+              aria-expanded={showQuickActionsEditor}
+              aria-controls="quick-actions-editor"
             >
               <span className="flex items-center gap-2">
                 <Target className="w-4 h-4 text-secondary" />
@@ -1090,6 +1111,7 @@ const DashboardSchedule = () => {
             <AnimatePresence>
               {showQuickActionsEditor && (
                 <motion.div
+                  id="quick-actions-editor"
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
@@ -1190,116 +1212,137 @@ const DashboardSchedule = () => {
           >
             <h3 className="font-display font-bold text-base sm:text-lg mb-1.5 sm:mb-2 flex items-center gap-2">
               <Download className="w-4 h-4 sm:w-5 sm:h-5 text-secondary shrink-0" />
-              Export to calendar
+              Add to calendar
             </h3>
-            <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3">
-              Download an .ics file with Suhoor, {iftarLabel}, all prayers, optional Taraweeh, and any events you add. Import into Google Calendar, Apple Calendar, or Outlook.
+            <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
+              Export an .ics file for Google Calendar, Apple Calendar, or Outlook.
             </p>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleExportIcal("month")}
-                disabled={exportLoading || !lat || !lng}
-                className="gap-2"
-                aria-label="Download .ics file for current month"
+
+            {/* Choose time */}
+            <div className="space-y-2 mb-4">
+              <Label htmlFor="export-time" className="text-sm font-medium">
+                Choose time
+              </Label>
+              <Select
+                value={exportTimeRange}
+                onValueChange={(v: "month" | "30days" | "ramadan" | "day") => setExportTimeRange(v)}
               >
-                {exportLoading ? <span className="animate-pulse">Loading…</span> : <Download className="w-4 h-4" />}
-                Download .ics: this month
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleExportIcal("30days")}
-                disabled={exportLoading || !lat || !lng}
-                className="gap-2"
-                aria-label="Download .ics file for next 30 days"
-              >
-                Download .ics: next 30 days
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleExportIcal("ramadan")}
-                disabled={exportLoading || !lat || !lng}
-                className="gap-2"
-                aria-label="Download .ics file for Ramadan only"
-              >
-                Download .ics: Ramadan only
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleExportIcal("day")}
-                disabled={exportLoading || !lat || !lng || !selectedDate || !effectiveSelectedDayPrayerTimes}
-                className="gap-2"
-                aria-label="Download .ics file for selected day only"
-              >
-                Download .ics: selected day
-              </Button>
+                <SelectTrigger id="export-time" className="w-full sm:w-auto min-w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="month">This month</SelectItem>
+                  <SelectItem value="30days">Next 30 days</SelectItem>
+                  <SelectItem value="ramadan">Ramadan only</SelectItem>
+                  <SelectItem value="day">Selected day</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            {(!lat || !lng) && (
-              <LocationRequiredCTA
-                compact
-                message="Set your location in Settings to include prayer times in the export."
-                className="mt-2"
-              />
-            )}
-            <div className="mt-3 pt-3 border-t border-border">
-              <p className="text-sm font-medium mb-2">What to include in calendar</p>
-              <p className="text-xs text-muted-foreground mb-2">Choose which events to sync and export. Eat times (Suhoor end, {iftarLabelShort}) and prayer times use your custom durations below.</p>
-              <div className="flex flex-wrap gap-x-6 gap-y-2 mb-3">
-                {(["suhoor", "iftar"] as const).map((t) => (
-                  <label key={t} className="flex items-center gap-2 cursor-pointer">
+
+            {/* Choose add to calendar type */}
+            <div className="space-y-2 mb-4">
+              <Label htmlFor="export-type" className="text-sm font-medium">
+                Choose add to calendar type
+              </Label>
+              <Select
+                value={exportTypePreset}
+                onValueChange={(v: "fasting" | "full" | "custom") => setExportTypePreset(v)}
+              >
+                <SelectTrigger id="export-type" className="w-full sm:w-auto min-w-[180px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="fasting">Fasting only (Suhoor + {iftarLabelShort})</SelectItem>
+                  <SelectItem value="full">Full (all prayers + Taraweeh)</SelectItem>
+                  <SelectItem value="custom">Custom (choose below)</SelectItem>
+                </SelectContent>
+              </Select>
+              {exportTypePreset === "custom" && (
+                <div className="flex flex-wrap gap-x-4 sm:gap-x-6 gap-y-2 pt-2">
+                  {(["suhoor", "iftar"] as const).map((t) => (
+                    <label key={t} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={calendarIncludeTypes[t] !== false}
+                        onChange={(e) => setCalendarIncludeTypes((prev) => ({ ...prev, [t]: e.target.checked }))}
+                        className="rounded border-border"
+                      />
+                      <span className="text-sm">{t === "suhoor" ? "Suhoor end" : iftarLabelShort}</span>
+                    </label>
+                  ))}
+                  {(["fajr", "dhuhr", "asr", "maghrib", "isha"] as const).map((t) => (
+                    <label key={t} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={calendarIncludeTypes[t] !== false}
+                        onChange={(e) => setCalendarIncludeTypes((prev) => ({ ...prev, [t]: e.target.checked }))}
+                        className="rounded border-border"
+                      />
+                      <span className="text-sm capitalize">{t}</span>
+                    </label>
+                  ))}
+                  <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={calendarIncludeTypes[t] !== false}
-                      onChange={(e) => setCalendarIncludeTypes((prev) => ({ ...prev, [t]: e.target.checked }))}
+                      checked={calendarIncludeTypes.taraweeh !== false}
+                      onChange={(e) => setCalendarIncludeTypes((prev) => ({ ...prev, taraweeh: e.target.checked }))}
                       className="rounded border-border"
                     />
-                    <span className="text-sm">{t === "suhoor" ? "Suhoor end" : iftarLabelShort}</span>
+                    <span className="text-sm">Taraweeh</span>
                   </label>
-                ))}
-                {(["fajr", "dhuhr", "asr", "maghrib", "isha"] as const).map((t) => (
-                  <label key={t} className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={calendarIncludeTypes[t] !== false}
-                      onChange={(e) => setCalendarIncludeTypes((prev) => ({ ...prev, [t]: e.target.checked }))}
-                      className="rounded border-border"
-                    />
-                    <span className="text-sm capitalize">{t}</span>
-                  </label>
-                ))}
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={calendarIncludeTypes.taraweeh !== false}
-                    onChange={(e) => setCalendarIncludeTypes((prev) => ({ ...prev, taraweeh: e.target.checked }))}
-                    className="rounded border-border"
-                  />
-                  <span className="text-sm">Taraweeh</span>
-                </label>
-              </div>
+                </div>
+              )}
             </div>
-            <div className="mt-3 pt-3 border-t border-border flex flex-wrap gap-2">
+
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
+              <Button
+                onClick={handleExportIcal}
+                disabled={
+                  exportLoading ||
+                  !lat ||
+                  !lng ||
+                  (exportTimeRange === "day" && (!selectedDate || !effectiveSelectedDayPrayerTimes))
+                }
+                className="gap-2 min-h-[44px] sm:w-auto"
+                aria-label="Add to calendar (download .ics)"
+              >
+                {exportLoading ? (
+                  <span className="animate-pulse">Preparing…</span>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4 shrink-0" />
+                    Add to calendar
+                  </>
+                )}
+              </Button>
+              {(!lat || !lng) && (
+                <LocationRequiredCTA
+                  compact
+                  message="Set your location in Settings to include prayer times."
+                  className="sm:ml-0"
+                />
+              )}
+            </div>
+
+            <div className="mt-3 pt-3 border-t border-border flex flex-col sm:flex-row sm:items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={syncRamadanToCalendar}
                 disabled={ramadanPrayersLoading || !lat || !lng || Object.keys(effectiveRamadanTimesMap).length === 0}
-                className="gap-2"
+                className="gap-2 w-full sm:w-auto"
               >
-                {ramadanPrayersLoading ? "Loading…" : <CalendarDays className="w-4 h-4" />}
+                {ramadanPrayersLoading ? "Loading…" : <CalendarDays className="w-4 h-4 shrink-0" />}
                 Sync Ramadan to calendar
               </Button>
-              <span className="text-xs text-muted-foreground self-center">
-                Adds only the selected events above for each Ramadan day (only where not already added). Then export .ics.
+              <span className="text-xs text-muted-foreground">
+                Adds selected events for each Ramadan day (where not already added). Then export above.
               </span>
             </div>
+
             <details className="mt-3 pt-3 border-t border-border">
               <summary className="text-sm font-medium cursor-pointer hover:text-foreground">Default event durations (minutes)</summary>
-              <p className="text-xs text-muted-foreground mt-1 mb-2">Used when you sync Ramadan. You can edit each event after adding.</p>
+              <p className="text-xs text-muted-foreground mt-1 mb-2">Used when you sync Ramadan. Edit each event after adding.</p>
               <div className="flex flex-wrap gap-3 items-center">
                 {(["suhoor", "iftar", "fajr", "dhuhr", "asr", "maghrib", "isha", "taraweeh"] as const).map((type) => (
                   <label key={type} className="flex items-center gap-1.5 text-sm">
@@ -1620,6 +1663,7 @@ const DashboardSchedule = () => {
                     <TooltipTrigger asChild>
                       <button
                         type="button"
+                        data-testid="calendar-day-cell"
                         onClick={() => selectDay(dateStr)}
                         aria-label={`${date.toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric" })}${isToday ? ", Today" : ""}${isSelected ? ", selected" : ""}`}
                         aria-pressed={isSelected}
@@ -2769,6 +2813,9 @@ const DashboardSchedule = () => {
         </div>
       </main>
 
+      {/* Catch up on past days */}
+      <CatchUpDialog open={catchUpOpen} onOpenChange={setCatchUpOpen} todayStr={todayStr} />
+
       {/* Copy meals from another day */}
       <Dialog open={copyMealsFromOpen} onOpenChange={setCopyMealsFromOpen}>
         <DialogContent className="max-w-sm">
@@ -2778,34 +2825,55 @@ const DashboardSchedule = () => {
           </p>
           <ul className="space-y-1 max-h-60 overflow-auto">
             {(() => {
-              const yesterday = new Date(todayStr + "T12:00:00");
+              const todayDate = new Date(todayStr + "T12:00:00");
+              const yesterday = new Date(todayDate);
               yesterday.setDate(yesterday.getDate() - 1);
               const yesterdayStr = toLocalDateString(yesterday);
-              const options: { label: string; dateStr: string }[] = [
-                { label: `Today (${todayStr})`, dateStr: todayStr },
-                { label: `Yesterday (${yesterdayStr})`, dateStr: yesterdayStr },
-                ...lastFiveRamadanDates.map(({ dayNum, dateStr }) => ({
-                  label: `Ramadan Day ${dayNum} (${dateStr})`,
-                  dateStr,
-                })),
-              ];
-              return options.map(({ label, dateStr }) => {
-                const hasPlans = mealPlans[dateStr]?.suhoor || mealPlans[dateStr]?.iftar;
+              const ramadanStart = ramadanRange.startStr ?? toLocalDateString(ramadanRange.start);
+              const ramadanEnd = ramadanRange.endStr ?? toLocalDateString(ramadanRange.end);
+              const options: { label: string; dateStr: string; sortKey: number }[] = [];
+              for (let i = 0; i <= 13; i++) {
+                const d = new Date(todayDate);
+                d.setDate(d.getDate() - i);
+                const dateStr = toLocalDateString(d);
+                const dayNum = ramadanRange.getRamadanDayNumber(d);
+                const label = dayNum != null
+                  ? `Ramadan Day ${dayNum} (${dateStr})`
+                  : i === 0 ? `Today (${dateStr})` : i === 1 ? `Yesterday (${dateStr})` : dateStr;
+                options.push({ label, dateStr, sortKey: i });
+              }
+              const ramadanDays = Array.from({ length: 30 }, (_, i) => {
+                const d = new Date(ramadanStart + "T12:00:00");
+                d.setDate(d.getDate() + i);
+                const dateStr = toLocalDateString(d);
+                if (dateStr > todayStr) return null;
+                return { label: `Ramadan Day ${i + 1} (${dateStr})`, dateStr, sortKey: 100 + i };
+              }).filter(Boolean) as { label: string; dateStr: string; sortKey: number }[];
+              const allOptions = [...options];
+              ramadanDays.forEach((r) => {
+                if (!allOptions.some((o) => o.dateStr === r.dateStr)) allOptions.push(r);
+              });
+              const withMeals = allOptions
+                .filter((o) => mealPlans[o.dateStr]?.suhoor || mealPlans[o.dateStr]?.iftar)
+                .sort((a, b) => new Date(b.dateStr).getTime() - new Date(a.dateStr).getTime());
+              if (withMeals.length === 0) {
                 return (
-                  <li key={dateStr}>
-                    <button
-                      type="button"
-                      onClick={() => copyMealsFromDay(dateStr)}
-                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                        hasPlans ? "hover:bg-muted" : "text-muted-foreground"
-                      }`}
-                    >
-                      {label}
-                      {!hasPlans && " (no meals planned)"}
-                    </button>
+                  <li className="text-sm text-muted-foreground py-4 text-center">
+                    No days with meals planned yet. Plan meals on another day first, then copy here.
                   </li>
                 );
-              });
+              }
+              return withMeals.map(({ label, dateStr }) => (
+                <li key={dateStr}>
+                  <button
+                    type="button"
+                    onClick={() => copyMealsFromDay(dateStr)}
+                    className="w-full text-left px-3 py-2 rounded-lg text-sm transition-colors hover:bg-muted"
+                  >
+                    {label}
+                  </button>
+                </li>
+              ));
             })()}
           </ul>
         </DialogContent>

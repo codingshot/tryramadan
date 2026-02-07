@@ -79,11 +79,10 @@ describe("Calendar / month view", () => {
 
   it("clicking a day cell selects that day and shows day detail", () => {
     renderSchedule();
-    const dayCells = screen.getAllByRole("button", { name: /^\d+$/ }).filter((b) => Number(b.textContent) >= 1 && Number(b.textContent) <= 31);
-    if (dayCells.length > 0) {
-      fireEvent.click(dayCells[5]);
-      expect(screen.getAllByText(/meal plan|food log|prayer|note|journal|completed|fast/i).length).toBeGreaterThan(0);
-    }
+    const dayCells = screen.getAllByTestId("calendar-day-cell");
+    expect(dayCells.length).toBeGreaterThan(0);
+    fireEvent.click(dayCells[5]);
+    expect(screen.getAllByText(/meal plan|food log|prayer|note|journal|completed|fast/i).length).toBeGreaterThan(0);
   });
 
   it("jump to Ramadan navigates calendar to Ramadan month", () => {
@@ -117,11 +116,12 @@ describe("Calendar / month view", () => {
     expect(screen.getByRole("button", { name: /previous month/i })).toBeInTheDocument();
   });
 
-  it("shows Export to calendar section with Download .ics and Sync Ramadan", () => {
+  it("shows Add to calendar section with time/type selects and Sync Ramadan", () => {
     renderSchedule();
-    expect(screen.getByRole("heading", { name: /export to calendar/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /download.*current month/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /ramadan only/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /add to calendar/i })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: /choose time/i })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: /choose add to calendar type/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /add to calendar/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /sync ramadan to calendar/i })).toBeInTheDocument();
   });
 
@@ -150,9 +150,10 @@ describe("Calendar / month view", () => {
     expect(screen.getByText(/dashboard quick access/i)).toBeInTheDocument();
   });
 
-  it("shows What to include in calendar with eat times and prayer options", () => {
+  it("shows Choose add to calendar type and Choose time selects", () => {
     renderSchedule();
-    expect(screen.getByText(/what to include in calendar/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/suhoor end/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/choose add to calendar type/i)).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: /choose add to calendar type/i })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: /choose time/i })).toBeInTheDocument();
   });
 });

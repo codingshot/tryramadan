@@ -1329,12 +1329,12 @@ export function markHadithViewedToday(): void {
   }
 }
 
-export function useHadithViewedDates(): [string[], () => void] {
+export function useHadithViewedDates(): [string[], (date?: string) => void] {
   const [dates, setDates] = useLocalStorage<string[]>(HADITH_VIEWED_DATES_KEY, []);
-  const markToday = React.useCallback(() => {
-    const today = getTodayDateString();
-    if (dates.includes(today)) return;
-    setDates((prev) => [...prev, today].slice(-HADITH_VIEWED_MAX_DAYS));
+  const markToday = React.useCallback((date?: string) => {
+    const target = date ?? getTodayDateString();
+    if (dates.includes(target)) return;
+    setDates((prev) => [...prev, target].slice(-HADITH_VIEWED_MAX_DAYS));
   }, [dates, setDates]);
   return [dates, markToday];
 }
