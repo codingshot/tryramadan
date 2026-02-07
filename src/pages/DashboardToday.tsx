@@ -32,7 +32,8 @@ import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
 import { PrayerLocationBadge } from "@/components/PrayerLocationBadge";
 import { PageSEO } from "@/components/PageSEO";
 import {
-  getDefaultHydrationGoalMl,
+  getRecommendedHydrationGoalMl,
+  getHydrationRecommendationLabel,
   getHydrationUnit,
   formatHydrationAmount,
   formatHydrationGoal,
@@ -54,11 +55,13 @@ const DashboardToday = () => {
     addHydrationEntry,
     addEnergyEntry,
   } = useTodayData();
-  const hydrationGoalMl =
-    preferences.hydrationGoalMl && preferences.hydrationGoalMl > 0
-      ? preferences.hydrationGoalMl
-      : getDefaultHydrationGoalMl(preferences.country || "US");
+  const hydrationGoalMl = getRecommendedHydrationGoalMl(
+    preferences.gender,
+    preferences.country || "US",
+    preferences.hydrationGoalMl
+  );
   const hydrationUnit = getHydrationUnit(preferences.country || "US");
+  const hydrationLabel = getHydrationRecommendationLabel(preferences.gender);
   const hydrationProgressPct = hydrationGoalMl > 0 ? Math.min(100, (hydrationTotalMl / hydrationGoalMl) * 100) : 0;
   const [energyLevel, setEnergyLevel] = useState<1 | 2 | 3 | 4 | 5>(3);
   const [showBreakFast, setShowBreakFast] = useState(false);
@@ -535,7 +538,7 @@ const DashboardToday = () => {
               Hydration • ترطيب
             </h3>
             <p className="text-sm text-muted-foreground mb-3">
-              Goal: {formatHydrationGoal(hydrationGoalMl, hydrationUnit)} (based on your region). Log water during {iftarLabelShort} and before Fajr only.
+              Goal: {formatHydrationGoal(hydrationGoalMl, hydrationUnit)} ({hydrationLabel}). Log water during {iftarLabelShort} and before Fajr only.
             </p>
             <div className="flex flex-wrap items-baseline gap-2 mb-3">
               <span className="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400">
