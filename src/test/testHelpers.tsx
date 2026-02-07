@@ -25,7 +25,7 @@ export const PREFS_WITH_LOCATION = {
 
 export const PREFS_NON_MUSLIM = {
   ...PREFS_WITH_LOCATION,
-  userType: "non-muslim" as const,
+  userType: "new" as const,
 };
 
 /** Wrap with TooltipProvider (and optionally MemoryRouter). Use when you need custom Routes. */
