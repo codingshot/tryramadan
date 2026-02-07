@@ -114,6 +114,38 @@ Prioritized list of improvements to make. Tick off as done.
 
 ---
 
+## Testing & skills verification (latest run)
+
+Tests run against all skills. Key coverage:
+
+| Skill area | Test file(s) | Status |
+|------------|--------------|--------|
+| **testing** | All `src/test/*.ts(x)` | Vitest, RTL, vitest-axe |
+| **ramadan-calendar-and-fasting-logic** | ramadan.test.ts, loggingAndTracking.test.ts | Ramadan dates, fasting states, streak, todayOverride |
+| **local-storage-and-persistence** | localStorage.test.ts | persistPreferencesSync, persistQuickActionsSync, useLocalStorage |
+| **timezone-and-countdown** | countdownAndPrayerTimes.test.ts | getNowSecondsSinceMidnightInTimezone, prayer cache, no-API-when-cached |
+| **offline-and-degraded-network** | prayerTimes.test.ts, countdownAndPrayerTimes.test.ts | Cache key, API failure, cache hit/miss |
+| **accessibility** | accessibility.test.tsx | axe-core: HeroSection, OnboardingWelcome, ArabicHover |
+| **onboarding-and-re-onboarding** | onboardingFlow.test.tsx, onboardingCritical.test.tsx | Complete flow → dashboard, persist prefs |
+| **culture-recipes-authenticity** | cultureData.test.ts, recipesAndUrl.test.tsx | Traditions, recipes, URLs |
+| **data-and-config** | dataLifecycle.test.ts | Config, data files |
+| **qa-bug-reports-and-regression** | BUG-STRK-001 in loggingAndTracking.test.ts | Regression coverage |
+
+**Known test warnings** (non-blocking):
+
+- `fetchPriority` → use lowercase `fetchpriority` (React DOM); HeroSection `<img>`.
+- React Router v7 flags: `v7_startTransition`, `v7_relativeSplatPath` (opt-in for future).
+- `act()` warnings for Tooltip, FastingTimer (radix/framer state updates in tests).
+- axe-core: jsdom `HTMLCanvasElement.prototype.getContext` not implemented (canvas npm); axe still passes.
+- punycode deprecation (Node); consider userland alternative.
+
+**Future test improvements:**
+
+- [ ] Fix `fetchPriority` → `fetchpriority` on HeroSection `<img>` to silence React warning.
+- [ ] Consider wrapping Tooltip/FastingTimer async updates in `act()` where tests trigger radix/framer state.
+
+---
+
 ## Future improvements
 
 - [ ] **React hooks** – Resolve remaining react-hooks/exhaustive-deps warnings where safe; fast-refresh warnings in shadcn/ui can remain.

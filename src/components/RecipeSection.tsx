@@ -72,8 +72,8 @@ export const RecipeSection = () => {
                   </div>
 
                 <div className="pt-3 border-t border-border">
-                  <div className="flex items-start gap-2">
-                    <span className="text-base flex-shrink-0 mt-0.5" aria-hidden>❤️</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-base flex-shrink-0 leading-none" aria-hidden>❤️</span>
                     <p className="text-xs text-muted-foreground">{recipe.benefits}</p>
                   </div>
                 </div>
@@ -154,8 +154,8 @@ export const RecipeSection = () => {
                   </div>
 
                 <div className="pt-3 border-t border-border">
-                  <div className="flex items-start gap-2">
-                    <span className="text-base flex-shrink-0 mt-0.5" aria-hidden>🍽️</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-base flex-shrink-0 leading-none" aria-hidden>🍽️</span>
                     <p className="text-xs text-muted-foreground italic">{recipe.tips}</p>
                   </div>
                 </div>

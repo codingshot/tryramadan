@@ -51,10 +51,10 @@ export const HeroDailySlider = () => {
       const el = sectionRef.current;
       if (!el || !el.contains(document.activeElement)) return;
       if (e.key === "ArrowLeft") {
-        setMode("hadith");
+        setDayOffset((o) => o - 1);
         e.preventDefault();
       } else if (e.key === "ArrowRight") {
-        setMode("quran");
+        setDayOffset((o) => o + 1);
         e.preventDefault();
       }
     };

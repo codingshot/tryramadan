@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { DailyHadith } from "@/components/DailyHadith";
+import { HeroDailySlider } from "@/components/HeroDailySlider";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import dailyFactsData from "@/data/daily-facts.json";
 import { Button } from "@/components/ui/button";
@@ -173,14 +173,14 @@ const DashboardLearn = () => {
             <p className="text-sm text-muted-foreground">{dailyFact.content}</p>
           </motion.div>
 
-          {/* Daily Hadith */}
+          {/* Daily Hadith & Quran (tabs + day arrows) */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             className="mb-8"
           >
-            <DailyHadith />
+            <HeroDailySlider />
           </motion.div>
 
           {/* Quiz */}
