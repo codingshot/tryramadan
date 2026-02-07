@@ -7,7 +7,7 @@ import { useUserPreferences, useFastingProgress, isFastingToday, useDisplayTimez
 import { useAutoLocation } from "@/hooks/useLocation";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
-export const Navbar = () => {
+export function Navbar() {
   const { pathname } = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [localTime, setLocalTime] = useState("");
@@ -251,4 +251,4 @@ export const Navbar = () => {
 
     </>
   );
-};
+}
