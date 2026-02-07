@@ -25,7 +25,7 @@ type Country = {
   specialNote: string;
 };
 
-const allCountries: Country[] = (culturalData as { regions: { name: string; countries: Country[] }[] }).regions.flatMap((r) =>
+const allCountries: Country[] = ((culturalData as unknown) as { regions: { name: string; countries: Omit<Country, 'regionName'>[] }[] }).regions.flatMap((r) =>
   r.countries.map((c) => ({ ...c, regionName: r.name }))
 );
 

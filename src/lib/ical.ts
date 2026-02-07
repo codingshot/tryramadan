@@ -173,7 +173,7 @@ export function buildIcalContent(options: ExportOptions): string {
       if (includeTypes) {
         TYPE_TO_SUMMARY_AND_KEY.forEach(({ type, summary, timeKey }) => {
           if (includeTypes[type] !== false) {
-            const time = (pt as Record<string, string>)[timeKey] ?? "";
+            const time = (pt as unknown as Record<string, string>)[timeKey] ?? "";
             if (time && time.trim())
               events.push(eventToIcal(summary, dateStr, time, durations[type] ?? 5, tz));
           }

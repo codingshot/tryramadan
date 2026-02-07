@@ -120,7 +120,7 @@ describe("buildIcalContent", () => {
       prayerTimesMap,
       customEvents: {
         "2025-03-01": [
-          { title: "Break fast early", time: "18:00", durationMinutes: 15 },
+          { id: "test-1", title: "Break fast early", time: "18:00", durationMinutes: 15, type: "custom", date: "2025-03-01" },
         ],
       },
       dateRange: [startStr, endStr],

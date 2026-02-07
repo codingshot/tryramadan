@@ -84,7 +84,7 @@ function PageFallback() {
 }
 
 /** Scroll to top when the route changes so each page starts at the top. */
-function ScrollToTop() {
+function ScrollToTop(): null {
   const { pathname } = useLocation();
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
@@ -94,7 +94,7 @@ function ScrollToTop() {
 }
 
 /** After "Clear all data", show Undo toast on reload (HISTORICAL-DATA undo reset). */
-function UndoClearAllToast() {
+function UndoClearAllToast(): null {
   useEffect(() => {
     const backup = getUndoBackup();
     if (!backup) return;
@@ -106,12 +106,12 @@ function UndoClearAllToast() {
   return null;
 }
 
-function KeyboardShortcutsManager() {
+function KeyboardShortcutsManager(): null {
   useKeyboardShortcuts();
   return null;
 }
 
-function ThemeSync() {
+function ThemeSync(): null {
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem("tryramadan-preferences");

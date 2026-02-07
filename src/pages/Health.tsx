@@ -226,7 +226,7 @@ export default function Health() {
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 text-green-600 flex-shrink-0" />
-                  {preferences?.userType === "non-muslim"
+                  {preferences?.userType === "new"
                     ? "Traditionally, Muslims break fast with dates and water (Sunnah), then a light meal."
                     : "Break fast with dates and water (following the Sunnah), then a light meal."}
                 </li>
