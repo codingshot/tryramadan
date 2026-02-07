@@ -32,7 +32,8 @@ export const HeroSection = () => {
           width={1920}
           height={1080}
           decoding="async"
-          fetchPriority="high"
+          // @ts-expect-error -- React 18 lowercase attribute for fetchpriority
+          fetchpriority="high"
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
         
@@ -74,7 +75,8 @@ export const HeroSection = () => {
                   width={112}
                   height={112}
                   decoding="async"
-                  fetchPriority="low"
+                  // @ts-expect-error -- React 18 lowercase attribute for fetchpriority
+                  fetchpriority="low"
                   className="w-20 h-20 md:w-28 md:h-28 drop-shadow-2xl"
                 />
               </motion.picture>

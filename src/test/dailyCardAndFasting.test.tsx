@@ -67,8 +67,9 @@ describe("Daily card and fasting", () => {
   describe("Dashboard renders daily card with realistic props", () => {
     it("renders day selector with previous and next day buttons", () => {
       renderDashboard();
-      expect(screen.getByRole("button", { name: /previous day/i })).toBeInTheDocument();
-      expect(screen.getByRole("button", { name: /next day/i })).toBeInTheDocument();
+      // There may be multiple prev/next day buttons (schedule view + day selector)
+      expect(screen.getAllByRole("button", { name: /previous day/i }).length).toBeGreaterThan(0);
+      expect(screen.getAllByRole("button", { name: /next day/i }).length).toBeGreaterThan(0);
     });
 
     it("renders fasting status or eating window text", () => {
@@ -176,13 +177,16 @@ describe("Daily card and fasting", () => {
   describe("Switching days", () => {
     it("previous/next day changes selected date and day view content", () => {
       renderDashboard();
-      const prevBtn = screen.getByRole("button", { name: /previous day/i });
-      const nextBtn = screen.getByRole("button", { name: /next day/i });
-      fireEvent.click(prevBtn);
-      fireEvent.click(prevBtn);
-      fireEvent.click(nextBtn);
-      expect(prevBtn).toBeInTheDocument();
-      expect(nextBtn).toBeInTheDocument();
+      // There may be multiple prev/next day buttons (schedule view + day selector)
+      const prevBtns = screen.getAllByRole("button", { name: /previous day/i });
+      const nextBtns = screen.getAllByRole("button", { name: /next day/i });
+      expect(prevBtns.length).toBeGreaterThan(0);
+      expect(nextBtns.length).toBeGreaterThan(0);
+      fireEvent.click(prevBtns[0]);
+      fireEvent.click(prevBtns[0]);
+      fireEvent.click(nextBtns[0]);
+      expect(prevBtns[0]).toBeInTheDocument();
+      expect(nextBtns[0]).toBeInTheDocument();
     });
   });
 
@@ -246,8 +250,8 @@ describe("Daily card and fasting", () => {
     });
   });
 
-  describe("Non-Muslim mode: fasting and meal tracking still available", () => {
-    it("renders dashboard with Today, Schedule, and Meals when userType is non-muslim", () => {
+  describe("New user mode: fasting and meal tracking still available", () => {
+    it("renders dashboard with Today, Schedule, and Meals when userType is new", () => {
       localStorage.setItem("tryramadan-preferences", JSON.stringify(PREFS_NON_MUSLIM));
       renderDashboard();
       expect(screen.getByRole("link", { name: /^today$/i })).toBeInTheDocument();

@@ -20,8 +20,8 @@ interface BreakFastReasonDialogProps {
   onSelectReason: (reasonId: string, brokeAt?: string) => void;
   /** Optional title override */
   title?: string;
-  /** When non-Muslim, show tooltip on Travel reason (COPY-AUDIT) */
-  userType?: "muslim" | "non-muslim" | "new" | null;
+  /** When non-Muslim (new), show tooltip on Travel reason (COPY-AUDIT) */
+  userType?: "muslim" | "new" | null;
   /** When true, show reminder that it's not fasting period and they're logging a break during the fasting window */
   notInFastingPeriod?: boolean;
 }
@@ -111,7 +111,7 @@ export function BreakFastReasonDialog({
         </p>
         <ul className="space-y-2 mt-2">
           {BROKEN_FAST_REASONS.map(({ id, label }) => {
-            const isTravelNonMuslim = id === "travel" && userType === "non-muslim";
+            const isTravelNewUser = id === "travel" && userType === "new";
             const button = (
               <button
                 type="button"
@@ -128,7 +128,7 @@ export function BreakFastReasonDialog({
             );
             return (
               <li key={id}>
-                {isTravelNonMuslim ? (
+                {isTravelNewUser ? (
                   <Tooltip>
                     <TooltipTrigger asChild>{button}</TooltipTrigger>
                     <TooltipContent side="top" className="max-w-xs">
