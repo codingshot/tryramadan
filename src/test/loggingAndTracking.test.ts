@@ -16,6 +16,7 @@ import {
   getDailyMissions,
   normalizeDayFoodLog,
   getDayTotalsFromFoodLog,
+  planToFoodLogEntries,
   hoursBetween,
   breakFastingToday,
   updateBrokenReason,
@@ -26,6 +27,7 @@ import {
   getPrayerCountForDate,
   getPrayerStreak,
   getTotalPrayerCount,
+  getJournalStreak,
   type FastingProgress,
   type DayFoodLog,
 } from "@/hooks/useLocalStorage";
@@ -213,6 +215,70 @@ describe("Food log edge cases", () => {
     expect(totals.protein).toBe(0);
     expect(totals.carbs).toBe(0);
     expect(totals.fat).toBe(0);
+  });
+});
+
+describe("planToFoodLogEntries", () => {
+  const mockGetRecipe = (mealType: "suhoor" | "iftar", id: number) =>
+    ({ name: `Recipe-${mealType}-${id}`, nutrition: { calories: 100 + id, protein: "5", carbs: "10", fat: "3" } });
+  const parseNutrient = (s: string | undefined) => (s ? parseFloat(s) : 0) || 0;
+
+  it("returns empty suhoor and iftar for empty plan", () => {
+    const out = planToFoodLogEntries({}, mockGetRecipe, parseNutrient);
+    expect(out.suhoor).toEqual([]);
+    expect(out.iftar).toEqual([]);
+  });
+
+  it("parses recipe keys and creates recipe entries with nutrition", () => {
+    const out = planToFoodLogEntries(
+      { suhoor: "suhoor-1", iftar: "iftar-2" },
+      mockGetRecipe,
+      parseNutrient
+    );
+    expect(out.suhoor).toHaveLength(1);
+    expect(out.suhoor[0].type).toBe("recipe");
+    expect(out.suhoor[0].name).toBe("Recipe-suhoor-1");
+    expect(out.suhoor[0].caloriesPerPortion).toBe(101);
+    expect(out.suhoor[0].recipeId).toBe("suhoor-1");
+    expect(out.iftar).toHaveLength(1);
+    expect(out.iftar[0].name).toBe("Recipe-iftar-2");
+    expect(out.iftar[0].caloriesPerPortion).toBe(102);
+  });
+
+  it("treats plain text as custom entry with 0 calories", () => {
+    const out = planToFoodLogEntries(
+      { suhoor: "Oats and dates" },
+      mockGetRecipe,
+      parseNutrient
+    );
+    expect(out.suhoor).toHaveLength(1);
+    expect(out.suhoor[0].type).toBe("custom");
+    expect(out.suhoor[0].name).toBe("Oats and dates");
+    expect(out.suhoor[0].caloriesPerPortion).toBe(0);
+  });
+
+  it("ignores wrong meal type recipe key in suhoor string", () => {
+    const out = planToFoodLogEntries(
+      { suhoor: "iftar-2" },
+      mockGetRecipe,
+      parseNutrient
+    );
+    expect(out.suhoor).toHaveLength(1);
+    expect(out.suhoor[0].type).toBe("custom");
+    expect(out.suhoor[0].name).toBe("iftar-2");
+  });
+
+  it("splits comma-separated mix of recipe keys and text", () => {
+    const out = planToFoodLogEntries(
+      { suhoor: "suhoor-1, Plain yogurt, suhoor-3" },
+      mockGetRecipe,
+      parseNutrient
+    );
+    expect(out.suhoor).toHaveLength(3);
+    expect(out.suhoor[0].name).toBe("Recipe-suhoor-1");
+    expect(out.suhoor[1].name).toBe("Plain yogurt");
+    expect(out.suhoor[1].type).toBe("custom");
+    expect(out.suhoor[2].name).toBe("Recipe-suhoor-3");
   });
 });
 
@@ -449,5 +515,53 @@ describe("Prayer completion helpers", () => {
   it("getPrayerCountForDate handles malformed day object (string) as empty", () => {
     const t = { "2025-03-15": "invalid" as unknown as Record<string, boolean> };
     expect(getPrayerCountForDate(t, "2025-03-15")).toBe(0);
+  });
+});
+
+describe("getJournalStreak (non-fasting achievements)", () => {
+  it("returns 0 for empty entries", () => {
+    expect(getJournalStreak([])).toBe(0);
+  });
+
+  it("counts consecutive days ending today with at least one journal entry", () => {
+    const today = toLocalDateString(new Date());
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    const yesterday = toLocalDateString(d);
+    d.setDate(d.getDate() - 1);
+    const twoDaysAgo = toLocalDateString(d);
+    const entries = [
+      { date: today },
+      { date: yesterday },
+      { date: twoDaysAgo },
+    ];
+    expect(getJournalStreak(entries)).toBe(3);
+  });
+
+  it("uses unique dates (multiple entries same day count as one day)", () => {
+    const today = toLocalDateString(new Date());
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    const yesterday = toLocalDateString(d);
+    const entries = [
+      { date: today, slot: "morning" },
+      { date: today, slot: "general" },
+      { date: yesterday },
+    ];
+    expect(getJournalStreak(entries)).toBe(2);
+  });
+
+  it("stops at first day without an entry", () => {
+    const today = toLocalDateString(new Date());
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    const yesterday = toLocalDateString(d);
+    d.setDate(d.getDate() - 1);
+    const twoDaysAgo = toLocalDateString(d);
+    const entries = [
+      { date: today },
+      { date: twoDaysAgo },
+    ];
+    expect(getJournalStreak(entries)).toBe(1);
   });
 });

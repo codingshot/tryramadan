@@ -104,4 +104,83 @@ describe("Journal editor", () => {
       expect(entries.some((e: { mood?: number }) => e.mood != null)).toBe(true);
     }
   });
+
+  describe("past entries search, sort, and filters", () => {
+    const entriesWithVariety = [
+      { date: "2025-01-01", prompt: "P", content: "First day reflection", gratitude: "family", mood: 1, slot: "general" },
+      { date: "2025-01-02", prompt: "P", content: "Second day with keyword coffee", gratitude: undefined, mood: 3, slot: "morning" },
+      { date: "2025-01-03", prompt: "P", content: "Third entry", gratitude: "health", mood: 5, slot: "general" },
+    ];
+
+    beforeEach(() => {
+      localStorage.setItem("tryramadan-journal", JSON.stringify(entriesWithVariety));
+    });
+
+    it("search filters entries by content", () => {
+      renderJournal();
+      const searchInput = screen.getByRole("searchbox", { name: /search past journal/i });
+      fireEvent.change(searchInput, { target: { value: "coffee" } });
+      expect(screen.getByText(/keyword coffee/)).toBeInTheDocument();
+      expect(screen.queryByText(/First day reflection/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Third entry/)).not.toBeInTheDocument();
+    });
+
+    it("search filters by gratitude", () => {
+      renderJournal();
+      const searchInput = screen.getByRole("searchbox", { name: /search past journal/i });
+      fireEvent.change(searchInput, { target: { value: "health" } });
+      expect(screen.getByText(/Third entry/)).toBeInTheDocument();
+      expect(screen.queryByText(/First day reflection/)).not.toBeInTheDocument();
+    });
+
+    it("sort oldest first shows entries in date ascending order", () => {
+      renderJournal();
+      const sortTrigger = screen.getByRole("combobox", { name: /sort order/i });
+      fireEvent.click(sortTrigger);
+      const oldestFirst = screen.getByRole("option", { name: /oldest first/i });
+      fireEvent.click(oldestFirst);
+      const pastSection = document.getElementById("past-entries");
+      const listItems = pastSection ? Array.from(pastSection.querySelectorAll("ul li")) : [];
+      expect(listItems.length).toBeGreaterThanOrEqual(3);
+      const firstEntryContent = listItems[0].textContent ?? "";
+      expect(firstEntryContent).toMatch(/First day|2025-01-01/);
+    });
+
+    it("filter by slot shows only matching entries", () => {
+      renderJournal();
+      const slotTrigger = screen.getByRole("combobox", { name: /filter by slot/i });
+      fireEvent.click(slotTrigger);
+      const morning = screen.getByRole("option", { name: /morning/i });
+      fireEvent.click(morning);
+      expect(screen.getByText(/keyword coffee/)).toBeInTheDocument();
+      expect(screen.queryByText(/First day reflection/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Third entry/)).not.toBeInTheDocument();
+    });
+
+    it("filter by mood shows only matching entries", () => {
+      renderJournal();
+      const moodTrigger = screen.getByRole("combobox", { name: /filter by mood/i });
+      fireEvent.click(moodTrigger);
+      const good = screen.getByRole("option", { name: /good/i });
+      fireEvent.click(good);
+      expect(screen.getByText(/keyword coffee/)).toBeInTheDocument();
+      expect(screen.queryByText(/First day reflection/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Third entry/)).not.toBeInTheDocument();
+    });
+
+    it("no match shows empty filter message", () => {
+      renderJournal();
+      const searchInput = screen.getByRole("searchbox", { name: /search past journal/i });
+      fireEvent.change(searchInput, { target: { value: "xyznonexistent123" } });
+      expect(screen.getByText(/no entries match your search or filters/i)).toBeInTheDocument();
+    });
+
+    it("search input and sort/filter controls are present and accessible", () => {
+      renderJournal();
+      expect(screen.getByRole("searchbox", { name: /search past journal/i })).toBeInTheDocument();
+      expect(screen.getByRole("combobox", { name: /sort order/i })).toBeInTheDocument();
+      expect(screen.getByRole("combobox", { name: /filter by slot/i })).toBeInTheDocument();
+      expect(screen.getByRole("combobox", { name: /filter by mood/i })).toBeInTheDocument();
+    });
+  });
 });

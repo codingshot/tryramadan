@@ -131,11 +131,18 @@ function FoodLogRow({
   const totalP = entry.proteinPerPortion != null ? Math.round(entry.proteinPerPortion * entry.portions) : null;
   const totalC = entry.carbsPerPortion != null ? Math.round(entry.carbsPerPortion * entry.portions) : null;
   const totalF = entry.fatPerPortion != null ? Math.round(entry.fatPerPortion * entry.portions) : null;
+  const recipeEmoji = entry.recipeId ? (() => {
+    const [mt, idStr] = entry.recipeId.split("-");
+    const id = parseInt(idStr, 10);
+    const r = getRecipe(mt as MealType, id);
+    return r?.emoji;
+  })() : undefined;
   return (
     <li className="flex flex-wrap items-center gap-2 text-sm py-1 border-b border-border/50 last:border-0">
       {entry.imageDataUrl ? (
         <img src={entry.imageDataUrl} alt="" className="h-10 w-10 rounded object-cover shrink-0 border border-border" />
       ) : null}
+      {recipeEmoji && <span className="shrink-0" aria-hidden>{recipeEmoji}</span>}
       <span className="font-medium min-w-0 truncate">{entry.name}</span>
       <span className="text-muted-foreground shrink-0">
         <input
@@ -304,6 +311,8 @@ const DashboardSchedule = () => {
   const [countdownToIftar, setCountdownToIftar] = useState({ h: 0, m: 0, s: 0 });
   const [countdownToSuhoor, setCountdownToSuhoor] = useState({ h: 0, m: 0, s: 0 });
   const [copyMealsFromOpen, setCopyMealsFromOpen] = useState(false);
+  const [copyMealsToSelectedOpen, setCopyMealsToSelectedOpen] = useState(false);
+  const [copyToSelectedDates, setCopyToSelectedDates] = useState<Set<string>>(new Set());
   const [catchUpOpen, setCatchUpOpen] = useState(false);
   const [scheduleTableSort, setScheduleTableSort] = useState<"date" | "hoursAsc" | "hoursDesc">("date");
   const [scheduleTableMonthOnly, setScheduleTableMonthOnly] = useState(false);
@@ -572,6 +581,62 @@ const DashboardSchedule = () => {
     });
     toast.success(`Meals copied to ${dateStrs.length} day(s) through end of Ramadan.`);
   }, [selectedDate, todayStr, mealPlans, setMealPlans, ramadanRange.end]);
+
+  /** Copy selected day's meals to the next 6 days (7 days total including selected). Only today and future. */
+  const copyMealsToThisWeek = useCallback(() => {
+    if (!selectedDate) return;
+    const source = mealPlans[selectedDate];
+    if (!source?.suhoor && !source?.iftar) {
+      toast.info("This day has no meals planned to copy.");
+      return;
+    }
+    const dateStrs: string[] = [];
+    const start = new Date(selectedDate + "T12:00:00");
+    for (let i = 1; i <= 6; i++) {
+      const d = new Date(start);
+      d.setDate(d.getDate() + i);
+      const str = toLocalDateString(d);
+      if (str >= todayStr) dateStrs.push(str);
+    }
+    if (dateStrs.length === 0) {
+      toast.info("No future days in this week to copy to.");
+      return;
+    }
+    setMealPlans((prev) => {
+      const next = { ...prev };
+      dateStrs.forEach((str) => {
+        next[str] = { ...(next[str] ?? {}), ...source };
+      });
+      return next;
+    });
+    toast.success(`Meals copied to ${dateStrs.length} day(s) (this week).`);
+  }, [selectedDate, todayStr, mealPlans, setMealPlans]);
+
+  /** Copy selected day's meals to the set of dates chosen in the "Copy to selected days" dialog. */
+  const copyMealsToSelectedDays = useCallback(() => {
+    if (!selectedDate || copyToSelectedDates.size === 0) return;
+    const source = mealPlans[selectedDate];
+    if (!source?.suhoor && !source?.iftar) {
+      toast.info("This day has no meals planned to copy.");
+      return;
+    }
+    const dateStrs = [...copyToSelectedDates].filter((str) => str >= todayStr && str !== selectedDate);
+    if (dateStrs.length === 0) {
+      toast.info("No future days selected to copy to.");
+      setCopyMealsToSelectedOpen(false);
+      return;
+    }
+    setMealPlans((prev) => {
+      const next = { ...prev };
+      dateStrs.forEach((str) => {
+        next[str] = { ...(next[str] ?? {}), ...source };
+      });
+      return next;
+    });
+    toast.success(`Meals copied to ${dateStrs.length} day(s).`);
+    setCopyToSelectedDates(new Set());
+    setCopyMealsToSelectedOpen(false);
+  }, [selectedDate, todayStr, mealPlans, setMealPlans, copyToSelectedDates]);
 
   const prevMonth = () =>
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
@@ -2490,6 +2555,15 @@ const DashboardSchedule = () => {
                               >
                                 Copy to next day
                               </Button>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={copyMealsToThisWeek}
+                                className="gap-1"
+                              >
+                                Copy to this week
+                              </Button>
                               {selectedIsRamadan && (
                                 <Button
                                   type="button"
@@ -2498,9 +2572,18 @@ const DashboardSchedule = () => {
                                   onClick={copyMealsToRemainingRamadan}
                                   className="gap-1"
                                 >
-                                  Copy to remaining Ramadan days
+                                  Copy to rest of Ramadan
                                 </Button>
                               )}
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCopyMealsToSelectedOpen(true)}
+                                className="gap-1"
+                              >
+                                Copy to selected days…
+                              </Button>
                             </>
                           )}
                         </div>
@@ -2923,6 +3006,85 @@ const DashboardSchedule = () => {
               ));
             })()}
           </ul>
+        </DialogContent>
+      </Dialog>
+
+      {/* Copy to selected days */}
+      <Dialog
+        open={copyMealsToSelectedOpen}
+        onOpenChange={(open) => {
+          if (!open) setCopyToSelectedDates(new Set());
+          setCopyMealsToSelectedOpen(open);
+        }}
+      >
+        <DialogContent className="max-w-sm">
+          <DialogTitle>Copy meals to selected days</DialogTitle>
+          <p className="text-xs text-muted-foreground mb-3">
+            Copy this day&apos;s meal plan to the days you check below. Only future days are applied.
+          </p>
+          {(() => {
+            const start = new Date((selectedDate ?? todayStr) + "T12:00:00");
+            start.setDate(start.getDate() + 1);
+            const end = new Date(start);
+            end.setDate(end.getDate() + 29);
+            const ramadanEnd = ramadanRange.end ? new Date(ramadanRange.end) : end;
+            const lastDate = end > ramadanEnd ? ramadanEnd : end;
+            const candidateDates: string[] = [];
+            for (const d = new Date(start); d <= lastDate; d.setDate(d.getDate() + 1)) {
+              const str = toLocalDateString(d);
+              if (str >= todayStr) candidateDates.push(str);
+            }
+            const toggle = (dateStr: string) => {
+              setCopyToSelectedDates((prev) => {
+                const next = new Set(prev);
+                if (next.has(dateStr)) next.delete(dateStr);
+                else next.add(dateStr);
+                return next;
+              });
+            };
+            const selectAll = () => setCopyToSelectedDates(new Set(candidateDates));
+            const clearAll = () => setCopyToSelectedDates(new Set());
+            return (
+              <>
+                <div className="flex gap-2 mb-2">
+                  <Button type="button" variant="outline" size="sm" onClick={selectAll}>Select all</Button>
+                  <Button type="button" variant="outline" size="sm" onClick={clearAll}>Clear</Button>
+                </div>
+                <ul className="space-y-1 max-h-48 overflow-auto border rounded-lg p-2">
+                  {candidateDates.length === 0 ? (
+                    <li className="text-sm text-muted-foreground py-2 text-center">No future days in range.</li>
+                  ) : (
+                    candidateDates.map((dateStr) => {
+                      const dayNum = ramadanRange.getRamadanDayNumber(new Date(dateStr + "T12:00:00"));
+                      const label = dayNum != null ? `Day ${dayNum} · ${dateStr}` : dateStr;
+                      return (
+                        <li key={dateStr}>
+                          <label className="flex items-center gap-2 cursor-pointer py-1 rounded hover:bg-muted/50 px-2">
+                            <input
+                              type="checkbox"
+                              checked={copyToSelectedDates.has(dateStr)}
+                              onChange={() => toggle(dateStr)}
+                              className="rounded border-input"
+                              aria-label={`Select ${dateStr}`}
+                            />
+                            <span className="text-sm">{label}</span>
+                          </label>
+                        </li>
+                      );
+                    })
+                  )}
+                </ul>
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button type="button" variant="outline" onClick={() => setCopyMealsToSelectedOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="button" onClick={copyMealsToSelectedDays}>
+                    Apply to {copyToSelectedDates.size} day{copyToSelectedDates.size !== 1 ? "s" : ""}
+                  </Button>
+                </div>
+              </>
+            );
+          })()}
         </DialogContent>
       </Dialog>
 

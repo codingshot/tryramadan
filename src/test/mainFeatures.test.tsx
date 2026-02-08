@@ -21,6 +21,7 @@ import DashboardCulture from "@/pages/DashboardCulture";
 import DashboardHealth from "@/pages/DashboardHealth";
 import DashboardGoals from "@/pages/DashboardGoals";
 import DashboardProgress from "@/pages/DashboardProgress";
+import DashboardAchievements from "@/pages/DashboardAchievements";
 import Settings from "@/pages/Settings";
 import Culture from "@/pages/Culture";
 import CultureCountry from "@/pages/CultureCountry";
@@ -133,6 +134,13 @@ describe("Dashboard main pages", () => {
   it("dashboard progress page renders progress content", () => {
     renderAt("/dashboard/progress", <DashboardProgress />);
     expect(screen.getAllByText(/progress|day|streak|ramadan|completed/i).length).toBeGreaterThan(0);
+  });
+
+  it("dashboard achievements page renders badges and progress link", () => {
+    renderAt("/dashboard/achievements", <DashboardAchievements />);
+    expect(screen.getByRole("heading", { name: /achievements/i })).toBeInTheDocument();
+    expect(screen.getAllByText(/badges|earned|upcoming/i).length).toBeGreaterThan(0);
+    expect(screen.getByRole("link", { name: /view full progress/i })).toBeInTheDocument();
   });
 });
 

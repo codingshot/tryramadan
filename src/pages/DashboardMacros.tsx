@@ -17,6 +17,7 @@ import {
   ImagePlus,
   LayoutList,
   Grid3X3,
+  TrendingUp,
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -35,21 +36,25 @@ import {
   useDailyGoals,
   useUserPreferences,
   getRecommendedCaloriesFromPreferences,
+  getRecommendedCaloriesExplanation,
   useDayPlannedItems,
   useDayFoodLog,
+  useFastingProgress,
   getDayTotalsFromPlanned,
   getDayTotalsFromFoodLog,
   normalizeDayFoodLog,
   clampCalories,
   useDisplayTimezone,
+  getBrokenReasonLabel,
   type MealCategory,
   type PlannedItem,
   type FoodLogEntry,
 } from "@/hooks/useLocalStorage";
 import { getTodayStringInTimezone, toLocalDateString } from "@/lib/utils";
 import recipesData from "@/data/recipes.json";
-import { parseNutrient, getAllCountries } from "@/lib/cultureRecipes";
+import { parseNutrient, getAllCountries, getRecipe, type MealType } from "@/lib/cultureRecipes";
 import { resizeImageToDataUrl } from "@/lib/foodImage";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 
 const MEAL_LABELS: Record<MealCategory, { label: string; Icon: typeof Sunrise }> = {
@@ -128,7 +133,19 @@ export default function DashboardMacros() {
   const [dailyGoals, setDailyGoals] = useDailyGoals();
   const [planned, setPlanned] = useDayPlannedItems();
   const [foodLogs, setFoodLogs] = useDayFoodLog();
+  const [progress] = useFastingProgress();
   const recommendedCal = getRecommendedCaloriesFromPreferences(preferences);
+
+  /** Fasting status for the selected day (for display on macro tracker). */
+  const selectedDayFastingStatus = useMemo(() => {
+    const date = selectedDate;
+    if ((progress.completedDays ?? []).includes(date)) return "completed";
+    if ((progress.skippedDays ?? []).includes(date)) return "skipped";
+    const logEntry = (progress.fastingLog ?? []).find((e) => e.date === date);
+    if (logEntry?.status === "broken") return "broken";
+    if (logEntry?.status === "in_progress") return "in_progress";
+    return null;
+  }, [progress.completedDays, progress.skippedDays, progress.fastingLog, selectedDate]);
   const hasRecommendation = preferences.sexForCalories != null || (preferences.bodyWeightKg != null && preferences.bodyWeightKg > 0);
   const canUseRecommended = hasRecommendation && recommendedCal !== dailyGoals.calories;
 
@@ -190,6 +207,12 @@ export default function DashboardMacros() {
   }, [foodLogs]);
 
   const mealHistoryWithImages = useMemo(() => mealHistoryEntries.filter((x) => x.entry.imageDataUrl), [mealHistoryEntries]);
+
+  /** Recent fasting log entries (last 14), newest first, for fasting history block. */
+  const recentFastingLog = useMemo(
+    () => (progress.fastingLog ?? []).slice(-14).reverse(),
+    [progress.fastingLog]
+  );
 
   const addPlanned = () => {
     const name = planForm.name.trim() || "Planned item";
@@ -345,26 +368,47 @@ export default function DashboardMacros() {
             </p>
           </motion.header>
 
-          {/* Day selector */}
+          {/* Day selector + fasting status for this day */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05 }}
-            className="flex items-center justify-between gap-4 mb-6 p-3 rounded-2xl bg-card border border-border"
+            className="mb-6 space-y-2"
           >
-            <Button variant="outline" size="icon" onClick={goPrevDay} aria-label="Previous day">
-              <ChevronLeft className="w-5 h-5" />
-            </Button>
-            <div className="flex items-center gap-2">
-              <Calendar className="w-5 h-5 text-secondary" />
-              <span className="font-semibold">
-                {selectedDateObj.toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
-                {isToday && " (Today)"}
-              </span>
+            <div className="flex items-center justify-between gap-4 p-3 rounded-2xl bg-card border border-border">
+              <Button variant="outline" size="icon" onClick={goPrevDay} aria-label="Previous day">
+                <ChevronLeft className="w-5 h-5" />
+              </Button>
+              <div className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-secondary" />
+                <span className="font-semibold">
+                  {selectedDateObj.toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
+                  {isToday && " (Today)"}
+                </span>
+              </div>
+              <Button variant="outline" size="icon" onClick={goNextDay} aria-label="Next day">
+                <ChevronRight className="w-5 h-5" />
+              </Button>
             </div>
-            <Button variant="outline" size="icon" onClick={goNextDay} aria-label="Next day">
-              <ChevronRight className="w-5 h-5" />
-            </Button>
+            <div className="flex flex-wrap items-center gap-2 px-3 py-2 rounded-xl bg-muted/30 border border-border text-sm">
+              <span className="text-muted-foreground">Fasting this day:</span>
+              {selectedDayFastingStatus === "completed" && (
+                <span className="px-2 py-0.5 rounded-full bg-secondary/20 text-secondary font-medium">Completed</span>
+              )}
+              {selectedDayFastingStatus === "skipped" && (
+                <span className="px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">Skipped</span>
+              )}
+              {selectedDayFastingStatus === "broken" && (
+                <span className="px-2 py-0.5 rounded-full bg-destructive/20 text-destructive font-medium">Broken</span>
+              )}
+              {selectedDayFastingStatus === "in_progress" && (
+                <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-400 font-medium">In progress</span>
+              )}
+              {selectedDayFastingStatus == null && (
+                <span className="text-muted-foreground">Not logged</span>
+              )}
+              <Link to="/dashboard/schedule" className="text-xs text-secondary hover:underline ml-auto">Set on Schedule →</Link>
+            </div>
           </motion.div>
 
           {/* Daily goals */}
@@ -379,7 +423,27 @@ export default function DashboardMacros() {
               Daily goals
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-              <div><span className="text-muted-foreground">Calories</span><span className="block font-bold">{dailyGoals.calories}</span></div>
+              <div>
+                <span className="text-muted-foreground">Calories</span>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link
+                      to="/settings#daily-calorie-goal"
+                      className="block font-bold text-foreground hover:text-secondary hover:underline cursor-pointer border-b border-dotted border-transparent hover:border-secondary/50 w-fit focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
+                      aria-label="How we got this goal (click to change in Settings)"
+                    >
+                      {dailyGoals.calories}
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-xs p-3">
+                    <p className="font-medium text-sm mb-1">How we got this goal</p>
+                    <p className="text-xs text-muted-foreground">{getRecommendedCaloriesExplanation(preferences)}</p>
+                    <Link to="/settings#daily-calorie-goal" className="text-xs text-secondary hover:underline mt-2 inline-block font-medium">
+                      Click to change in Settings →
+                    </Link>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
               <div><span className="text-muted-foreground">Protein</span><span className="block font-bold">{dailyGoals.protein}g</span></div>
               <div><span className="text-muted-foreground">Carbs</span><span className="block font-bold">{dailyGoals.carbs}g</span></div>
               <div><span className="text-muted-foreground">Fat</span><span className="block font-bold">{dailyGoals.fat}g</span></div>
@@ -561,8 +625,10 @@ export default function DashboardMacros() {
             transition={{ delay: 0.14 }}
             className="mb-6 p-4 rounded-2xl bg-card border border-border"
           >
-            <h2 className="font-display font-bold mb-3">Actual food eaten (logs)</h2>
-            <p className="text-sm text-muted-foreground mb-3">Quick add what you ate:</p>
+            <h2 className="font-display font-bold mb-3">Log food for this day</h2>
+            <p className="text-sm text-muted-foreground mb-3">
+              Food is logged for <strong>{selectedDateObj.toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric" })}</strong>. Choose a meal (Suhoor, Iftar, or between), then add what you ate—each item is saved for that day and meal.
+            </p>
             <div className="flex flex-wrap gap-2 mb-4">
               {(["suhoor", "iftar", "between"] as const).map((m) => {
                 const { label, Icon } = MEAL_LABELS[m];
@@ -793,6 +859,66 @@ export default function DashboardMacros() {
             </div>
           </motion.div>
 
+          {/* Fasting history: recent fasts (date, time, status) */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="mb-8 p-4 rounded-2xl bg-card border border-border"
+          >
+            <h2 className="font-display font-bold mb-3 flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-secondary" aria-hidden />
+              Fasting history
+            </h2>
+            {recentFastingLog.length > 0 ? (
+              <>
+                <ul className="space-y-2 text-sm max-h-[240px] overflow-y-auto">
+                  {recentFastingLog.map((entry) => (
+                    <li
+                      key={entry.date}
+                      className="flex items-center justify-between gap-2 py-2 border-b border-border/50 last:border-0"
+                    >
+                      <span className="font-medium shrink-0">
+                        {new Date(entry.date + "T12:00:00").toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric" })}
+                      </span>
+                      <span className="text-muted-foreground text-xs shrink-0">
+                        {entry.startedAt ? new Date(entry.startedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "—"}
+                        {entry.completedAt && ` → ${new Date(entry.completedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`}
+                      </span>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-xs font-medium shrink-0 ${
+                          entry.status === "completed"
+                            ? "bg-secondary/20 text-secondary"
+                            : entry.status === "broken"
+                              ? "bg-destructive/20 text-destructive"
+                              : "bg-primary/20 text-foreground"
+                        }`}
+                      >
+                        {entry.status === "completed"
+                          ? "Done"
+                          : entry.status === "broken"
+                            ? entry.brokenReason
+                              ? `Broken (${getBrokenReasonLabel(entry.brokenReason)})`
+                              : "Broken"
+                            : "In progress"}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  to="/dashboard/progress"
+                  className="inline-flex items-center gap-1.5 mt-3 text-sm font-medium text-secondary hover:underline"
+                >
+                  Full fasting tracker →
+                </Link>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground mb-2">
+                Your fasting log will show here. Start or complete a fast on the Dashboard or Today page to see history.
+              </p>
+            )}
+          </motion.div>
+
           {/* Meal history: list or feed (image) mode */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -834,11 +960,18 @@ export default function DashboardMacros() {
                   {mealHistoryEntries.slice(0, 50).map(({ dateStr, mealType, entry }) => {
                     const totalCal = Math.round((entry.caloriesPerPortion || 0) * entry.portions);
                     const dateLabel = new Date(dateStr + "T12:00:00").toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric" });
+                    const recipeEmoji = entry.recipeId ? (() => {
+                      const [mt, idStr] = entry.recipeId.split("-");
+                      const id = parseInt(idStr, 10);
+                      const r = getRecipe(mt as MealType, id);
+                      return r?.emoji;
+                    })() : undefined;
                     return (
                       <li key={`${dateStr}-${entry.id}`} className="flex items-center gap-2 text-sm py-2 border-b border-border/50 last:border-0">
                         {entry.imageDataUrl ? (
                           <img src={entry.imageDataUrl} alt="" className="h-9 w-9 rounded object-cover shrink-0" />
                         ) : null}
+                        {recipeEmoji && <span className="shrink-0" aria-hidden>{recipeEmoji}</span>}
                         <button type="button" onClick={() => setSelectedDateAndUrl(dateStr)} className="text-left font-medium text-foreground hover:text-secondary truncate min-w-0 flex-1">
                           {entry.name}
                         </button>

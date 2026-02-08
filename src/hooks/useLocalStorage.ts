@@ -926,6 +926,21 @@ export function getRecommendedCaloriesFromPreferences(preferences: Pick<UserPref
   return getSuggestedCalories(preferences.sexForCalories ?? null, preferences.bodyWeightKg ?? null);
 }
 
+/** Human-readable explanation of how recommended calories were derived (for tooltips and Settings). */
+export function getRecommendedCaloriesExplanation(preferences: Pick<UserPreferences, 'sexForCalories' | 'bodyWeightKg'>): string {
+  const sex = preferences.sexForCalories ?? null;
+  const kg = preferences.bodyWeightKg ?? null;
+  const cal = getRecommendedCaloriesFromPreferences(preferences);
+  if (kg != null && kg > 0) {
+    const kcalPerKg = sex === 'female' ? 26 : sex === 'male' ? 28 : 27;
+    const label = sex === 'male' ? 'male' : sex === 'female' ? 'female' : 'average';
+    return `Average for ${label} at ${kg} kg: ${cal.toLocaleString()} cal (${kcalPerKg} kcal/kg).`;
+  }
+  if (sex === 'male') return `Default average for male: ${cal.toLocaleString()} cal.`;
+  if (sex === 'female') return `Default average for female: ${cal.toLocaleString()} cal.`;
+  return `Default average: ${cal.toLocaleString()} cal. Set gender and body weight in Settings for a personalised goal.`;
+}
+
 export function useDailyGoals() {
   const [goals, setGoals] = useLocalStorage<DailyGoals>('tryramadan-daily-goals', defaultDailyGoals);
   const clampedGoals = React.useMemo(
@@ -1165,6 +1180,67 @@ export function getDayTotalsFromFoodLog(dayLog: DayFoodLog | undefined): DayNutr
     fat += (Number(e.fatPerPortion) || 0) * portion;
   }
   return { calories, protein, carbs, fat };
+}
+
+/** Recipe shape needed to build food log entries from meal plan */
+export type RecipeForPlan = {
+  name: string;
+  nutrition?: { calories?: number; protein?: string; carbs?: string; fat?: string };
+};
+
+/**
+ * Convert DayMealPlan suhoor/iftar strings to food log entries for "log as eaten".
+ * Parses recipe keys (e.g. suhoor-1, iftar-2) and plain text; suhoor string only produces suhoor entries, iftar only iftar.
+ */
+export function planToFoodLogEntries(
+  plan: DayMealPlan,
+  getRecipe: (mealType: 'suhoor' | 'iftar', id: number) => RecipeForPlan | undefined,
+  parseNutrient: (s: string | undefined) => number
+): { suhoor: FoodLogEntry[]; iftar: FoodLogEntry[] } {
+  const recipeKeyRe = /^(suhoor|iftar)-(\d+)$/;
+  const toEntries = (mealType: 'suhoor' | 'iftar', text: string | undefined): FoodLogEntry[] => {
+    if (!text?.trim()) return [];
+    const entries: FoodLogEntry[] = [];
+    const tokens = text.split(',').map((t) => t.trim()).filter(Boolean);
+    const ts = Date.now();
+    for (let i = 0; i < tokens.length; i++) {
+      const token = tokens[i];
+      const m = token.match(recipeKeyRe);
+      if (m && (m[1] as 'suhoor' | 'iftar') === mealType) {
+        const id = parseInt(m[2], 10);
+        const recipe = getRecipe(mealType, id);
+        if (recipe) {
+          const cal = recipe.nutrition?.calories ?? 0;
+          entries.push({
+            id: `recipe-${ts}-${mealType}-${id}-${i}`,
+            type: 'recipe',
+            mealType,
+            name: recipe.name,
+            portions: 1,
+            caloriesPerPortion: cal,
+            proteinPerPortion: parseNutrient(recipe.nutrition?.protein) || undefined,
+            carbsPerPortion: parseNutrient(recipe.nutrition?.carbs) || undefined,
+            fatPerPortion: parseNutrient(recipe.nutrition?.fat) || undefined,
+            recipeId: `${mealType}-${id}`,
+          });
+        }
+      } else {
+        entries.push({
+          id: `custom-${ts}-${mealType}-${i}`,
+          type: 'custom',
+          mealType,
+          name: token,
+          portions: 1,
+          caloriesPerPortion: 0,
+        });
+      }
+    }
+    return entries;
+  };
+  return {
+    suhoor: toEntries('suhoor', plan.suhoor),
+    iftar: toEntries('iftar', plan.iftar),
+  };
 }
 
 /** Get fasting log entry for a date (for hours fasted) */

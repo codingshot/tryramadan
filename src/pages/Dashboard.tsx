@@ -50,6 +50,7 @@ import {
   useDayFoodLog,
   normalizeDayFoodLog,
   getDayTotalsFromFoodLog,
+  planToFoodLogEntries,
   useDisplayTimezone,
   useHabitLog,
 } from "@/hooks/useLocalStorage";
@@ -96,6 +97,8 @@ const Dashboard = () => {
   const [scheduleOpen, setScheduleOpen] = useState(false);
   const [addFoodMeal, setAddFoodMeal] = useState<"suhoor" | "iftar" | null>(null);
   const [addFoodInputs, setAddFoodInputs] = useState({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "" });
+  /** When set, form was pre-filled from this recipe; user can override before adding. */
+  const [pendingRecipe, setPendingRecipe] = useState<{ mealType: "suhoor" | "iftar"; mealTypeKey: string; recipeId: number } | null>(null);
   const [quickJournalOpen, setQuickJournalOpen] = useState(false);
   const [quickJournalContent, setQuickJournalContent] = useState("");
   const [quickJournalGratitude, setQuickJournalGratitude] = useState("");
@@ -322,33 +325,23 @@ const Dashboard = () => {
     return { recipes, foods };
   }, [addFoodMeal, addFoodInputs.name, allRecipesForAddFood, allCulturalFoods]);
 
-  const quickAddRecipe = (mealType: "suhoor" | "iftar", mealTypeKey: string, recipeId: number) => {
+  /** Pre-fill form from recipe so user can override calories/portions/macros before adding. */
+  const prefillFromRecipe = (mealType: "suhoor" | "iftar", mealTypeKey: string, recipeId: number) => {
     const recipe = getRecipe(mealType, recipeId);
     if (!recipe) return;
     const cal = recipe.nutrition?.calories ?? 0;
     const protein = parseNutrient(recipe.nutrition?.protein);
     const carbs = parseNutrient(recipe.nutrition?.carbs);
     const fat = parseNutrient(recipe.nutrition?.fat);
-    const entry = {
-      id: `recipe-${Date.now()}-${mealTypeKey}-${recipeId}`,
-      type: "recipe" as const,
-      mealType,
+    setAddFoodInputs({
       name: recipe.name,
-      portions: 1,
-      caloriesPerPortion: cal,
-      proteinPerPortion: protein,
-      carbsPerPortion: carbs,
-      fatPerPortion: fat,
-      recipeId: `${mealTypeKey}-${recipeId}`,
-    };
-    setFoodLogs((prev) => {
-      const d = normalizeDayFoodLog(prev[selectedDate]);
-      const list = mealType === "suhoor" ? [...d.suhoor, entry] : [...d.iftar, entry];
-      return { ...prev, [selectedDate]: { ...d, [mealType]: list } };
+      cal: cal ? String(cal) : "",
+      portions: "1",
+      protein: protein ? String(protein) : "",
+      carbs: carbs ? String(carbs) : "",
+      fat: fat ? String(fat) : "",
     });
-    setAddFoodInputs({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "" });
-    setAddFoodMeal(null);
-    toast.success(`Added ${recipe.name}`);
+    setPendingRecipe({ mealType, mealTypeKey, recipeId });
   };
 
   const submitAddFood = (mealType: "suhoor" | "iftar") => {
@@ -363,23 +356,46 @@ const Dashboard = () => {
       return;
     }
     const day = normalizeDayFoodLog(foodLogs[selectedDate]);
-    const entry = {
-      id: `custom-${Date.now()}`,
-      type: "custom" as const,
-      mealType,
-      name: name || "Custom",
-      portions,
-      caloriesPerPortion: cal,
-      proteinPerPortion: protein || undefined,
-      carbsPerPortion: carbs || undefined,
-      fatPerPortion: fat || undefined,
-    };
-    setFoodLogs((prev) => {
-      const d = normalizeDayFoodLog(prev[selectedDate]);
-      const list = mealType === "suhoor" ? [...d.suhoor, entry] : [...d.iftar, entry];
-      return { ...prev, [selectedDate]: { ...d, [mealType]: list } };
-    });
+
+    if (pendingRecipe && pendingRecipe.mealType === mealType) {
+      const entry = {
+        id: `recipe-${Date.now()}-${pendingRecipe.mealTypeKey}-${pendingRecipe.recipeId}`,
+        type: "recipe" as const,
+        mealType,
+        name: name || "Recipe",
+        portions,
+        caloriesPerPortion: clampCalories(cal),
+        proteinPerPortion: protein || undefined,
+        carbsPerPortion: carbs || undefined,
+        fatPerPortion: fat || undefined,
+        recipeId: `${pendingRecipe.mealTypeKey}-${pendingRecipe.recipeId}`,
+      };
+      setFoodLogs((prev) => {
+        const d = normalizeDayFoodLog(prev[selectedDate]);
+        const list = mealType === "suhoor" ? [...d.suhoor, entry] : [...d.iftar, entry];
+        return { ...prev, [selectedDate]: { ...d, [mealType]: list } };
+      });
+      toast.success(`Added ${name}`);
+    } else {
+      const entry = {
+        id: `custom-${Date.now()}`,
+        type: "custom" as const,
+        mealType,
+        name: name || "Custom",
+        portions,
+        caloriesPerPortion: clampCalories(cal),
+        proteinPerPortion: protein || undefined,
+        carbsPerPortion: carbs || undefined,
+        fatPerPortion: fat || undefined,
+      };
+      setFoodLogs((prev) => {
+        const d = normalizeDayFoodLog(prev[selectedDate]);
+        const list = mealType === "suhoor" ? [...d.suhoor, entry] : [...d.iftar, entry];
+        return { ...prev, [selectedDate]: { ...d, [mealType]: list } };
+      });
+    }
     setAddFoodInputs({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "" });
+    setPendingRecipe(null);
     setAddFoodMeal(null);
   };
 
@@ -397,7 +413,7 @@ const Dashboard = () => {
   const factDay = Math.min(30, Math.max(1, (new Date().getDate() % 30) || 30));
   const dailyFact = dailyFactsData.facts.find((f) => f.day === factDay) || dailyFactsData.facts[0];
   const badgeList = [
-    { id: "first-fast", name: "First Fast", icon: "🌙", unlocked: progress.completedDays.length >= 1 },
+    { id: "first-fast", name: "First Fast", icon: "🌙", unlocked: completedInRange.length >= 1 },
     { id: "week-one", name: "Week One", icon: "⭐", unlocked: completedInRange.length >= 7 },
     { id: "halfway", name: "Halfway", icon: "🏅", unlocked: completedInRange.length >= 15 },
     { id: "streak-5", name: "5-day streak", icon: "🔥", unlocked: streak >= 5 },
@@ -1219,6 +1235,96 @@ const Dashboard = () => {
                 </div>
               )}
 
+              {/* Planned for this day: show plan and "Log as eaten" / "Edit on Schedule" */}
+              {selectedDate && (mealPlans[selectedDate]?.suhoor || mealPlans[selectedDate]?.iftar) && (
+                <div className="mb-4 p-3 rounded-xl bg-primary/5 border border-primary/20">
+                  <p className="text-xs font-medium text-muted-foreground mb-2">Planned for this day</p>
+                  <ul className="space-y-1 text-sm mb-3">
+                    {mealPlans[selectedDate]?.suhoor && (
+                      <li><span className="text-muted-foreground">{suhoorLabelShort}:</span> {mealPlans[selectedDate].suhoor}</li>
+                    )}
+                    {mealPlans[selectedDate]?.iftar && (
+                      <li><span className="text-muted-foreground">{iftarLabel}:</span> {mealPlans[selectedDate].iftar}</li>
+                    )}
+                  </ul>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={() => {
+                        const plan = mealPlans[selectedDate];
+                        if (!plan) return;
+                        const { suhoor: suhoorEntries, iftar: iftarEntries } = planToFoodLogEntries(plan, getRecipe, parseNutrient);
+                        setFoodLogs((prev) => {
+                          const d = normalizeDayFoodLog(prev[selectedDate]);
+                          return {
+                            ...prev,
+                            [selectedDate]: {
+                              ...d,
+                              suhoor: [...d.suhoor, ...suhoorEntries],
+                              iftar: [...d.iftar, ...iftarEntries],
+                            },
+                          };
+                        });
+                        toast.success("Planned meals added to your log. You can edit portions on Schedule.");
+                      }}
+                    >
+                      <Check className="w-3.5 h-3.5 mr-1" aria-hidden />
+                      Log as eaten
+                    </Button>
+                    <Button type="button" variant="outline" size="sm" asChild>
+                      <Link to="/dashboard/schedule">Edit on Schedule →</Link>
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* What you logged this day: show food entries so user can see what they added */}
+              {(selectedDayLog.suhoor.length > 0 || selectedDayLog.iftar.length > 0) && (
+                <div className="mb-4 p-3 rounded-xl bg-muted/20 border border-border">
+                  <p className="text-xs font-medium text-muted-foreground mb-2">What you logged</p>
+                  <ul className="space-y-1.5 text-sm">
+                    {selectedDayLog.suhoor.map((entry) => {
+                      const recipeEmoji = entry.recipeId ? (() => {
+                        const [mt, idStr] = entry.recipeId.split("-");
+                        const id = parseInt(idStr, 10);
+                        const r = getRecipe(mt as MealType, id);
+                        return r?.emoji;
+                      })() : undefined;
+                      const totalCal = Math.round((entry.caloriesPerPortion || 0) * entry.portions);
+                      return (
+                        <li key={entry.id} className="flex items-center gap-2 flex-wrap">
+                          {recipeEmoji && <span className="shrink-0" aria-hidden>{recipeEmoji}</span>}
+                          <span className="min-w-0 truncate">{entry.name}</span>
+                          <span className="text-muted-foreground shrink-0">
+                            {entry.portions !== 1 ? `${entry.portions}× ` : ""}{entry.caloriesPerPortion} cal = {totalCal} cal
+                          </span>
+                        </li>
+                      );
+                    })}
+                    {selectedDayLog.iftar.map((entry) => {
+                      const recipeEmoji = entry.recipeId ? (() => {
+                        const [mt, idStr] = entry.recipeId.split("-");
+                        const id = parseInt(idStr, 10);
+                        const r = getRecipe(mt as MealType, id);
+                        return r?.emoji;
+                      })() : undefined;
+                      const totalCal = Math.round((entry.caloriesPerPortion || 0) * entry.portions);
+                      return (
+                        <li key={entry.id} className="flex items-center gap-2 flex-wrap">
+                          {recipeEmoji && <span className="shrink-0" aria-hidden>{recipeEmoji}</span>}
+                          <span className="min-w-0 truncate">{entry.name}</span>
+                          <span className="text-muted-foreground shrink-0">
+                            {entry.portions !== 1 ? `${entry.portions}× ` : ""}{entry.caloriesPerPortion} cal = {totalCal} cal
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  <Link to="/dashboard/schedule" className="text-xs text-secondary hover:underline mt-2 inline-block">Edit on Schedule →</Link>
+                </div>
+              )}
+
               {/* Log what you ate: plus to add for Suhoor and Iftar (order by time: before Fajr → Suhoor first; after Maghrib → Iftar first) */}
               {(() => {
                 const fajr = selectedDayPrayerTimes?.fajr;
@@ -1255,7 +1361,7 @@ const Dashboard = () => {
                           <TooltipTrigger asChild>
                             <button
                               type="button"
-                              onClick={() => setAddFoodMeal(meal)}
+                              onClick={() => { setAddFoodMeal(meal); setPendingRecipe(null); setAddFoodInputs({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "" }); }}
                               className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
                               aria-label={`Add food for ${meal === "suhoor" ? suhoorLabelShort : iftarLabel}`}
                             >
@@ -1272,11 +1378,22 @@ const Dashboard = () => {
                 );
               })()}
 
-              {/* Add food dialog */}
-              <Dialog open={addFoodMeal != null} onOpenChange={(open) => !open && setAddFoodMeal(null)}>
+              {/* Add food dialog: pre-fill from recipe/preexisting, allow override before adding */}
+              <Dialog
+                open={addFoodMeal != null}
+                onOpenChange={(open) => {
+                  if (!open) {
+                    setAddFoodMeal(null);
+                    setPendingRecipe(null);
+                    setAddFoodInputs({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "" });
+                  }
+                }}
+              >
                 <DialogContent className="max-w-sm">
                   <DialogTitle>Add to {addFoodMeal === "suhoor" ? suhoorLabelShort : iftarLabel}</DialogTitle>
-                  <p className="text-xs text-muted-foreground">What did you eat? Add name and optional calories (and P/C/F per portion).</p>
+                  <p className="text-xs text-muted-foreground">
+                    Pick a recipe or type a name. Calories and macros are filled automatically from recipes—you can override any value before adding.
+                  </p>
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
@@ -1297,10 +1414,10 @@ const Dashboard = () => {
                             <li key={`${mealType}-${recipe.id}`}>
                               <button
                                 type="button"
-                                onClick={() => quickAddRecipe(mealType as "suhoor" | "iftar", mealType, recipe.id)}
+                                onClick={() => prefillFromRecipe(mealType as "suhoor" | "iftar", mealType, recipe.id)}
                                 className="w-full text-left px-3 py-2 text-sm hover:bg-muted flex items-center justify-between gap-2"
                               >
-                                <span>{recipe.name}</span>
+                                <span>{recipe.emoji ? `${recipe.emoji} ` : ""}{recipe.name}</span>
                                 <span className="text-xs text-muted-foreground">
                                   {recipe.nutrition?.calories ?? "?"} cal
                                 </span>
@@ -1311,7 +1428,7 @@ const Dashboard = () => {
                             <li key={f}>
                               <button
                                 type="button"
-                                onClick={() => setAddFoodInputs((p) => ({ ...p, name: f }))}
+                                onClick={() => { setAddFoodInputs((p) => ({ ...p, name: f })); setPendingRecipe(null); }}
                                 className="w-full text-left px-3 py-2 text-sm hover:bg-muted"
                               >
                                 {f}
@@ -1366,7 +1483,7 @@ const Dashboard = () => {
                       />
                     </div>
                     <div className="flex gap-2 justify-end pt-2">
-                      <Button type="button" variant="outline" size="sm" onClick={() => { setAddFoodMeal(null); setAddFoodInputs({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "" }); }}>
+                      <Button type="button" variant="outline" size="sm" onClick={() => { setAddFoodMeal(null); setPendingRecipe(null); setAddFoodInputs({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "" }); }}>
                         Cancel
                       </Button>
                       <Button type="submit" size="sm">

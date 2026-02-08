@@ -35,6 +35,8 @@ export interface Recipe {
   steps?: string[];
   /** Optional hyperlink sources for authenticity and discovery. */
   sources?: SourceLink[];
+  /** Optional emoji for inline display with food (e.g. 🥣 🍲). Use when it accurately represents the dish. */
+  emoji?: string;
 }
 
 export interface CityPractice {

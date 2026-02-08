@@ -26,6 +26,7 @@ import {
   getSunnahDaysCompleted,
   getSuggestedCalories,
   getRecommendedCaloriesFromPreferences,
+  getRecommendedCaloriesExplanation,
   useDailyGoals,
   type LearningPriority,
   type CultureRecipesPriority,
@@ -154,7 +155,7 @@ const Settings = () => {
   const iftarLabel = useIftarLabel();
   const iftarLabelShort = useIftarLabelShort();
   const [, setQuickActionOrder] = useDashboardQuickActions();
-  const [, setDailyGoals] = useDailyGoals();
+  const [dailyGoals, setDailyGoals] = useDailyGoals();
   const { permission, requestPermission, supported } = useNotifications();
   const [locationLoading, setLocationLoading] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -678,11 +679,29 @@ const Settings = () => {
                 />
                 <p className="text-xs text-muted-foreground mt-1">Optional. With gender, used to suggest daily calories in the macro tracker.</p>
               </div>
-              {((preferences.sexForCalories != null) || (preferences.bodyWeightKg != null && preferences.bodyWeightKg > 0)) && (
-                <p className="text-xs text-muted-foreground">
-                  Recommended daily calories: <strong className="text-foreground">{getRecommendedCaloriesFromPreferences(preferences)}</strong> cal (applied to your macro goal).
+
+              {/* Daily calorie goal override — id for deep link from macro tracker */}
+              <div id="daily-calorie-goal" className="pt-2 border-t border-border">
+                <label htmlFor="settings-daily-calories" className="text-xs font-semibold text-muted-foreground block mb-2">Daily calorie goal (override)</label>
+                <input
+                  id="settings-daily-calories"
+                  type="number"
+                  min={800}
+                  max={5000}
+                  step={50}
+                  className="w-full max-w-[140px] min-h-[44px] px-3 rounded-lg border border-border bg-background text-foreground text-sm"
+                  value={dailyGoals.calories > 0 ? String(dailyGoals.calories) : ""}
+                  onChange={(e) => {
+                    const v = e.target.value.trim();
+                    const num = v === "" ? 0 : parseInt(v, 10);
+                    const cal = Number.isNaN(num) || num < 0 ? 0 : Math.min(5000, Math.max(800, num));
+                    setDailyGoals((g) => ({ ...g, calories: cal }));
+                  }}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  How we get the recommended value: {getRecommendedCaloriesExplanation(preferences)} Set a custom value above to override; this updates your macro tracker goal everywhere.
                 </p>
-              )}
+              </div>
             </div>
           </motion.div>
           

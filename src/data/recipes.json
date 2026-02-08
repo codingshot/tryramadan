@@ -24,6 +24,7 @@
       "significance": "Ful medames has been a staple suhoor in Egypt and the Levant for centuries, providing lasting energy for the long fast.",
       "dietary": ["vegetarian"],
       "countryId": "egypt",
+      "emoji": "🥣",
       "steps": [
         "If using dried fava beans, soak overnight (8–12 hr), then simmer 45–60 min until tender; or use canned, drained fava beans (no cook).",
         "Warm the beans in a pan with a little olive oil and cumin over medium heat for 3–4 min. Mash lightly with a fork.",
@@ -63,6 +64,7 @@
       "benefits": "Balanced meal with proteins, healthy fats, and carbohydrates",
       "tips": "Limit caffeine intake; opt for herbal tea if possible",
       "countryId": "turkey",
+      "emoji": "🧀",
       "steps": [
         "Slice 100–150g feta and arrange on a plate with 1/2 cup olives (black or green). Slice 1–2 tomatoes and 1 cucumber into wedges if using (about 2 min).",
         "Fry or scramble 2–3 eggs to your liking 2–3 min; season with a little salt and black pepper. Keep warm.",
@@ -82,6 +84,7 @@
       "benefits": "Easily digestible, warming, and hydrating",
       "tips": "Prepare the night before for easy morning reheating",
       "countryId": "indonesia",
+      "emoji": "🍲",
       "steps": [
         "Rinse 1 cup rice (1 min) and put in a large pot with 8–10 cups water (or chicken broth). Bring to a boil (about 5 min), then reduce heat and simmer, stirring every 10 min, until rice breaks down into a thick porridge (about 45 min total). Add more water if needed.",
         "Meanwhile, poach or boil chicken breast or thigh 15–20 min until cooked; shred the meat. Save the broth to add to the porridge.",
@@ -112,6 +115,7 @@
       "significance": "Dates and oats align with the Sunnah of breaking fast with dates while providing sustained energy.",
       "dietary": ["vegetarian", "vegan-option"],
       "countryId": "western-communities",
+      "emoji": "🥣",
       "steps": [
         "In a jar or bowl, combine 1 cup rolled or steel-cut oats, 1 cup milk (or plant-based), 1/4 tsp cinnamon, and 1 tbsp honey. Stir well (1 min).",
         "Chop 2–3 Medjool dates and add to the mixture. Add 2 tbsp almonds (whole or sliced) and optional 1 tbsp chia seeds (1 min).",
@@ -257,6 +261,7 @@
     {
       "id": 1,
       "name": "Traditional Date & Water Start",
+      "emoji": "🫒",
       "region": "Universal",
       "description": "The Prophetic way to break fast - dates and water first",
       "defaultServings": 1,
@@ -281,6 +286,7 @@
     {
       "id": 2,
       "name": "Moroccan Harira Soup",
+      "emoji": "🍲",
       "region": "Morocco",
       "description": "Hearty tomato-based soup with lentils, chickpeas, and fresh herbs",
       "ingredients": ["Tomatoes", "Lentils", "Chickpeas", "Celery", "Cilantro", "Ginger"],
