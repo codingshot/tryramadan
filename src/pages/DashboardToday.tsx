@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { 
   Moon, Sun, Clock, AlertTriangle, Battery, BatteryLow, BatteryMedium, BatteryFull,
-  ArrowLeft, Droplets, Heart, ChevronRight, Zap
+  ArrowLeft, Droplets, Heart, ChevronRight, Zap, Utensils, BookOpen, Landmark
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -352,15 +352,35 @@ const DashboardToday = () => {
                       {suhoorPassed ? `${suhoorLabelShort} ended` : `Until ${suhoorLabelShort} end`}
                       <span className="hidden sm:inline"> (eat cutoff)</span>
                     </span>
+                    {suhoorPassed && (
+                      <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium bg-secondary/20 text-secondary border border-secondary/30">
+                        Fasting
+                      </span>
+                    )}
+                    {suhoorPassed && preferences.userType === "muslim" && (
+                      <p className="text-xs text-muted-foreground mt-1.5 flex items-center justify-center gap-1">
+                        <Landmark className="w-3.5 h-3.5" aria-hidden />
+                        Pray Fajr
+                      </p>
+                    )}
                     {suhoorPassed ? (
-                      <span className="text-base sm:text-lg font-bold text-muted-foreground tabular-nums">
+                      <span className="text-base sm:text-lg font-bold text-muted-foreground tabular-nums block mt-1">
                         {prayerTimes?.imsak ?? prayerTimes?.fajr}
                       </span>
                     ) : (
-                      <span className="text-lg sm:text-xl font-bold text-secondary tabular-nums">
+                      <span className="text-lg sm:text-xl font-bold text-secondary tabular-nums block">
                         {String(countdownSuhoorEnd.h).padStart(2, "0")}:
                         {String(countdownSuhoorEnd.m).padStart(2, "0")}
                       </span>
+                    )}
+                    {!suhoorPassed && (
+                      <Link
+                        to={`/dashboard/schedule?date=${todayStr}`}
+                        className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-secondary hover:underline"
+                      >
+                        <Utensils className="w-3.5 h-3.5" aria-hidden />
+                        Log suhoor
+                      </Link>
                     )}
                   </div>
                 </TooltipTrigger>
@@ -385,15 +405,39 @@ const DashboardToday = () => {
                     <span className="text-xs text-muted-foreground block truncate">
                       {iftarPassed ? `${iftarLabel} passed` : `Until ${iftarLabel}`}
                     </span>
+                    {!iftarPassed && preferences.userType === "muslim" && (
+                      <p className="text-xs text-muted-foreground mt-1 flex items-center justify-center gap-1">
+                        <Landmark className="w-3.5 h-3.5" aria-hidden />
+                        Pray Maghrib when you break
+                      </p>
+                    )}
                     {iftarPassed ? (
-                      <span className="text-base sm:text-lg font-bold text-muted-foreground tabular-nums">
+                      <span className="text-base sm:text-lg font-bold text-muted-foreground tabular-nums block mt-1">
                         {prayerTimes.maghrib}
                       </span>
                     ) : (
-                      <span className="text-lg sm:text-xl font-bold text-secondary tabular-nums">
+                      <span className="text-lg sm:text-xl font-bold text-secondary tabular-nums block">
                         {String(countdownIftar.h).padStart(2, "0")}:
                         {String(countdownIftar.m).padStart(2, "0")}
                       </span>
+                    )}
+                    {iftarPassed && (
+                      <div className="mt-2 flex flex-wrap justify-center gap-x-3 gap-y-1">
+                        <Link
+                          to={`/dashboard/schedule?date=${todayStr}`}
+                          className="inline-flex items-center gap-1 text-xs font-medium text-secondary hover:underline"
+                        >
+                          <Utensils className="w-3.5 h-3.5" aria-hidden />
+                          Log iftar
+                        </Link>
+                        <Link
+                          to={`/dashboard/journal?date=${todayStr}`}
+                          className="inline-flex items-center gap-1 text-xs font-medium text-secondary hover:underline"
+                        >
+                          <BookOpen className="w-3.5 h-3.5" aria-hidden />
+                          Journal
+                        </Link>
+                      </div>
                     )}
                   </div>
                 </TooltipTrigger>

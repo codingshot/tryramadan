@@ -258,15 +258,21 @@ export const FastingTimer = ({
           </div>
         )}
 
-        {/* Location + local time (next to city) */}
+        {/* Location + local time (next to city) — city clickable to change */}
         {(locationShort || preferences.location) && (
           <div className="flex items-center justify-center gap-1.5 mb-3 text-primary-foreground/60 flex-wrap">
-            <MapPin className="w-3 h-3 shrink-0" />
-            <span className="text-xs">{preferences.location ? preferences.location.split(",")[0] : locationShort?.split(",")[0]}</span>
+            <MapPin className="w-3 h-3 shrink-0" aria-hidden />
+            <Link
+              to="/settings"
+              className="text-xs underline hover:text-primary-foreground transition-colors"
+              aria-label={`${preferences.location ? preferences.location.split(",")[0] : locationShort?.split(",")[0]}. Tap to change location.`}
+            >
+              {preferences.location ? preferences.location.split(",")[0] : locationShort?.split(",")[0]}
+            </Link>
             {localTime && (
               <span className="text-xs tabular-nums">· {localTime}</span>
             )}
-            {loading && <Loader2 className="w-3 h-3 animate-spin shrink-0" />}
+            {loading && <Loader2 className="w-3 h-3 animate-spin shrink-0" aria-hidden />}
           </div>
         )}
 
@@ -486,7 +492,7 @@ export const FastingTimer = ({
             <p className="text-center text-xs text-primary-foreground/80">
               {typeof navigator !== "undefined" && !navigator.onLine
                 ? "Cached times · You're offline."
-                : <>Times may be outdated. <button type="button" onClick={() => refetchPrayers()} className="underline hover:text-primary-foreground">Try again</button> · <Link to="/settings" className="underline hover:text-primary-foreground/90">Update</Link></>}
+                : <><button type="button" onClick={() => refetchPrayers()} className="underline hover:text-primary-foreground">Try again</button> · <Link to="/settings" className="underline hover:text-primary-foreground/90">Update location</Link></>}
             </p>
           ) : error || (!effectiveLat || !effectiveLng) ? (
             <LocationRequiredCTA

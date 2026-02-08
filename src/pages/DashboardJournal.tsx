@@ -12,6 +12,8 @@ import {
   Smile,
   Trash2,
   CheckSquare,
+  Search,
+  SlidersHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Navbar } from "@/components/Navbar";
@@ -21,7 +23,19 @@ import { Clock } from "lucide-react";
 import { getHabitsForUser, getShortLabelsForHabitIds } from "@/data/ramadan-habits";
 import { Calendar } from "@/components/ui/calendar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { PageSEO } from "@/components/PageSEO";
+
+/** Journal slot: time-of-day for better tracking. Entries without slot = "general" (backward compat). */
+export type JournalSlot = "morning" | "suhoor" | "iftar" | "general";
 
 export interface JournalEntry {
   date: string;
@@ -29,11 +43,20 @@ export interface JournalEntry {
   content: string;
   gratitude?: string;
   mood?: number; // 1-5
+  /** Time-of-day slot. morning=intention/to-do, suhoor=pre-dawn, iftar=evening, general=reflection */
+  slot?: JournalSlot;
   /** Set on first save (QA doc: timeline / last edited) */
   createdAt?: string;
   /** Set on every save */
   updatedAt?: string;
 }
+
+const SLOT_LABELS: Record<JournalSlot, string> = {
+  morning: "Morning (intention / to-do)",
+  suhoor: "Suhoor",
+  iftar: "Iftar",
+  general: "Reflection",
+};
 
 const PROMPTS_MUSLIM = [
   "What did you learn about yourself today while fasting?",
@@ -55,10 +78,34 @@ const PROMPTS_NON_MUSLIM = [
   "What intention will you carry into tomorrow?",
 ];
 
+const SLOT_PROMPTS: Record<JournalSlot, Record<string, string>> = {
+  morning: {
+    muslim: "What's your intention or to-do for today?",
+    "non-muslim": "What's your intention or to-do for today?",
+  },
+  suhoor: {
+    muslim: "How did suhoor go? What did you eat?",
+    "non-muslim": "How did your pre-dawn meal go? What did you eat?",
+  },
+  iftar: {
+    muslim: "How did you feel breaking your fast?",
+    "non-muslim": "How did you feel breaking your fast?",
+  },
+  general: {
+    muslim: "", // use rotating prompt
+    "non-muslim": "",
+  },
+};
+
 const MOOD_LABELS = ["Low", "Okay", "Good", "Great", "Amazing"];
 const MOOD_EMOJI = ["😢", "😐", "🙂", "😊", "😄"];
 
-export function getPromptForDate(isoDate: string, userType?: string): string {
+export function getPromptForDate(isoDate: string, userType?: string, slot?: JournalSlot): string {
+  const u = userType === "muslim" ? "muslim" : "non-muslim";
+  if (slot && slot !== "general") {
+    const fixed = SLOT_PROMPTS[slot][u];
+    if (fixed) return fixed;
+  }
   const day = parseInt(isoDate.slice(8, 10), 10) || 1;
   const prompts = userType === "muslim" ? PROMPTS_MUSLIM : PROMPTS_NON_MUSLIM;
   return prompts[(day - 1) % prompts.length];
@@ -85,12 +132,13 @@ export default function DashboardJournal() {
   );
 
   const [writeDate, setWriteDate] = useState(initialDate);
+  const [activeSlot, setActiveSlot] = useState<JournalSlot>("general");
   const [content, setContent] = useState("");
   const [gratitude, setGratitude] = useState("");
   const [mood, setMood] = useState<number | undefined>(undefined);
 
-  const existingForWriteDate = entries.find((e) => e.date === writeDate);
-  const prompt = getPromptForDate(writeDate, preferences.userType);
+  const existingForWriteDate = entries.find((e) => e.date === writeDate && (e.slot ?? "general") === activeSlot);
+  const prompt = getPromptForDate(writeDate, preferences.userType, activeSlot);
   const hasTodayEntry = entries.some((e) => e.date === today);
   const isFutureDate = writeDate > today;
   const showWriteTodayPrompt = isFutureDate && !hasTodayEntry;
@@ -102,12 +150,19 @@ export default function DashboardJournal() {
     }
   }, [searchParams]);
 
+  // When non-Muslim, only morning and general slots are shown; reset if activeSlot is suhoor/iftar
   useEffect(() => {
-    const entry = entries.find((e) => e.date === writeDate);
+    if (preferences.userType !== "muslim" && (activeSlot === "suhoor" || activeSlot === "iftar")) {
+      setActiveSlot("general");
+    }
+  }, [preferences.userType, activeSlot]);
+
+  useEffect(() => {
+    const entry = entries.find((e) => e.date === writeDate && (e.slot ?? "general") === activeSlot);
     setContent(entry?.content ?? "");
     setGratitude(entry?.gratitude ?? "");
     setMood(entry?.mood);
-  }, [writeDate, entries]);
+  }, [writeDate, activeSlot, entries]);
 
   // Optional journal retention: auto-delete entries older than N days (see docs/DATA-LIFECYCLE-POLICIES.md)
   useEffect(() => {
@@ -141,6 +196,7 @@ export default function DashboardJournal() {
       content: content.trim(),
       gratitude: gratitude.trim() || undefined,
       mood,
+      slot: activeSlot,
       createdAt: existing?.createdAt ?? now,
       updatedAt: now,
     };
@@ -238,8 +294,41 @@ export default function DashboardJournal() {
   const [expandedDate, setExpandedDate] = useState<string | null>(null);
   const INITIAL_SHOW = 14;
   const [showCount, setShowCount] = useState(INITIAL_SHOW);
-  const displayEntries = entries.slice(0, showCount);
-  const hasMore = entries.length > showCount;
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState<"newest" | "oldest">("newest");
+  const [slotFilter, setSlotFilter] = useState<JournalSlot | "all">("all");
+  const [moodFilter, setMoodFilter] = useState<number | "all">("all");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  const filteredAndSortedEntries = useMemo(() => {
+    let result = [...entries];
+    const q = searchQuery.trim().toLowerCase();
+    if (q) {
+      result = result.filter(
+        (e) =>
+          e.content.toLowerCase().includes(q) ||
+          (e.gratitude?.toLowerCase().includes(q) ?? false) ||
+          (e.prompt?.toLowerCase().includes(q) ?? false)
+      );
+    }
+    if (slotFilter !== "all") {
+      result = result.filter((e) => (e.slot ?? "general") === slotFilter);
+    }
+    if (moodFilter !== "all") {
+      result = result.filter((e) => e.mood === moodFilter);
+    }
+    result.sort((a, b) =>
+      sortBy === "newest" ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date)
+    );
+    return result;
+  }, [entries, searchQuery, sortBy, slotFilter, moodFilter]);
+
+  const displayEntries = filteredAndSortedEntries.slice(0, showCount);
+  const hasMore = filteredAndSortedEntries.length > showCount;
+
+  useEffect(() => {
+    setShowCount(INITIAL_SHOW);
+  }, [searchQuery, sortBy, slotFilter, moodFilter]);
   const editorSectionRef = useRef<HTMLDivElement>(null);
   const pastEntriesSectionRef = useRef<HTMLDivElement>(null);
 
@@ -422,6 +511,25 @@ export default function DashboardJournal() {
                 </label>
               </div>
             </div>
+            <div className="flex flex-wrap gap-1 mb-4">
+              {(preferences.userType === "muslim"
+                ? (["morning", "suhoor", "iftar", "general"] as JournalSlot[])
+                : (["morning", "general"] as JournalSlot[])
+              ).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setActiveSlot(s)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    activeSlot === s
+                      ? "bg-secondary text-secondary-foreground"
+                      : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  {SLOT_LABELS[s]}
+                </button>
+              ))}
+            </div>
             <p className="text-sm text-muted-foreground mb-4">{prompt}</p>
             <textarea
               value={content}
@@ -538,7 +646,29 @@ export default function DashboardJournal() {
                               <blockquote className="text-xs text-muted-foreground italic border-l-2 border-secondary/50 pl-2 my-1">
                                 &ldquo;{habit.quote}&rdquo;
                               </blockquote>
-                              <p className="text-xs text-muted-foreground mt-1">{habit.sourceLabel}</p>
+                              <div className="text-xs text-muted-foreground mt-1 space-y-1">
+                                <a
+                                  href={habit.sourceUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-secondary hover:underline"
+                                >
+                                  {habit.sourceLabel} ↗
+                                </a>
+                                {habit.sourceUrl2 && habit.sourceLabel2 && (
+                                  <>
+                                    <span className="mx-1">·</span>
+                                    <a
+                                      href={habit.sourceUrl2}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-secondary hover:underline"
+                                    >
+                                      {habit.sourceLabel2} ↗
+                                    </a>
+                                  </>
+                                )}
+                              </div>
                               <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{habit.explanation}</p>
                             </TooltipContent>
                           </Tooltip>
@@ -585,23 +715,150 @@ export default function DashboardJournal() {
             <h3 className="font-display font-bold mb-4 flex items-center gap-2">
               <BookOpen className="w-5 h-5 text-secondary" />
               Past entries
+              {filteredAndSortedEntries.length < entries.length && (
+                <span className="text-sm font-normal text-muted-foreground">
+                  ({filteredAndSortedEntries.length} of {entries.length})
+                </span>
+              )}
             </h3>
+
+            {/* Search */}
+            <div className="relative mb-3">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" aria-hidden />
+              <Input
+                type="search"
+                placeholder="Search entries..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+                aria-label="Search past journal entries"
+              />
+            </div>
+
+            {/* Sort and filters - mobile: collapsible, desktop: always visible */}
+            <div className="mb-4">
+              {/* Mobile: collapsible panel */}
+              <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen} className="sm:hidden">
+                <CollapsibleTrigger
+                  className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-border bg-card text-sm font-medium hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  aria-expanded={filtersOpen}
+                  aria-label="Toggle sort and filters"
+                >
+                  <SlidersHorizontal className="h-4 w-4" />
+                  Sort & filters
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="flex flex-col gap-2 pt-3">
+                    <Select value={sortBy} onValueChange={(v) => setSortBy(v as "newest" | "oldest")}>
+                      <SelectTrigger className="w-full h-9" aria-label="Sort order">
+                        <SelectValue placeholder="Sort" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="newest">Newest first</SelectItem>
+                        <SelectItem value="oldest">Oldest first</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select value={slotFilter} onValueChange={(v) => setSlotFilter(v as JournalSlot | "all")}>
+                      <SelectTrigger className="w-full h-9" aria-label="Filter by slot">
+                        <SelectValue placeholder="Slot" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All slots</SelectItem>
+                        {(["morning", "suhoor", "iftar", "general"] as const).map((s) => (
+                          <SelectItem key={s} value={s}>
+                            {SLOT_LABELS[s]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select
+                      value={moodFilter === "all" ? "all" : String(moodFilter)}
+                      onValueChange={(v) => setMoodFilter(v === "all" ? "all" : Number(v))}
+                    >
+                      <SelectTrigger className="w-full h-9" aria-label="Filter by mood">
+                        <SelectValue placeholder="Mood" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All moods</SelectItem>
+                        {MOOD_LABELS.map((label, i) => (
+                          <SelectItem key={i} value={String(i + 1)}>
+                            {MOOD_EMOJI[i]} {label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+              {/* Desktop: inline row */}
+              <div className="hidden sm:flex flex-wrap items-center gap-3">
+                <Select value={sortBy} onValueChange={(v) => setSortBy(v as "newest" | "oldest")}>
+                  <SelectTrigger className="w-[140px] h-9" aria-label="Sort order">
+                    <SelectValue placeholder="Sort" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="newest">Newest first</SelectItem>
+                    <SelectItem value="oldest">Oldest first</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={slotFilter} onValueChange={(v) => setSlotFilter(v as JournalSlot | "all")}>
+                  <SelectTrigger className="w-[140px] h-9" aria-label="Filter by slot">
+                    <SelectValue placeholder="Slot" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All slots</SelectItem>
+                    {(["morning", "suhoor", "iftar", "general"] as const).map((s) => (
+                      <SelectItem key={s} value={s}>
+                        {SLOT_LABELS[s]}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={moodFilter === "all" ? "all" : String(moodFilter)}
+                  onValueChange={(v) => setMoodFilter(v === "all" ? "all" : Number(v))}
+                >
+                  <SelectTrigger className="w-[140px] h-9" aria-label="Filter by mood">
+                    <SelectValue placeholder="Mood" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All moods</SelectItem>
+                    {MOOD_LABELS.map((label, i) => (
+                      <SelectItem key={i} value={String(i + 1)}>
+                        {MOOD_EMOJI[i]} {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             {displayEntries.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Your journal is ready for you. Write whenever it helps — a line or two about your day, mood, or gratitude is enough. Pick a date above to get started.</p>
+              <p className="text-sm text-muted-foreground">
+                {entries.length === 0
+                  ? "Your journal is ready for you. Write whenever it helps — a line or two about your day, mood, or gratitude is enough. Pick a date above to get started."
+                  : "No entries match your search or filters. Try different keywords or clear filters."}
+              </p>
             ) : (
               <ul className="space-y-3">
                 {displayEntries.map((entry) => {
-                  const isExpanded = expandedDate === entry.date;
+                  const entryKey = `${entry.date}-${entry.slot ?? "general"}`;
+                  const isExpanded = expandedDate === entryKey;
                   const dayHabits = habitLog && typeof habitLog === "object" ? habitLog[entry.date] : undefined;
                   const checkedHabitIds = dayHabits && typeof dayHabits === "object" ? Object.entries(dayHabits).filter(([, v]) => v).map(([id]) => id) : [];
                   const habitLabels = getShortLabelsForHabitIds(checkedHabitIds);
                   return (
                     <li
-                      key={entry.date}
-                      className="p-4 rounded-xl bg-card border border-border"
+                      key={entryKey}
+                      className="p-4 rounded-xl bg-card border border-border min-w-0"
                     >
-                      <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
                         <span className="text-xs text-muted-foreground">{entry.date}</span>
+                        {(entry.slot ?? "general") !== "general" && (
+                          <span className="text-xs px-1.5 py-0.5 rounded bg-secondary/10 text-secondary">
+                            {SLOT_LABELS[entry.slot ?? "general"]}
+                          </span>
+                        )}
                         {entry.mood != null && (
                           <span className="text-sm" title={MOOD_LABELS[entry.mood - 1]}>
                             {MOOD_EMOJI[entry.mood - 1]}
@@ -629,18 +886,19 @@ export default function DashboardJournal() {
                           type="button"
                           onClick={() => {
                             setWriteDate(entry.date);
+                            setActiveSlot(entry.slot ?? "general");
                             setCalendarMonth(new Date(entry.date + "T12:00:00"));
                             handleSelectDate(new Date(entry.date + "T12:00:00"));
                             setTimeout(scrollToEditor, 150);
                           }}
-                          className="text-xs font-medium text-secondary hover:underline"
+                          className="text-xs font-medium text-secondary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
                         >
                           Edit
                         </button>
                         <button
                           type="button"
-                          onClick={() => setExpandedDate(isExpanded ? null : entry.date)}
-                          className="text-xs font-medium text-secondary hover:underline"
+                          onClick={() => setExpandedDate(isExpanded ? null : entryKey)}
+                          className="text-xs font-medium text-secondary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
                         >
                           {isExpanded ? "Show less" : "View full"}
                         </button>

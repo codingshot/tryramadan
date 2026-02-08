@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { Landmark, Utensils, BookOpen } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -109,6 +110,30 @@ export function BreakFastReasonDialog({
             Health & Safety →
           </Link>
         </p>
+        {userType === "muslim" && (
+          <div className="mt-3 p-3 rounded-xl bg-secondary/10 border border-secondary/20 space-y-2">
+            <p className="text-xs font-medium text-foreground flex items-center gap-2">
+              <Landmark className="w-4 h-4 text-secondary shrink-0" aria-hidden />
+              After breaking: pray Maghrib, then log your meal and journal
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                to="/dashboard/schedule"
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-secondary hover:underline"
+              >
+                <Utensils className="w-3.5 h-3.5" aria-hidden />
+                Log food
+              </Link>
+              <Link
+                to="/dashboard/journal"
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-secondary hover:underline"
+              >
+                <BookOpen className="w-3.5 h-3.5" aria-hidden />
+                Journal
+              </Link>
+            </div>
+          </div>
+        )}
         <ul className="space-y-2 mt-2">
           {BROKEN_FAST_REASONS.map(({ id, label }) => {
             const isTravelNewUser = id === "travel" && userType === "new";

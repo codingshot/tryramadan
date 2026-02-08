@@ -1401,17 +1401,18 @@ const Dashboard = () => {
                         return;
                       }
                       const now = new Date().toISOString();
-                      const existing = journalEntries.find((e) => e.date === todayStr);
+                      const existing = journalEntries.find((e) => e.date === todayStr && (e.slot ?? "general") === "general");
                       const newEntry: JournalEntry = {
                         date: todayStr,
-                        prompt: getPromptForDate(todayStr, preferences.userType),
+                        prompt: getPromptForDate(todayStr, preferences.userType, "general"),
                         content,
                         gratitude: quickJournalGratitude.trim() || undefined,
+                        slot: "general",
                         createdAt: existing?.createdAt ?? now,
                         updatedAt: now,
                       };
                       setJournalEntries((prev) => {
-                        const rest = prev.filter((e) => e.date !== todayStr);
+                        const rest = prev.filter((e) => !(e.date === todayStr && (e.slot ?? "general") === "general"));
                         return [...rest, newEntry].sort((a, b) => b.date.localeCompare(a.date));
                       });
                       toast.success("Entry saved");
