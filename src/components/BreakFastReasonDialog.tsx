@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { BROKEN_FAST_REASONS } from "@/hooks/useLocalStorage";
@@ -55,9 +56,12 @@ export function BreakFastReasonDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" aria-describedby="break-fast-reason-desc">
         <DialogHeader>
           <DialogTitle className="font-display">{title}</DialogTitle>
+          <DialogDescription id="break-fast-reason-desc">
+            Choose a reason so we can track how long you fasted. No judgment — your intention matters.
+          </DialogDescription>
         </DialogHeader>
         {notInFastingPeriod && (
           <p className="text-sm text-amber-700 dark:text-amber-400 bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2 -mt-2">
@@ -101,9 +105,6 @@ export function BreakFastReasonDialog({
           </div>
         </div>
 
-        <p className="text-sm text-muted-foreground">
-          Choose a reason so we can track how long you fasted. No judgment — your intention matters.
-        </p>
         <p className="text-xs text-muted-foreground">
           Need medical resources?{" "}
           <Link to="/health-safety" className="text-secondary hover:underline">

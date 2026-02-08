@@ -969,7 +969,7 @@ export default function DashboardMacros() {
                     return (
                       <li key={`${dateStr}-${entry.id}`} className="flex items-center gap-2 text-sm py-2 border-b border-border/50 last:border-0">
                         {entry.imageDataUrl ? (
-                          <img src={entry.imageDataUrl} alt="" className="h-9 w-9 rounded object-cover shrink-0" />
+                          <img src={entry.imageDataUrl} alt="" className="h-9 w-9 rounded object-cover shrink-0" aria-hidden />
                         ) : null}
                         {recipeEmoji && <span className="shrink-0" aria-hidden>{recipeEmoji}</span>}
                         <button type="button" onClick={() => setSelectedDateAndUrl(dateStr)} className="text-left font-medium text-foreground hover:text-secondary truncate min-w-0 flex-1">
@@ -997,7 +997,7 @@ export default function DashboardMacros() {
                       className="rounded-xl border border-border overflow-hidden bg-muted/20 hover:bg-muted/40 text-left transition-colors"
                     >
                       <div className="aspect-square relative">
-                        <img src={entry.imageDataUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                        <img src={entry.imageDataUrl} alt="" className="absolute inset-0 w-full h-full object-cover" aria-hidden />
                       </div>
                       <div className="p-2">
                         <p className="font-medium text-sm truncate">{entry.name}</p>
