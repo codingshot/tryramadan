@@ -60,6 +60,7 @@ const Personas = lazy(() => import("./pages/Personas").then((m) => ({ default: m
 const PersonaPage = lazy(() => import("./pages/PersonaPage").then((m) => ({ default: m.default })));
 const RamadanCompare = lazy(() => import("./pages/RamadanCompare").then((m) => ({ default: m.default })));
 const Habits = lazy(() => import("./pages/Habits").then((m) => ({ default: m.default })));
+const Brand = lazy(() => import("./pages/Brand").then((m) => ({ default: m.default })));
 const NotFound = lazy(() => import("./pages/NotFound").then((m) => ({ default: m.default })));
 import { AdhanScheduler } from "./components/AdhanScheduler";
 import { FastingBottomBar } from "./components/FastingBottomBar";
@@ -273,6 +274,7 @@ const App = () => (
           <Route path="/personas" element={<Suspense fallback={<PageFallback />}><Personas /></Suspense>} />
           <Route path="/personas/:slug" element={<Suspense fallback={<PageFallback />}><PersonaPage /></Suspense>} />
           <Route path="/compare" element={<Suspense fallback={<PageFallback />}><RamadanCompare /></Suspense>} />
+          <Route path="/brand" element={<Suspense fallback={<PageFallback />}><Brand /></Suspense>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<Suspense fallback={<PageFallback />}><NotFound /></Suspense>} />
         </Routes>

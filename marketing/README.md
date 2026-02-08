@@ -6,7 +6,11 @@
 
 | File | Purpose |
 |------|--------|
-| [customer-personas.md](./customer-personas.md) | Who we’re for: segments, goals, journeys |
+| [launch-strategy.md](./launch-strategy.md) | Launch strategy — phased plan, goals, KPIs, risk mitigation, checklist |
+| [launch-announcements.md](./launch-announcements.md) | Launch announcements — detailed posts for launch day, PH, countdown, Eid |
+| [product-hunt-and-launch-platforms.md](./product-hunt-and-launch-platforms.md) | Product Hunt & launch platforms — PH checklist, Hacker News, Indie Hackers, BetaList, Reddit |
+| [outreach-messages.md](./outreach-messages.md) | Outreach messages — templates for journalists, influencers, moderators, DEI orgs |
+| [customer-personas.md](./customer-personas.md) | Who we're for: segments, goals, journeys | Who we’re for: segments, goals, journeys |
 | [content-types.md](./content-types.md) | What to post: pillars, 30-day prompts, formats by channel |
 | [social-announcements.md](./social-announcements.md) | Platform-specific announcement templates |
 | [pitch-and-messaging.md](./pitch-and-messaging.md) | Elevator pitch, value props, taglines |

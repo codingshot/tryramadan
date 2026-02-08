@@ -42,7 +42,7 @@ export const guides: Guide[] = [
     title: "Getting Started with TryRamadan",
     shortDescription: "Set up the app in 4 simple steps.",
     description:
-      "Step-by-step guide to getting started with TryRamadan: open the app, start your journey, complete onboarding (welcome, mode, location, goals), and reach your dashboard. No account required. Optimized for mobile and desktop.",
+      "How to get started with TryRamadan Ramadan fasting app: open the app, start your journey, complete onboarding (welcome, mode, location, prayer times, goals), and reach your dashboard. No account required. Includes suhoor and iftar setup. Optimized for mobile and desktop.",
     category: "onboarding",
     relatedSlugs: ["onboarding-flow", "dashboard-overview"],
     steps: [
@@ -168,9 +168,9 @@ export const guides: Guide[] = [
     title: "Dashboard Overview",
     shortDescription: "Navigate the main dashboard and quick actions.",
     description:
-      "Learn how to use the TryRamadan dashboard: fasting timer, log fasting, mark day complete, streak, schedule strip, and links to Today, Schedule, Prayers, Meals, Learn, Progress, and more. Mobile and desktop.",
+      "TryRamadan dashboard guide: fasting timer and countdown to suhoor/iftar, log fasting, mark day complete, streak, planned meals and Log as eaten, schedule strip, and links to Today, Schedule, Prayers, Meals, Macro Tracker, Learn, Quran, Progress, Culture, Health, Journal, Achievements, and Goals. For Ramadan fasting tracking.",
     category: "dashboard",
-    relatedSlugs: ["getting-started", "today-fast", "schedule-calendar"],
+    relatedSlugs: ["getting-started", "today-fast", "schedule-calendar", "macro-tracker"],
     steps: [
       {
         title: "Dashboard home",
@@ -186,6 +186,11 @@ export const guides: Guide[] = [
       {
         title: "Mark day complete",
         body: "After breaking fast at iftar, use the “Mark Done” card to mark the day complete. This updates your streak and progress.",
+        quickLink: { path: "/dashboard", label: "Open Dashboard" },
+      },
+      {
+        title: "Planned meals and Log as eaten",
+        body: "When viewing a day that has a meal plan, you’ll see “Planned for this day” with suhoor and iftar. Tap “Log as eaten” to add the planned meals to your food log in one step, or “Edit on Schedule →” to adjust first.",
         quickLink: { path: "/dashboard", label: "Open Dashboard" },
       },
       {
@@ -205,7 +210,7 @@ export const guides: Guide[] = [
     title: "Today's Fast & Timer",
     shortDescription: "Track your current fast and use the timer.",
     description:
-      "How to use Today’s Fast: view the fasting timer, log fasting, see countdowns to suhoor end and iftar, set intention, track hydration and energy. Mobile-first guide.",
+      "How to use Today’s Fast: view the fasting timer, log fasting, see countdowns to suhoor end and iftar, set intention, track hydration and energy. Location-based prayer times. Mobile-first guide for Ramadan fasting tracking.",
     category: "dashboard",
     relatedSlugs: ["dashboard-overview", "schedule-calendar"],
     steps: [
@@ -235,11 +240,11 @@ export const guides: Guide[] = [
   {
     slug: "schedule-calendar",
     title: "Schedule & Calendar",
-    shortDescription: "Use the calendar and add events.",
+    shortDescription: "Use the calendar, meal plans, and add events.",
     description:
-      "Guide to the Schedule page: view the calendar, see prayer times and fasting days, add suhoor/iftar/prayer events, create custom events, and export to iCal. Mobile and desktop.",
+      "Step-by-step guide to the TryRamadan Schedule page: view the Ramadan calendar, add meal plans for suhoor and iftar, copy meal plans to future days (this week, rest of Ramadan, or selected days), add prayer and custom events, and export to Google Calendar, Apple Calendar, or Outlook. Includes meal planning for Ramadan fasting.",
     category: "dashboard",
-    relatedSlugs: ["dashboard-overview", "today-fast"],
+    relatedSlugs: ["dashboard-overview", "today-fast", "macro-tracker"],
     steps: [
       {
         title: "Open Schedule",
@@ -250,6 +255,16 @@ export const guides: Guide[] = [
       {
         title: "Navigate months",
         body: "Use the arrows or “Go to Ramadan” to jump to Ramadan. Days with completed fasts or journal entries may show indicators.",
+        quickLink: { path: "/dashboard/schedule", label: "Open Schedule" },
+      },
+      {
+        title: "Add meal plan",
+        body: "Select a day, then enter suhoor and iftar plans in the meal plan fields. You can type free text (e.g. “Oats and dates”) or recipe keys. Use “Copy meals from another day” to copy from a day that already has a plan.",
+        quickLink: { path: "/dashboard/schedule", label: "Open Schedule" },
+      },
+      {
+        title: "Copy meal plan to future days",
+        body: "Once a day has a meal plan, use “Copy to next day”, “Copy to this week” (next 7 days), “Copy to rest of Ramadan”, or “Copy to selected days…” to apply the plan to multiple dates. Pick target days in the dialog and tap Apply.",
         quickLink: { path: "/dashboard/schedule", label: "Open Schedule" },
       },
       {
@@ -283,6 +298,42 @@ export const guides: Guide[] = [
         title: "Times explained",
         body: "Imsak is when to stop eating (suhoor); Fajr is when Fajr prayer begins. Maghrib is when to break fast (iftar). Times are location-based.",
         quickLink: { path: "/dashboard/prayers", label: "Open Prayers" },
+      },
+    ],
+  },
+  {
+    slug: "meal-plan-apply-and-log",
+    title: "Apply Meal Plan to Future Days & Log as Eaten",
+    shortDescription: "Copy meal plans to future days and log planned meals as eaten.",
+    description:
+      "TryRamadan meal planning guide: how to copy your suhoor and iftar meal plan to future days (this week, rest of Ramadan, or selected days) and log planned meals as eaten on the Dashboard. Includes Schedule copy options and Dashboard Log as eaten flow for Ramadan meal tracking.",
+    category: "dashboard",
+    relatedSlugs: ["schedule-calendar", "macro-tracker", "dashboard-overview"],
+    steps: [
+      {
+        title: "Add a meal plan on Schedule",
+        body: "Open Schedule, select a day, and enter your suhoor and iftar plans in the meal plan fields. You can type free text (e.g. “Oats and dates”) or recipe keys (e.g. suhoor-1, iftar-2).",
+        quickLink: { path: "/dashboard/schedule", label: "Open Schedule" },
+      },
+      {
+        title: "Copy to future days",
+        body: "Once a day has a meal plan, use “Copy to next day”, “Copy to this week” (next 7 days), “Copy to rest of Ramadan”, or “Copy to selected days…” to apply the same plan to multiple dates. In “Copy to selected days”, pick target days with checkboxes and tap Apply.",
+        quickLink: { path: "/dashboard/schedule", label: "Open Schedule" },
+      },
+      {
+        title: "View planned meals on Dashboard",
+        body: "On the Dashboard day view, when you select a day that has a meal plan, you’ll see “Planned for this day” with the suhoor and iftar you planned.",
+        quickLink: { path: "/dashboard", label: "Open Dashboard" },
+      },
+      {
+        title: "Log as eaten",
+        body: "Tap “Log as eaten” to convert your planned meals into food log entries for that day. Recipe keys become entries with nutrition; plain text becomes custom entries. You can edit portions later on Schedule or Macro Tracker.",
+        quickLink: { path: "/dashboard", label: "Open Dashboard" },
+      },
+      {
+        title: "Edit on Schedule",
+        body: "If you want to adjust the plan before logging, tap “Edit on Schedule →” to open the Schedule page for that day, edit the meal plan, then return to Dashboard to log as eaten.",
+        quickLink: { path: "/dashboard/schedule", label: "Open Schedule" },
       },
     ],
   },
@@ -461,16 +512,21 @@ export const guides: Guide[] = [
   },
   {
     slug: "macro-tracker",
-    title: "Macro Tracker",
-    shortDescription: "Plan meals and track macros: planned vs actual, goals, Suhoor/Iftar/between.",
+    title: "Macro Tracker & Meal History",
+    shortDescription: "Plan meals, track macros, view fasting and meal history.",
     description:
-      "How to use the Macro Tracker: add items to your daily plan (meal prep), log what you actually eat (Suhoor, Iftar, between meals), compare planned vs actual vs daily goals, and navigate by day. Quick add for each meal type.",
+      "TryRamadan Macro Tracker guide: plan suhoor and iftar meals, log what you actually eat, track calories and macros (protein, carbs, fat) vs daily goals. Includes fasting history (recent fasts with status), meal history (list or photo feed view), and quick-add from recipes. For Ramadan fasting nutrition and meal logging.",
     category: "dashboard",
-    relatedSlugs: ["meals-recipes", "dashboard-overview", "progress-goals"],
+    relatedSlugs: ["meals-recipes", "dashboard-overview", "progress-goals", "schedule-calendar"],
     steps: [
       {
         title: "Open Macro Tracker",
-        body: "From the dashboard, tap “Macros”. You’ll see the day selector, daily goals, and sections for plan, logs, and comparison.",
+        body: "From the dashboard, tap “Macros”. You’ll see the day selector, daily goals, fasting history, and meal history sections.",
+        quickLink: { path: "/dashboard/macros", label: "Open Macro Tracker" },
+      },
+      {
+        title: "Fasting history",
+        body: "The Fasting history section shows your last 14 fasting log entries: date, time range, and status (Done, Broken, In progress). Tap “Full fasting tracker →” to open the Progress page.",
         quickLink: { path: "/dashboard/macros", label: "Open Macro Tracker" },
       },
       {
@@ -486,6 +542,11 @@ export const guides: Guide[] = [
       {
         title: "Quick add actual food",
         body: "Under “Actual food eaten (logs)”, tap Suhoor, Iftar, or Between meals to open the quick-add form. Enter what you ate (name, cal, portions, P/C/F) and tap “Add to log”.",
+        quickLink: { path: "/dashboard/macros", label: "Open Macro Tracker" },
+      },
+      {
+        title: "Meal history list & feed",
+        body: "Meal history shows your logged meals across all days. Switch between List view (date, meal type, calories) and Feed view (entries with photos). Tap an entry to jump to that day.",
         quickLink: { path: "/dashboard/macros", label: "Open Macro Tracker" },
       },
       {
@@ -747,9 +808,9 @@ export const guides: Guide[] = [
     title: "FAQ & Help",
     shortDescription: "Find answers and user guides.",
     description:
-      "Where to get help: FAQ for common questions (fasting, health, app usage), User Guides for step-by-step flows, Emergency for breaking fast safely, and Settings for location and notifications.",
+      "TryRamadan help and FAQ: common questions about fasting, health, and app usage. User guides for step-by-step flows (onboarding, meal planning, macro tracker, schedule). Emergency page for breaking fast safely. Settings for location and notifications.",
     category: "general",
-    relatedSlugs: ["health-safety-emergency", "settings", "getting-started", "keyboard-shortcuts", "install-as-app"],
+    relatedSlugs: ["health-safety-emergency", "settings", "getting-started", "meal-plan-apply-and-log", "keyboard-shortcuts", "install-as-app"],
     steps: [
       {
         title: "FAQ",

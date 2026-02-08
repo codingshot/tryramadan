@@ -31,6 +31,7 @@
   <url><loc>https://tryramadan.app/guides</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://tryramadan.app/personas</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://tryramadan.app/settings</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://tryramadan.app/brand</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://tryramadan.app/privacy</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
   <url><loc>https://tryramadan.app/terms</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
   <url><loc>https://tryramadan.app/legal</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
@@ -46,7 +47,13 @@
   <url><loc>https://tryramadan.app/culture/malaysia</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://tryramadan.app/culture/bangladesh</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <!-- Guide pages -->
-  <url><loc>https://tryramadan.app/guides/onboarding</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/guides/getting-started</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/guides/onboarding-flow</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://tryramadan.app/guides/dashboard-overview</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/guides/today-fast</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/guides/schedule-calendar</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/guides/meal-plan-apply-and-log</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/guides/macro-tracker</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://tryramadan.app/guides/quran</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://tryramadan.app/guides/faq-and-help</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>

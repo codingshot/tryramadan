@@ -14,16 +14,21 @@ import {
 } from "@/data/guides";
 
 function buildHowToJsonLd(guide: Guide): object {
+  const firstImage = guide.steps.find((s) => s.image)?.image;
   return {
     "@context": "https://schema.org",
     "@type": "HowTo",
     name: guide.title,
     description: guide.description,
+    totalTime: "PT5M",
+    tool: { "@type": "SoftwareApplication", name: "TryRamadan", applicationCategory: "LifestyleApplication" },
+    ...(firstImage && { image: firstImage.startsWith("http") ? firstImage : `https://tryramadan.app${firstImage}` }),
     step: guide.steps.map((s, i) => ({
       "@type": "HowToStep",
       position: i + 1,
       name: s.title,
       text: s.body,
+      ...(s.image && { image: s.image.startsWith("http") ? s.image : `https://tryramadan.app${s.image}` }),
     })),
   };
 }
