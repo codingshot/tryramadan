@@ -1,5 +1,5 @@
 /**
- * Effective Ramadan range from preferences (optional override). Use for "Day N", "Last day", and Ramadan-scoped stats.
+ * Effective Ramadan range for "Day N", "Last day", and rest-of-month. When set, start/end come from preferences (localStorage: ramadanStartOverride, ramadanEndOverride); else app calendar.
  */
 import { useMemo } from "react";
 import { useUserPreferences } from "@/hooks/useLocalStorage";

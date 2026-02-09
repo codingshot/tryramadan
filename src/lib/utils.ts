@@ -73,3 +73,48 @@ export function getTodayStringInTimezone(timeZone: string): string {
     return toLocalDateString(new Date());
   }
 }
+
+function copyViaExecCommand(text: string): boolean {
+  try {
+    const el = document.createElement("textarea");
+    el.value = text;
+    el.setAttribute("readonly", "");
+    el.style.position = "fixed";
+    el.style.top = "0";
+    el.style.left = "0";
+    el.style.width = "2em";
+    el.style.height = "2em";
+    el.style.padding = "0";
+    el.style.border = "none";
+    el.style.outline = "none";
+    el.style.boxShadow = "none";
+    el.style.background = "transparent";
+    el.style.opacity = "0";
+    el.style.pointerEvents = "none";
+    document.body.appendChild(el);
+    el.focus();
+    el.select();
+    el.setSelectionRange(0, text.length);
+    const ok = document.execCommand("copy");
+    document.body.removeChild(el);
+    return !!ok;
+  } catch {
+    return false;
+  }
+}
+
+/** Copy text to clipboard. Works in secure and non-secure contexts; falls back to execCommand if needed. Returns true if successful. */
+export function copyToClipboard(text: string): Promise<boolean> {
+  if (typeof text !== "string" || !text) return Promise.resolve(false);
+  if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+    try {
+      return navigator.clipboard
+        .writeText(text)
+        .then(() => true)
+        .catch(() => copyViaExecCommand(text));
+    } catch {
+      return Promise.resolve(copyViaExecCommand(text));
+    }
+  }
+  return Promise.resolve(copyViaExecCommand(text));
+}

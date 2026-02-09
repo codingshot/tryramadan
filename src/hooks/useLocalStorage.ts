@@ -473,11 +473,15 @@ export function completeFastingToday(
 
   const alreadyCompleted = progress.completedDays.includes(today);
   const completedDays = alreadyCompleted ? progress.completedDays : [...progress.completedDays, today];
+  // When marking complete, remove from skippedDays so the day is not in both (S→C make-up; STATE-TRANSITION-TESTING-FASTING §5).
+  const skippedDays = progress.skippedDays ?? [];
+  const newSkippedDays = skippedDays.includes(today) ? skippedDays.filter((d) => d !== today) : skippedDays;
 
   setProgress({
     ...progress,
     fastingLog: updatedLog,
     completedDays,
+    ...(skippedDays.includes(today) ? { skippedDays: newSkippedDays } : {}),
   });
 
   console.log(`${LOG_PREFIX} Fast completed. ${today} logged at ${now}. Total days: ${completedDays.length}`);
@@ -535,7 +539,7 @@ export function uncompleteFastingToday(
   console.log(`${LOG_PREFIX} Undo completed. ${today} set back to in progress.`);
 }
 
-/** Set a specific day (ISO YYYY-MM-DD) as completed or not. Use for day view / click-through days. */
+/** Set a specific day (ISO YYYY-MM-DD) as completed or not. Use for day view / click-through days (e.g. make-up). When marking completed, removes the day from skippedDays so it cannot be in both (STATE-TRANSITION-TESTING-FASTING §5). */
 export function setDayCompleted(
   progress: FastingProgress,
   setProgress: (value: FastingProgress | ((prev: FastingProgress) => FastingProgress)) => void,
@@ -543,8 +547,16 @@ export function setDayCompleted(
   completed: boolean
 ): void {
   const has = progress.completedDays.includes(dateStr);
+  const skippedDays = progress.skippedDays ?? [];
+  const inSkipped = skippedDays.includes(dateStr);
   if (completed && !has) {
-    setProgress({ ...progress, completedDays: [...progress.completedDays, dateStr].sort() });
+    const newCompletedDays = [...progress.completedDays, dateStr].sort();
+    const newSkippedDays = inSkipped ? skippedDays.filter((d) => d !== dateStr) : skippedDays;
+    setProgress({
+      ...progress,
+      completedDays: newCompletedDays,
+      ...(inSkipped ? { skippedDays: newSkippedDays } : {}),
+    });
   } else if (!completed && has) {
     setProgress({ ...progress, completedDays: progress.completedDays.filter((d) => d !== dateStr) });
   }
@@ -1470,6 +1482,19 @@ export function useQuranVerseViewedDates(): [string[], (date?: string) => void] 
     setDates((prev) => [...prev, today].slice(-QURAN_VERSE_VIEWED_MAX_DAYS));
   }, [dates, setDates]);
   return [dates, markToday];
+}
+
+const CATCH_UP_DISMISSED_DATES_KEY = 'tryramadan-catch-up-dismissed-dates';
+const CATCH_UP_DISMISSED_MAX_DAYS = 60;
+
+/** Dates the user has marked as "caught up" in the Catch up dialog (no longer shown in the list). */
+export function useCatchUpDismissedDates(): [string[], (dateStr: string) => void] {
+  const [dates, setDates] = useLocalStorage<string[]>(CATCH_UP_DISMISSED_DATES_KEY, []);
+  const markDayCaughtUp = React.useCallback((dateStr: string) => {
+    if (dates.includes(dateStr)) return;
+    setDates((prev) => [...prev, dateStr].slice(-CATCH_UP_DISMISSED_MAX_DAYS));
+  }, [dates, setDates]);
+  return [dates, markDayCaughtUp];
 }
 
 /** Build today's daily missions and completion from progress, meal plans, food log, schedule notes, Quran verse and hadith viewed. */

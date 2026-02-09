@@ -28,6 +28,7 @@ import {
   ImagePlus,
   Copy,
   Zap,
+  BookOpen,
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -78,6 +79,7 @@ import {
   getNowSecondsSinceMidnightInTimezone,
   timeStringToSecondsSinceMidnight,
   secondsUntilTimeInTimezone,
+  copyToClipboard,
 } from "@/lib/utils";
 import { usePrayerTimes, usePrayerTimesForDate, getEffectivePrayerTimes, useRamadanPrayerTimes } from "@/hooks/usePrayerTimes";
 import { buildIcalContent, downloadIcal } from "@/lib/ical";
@@ -453,35 +455,51 @@ const DashboardSchedule = () => {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [selectedDate, scheduleNotes, ramadanRange.start, ramadanRange.end, setSearchParams]);
 
-  /** Last 5 days of Ramadan (day 26–30) for quick "Plan last days" links */
-  const lastFiveRamadanDates = useMemo(() => {
-    const start = new Date(ramadanRange.start.getTime());
+  /** Remaining Ramadan days from today (or selected date if in future) through end of Ramadan (inclusive). Uses ramadanRange from preferences (localStorage: ramadanStartOverride/ramadanEndOverride or app calendar). */
+  const remainingRamadanDates = useMemo(() => {
+    const startStr = ramadanRange.startStr ?? toLocalDateString(ramadanRange.start);
+    const endStr = ramadanRange.endStr ?? toLocalDateString(ramadanRange.end);
+    const fromStr = selectedDate && selectedDate >= todayStr && selectedDate <= endStr ? selectedDate : todayStr;
+    if (fromStr > endStr) return [];
+    const [fy, fm, fd] = fromStr.split("-").map(Number);
+    const [ey, em, ed] = endStr.split("-").map(Number);
+    const fromDate = new Date(fy, fm - 1, fd);
+    const endDate = new Date(ey, em - 1, ed);
     const dates: { dayNum: number; dateStr: string }[] = [];
-    for (let dayNum = 26; dayNum <= 30; dayNum++) {
-      const d = new Date(start);
-      d.setDate(d.getDate() + dayNum - 1);
-      dates.push({ dayNum, dateStr: toLocalDateString(d) });
+    for (const d = new Date(fromDate); d.getTime() <= endDate.getTime(); d.setDate(d.getDate() + 1)) {
+      const dateStr = toLocalDateString(d);
+      if (dateStr < todayStr) continue;
+      const dayNum = ramadanRange.getRamadanDayNumber(d);
+      if (dayNum != null) dates.push({ dayNum, dateStr });
     }
     return dates;
-  }, [ramadanRange.start]);
+  }, [ramadanRange.startStr, ramadanRange.endStr, ramadanRange.start, ramadanRange.end, todayStr, selectedDate]);
 
   /** Copy selected day's eating cutoff and break-fast times to clipboard. */
   const copySelectedDayTimes = useCallback(() => {
-    if (!selectedDate || !effectiveSelectedDayPrayerTimes) return;
+    if (!selectedDate || !effectiveSelectedDayPrayerTimes) {
+      toast.info("Set your location to see times for this day.");
+      return;
+    }
     const pt = effectiveSelectedDayPrayerTimes;
     const d = new Date(selectedDate + "T12:00:00");
     const dateLabel = d.toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
     const hrs = getFastingHoursForDay(pt.imsak, pt.maghrib);
     const line = `${dateLabel}: ${suhoorLabel} end ${pt.imsak ?? "—"}, ${iftarLabel} ${pt.maghrib ?? "—"}${hrs != null ? ` (${hrs}h fast)` : ""}`;
-    navigator.clipboard.writeText(line).then(
-      () => toast.success("Times copied to clipboard"),
-      () => toast.error("Could not copy")
-    );
+    copyToClipboard(line)
+      .then((ok) => {
+        if (ok) toast.success("Times copied to clipboard");
+        else toast.error("Could not copy");
+      })
+      .catch(() => toast.error("Could not copy"));
   }, [selectedDate, effectiveSelectedDayPrayerTimes, suhoorLabel, iftarLabel]);
 
   /** Copy as reminder text (Suhoor ends at X, Iftar at Y) for pasting into reminder apps. */
   const copyAsReminder = useCallback(() => {
-    if (!selectedDate || !effectiveSelectedDayPrayerTimes) return;
+    if (!selectedDate || !effectiveSelectedDayPrayerTimes) {
+      toast.info("Set your location to see Suhoor and Iftar times for this day.");
+      return;
+    }
     const pt = effectiveSelectedDayPrayerTimes;
     const imsak = pt.imsak ?? "—";
     const maghrib = pt.maghrib ?? "—";
@@ -489,10 +507,12 @@ const DashboardSchedule = () => {
       `Remind me: ${suhoorLabel} ends at ${imsak}`,
       `Remind me: ${iftarLabel} at ${maghrib}`,
     ];
-    navigator.clipboard.writeText(lines.join("\n")).then(
-      () => toast.success("Reminder text copied"),
-      () => toast.error("Could not copy")
-    );
+    copyToClipboard(lines.join("\n"))
+      .then((ok) => {
+        if (ok) toast.success("Reminder text copied");
+        else toast.error("Could not copy");
+      })
+      .catch(() => toast.error("Could not copy"));
   }, [selectedDate, effectiveSelectedDayPrayerTimes, suhoorLabel, iftarLabel]);
 
   /** Copy one table row's times to clipboard. */
@@ -502,10 +522,12 @@ const DashboardSchedule = () => {
       const dateLabel = d.toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
       const hrs = getFastingHoursForDay(pt.imsak, pt.maghrib);
       const line = `${dateLabel}: ${suhoorLabel} end ${pt.imsak ?? "—"}, ${iftarLabel} ${pt.maghrib ?? "—"}${hrs != null ? ` (${hrs}h fast)` : ""}`;
-      navigator.clipboard.writeText(line).then(
-        () => toast.success("Times copied"),
-        () => toast.error("Could not copy")
-      );
+      copyToClipboard(line)
+        .then((ok) => {
+          if (ok) toast.success("Times copied");
+          else toast.error("Could not copy");
+        })
+        .catch(() => toast.error("Could not copy"));
     },
     [suhoorLabel, iftarLabel]
   );
@@ -750,6 +772,15 @@ const DashboardSchedule = () => {
         [selectedDate]: { ...day, [meal]: list },
       };
     });
+    // Keep meal plan text in sync: append recipe name so plan summary stays visible
+    setMealPlans((prev) => {
+      const current = prev[selectedDate]?.[meal]?.trim() ?? "";
+      const appended = current ? `${current}, ${recipe.name}` : recipe.name;
+      return {
+        ...prev,
+        [selectedDate]: { ...prev[selectedDate], [meal]: appended },
+      };
+    });
     setAddFoodMeal(null);
   };
 
@@ -855,6 +886,22 @@ const DashboardSchedule = () => {
     }
     const duration = template.type === "taraweeh" ? 60 : template.type === "get_food" ? 30 : 15;
     addCalendarEvent(type, template.title, time, duration);
+  };
+
+  /** Quick-add all prayer events for the selected day (suhoor, iftar, 5 prayers, Taraweeh). Skips types already added. */
+  const quickAddAllPrayers = () => {
+    if (!selectedDate) return;
+    const existing = new Set((calendarEvents[selectedDate] ?? []).map((e) => e.type));
+    const prayerTemplates = QUICK_ADD_TEMPLATES.filter((t) => t.type !== "get_food");
+    let added = 0;
+    prayerTemplates.forEach((t) => {
+      if (!existing.has(t.type)) {
+        quickAddCalendarEvent(t.type, t);
+        existing.add(t.type);
+        added++;
+      }
+    });
+    if (added > 0) toast.success(`Added ${added} prayer event${added === 1 ? "" : "s"} to ${selectedDate}`);
   };
 
   const addCustomCalendarEvent = () => {
@@ -1019,7 +1066,6 @@ const DashboardSchedule = () => {
     }
     setExportLoading(true);
     try {
-      const now = new Date();
       let start: Date;
       let end: Date;
       let startStr: string;
@@ -1030,13 +1076,14 @@ const DashboardSchedule = () => {
         endStr = selectedDate;
         prayerTimesMap = { [selectedDate]: effectiveSelectedDayPrayerTimes };
       } else if (range === "month") {
-        start = new Date(now.getFullYear(), now.getMonth(), 1);
-        end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        const [y, m] = todayStr.split("-").map(Number);
+        start = new Date(y, m - 1, 1);
+        end = new Date(y, m, 0);
         startStr = toLocalDateString(start);
         endStr = toLocalDateString(end);
       } else if (range === "30days") {
-        start = new Date(now);
-        end = new Date(now);
+        start = new Date(todayStr + "T12:00:00");
+        end = new Date(todayStr + "T12:00:00");
         end.setDate(end.getDate() + 29);
         startStr = toLocalDateString(start);
         endStr = toLocalDateString(end);
@@ -1046,6 +1093,13 @@ const DashboardSchedule = () => {
         endStr = ramadanRange.endStr ?? toLocalDateString(ramadanRange.end);
         start = new Date(startStr + "T00:00:00");
         end = new Date(endStr + "T23:59:59");
+        // Use same prayer times as table/sync (with fallback-to-previous-day) so export matches UI
+        const ramadanMapKeys = Object.keys(effectiveRamadanTimesMap).filter(
+          (d) => d >= startStr && d <= endStr
+        );
+        if (ramadanMapKeys.length > 0) {
+          prayerTimesMap = { ...effectiveRamadanTimesMap };
+        }
       }
       if (Object.keys(prayerTimesMap).length === 0) {
         const startDate = new Date(startStr + "T12:00:00");
@@ -1105,9 +1159,9 @@ const DashboardSchedule = () => {
         <div className="container mx-auto px-4 max-w-4xl min-w-0 min-h-[50vh]">
           <Link
             to="/dashboard"
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
-            <ArrowLeft className="w-4 h-4" />
+            <ArrowLeft className="w-4 h-4" aria-hidden />
             Back to Dashboard
           </Link>
 
@@ -1116,19 +1170,45 @@ const DashboardSchedule = () => {
               Fasting Schedule
             </h1>
             <p className="text-sm sm:text-base text-muted-foreground mt-1.5 sm:mt-2">
-              Tap a day to view or edit meal plan, food log, and prayer times. Use arrow keys to move the selected day. Times vary by location.
+              Tap a day to view or edit meal plan, food log, and prayer times. Override past days by selecting the day and marking it complete or skipped. Plan ahead by copying meals to future days.
             </p>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setCatchUpOpen(true)}
-              className="mt-3 gap-2"
-              aria-label="Catch up on past days"
-            >
-              <Zap className="w-4 h-4" aria-hidden />
-              Catch up on past days
-            </Button>
+            <div className="mt-4 flex flex-wrap gap-2 sm:gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setCatchUpOpen(true)}
+                className="gap-2"
+                aria-label="Catch up on past days"
+              >
+                <Zap className="w-4 h-4" aria-hidden />
+                Catch up
+              </Button>
+              <span className="hidden sm:inline self-center text-xs text-muted-foreground">Log fasting, journal, or meals for past days.</span>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => document.getElementById("schedule-day-detail")?.scrollIntoView({ behavior: "smooth" })}
+                className="gap-2"
+                aria-label="Scroll to day details for meal prep"
+              >
+                <Utensils className="w-4 h-4" aria-hidden />
+                Plan ahead
+              </Button>
+              <span className="hidden sm:inline self-center text-xs text-muted-foreground">Copy meals to upcoming days.</span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => document.getElementById("ramadan-daily-schedule")?.scrollIntoView({ behavior: "smooth" })}
+                className="gap-2 text-muted-foreground"
+                aria-label="View Ramadan days table"
+              >
+                <CalendarDays className="w-4 h-4" aria-hidden />
+                Past days
+              </Button>
+            </div>
           </motion.div>
 
           {/* Set location for prayer/fasting times — shown when location not set so page still has clear next step */}
@@ -1157,7 +1237,7 @@ const DashboardSchedule = () => {
               <div className="flex-1">
                 <p className="font-semibold text-foreground">Today is a Sunnah fasting day</p>
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  {today.getDay() === 1 ? "Monday" : "Thursday"} — voluntary fasting is recommended in Islamic tradition. • يوم صيام سنة
+                  {today.getDay() === 1 ? "Monday" : "Thursday"} — voluntary fasting is recommended in Islamic tradition.
                 </p>
                 <p className="text-xs text-secondary mt-2">Click to view hadith on Sunnah.com →</p>
               </div>
@@ -1288,13 +1368,18 @@ const DashboardSchedule = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.07 }}
             className="mb-4 sm:mb-6 p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-card border border-border"
+            role="region"
+            aria-label="Export to calendar"
           >
-            <h3 className="font-display font-bold text-base sm:text-lg mb-1.5 sm:mb-2 flex items-center gap-2">
-              <Download className="w-4 h-4 sm:w-5 sm:h-5 text-secondary shrink-0" />
+            <h2 className="font-display font-bold text-base sm:text-lg mb-1.5 sm:mb-2 flex items-center gap-2">
+              <Download className="w-4 h-4 sm:w-5 sm:h-5 text-secondary shrink-0" aria-hidden />
               Add to calendar
-            </h3>
-            <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
+            </h2>
+            <p className="text-xs sm:text-sm text-muted-foreground mb-2">
               Export an .ics file for Google Calendar, Apple Calendar, or Outlook.
+            </p>
+            <p className="text-xs text-muted-foreground mb-3 sm:mb-4">
+              How to export? <Link to="/guides/schedule-calendar" className="text-secondary hover:underline inline-flex items-center gap-1"><BookOpen className="w-3 h-3 shrink-0" aria-hidden />Schedule guide</Link>
             </p>
 
             {/* Choose time */}
@@ -1444,15 +1529,16 @@ const DashboardSchedule = () => {
           {/* Ramadan daily schedule: every day with eating cutoff & break fast times */}
           {(lat != null && lng != null) && (
             <motion.div
+              id="ramadan-daily-schedule"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.065 }}
-              className="mb-6 p-4 rounded-2xl bg-card border border-border"
+              className="mb-6 p-4 rounded-2xl bg-card border border-border scroll-mt-4"
             >
-              <h3 className="font-display font-bold mb-2 flex items-center gap-2">
+              <h2 className="font-display font-bold mb-2 flex items-center gap-2">
                 <Sunrise className="w-5 h-5 text-secondary" />
                 Ramadan daily schedule
-              </h3>
+              </h2>
               <p className="text-sm text-muted-foreground mb-4">
                 Eating cutoff (Suhoor end) and break fast times for each day of Ramadan. Prayer times change every day and are calculated for your location. Override any date in the day panel below.
               </p>
@@ -1573,12 +1659,12 @@ const DashboardSchedule = () => {
               <TooltipTrigger asChild>
                 <div className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-secondary/10 border border-secondary/20 text-center cursor-help">
                   <span className="text-xl sm:text-2xl md:text-3xl font-bold text-secondary tabular-nums">{ramadanDaysInMonth}</span>
-                  <span className="block text-[10px] sm:text-xs text-muted-foreground mt-0.5">Ramadan this month</span>
+                  <span className="block text-[10px] sm:text-xs text-muted-foreground mt-0.5">Ramadan days in {monthName}</span>
                 </div>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs">
-                <p className="text-sm text-foreground">{GENERAL_TOOLTIPS.ramadan.body}</p>
-                <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{GENERAL_TOOLTIPS.ramadan.bodyAr}</span></p>
+                <p className="font-medium text-sm">Fasting days in this calendar month</p>
+                <p className="text-xs text-muted-foreground mt-1">Number of days in {monthName} that fall within Ramadan. Use the arrows above the calendar to change the month.</p>
               </TooltipContent>
             </Tooltip>
             <Tooltip>
@@ -1619,8 +1705,8 @@ const DashboardSchedule = () => {
             </Tooltip>
           </motion.div>
 
-          {/* Next 7 days strip — quick glance and tap to select */}
-          {lat != null && lng != null && nextSevenDays.length > 0 && (
+          {/* Next 7 days strip — only when viewing today or a past day; hide when viewing a future day */}
+          {lat != null && lng != null && nextSevenDays.length > 0 && (!selectedDate || selectedDate <= todayStr) && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -1678,9 +1764,9 @@ const DashboardSchedule = () => {
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
-                <h3 className="font-display font-bold text-base sm:text-lg min-w-0 text-center flex-1">
+                <h2 className="font-display font-bold text-base sm:text-lg min-w-0 text-center flex-1">
                   {monthName}
-                </h3>
+                </h2>
                 <button
                   onClick={nextMonth}
                   className="p-2 rounded-lg hover:bg-muted transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
@@ -1700,7 +1786,7 @@ const DashboardSchedule = () => {
               </div>
             </div>
             <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">
-              Click any day to view meal plan, food log, and fasting log for that day. Past days are read-only.
+              Click any day to view or edit. For past days you can mark &quot;I fasted this day&quot; or &quot;I didn&apos;t fast&quot; in the panel below. Meal planning applies to today and future days.
             </p>
 
             <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-2">
@@ -1828,12 +1914,12 @@ const DashboardSchedule = () => {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="mt-6 overflow-hidden"
+                  className="mt-6 overflow-hidden scroll-mt-4"
                   aria-label={`Details for ${selectedDateObj?.toLocaleDateString("en", { weekday: "long", month: "long", day: "numeric" })}`}
                 >
                   <div className="p-4 sm:p-5 rounded-xl sm:rounded-2xl bg-muted/50 border border-border space-y-4">
                     <div className="flex items-center justify-between flex-wrap gap-2">
-                      <h4 className="font-display font-bold text-base sm:text-lg flex items-center gap-2 flex-wrap">
+                      <h3 className="font-display font-bold text-base sm:text-lg flex items-center gap-2 flex-wrap">
                         {selectedDateObj?.toLocaleDateString("en", {
                           weekday: "long",
                           month: "long",
@@ -1853,7 +1939,7 @@ const DashboardSchedule = () => {
                             </TooltipContent>
                           </Tooltip>
                         )}
-                      </h4>
+                      </h3>
                       {selectedDate !== todayStr ? (
                         <Button
                           type="button"
@@ -1890,14 +1976,14 @@ const DashboardSchedule = () => {
                                 {isFasting ? "Right now: Fasting" : "Right now: Eating window"}
                               </span>
                               {isFasting ? (
-                                <div className="flex items-baseline gap-1.5 mt-0.5">
+                                <div className="flex items-baseline gap-1.5 mt-0.5" aria-live="polite" aria-atomic="true" aria-label={`${countdownToIftar.h} hours ${countdownToIftar.m} minutes until ${iftarLabel}`}>
                                   <span className="text-lg font-bold tabular-nums">
                                     {String(countdownToIftar.h).padStart(2, "0")}:{String(countdownToIftar.m).padStart(2, "0")}:{String(countdownToIftar.s).padStart(2, "0")}
                                   </span>
                                   <span className="text-xs text-muted-foreground">until {iftarLabel}</span>
                                 </div>
                               ) : (
-                                <div className="flex items-baseline gap-1.5 mt-0.5">
+                                <div className="flex items-baseline gap-1.5 mt-0.5" aria-live="polite" aria-atomic="true" aria-label={`${countdownToSuhoor.h} hours ${countdownToSuhoor.m} minutes until ${suhoorLabel}`}>
                                   <span className="text-xs text-muted-foreground">Next: {suhoorLabel} —</span>
                                   <span className="text-lg font-bold tabular-nums">
                                     {String(countdownToSuhoor.h).padStart(2, "0")}:{String(countdownToSuhoor.m).padStart(2, "0")}:{String(countdownToSuhoor.s).padStart(2, "0")}
@@ -1906,13 +1992,27 @@ const DashboardSchedule = () => {
                               )}
                             </div>
                           </div>
+                          <p className="text-xs font-medium text-muted-foreground">Today&apos;s status</p>
+                          <div className="flex flex-wrap items-center gap-2">
+                            {todayComplete ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-secondary/20 text-secondary border border-secondary/40" aria-live="polite">Complete ✓</span>
+                            ) : todaySkipped ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-muted text-muted-foreground border border-border" aria-live="polite">Skipped</span>
+                            ) : fastingToday ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-primary/20 text-primary border border-primary/40" aria-live="polite">Fasting</span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-muted/80 text-muted-foreground border border-border" aria-live="polite">Not logged yet</span>
+                            )}
+                          </div>
                           {todayLog?.startedAt && !todayLog?.completedAt && (
                             <p className="text-xs text-muted-foreground">
                               Started {new Date(todayLog.startedAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
                             </p>
                           )}
                           {!todaySkipped && !todayComplete && (
-                            <div className="flex flex-wrap gap-2">
+                            <div className="flex flex-col gap-1.5" role="group" aria-labelledby="schedule-mark-today-label">
+                              <p className="text-xs font-semibold text-muted-foreground" id="schedule-mark-today-label">Mark today</p>
+                              <div className="flex flex-wrap gap-2">
                               {!fastingToday ? (
                                 <>
                                   <Button
@@ -1942,11 +2042,18 @@ const DashboardSchedule = () => {
                                   Break fast
                                 </Button>
                               )}
+                              </div>
                             </div>
                           )}
                           {todaySkipped && (
                             <span className="text-sm text-muted-foreground">I didn&apos;t fast today</span>
                           )}
+                          <Link
+                            to="/dashboard"
+                            className="text-xs text-secondary hover:underline inline-flex items-center gap-1 mt-1"
+                          >
+                            See today&apos;s progress and checklist on Dashboard
+                          </Link>
                         </div>
                       );
                     })()}
@@ -2314,7 +2421,17 @@ const DashboardSchedule = () => {
                       <p className="text-xs text-muted-foreground mb-2">
                         Quick-add {suhoorLabel}, {iftarLabel}, prayers, Taraweeh, get food. These plus your custom events are included when you export.
                       </p>
-                      <div className="flex flex-wrap gap-1.5 mb-2">
+                      <div className="flex flex-wrap gap-1.5 mb-2 items-center">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          className="text-xs h-8"
+                          onClick={quickAddAllPrayers}
+                          disabled={!effectiveSelectedDayPrayerTimes}
+                        >
+                          Quick add all prayers
+                        </Button>
                         {QUICK_ADD_TEMPLATES.map((t) => (
                           <Button
                             key={t.type}
@@ -2334,6 +2451,7 @@ const DashboardSchedule = () => {
                           value={customEventTitle}
                           onChange={(e) => setCustomEventTitle(e.target.value)}
                           className="flex-1 min-w-[120px] min-h-[44px] h-9 sm:h-9 text-sm"
+                          aria-label="Custom event title"
                         />
                         <input
                           type="time"
@@ -2369,6 +2487,7 @@ const DashboardSchedule = () => {
                                     onChange={(ev) => setEditEventDuration(parseInt(ev.target.value, 10) || 15)}
                                     className="w-14 h-8 px-2 rounded border border-border bg-background text-xs"
                                     title="Duration (minutes)"
+                                    aria-label="Duration (minutes)"
                                   />
                                   <span className="text-xs text-muted-foreground">min</span>
                                   <Button size="sm" className="h-8" onClick={() => { if (selectedDate) { updateCalendarEvent(selectedDate, e.id, { time: editEventTime, durationMinutes: editEventDuration }); setEditingEventId(null); toast.success("Event updated"); } }}>
@@ -2458,7 +2577,7 @@ const DashboardSchedule = () => {
                           </p>
                           <p className="text-xs mt-1">
                             {canEditMealPlan
-                              ? `Short notes for your pre-dawn meal (Suhoor) and break-fast meal (${iftarLabel}). Use the Meals page to browse recipes.`
+                              ? `Type short notes or use “Add from recipe” to pick recipes for Suhoor and ${iftarLabel}. Items are added to the food log below with portions and calories.`
                               : "What you had is in the food log below."}
                           </p>
                         </TooltipContent>
@@ -2469,67 +2588,107 @@ const DashboardSchedule = () => {
                         </p>
                       )}
                       <div className="grid gap-2">
-                        <div className="flex items-center gap-2">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="flex items-center gap-1 text-muted-foreground shrink-0">
-                                <Sunrise className="w-4 h-4" aria-hidden />
-                                <span className="text-xs">Suhoor (morning)</span>
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent className="max-w-xs">
-                              <p className="font-medium">{EATING_TIME_TOOLTIPS.suhoor.title}</p>
-                              <p className="text-xs mt-1">{EATING_TIME_TOOLTIPS.suhoor.body}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                          <Input
-                            placeholder={canEditMealPlan ? "e.g. Oats & dates" : "Nothing planned"}
-                            value={selectedDayMeals?.suhoor ?? ""}
-                            onChange={(e) =>
-                              canEditMealPlan &&
-                              setMealPlans((prev) => ({
-                                ...prev,
-                                [selectedDate!]: {
-                                  ...prev[selectedDate!],
-                                  suhoor: e.target.value.trim() || undefined,
-                                },
-                              }))
-                            }
-                            readOnly={!canEditMealPlan}
-                            className="bg-background"
-                            aria-label={canEditMealPlan ? "Suhoor meal plan" : "Suhoor (past day, read-only)"}
-                          />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span className="flex items-center gap-1 text-muted-foreground shrink-0">
-                                <Sunset className="w-4 h-4" aria-hidden />
-                                <span className="text-xs">{iftarLabel} (evening)</span>
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent className="max-w-xs">
-                              <p className="font-medium">{EATING_TIME_TOOLTIPS.iftar.title}</p>
-                              <p className="text-xs mt-1">{EATING_TIME_TOOLTIPS.iftar.body}</p>
-                            </TooltipContent>
-                          </Tooltip>
-                          <Input
-                            placeholder={canEditMealPlan ? "e.g. Harira & dates" : "Nothing planned"}
-                            value={selectedDayMeals?.iftar ?? ""}
-                            onChange={(e) =>
-                              canEditMealPlan &&
-                              setMealPlans((prev) => ({
-                                ...prev,
-                                [selectedDate!]: {
-                                  ...prev[selectedDate!],
-                                  iftar: e.target.value.trim() || undefined,
-                                },
-                              }))
-                            }
-                            readOnly={!canEditMealPlan}
-                            className="bg-background"
-                            aria-label={canEditMealPlan ? `${iftarLabel} meal plan` : `${iftarLabel} (past day, read-only)`}
-                          />
+                        <div className="space-y-1.5">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="flex items-center gap-1 text-muted-foreground shrink-0">
+                                  <Sunrise className="w-4 h-4" aria-hidden />
+                                  <span className="text-xs">Suhoor (morning)</span>
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-xs">
+                                <p className="font-medium">{EATING_TIME_TOOLTIPS.suhoor.title}</p>
+                                <p className="text-xs mt-1">{EATING_TIME_TOOLTIPS.suhoor.body}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                            <Input
+                              placeholder={canEditMealPlan ? "e.g. Oats & dates or add from recipe" : "Nothing planned"}
+                              value={selectedDayMeals?.suhoor ?? ""}
+                              onChange={(e) =>
+                                canEditMealPlan &&
+                                setMealPlans((prev) => ({
+                                  ...prev,
+                                  [selectedDate!]: {
+                                    ...prev[selectedDate!],
+                                    suhoor: e.target.value.trim() || undefined,
+                                  },
+                                }))
+                              }
+                              readOnly={!canEditMealPlan}
+                              className="bg-background flex-1 min-w-[140px]"
+                              aria-label={canEditMealPlan ? "Suhoor meal plan" : "Suhoor (past day, read-only)"}
+                            />
+                            {canEditMealPlan && (
+                              <Select
+                                onValueChange={(v) => addFoodFromRecipe("suhoor", v)}
+                                value=""
+                              >
+                                <SelectTrigger className="w-[180px] h-9 shrink-0" aria-label="Add Suhoor recipe">
+                                  <SelectValue placeholder="Add from recipe…" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {allRecipesForPicker
+                                    .filter((r) => r.mealType === "suhoor")
+                                    .map(({ recipe, mealType }) => (
+                                      <SelectItem key={`${mealType}-${recipe.id}`} value={`${mealType}-${recipe.id}`}>
+                                        {recipe.name} ({recipe.nutrition?.calories ?? "?"} cal)
+                                      </SelectItem>
+                                    ))}
+                                </SelectContent>
+                              </Select>
+                            )}
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="flex items-center gap-1 text-muted-foreground shrink-0">
+                                  <Sunset className="w-4 h-4" aria-hidden />
+                                  <span className="text-xs">{iftarLabel} (evening)</span>
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-xs">
+                                <p className="font-medium">{EATING_TIME_TOOLTIPS.iftar.title}</p>
+                                <p className="text-xs mt-1">{EATING_TIME_TOOLTIPS.iftar.body}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                            <Input
+                              placeholder={canEditMealPlan ? `e.g. Harira & dates or add from recipe` : "Nothing planned"}
+                              value={selectedDayMeals?.iftar ?? ""}
+                              onChange={(e) =>
+                                canEditMealPlan &&
+                                setMealPlans((prev) => ({
+                                  ...prev,
+                                  [selectedDate!]: {
+                                    ...prev[selectedDate!],
+                                    iftar: e.target.value.trim() || undefined,
+                                  },
+                                }))
+                              }
+                              readOnly={!canEditMealPlan}
+                              className="bg-background flex-1 min-w-[140px]"
+                              aria-label={canEditMealPlan ? `${iftarLabel} meal plan` : `${iftarLabel} (past day, read-only)`}
+                            />
+                            {canEditMealPlan && (
+                              <Select
+                                onValueChange={(v) => addFoodFromRecipe("iftar", v)}
+                                value=""
+                              >
+                                <SelectTrigger className="w-[180px] h-9 shrink-0" aria-label={`Add ${iftarLabel} recipe`}>
+                                  <SelectValue placeholder="Add from recipe…" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {allRecipesForPicker
+                                    .filter((r) => r.mealType === "iftar")
+                                    .map(({ recipe, mealType }) => (
+                                      <SelectItem key={`${mealType}-${recipe.id}`} value={`${mealType}-${recipe.id}`}>
+                                        {recipe.name} ({recipe.nutrition?.calories ?? "?"} cal)
+                                      </SelectItem>
+                                    ))}
+                                </SelectContent>
+                              </Select>
+                            )}
+                          </div>
                         </div>
                       </div>
                       {canEditMealPlan && (
@@ -2590,12 +2749,15 @@ const DashboardSchedule = () => {
                       )}
                     </div>
 
-                    {/* Plan last days of Ramadan — quick jump */}
-                    {selectedDate && (selectedIsRamadan || selectedRamadanDay == null) && lastFiveRamadanDates.length > 0 && (
-                      <div className="rounded-xl border border-border bg-background/50 p-3">
-                        <p className="text-xs font-medium text-muted-foreground mb-2">Plan last days of Ramadan</p>
+                    {/* Plan the rest of days: quick jump + copy this plan to remaining / by weekday / Sunnah */}
+                    {selectedDate && remainingRamadanDates.length > 0 && (selectedDayMeals?.suhoor || selectedDayMeals?.iftar) && (
+                      <div className="rounded-xl border border-border bg-background/50 p-3 space-y-3">
+                        <p className="text-xs font-medium text-muted-foreground">Plan the rest of days</p>
+                        <p className="text-xs text-muted-foreground">
+                          Jump to a day or copy this day&apos;s meal plan to multiple days (by weekday or all remaining).
+                        </p>
                         <div className="flex flex-wrap gap-2">
-                          {lastFiveRamadanDates.map(({ dayNum, dateStr }) => (
+                          {remainingRamadanDates.slice(0, 14).map(({ dayNum, dateStr }) => (
                             <button
                               key={dateStr}
                               type="button"
@@ -2609,7 +2771,23 @@ const DashboardSchedule = () => {
                               Day {dayNum}
                             </button>
                           ))}
+                          {remainingRamadanDates.length > 14 && (
+                            <span className="px-2 py-1.5 text-xs text-muted-foreground">+{remainingRamadanDates.length - 14} more</span>
+                          )}
                         </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setCopyMealsToSelectedOpen(true);
+                            setCopyToSelectedDates(new Set());
+                          }}
+                          className="gap-1 w-full sm:w-auto"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                          Copy this plan to selected days…
+                        </Button>
                       </div>
                     )}
 
@@ -2630,6 +2808,11 @@ const DashboardSchedule = () => {
                       <p className="text-xs text-muted-foreground mb-2">
                         Add items from recipes or custom. Set portions; calories and optional P/C/F are per portion.
                       </p>
+                      {(selectedDayFoodLog?.suhoor?.length ?? 0) === 0 && (selectedDayFoodLog?.iftar?.length ?? 0) === 0 && (
+                        <p className="text-xs text-muted-foreground mb-2">
+                          Log your first meal. <Link to="/guides/meals-recipes" className="text-secondary hover:underline inline-flex items-center gap-1"><BookOpen className="w-3 h-3 shrink-0" aria-hidden />Meals guide</Link>
+                        </p>
+                      )}
 
                       {/* Suhoor entries */}
                       <div className="mb-3">
@@ -3009,7 +3192,7 @@ const DashboardSchedule = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Copy to selected days */}
+      {/* Copy to selected days: plan by day type (weekday, Sunnah) or select all / rest of Ramadan */}
       <Dialog
         open={copyMealsToSelectedOpen}
         onOpenChange={(open) => {
@@ -3017,23 +3200,38 @@ const DashboardSchedule = () => {
           setCopyMealsToSelectedOpen(open);
         }}
       >
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-w-sm max-h-[90vh] flex flex-col">
           <DialogTitle>Copy meals to selected days</DialogTitle>
           <p className="text-xs text-muted-foreground mb-3">
-            Copy this day&apos;s meal plan to the days you check below. Only future days are applied.
+            Copy this day&apos;s meal plan to the days you check below. Only today and future days are applied. Use quick-select to apply by calendar day type (e.g. all Mondays in Ramadan).
           </p>
           {(() => {
-            const start = new Date((selectedDate ?? todayStr) + "T12:00:00");
-            start.setDate(start.getDate() + 1);
-            const end = new Date(start);
-            end.setDate(end.getDate() + 29);
-            const ramadanEnd = ramadanRange.end ? new Date(ramadanRange.end) : end;
-            const lastDate = end > ramadanEnd ? ramadanEnd : end;
+            // Candidate range: today through end of Ramadan (when Ramadan is current/future), else next 30 days. Ramadan range from preferences (localStorage).
+            const ramadanEnd = ramadanRange.end ? new Date(ramadanRange.end) : null;
+            const todayDate = new Date(todayStr + "T12:00:00");
+            const fallbackEnd = new Date(todayDate);
+            fallbackEnd.setDate(fallbackEnd.getDate() + 29);
+            const endDate =
+              ramadanEnd && ramadanEnd >= todayDate ? ramadanEnd : fallbackEnd;
             const candidateDates: string[] = [];
-            for (const d = new Date(start); d <= lastDate; d.setDate(d.getDate() + 1)) {
-              const str = toLocalDateString(d);
-              if (str >= todayStr) candidateDates.push(str);
+            for (const d = new Date(todayDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+              candidateDates.push(toLocalDateString(d));
             }
+            const voluntary = preferences.voluntaryFasting ?? [];
+            const participatesSunnahMonThu = voluntary.includes("monday-thursday");
+            const weekdayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            const selectByWeekday = (weekday: number) => {
+              const set = new Set(candidateDates.filter((str) => new Date(str + "T12:00:00").getDay() === weekday));
+              setCopyToSelectedDates(set);
+            };
+            const selectRestOfRamadan = () => setCopyToSelectedDates(new Set(candidateDates));
+            const selectSunnahDays = () => {
+              const set = new Set(candidateDates.filter((str) => {
+                const day = new Date(str + "T12:00:00").getDay();
+                return day === 1 || day === 4;
+              }));
+              setCopyToSelectedDates(set);
+            };
             const toggle = (dateStr: string) => {
               setCopyToSelectedDates((prev) => {
                 const next = new Set(prev);
@@ -3046,17 +3244,30 @@ const DashboardSchedule = () => {
             const clearAll = () => setCopyToSelectedDates(new Set());
             return (
               <>
-                <div className="flex gap-2 mb-2">
-                  <Button type="button" variant="outline" size="sm" onClick={selectAll}>Select all</Button>
-                  <Button type="button" variant="outline" size="sm" onClick={clearAll}>Clear</Button>
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  <Button type="button" variant="outline" size="sm" onClick={selectAll} className="text-xs">Select all</Button>
+                  <Button type="button" variant="outline" size="sm" onClick={selectRestOfRamadan} className="text-xs">Rest of Ramadan</Button>
+                  <Button type="button" variant="outline" size="sm" onClick={clearAll} className="text-xs">Clear</Button>
+                  {participatesSunnahMonThu && (
+                    <Button type="button" variant="outline" size="sm" onClick={selectSunnahDays} className="text-xs">Sunnah (Mon/Thu)</Button>
+                  )}
                 </div>
-                <ul className="space-y-1 max-h-48 overflow-auto border rounded-lg p-2">
+                <p className="text-[10px] text-muted-foreground mb-1">By weekday (same schedule for that day type):</p>
+                <div className="flex flex-wrap gap-1 mb-2">
+                  {[0, 1, 2, 3, 4, 5, 6].map((wd) => (
+                    <Button key={wd} type="button" variant="ghost" size="sm" onClick={() => selectByWeekday(wd)} className="text-xs h-7 px-2">
+                      {weekdayNames[wd]}
+                    </Button>
+                  ))}
+                </div>
+                <ul className="space-y-1 max-h-48 overflow-auto border rounded-lg p-2 flex-1 min-h-0">
                   {candidateDates.length === 0 ? (
-                    <li className="text-sm text-muted-foreground py-2 text-center">No future days in range.</li>
+                    <li className="text-sm text-muted-foreground py-2 text-center">No days in range.</li>
                   ) : (
                     candidateDates.map((dateStr) => {
                       const dayNum = ramadanRange.getRamadanDayNumber(new Date(dateStr + "T12:00:00"));
-                      const label = dayNum != null ? `Day ${dayNum} · ${dateStr}` : dateStr;
+                      const wd = new Date(dateStr + "T12:00:00").getDay();
+                      const label = dayNum != null ? `Day ${dayNum} · ${weekdayNames[wd]} ${dateStr}` : `${weekdayNames[wd]} ${dateStr}`;
                       return (
                         <li key={dateStr}>
                           <label className="flex items-center gap-2 cursor-pointer py-1 rounded hover:bg-muted/50 px-2">
@@ -3074,7 +3285,7 @@ const DashboardSchedule = () => {
                     })
                   )}
                 </ul>
-                <div className="flex justify-end gap-2 pt-2">
+                <div className="flex justify-end gap-2 pt-2 shrink-0">
                   <Button type="button" variant="outline" onClick={() => setCopyMealsToSelectedOpen(false)}>
                     Cancel
                   </Button>

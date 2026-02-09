@@ -6,6 +6,7 @@ import {
   useAdhanSoundEnabled,
   useAdhanNotifiedToday,
 } from "@/hooks/useLocalStorage";
+import { useNotifications } from "@/hooks/useNotifications";
 import { playAdhan } from "@/lib/adhanAudio";
 import { getTodayStringInTimezone, toLocalDateString, getNowInTimezone } from "@/lib/utils";
 import { IftarDuaDialog } from "@/components/IftarDuaDialog";
@@ -25,6 +26,7 @@ function timeToMinutes(timeStr: string): number {
 export function AdhanScheduler() {
   const [preferences] = useUserPreferences();
   const displayTimezone = useDisplayTimezone();
+  const { permission, requestPermission } = useNotifications();
   const { prayerTimes } = usePrayerTimes(
     preferences.locationCoords?.lat ?? null,
     preferences.locationCoords?.lng ?? null,
@@ -38,6 +40,15 @@ export function AdhanScheduler() {
   notifiedStoreRef.current = adhanNotifiedToday;
   const iftarPopupShownForDayRef = useRef<string | null>(null);
   const [showIftarPopup, setShowIftarPopup] = useState(false);
+  const permissionRequestedRef = useRef(false);
+
+  // When prayer/iftar notifications are enabled, request permission so push notifications fire when alarm time comes
+  const hasPrayerNotification = preferences.userType === "muslim" && preferences.notificationsEnabled && PRAYER_NAMES.some((name) => prayerNotifications[name] !== false);
+  useEffect(() => {
+    if (!hasPrayerNotification || permission !== "default" || permissionRequestedRef.current) return;
+    permissionRequestedRef.current = true;
+    requestPermission();
+  }, [hasPrayerNotification, permission, requestPermission]);
 
   useEffect(() => {
     if (!prayerTimes) return;

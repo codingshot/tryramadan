@@ -432,7 +432,9 @@ export async function fetchPrayerTimesForMonth(
     const greg = day.date?.gregorian;
     if (!greg || !day.timings) return;
     const d = greg.day?.padStart(2, '0') ?? '';
-    const m = String(greg.month?.number ?? '').padStart(2, '0');
+    const monthVal = greg.month;
+    const monthNum = typeof monthVal === 'number' ? monthVal : (monthVal as { number?: number } | undefined)?.number;
+    const m = String(monthNum ?? '').padStart(2, '0');
     const y = greg.year ?? '';
     if (!d || !m || !y) return;
     const iso = `${y}-${m}-${d}`;

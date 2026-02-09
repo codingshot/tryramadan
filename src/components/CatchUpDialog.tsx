@@ -18,6 +18,7 @@ import {
   useDayFoodLog,
   useQuranVerseViewedDates,
   useHadithViewedDates,
+  useCatchUpDismissedDates,
   completeFastingToday,
   setDaySkipped,
   normalizeDayFoodLog,
@@ -26,6 +27,28 @@ import { toLocalDateString } from "@/lib/utils";
 import { useRamadanRange } from "@/hooks/useRamadanRange";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { HadithSunnahLink } from "@/components/HadithSunnahLink";
+import { EXTERNAL_LINKS } from "@/lib/config";
+import hadithsData from "@/data/hadiths.json";
+import dailyQuran from "@/data/daily-quran-verses.json";
+
+function getDayOfYear(dateStr: string): number {
+  const d = new Date(dateStr + "T12:00:00");
+  const start = new Date(d.getFullYear(), 0, 0);
+  return Math.floor((d.getTime() - start.getTime()) / 86400000);
+}
+
+function getVerseForDate(dateStr: string): (typeof dailyQuran.verses)[number] {
+  const dayOfYear = getDayOfYear(dateStr);
+  const index = dayOfYear % dailyQuran.verses.length;
+  return dailyQuran.verses[index];
+}
+
+function getHadithForDate(dateStr: string): (typeof hadithsData.hadiths)[number] {
+  const dayOfYear = getDayOfYear(dateStr);
+  const index = dayOfYear % hadithsData.hadiths.length;
+  return hadithsData.hadiths[index];
+}
 
 const CATCH_UP_DAYS = 14;
 
@@ -55,6 +78,7 @@ export function CatchUpDialog({ open, onOpenChange, todayStr }: CatchUpDialogPro
   const [foodLogs] = useDayFoodLog();
   const [quranDates, markQuranViewed] = useQuranVerseViewedDates();
   const [hadithDates, markHadithViewed] = useHadithViewedDates();
+  const [caughtUpDates, markDayCaughtUp] = useCatchUpDismissedDates();
   const ramadanRange = useRamadanRange();
 
   const wantQuran = (preferences.quranPriority ?? "some") !== "none";
@@ -69,6 +93,7 @@ export function CatchUpDialog({ open, onOpenChange, todayStr }: CatchUpDialogPro
       d.setDate(d.getDate() - i);
       const dateStr = toLocalDateString(d);
       if (dateStr > todayStr) continue;
+      if (caughtUpDates.includes(dateStr)) continue;
 
       const hasJournal = journalEntries.some((e) => e.date === dateStr);
       const completed = progress.completedDays.includes(dateStr);
@@ -106,6 +131,7 @@ export function CatchUpDialog({ open, onOpenChange, todayStr }: CatchUpDialogPro
     return result;
   }, [
     todayStr,
+    caughtUpDates,
     journalEntries,
     progress.completedDays,
     progress.skippedDays,
@@ -120,6 +146,8 @@ export function CatchUpDialog({ open, onOpenChange, todayStr }: CatchUpDialogPro
 
   const [stepIndex, setStepIndex] = useState(0);
   const currentDay = daysNeedingCatchUp[stepIndex];
+  const [readQuranForDate, setReadQuranForDate] = useState<string | null>(null);
+  const [readHadithForDate, setReadHadithForDate] = useState<string | null>(null);
 
   const handleMarkFastingCompleted = () => {
     if (!currentDay) return;
@@ -158,9 +186,23 @@ export function CatchUpDialog({ open, onOpenChange, todayStr }: CatchUpDialogPro
     if (stepIndex > 0) setStepIndex((i) => i - 1);
   };
 
+  const handleMarkDayCaughtUp = () => {
+    if (!currentDay) return;
+    markDayCaughtUp(currentDay.dateStr);
+    toast.success(`${currentDay.dateStr} marked as caught up`);
+    const remaining = daysNeedingCatchUp.length - 1;
+    if (remaining <= 0) {
+      onOpenChange(false);
+      setStepIndex(0);
+    } else {
+      setStepIndex((i) => Math.min(i, remaining - 1));
+    }
+  };
+
   if (!open) return null;
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="max-w-md"
@@ -272,16 +314,27 @@ export function CatchUpDialog({ open, onOpenChange, todayStr }: CatchUpDialogPro
                         <BookOpen className="w-4 h-4 text-secondary" aria-hidden />
                         Quran verse
                       </span>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={handleMarkQuranViewed}
-                        className="text-xs"
-                      >
-                        <Check className="w-3 h-3 mr-0.5" aria-hidden />
-                        Mark viewed
-                      </Button>
+                      <div className="flex gap-1">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => setReadQuranForDate(currentDay.dateStr)}
+                          className="text-xs"
+                        >
+                          Read
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleMarkQuranViewed}
+                          className="text-xs"
+                        >
+                          <Check className="w-3 h-3 mr-0.5" aria-hidden />
+                          Mark viewed
+                        </Button>
+                      </div>
                     </li>
                   )}
                   {currentDay.missing.hadith && (
@@ -290,20 +343,41 @@ export function CatchUpDialog({ open, onOpenChange, todayStr }: CatchUpDialogPro
                         <Zap className="w-4 h-4 text-secondary" aria-hidden />
                         Hadith
                       </span>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={handleMarkHadithViewed}
-                        className="text-xs"
-                      >
-                        <Check className="w-3 h-3 mr-0.5" aria-hidden />
-                        Mark viewed
-                      </Button>
+                      <div className="flex gap-1">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => setReadHadithForDate(currentDay.dateStr)}
+                          className="text-xs"
+                        >
+                          Read
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleMarkHadithViewed}
+                          className="text-xs"
+                        >
+                          <Check className="w-3 h-3 mr-0.5" aria-hidden />
+                          Mark viewed
+                        </Button>
+                      </div>
                     </li>
                   )}
                 </ul>
-                <div className="pt-2 flex justify-end">
+                <div className="pt-2 flex flex-wrap items-center justify-between gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleMarkDayCaughtUp}
+                    className="text-xs"
+                  >
+                    <Check className="w-3 h-3 mr-1" aria-hidden />
+                    Mark day as caught up
+                  </Button>
                   <Button type="button" variant="secondary" size="sm" onClick={goNext}>
                     Next day
                   </Button>
@@ -314,5 +388,95 @@ export function CatchUpDialog({ open, onOpenChange, todayStr }: CatchUpDialogPro
         )}
       </DialogContent>
     </Dialog>
+
+    {/* Read Quran verse popup */}
+    <Dialog open={!!readQuranForDate} onOpenChange={(open) => !open && setReadQuranForDate(null)}>
+      <DialogContent className="max-w-md" aria-describedby={undefined}>
+        <DialogTitle id="catchup-quran-title">
+          {readQuranForDate
+            ? `Quran verse · ${new Date(readQuranForDate + "T12:00:00").toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" })}`
+            : "Quran verse"}
+        </DialogTitle>
+        {readQuranForDate && (() => {
+          const verse = getVerseForDate(readQuranForDate);
+          return (
+          <div className="space-y-3 pt-1">
+            <blockquote className="text-sm md:text-base leading-relaxed font-display" id="catchup-quran-content">
+              "{verse.text}"
+            </blockquote>
+            <p className="text-xs text-muted-foreground">
+              <a
+                href={`${EXTERNAL_LINKS.quran}/${verse.surahNumber}/${verse.verseNumber}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-secondary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded"
+              >
+                Surah {verse.surah} {verse.reference}
+              </a>
+              {" · "}
+              {verse.topic}
+            </p>
+            {currentDay?.dateStr === readQuranForDate && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  handleMarkQuranViewed();
+                  setReadQuranForDate(null);
+                }}
+              >
+                <Check className="w-3 h-3 mr-1" aria-hidden />
+                Mark as read
+              </Button>
+            )}
+          </div>
+          );
+        })()}
+      </DialogContent>
+    </Dialog>
+
+    {/* Read Hadith popup */}
+    <Dialog open={!!readHadithForDate} onOpenChange={(open) => !open && setReadHadithForDate(null)}>
+      <DialogContent className="max-w-md" aria-describedby={undefined}>
+        <DialogTitle id="catchup-hadith-title">
+          {readHadithForDate
+            ? `Hadith · ${new Date(readHadithForDate + "T12:00:00").toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" })}`
+            : "Hadith"}
+        </DialogTitle>
+        {readHadithForDate && (() => {
+          const hadith = getHadithForDate(readHadithForDate);
+          return (
+          <div className="space-y-3 pt-1">
+            <blockquote className="text-sm md:text-base leading-relaxed font-display" id="catchup-hadith-content">
+              "{hadith.text}"
+            </blockquote>
+            <p className="text-xs text-muted-foreground">
+              <HadithSunnahLink source={hadith.source}>
+                {hadith.source}
+              </HadithSunnahLink>
+              {" · "}
+              {hadith.topic}
+            </p>
+            {currentDay?.dateStr === readHadithForDate && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  handleMarkHadithViewed();
+                  setReadHadithForDate(null);
+                }}
+              >
+                <Check className="w-3 h-3 mr-1" aria-hidden />
+                Mark as read
+              </Button>
+            )}
+          </div>
+          );
+        })()}
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

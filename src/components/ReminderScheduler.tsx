@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useUserPreferences, useNotificationSettings, useDisplayTimezone, useIftarLabel, useIftarLabelShort } from "@/hooks/useLocalStorage";
+import { useNotifications } from "@/hooks/useNotifications";
 import { usePrayerTimes, getSunnahFastingInfo } from "@/hooks/usePrayerTimes";
 import { useRamadanRange } from "@/hooks/useRamadanRange";
 import { getTodayStringInTimezone, toLocalDateString, getNowInTimezone } from "@/lib/utils";
@@ -49,18 +50,27 @@ export function ReminderScheduler(): null {
   const ramadanRange = useRamadanRange();
   const iftarLabel = useIftarLabel();
   const iftarLabelShort = useIftarLabelShort();
+  const { permission, requestPermission } = useNotifications();
   const { prayerTimes } = usePrayerTimes(
     preferences.locationCoords?.lat ?? null,
     preferences.locationCoords?.lng ?? null,
     displayTimezone
   );
   const sentRef = useRef<Record<string, ReminderType[]>>(getRemindersSent());
+  const permissionRequestedRef = useRef(false);
+
+  // When fasting alarms (suhoor/iftar) are on, request notification permission so push notifications fire when alarm time comes
+  useEffect(() => {
+    if (!preferences.notificationsEnabled || (!notifSettings.suhoorEnabled && !notifSettings.iftarEnabled)) return;
+    if (permission !== "default" || permissionRequestedRef.current) return;
+    permissionRequestedRef.current = true;
+    requestPermission();
+  }, [preferences.notificationsEnabled, notifSettings.suhoorEnabled, notifSettings.iftarEnabled, permission, requestPermission]);
 
   useEffect(() => {
     if (!preferences.notificationsEnabled) return;
     if (!prayerTimes) return;
-    if (!("Notification" in window)) return;
-    if (Notification.permission !== "granted") return;
+    if (permission !== "granted") return;
 
     const checkAndNotify = () => {
       sentRef.current = getRemindersSent();
@@ -155,7 +165,7 @@ export function ReminderScheduler(): null {
     checkAndNotify();
     const interval = setInterval(checkAndNotify, 60 * 1000);
     return () => clearInterval(interval);
-  }, [preferences.notificationsEnabled, preferences.userType, displayTimezone, prayerTimes, notifSettings.suhoorEnabled, notifSettings.iftarEnabled, notifSettings.suhoorMinutesBefore, notifSettings.iftarMinutesBefore, preferences.hydrationReminderEnabled, preferences.hydrationReminderTimes, iftarLabel, iftarLabelShort]);
+  }, [permission, preferences.notificationsEnabled, preferences.userType, displayTimezone, prayerTimes, notifSettings.suhoorEnabled, notifSettings.iftarEnabled, notifSettings.suhoorMinutesBefore, notifSettings.iftarMinutesBefore, preferences.hydrationReminderEnabled, preferences.hydrationReminderTimes, iftarLabel, iftarLabelShort]);
 
   return null;
 }

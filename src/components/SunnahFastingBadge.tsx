@@ -75,11 +75,6 @@ export const SunnahFastingBadge = ({ hijriDay, prayerTimes, locationLabel }: Sun
         </a>
       )}
 
-      {(sunnahInfo || isAyyamAlBeed) && (
-        <p className="w-full text-center text-xs text-muted-foreground mt-1">
-          💡 Today is a recommended day to fast in Islamic tradition
-        </p>
-      )}
     </motion.div>
   );
 };

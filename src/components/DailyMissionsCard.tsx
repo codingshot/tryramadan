@@ -132,7 +132,7 @@ export const DailyMissionsCard = memo(function DailyMissionsCard() {
           <TooltipTrigger asChild>
             <h3 className="font-display font-bold flex items-center gap-2 cursor-help w-fit border-b border-dotted border-transparent hover:border-muted-foreground/40">
               <Target className="w-5 h-5 text-secondary" />
-              Today&apos;s missions
+              Today&apos;s progress
             </h3>
           </TooltipTrigger>
           <TooltipContent>
@@ -142,18 +142,18 @@ export const DailyMissionsCard = memo(function DailyMissionsCard() {
         </Tooltip>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="text-sm font-medium text-secondary tabular-nums">
+            <span className="text-sm font-medium text-secondary tabular-nums" aria-label={`${completedCount} of ${totalCount} items done today`}>
               {completedCount}/{totalCount}
             </span>
           </TooltipTrigger>
           <TooltipContent>
-            <p className="font-medium">Daily missions completed</p>
-            <p className="text-xs mt-1">Start fasting, log meals, add a note, read a hadith, and complete or break your fast.</p>
+            <p className="font-medium">Daily progress</p>
+            <p className="text-xs mt-1">Mark fasting, log meals, add a note, read a hadith, and complete or break your fast.</p>
           </TooltipContent>
         </Tooltip>
       </div>
       <p className="text-xs text-muted-foreground mb-3">
-        Small steps for your fasting day. Tap Start fasting to mark it, or tap an item to open the right page.
+        Mark whether you&apos;re fasting, log meals, and complete the day. Tap an item to open the right page or tap &quot;Start fasting&quot; to log that you&apos;ve started.
       </p>
       <ul className="space-y-0.5">
         {missions.map((m) => (

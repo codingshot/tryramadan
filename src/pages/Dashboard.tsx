@@ -28,6 +28,7 @@ import {
   getBrokenReasonLabel,
   isFastingToday,
   setDayCompleted,
+  setBrokenDayToCompleted,
   setDaySkipped,
   useDayMealPlans,
   useDayNutrition,
@@ -84,9 +85,11 @@ const Dashboard = () => {
   const [progress, setProgress] = useFastingProgress();
   const ramadanRange = useRamadanRange();
 
-  const [isFasting, setIsFasting] = useState(true);
+  const [isFasting, setIsFasting] = useState(false);
+  const [inFastingWindow, setInFastingWindow] = useState(false);
   const [countdownToIftar, setCountdownToIftar] = useState({ h: 0, m: 0, s: 0 });
   const [countdownToSuhoor, setCountdownToSuhoor] = useState({ h: 0, m: 0, s: 0 });
+  const [showAskFastingPopup, setShowAskFastingPopup] = useState(false);
   const [ayyamAlBeed, setAyyamAlBeed] = useState<{ isAyyamAlBeed: boolean; hijriDay: number } | null>(null);
   const [locationEditorOpen, setLocationEditorOpen] = useState(false);
   const [showBreakFastDialog, setShowBreakFastDialog] = useState(false);
@@ -184,6 +187,7 @@ const Dashboard = () => {
   );
   const selectedDayJournal = journalEntries.find((e) => e.date === selectedDate);
   const selectedDayComplete = progress.completedDays.includes(selectedDate);
+  const selectedDayBroken = (progress.fastingLog ?? []).some((e) => e.date === selectedDate && e.status === "broken");
   const selectedDateObj = new Date(selectedDate + "T12:00:00");
   const isSelectedToday = selectedDate === todayStr;
   
@@ -232,15 +236,17 @@ const Dashboard = () => {
 
   const tickFastingAndCountdown = useCallback(() => {
     if (!prayerTimes?.imsak || !prayerTimes?.maghrib) return;
+    const fastingToday = isFastingToday(progress, todayStr);
     const suhoorForTomorrow = imsakTomorrow ?? prayerTimes.imsak;
     if (displayTimezone) {
       const nowSeconds = getNowSecondsSinceMidnightInTimezone(displayTimezone);
       const imsakSeconds = timeStringToSecondsSinceMidnight(prayerTimes.imsak);
       const imsakTomorrowSeconds = timeStringToSecondsSinceMidnight(suhoorForTomorrow);
       const maghribSeconds = timeStringToSecondsSinceMidnight(prayerTimes.maghrib);
-      const fasting = nowSeconds >= imsakSeconds && nowSeconds < maghribSeconds;
-      setIsFasting(fasting);
-      if (fasting) {
+      const inWindow = nowSeconds >= imsakSeconds && nowSeconds < maghribSeconds;
+      setInFastingWindow(inWindow);
+      setIsFasting(inWindow && fastingToday);
+      if (inWindow) {
         const diff = secondsUntilTimeInTimezone(nowSeconds, maghribSeconds);
         setCountdownToIftar({
           h: Math.floor(diff / 3600),
@@ -267,9 +273,10 @@ const Dashboard = () => {
         next.setDate(next.getDate() + 1);
         return next;
       })();
-      const fasting = now >= imsakTime && now < maghribTarget;
-      setIsFasting(fasting);
-      if (fasting) {
+      const inWindow = now >= imsakTime && now < maghribTarget;
+      setInFastingWindow(inWindow);
+      setIsFasting(inWindow && fastingToday);
+      if (inWindow) {
         const diff = maghribTarget.getTime() - now.getTime();
         if (diff > 0) setCountdownToIftar({
           h: Math.floor(diff / 36e5),
@@ -288,7 +295,7 @@ const Dashboard = () => {
         });
       }
     }
-  }, [prayerTimes, imsakTomorrow, displayTimezone, parseTimeToToday]);
+  }, [prayerTimes, imsakTomorrow, displayTimezone, parseTimeToToday, progress, todayStr]);
 
   useEffect(() => {
     tickFastingAndCountdown();
@@ -298,7 +305,7 @@ const Dashboard = () => {
     const t = setInterval(tickFastingAndCountdown, 2000); // Throttle for INP (was 1s)
     return () => clearInterval(t);
   }, [tickFastingAndCountdown]);
-  
+
   // Toggle today's fast as complete (uses fasting log + console)
   const toggleTodayComplete = () => {
     const isComplete = progress.completedDays.includes(todayStr);
@@ -404,6 +411,50 @@ const Dashboard = () => {
   const fastingToday = isFastingToday(progress, todayStr);
   const todayLog = getTodayFastingLog(progress, todayStr);
   const recentLog = (progress.fastingLog || []).slice(-7).reverse();
+
+  const ASK_FASTING_DISMISSED_KEY = "tryramadan-ask-fasting-dismissed";
+  useEffect(() => {
+    if (!inFastingWindow || fastingToday || todayComplete || todaySkipped) return;
+    try {
+      if (window.localStorage.getItem(ASK_FASTING_DISMISSED_KEY) === todayStr) return;
+    } catch {
+      return;
+    }
+    setShowAskFastingPopup(true);
+  }, [inFastingWindow, fastingToday, todayComplete, todaySkipped, todayStr]);
+
+  const dismissAskFastingForToday = useCallback(() => {
+    try {
+      window.localStorage.setItem(ASK_FASTING_DISMISSED_KEY, todayStr);
+    } catch {
+      // ignore
+    }
+    setShowAskFastingPopup(false);
+  }, [todayStr]);
+
+  const handleAskFastingYes = useCallback(() => {
+    startFastingToday(progress, setProgress, todayStr);
+    setShowAskFastingPopup(false);
+    toast.success("You're fasting today");
+  }, [progress, setProgress, todayStr]);
+
+  const handleAskFastingNo = useCallback(() => {
+    setDaySkipped(progress, setProgress, todayStr);
+    setShowAskFastingPopup(false);
+    toast.success("Marked as not fasting today");
+  }, [progress, setProgress, todayStr]);
+
+  const askFastingContext = useMemo(() => {
+    const today = new Date(todayStr + "T12:00:00");
+    if (ramadanRange.isRamadanDay(today)) {
+      const dayNum = ramadanRange.getRamadanDayNumber(today);
+      return dayNum != null ? `Today is Ramadan Day ${dayNum}.` : "Today is a Ramadan day.";
+    }
+    const sunnah = getSunnahFastingInfo();
+    if (sunnah) return sunnah.reason + ".";
+    return null;
+  }, [todayStr, ramadanRange]);
+
   const streak = calculateStreak(progress, todayStr);
   const totalDays = ramadanRange.totalDays ?? 30;
   const ramadanStart = ramadanRange.startStr ?? "";
@@ -693,7 +744,7 @@ const Dashboard = () => {
           </motion.div>
           
           {/* Desktop: two columns — left: fast status + checklist; right: streak/total/sunnah/broken */}
-          <div className="grid grid-cols-1 md:grid-cols-[1fr,minmax(220px,1fr)] gap-6 lg:gap-8 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1.4fr),minmax(220px,0.6fr)] gap-6 lg:gap-8 mb-6">
             {/* Left column: Current Fast Status + Suhoor/Iftar + Today's schedule + Daily missions */}
             <div className="min-w-0 space-y-4 w-full">
           {/* Current Fast Status Card */}
@@ -702,7 +753,7 @@ const Dashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.08 }}
             className={`p-4 sm:p-5 rounded-2xl border-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 w-full min-w-0 ${
-              isFasting ? "bg-primary/10 border-primary/30" : "bg-muted/50 border-border"
+              isFasting ? "bg-primary/10 border-primary/30" : inFastingWindow ? "bg-muted/50 border-border" : "bg-muted/50 border-border"
             }`}
           >
             <div className="flex items-start sm:items-center gap-3 min-w-0">
@@ -711,21 +762,35 @@ const Dashboard = () => {
               </div>
               <div className="min-w-0">
                 <span className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold mb-1.5 bg-background/80" aria-live="polite">
-                  {isFasting ? "Right now: Fasting (no food or drink)" : "Right now: Eating window (you can eat)"}
+                  {isFasting ? "Right now: Fasting (no food or drink)" : inFastingWindow ? "Right now: Fasting window — log when you start" : "Right now: Eating window (you can eat)"}
                 </span>
+                <p className="text-xs font-medium text-muted-foreground mt-0.5 mb-1">Today&apos;s status</p>
                 <div className="flex items-center gap-2 flex-wrap">
+                  {todayComplete ? (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-secondary/20 text-secondary border border-secondary/40" aria-live="polite">Complete ✓</span>
+                  ) : todaySkipped ? (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-muted text-muted-foreground border border-border" aria-live="polite">Skipped</span>
+                  ) : fastingToday ? (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-primary/20 text-primary border border-primary/40" aria-live="polite">Fasting</span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-muted/80 text-muted-foreground border border-border" aria-live="polite">Not logged yet</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 flex-wrap mt-1">
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <span className="font-semibold cursor-help border-b border-dotted border-transparent hover:border-muted-foreground/40 w-fit">
-                        {isFasting ? "Currently fasting" : "Not fasting"}
+                        {isFasting ? "Currently fasting" : inFastingWindow ? "Not logged yet" : "Not fasting"}
                       </span>
                     </TooltipTrigger>
                     <TooltipContent className="max-w-xs p-3">
                       <p className="font-semibold text-sm">
-                        {isFasting ? GENERAL_TOOLTIPS.fastingPeriod.title : "Not fasting"}
+                        {isFasting ? GENERAL_TOOLTIPS.fastingPeriod.title : inFastingWindow ? "Log when you start" : "Not fasting"}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        {isFasting ? GENERAL_TOOLTIPS.fastingPeriod.body : preferences.userType === "new"
+                        {isFasting ? GENERAL_TOOLTIPS.fastingPeriod.body : inFastingWindow
+                                ? "You're in the fasting window (after suhoor end). Tap \"I'm fasting\" below when you've started, or \"I didn't fast today\" if you're not fasting."
+                                : preferences.userType === "new"
                                 ? `You're in the eating window—between sunset (Maghrib) and the next dawn (Fajr). You can eat and drink. The timer shows time until suhoor end (suhoor = last meal before dawn; after that, fasting starts).`
                                 : `You're in the eating window—between sunset (Maghrib) and the next dawn (Fajr). You can eat and drink. The timer below shows time until ${suhoorLabelShort} end (cut-off).`}
                       </p>
@@ -758,7 +823,7 @@ const Dashboard = () => {
                     </Tooltip>
                   )}
                 </div>
-                {isFasting ? (
+                {inFastingWindow ? (
                   <div className="mt-2 flex items-baseline gap-1.5" aria-live="polite" aria-atomic="true">
                     <span className="text-lg sm:text-xl font-bold tabular-nums">
                       {String(countdownToIftar.h).padStart(2, "0")}:{String(countdownToIftar.m).padStart(2, "0")}:{String(countdownToIftar.s).padStart(2, "0")}
@@ -847,7 +912,10 @@ const Dashboard = () => {
                     </TooltipContent>
                   </Tooltip>
                 </Link>
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2" role="group" aria-labelledby={!todaySkipped && !todayComplete ? "dashboard-mark-today-label" : undefined}>
+                  {!todaySkipped && !todayComplete && (
+                    <p className="w-full text-xs font-semibold text-muted-foreground mb-0.5" id="dashboard-mark-today-label">Mark today</p>
+                  )}
                   {todaySkipped && (
                     <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium bg-muted text-muted-foreground border border-border">
                       I didn&apos;t fast today
@@ -978,7 +1046,7 @@ const Dashboard = () => {
             <Dialog open={showBreakFastConfirm} onOpenChange={setShowBreakFastConfirm}>
               <DialogContent className="max-w-xs">
                 <DialogTitle>Break fast?</DialogTitle>
-                {isFasting ? (
+                {inFastingWindow ? (
                   <p className="text-sm text-muted-foreground">Log that you broke your fast early. Choose a reason.</p>
                 ) : (
                   <p className="text-sm text-muted-foreground">
@@ -1006,12 +1074,32 @@ const Dashboard = () => {
                 </div>
               </DialogContent>
             </Dialog>
+            <Dialog open={showAskFastingPopup} onOpenChange={(open) => !open && dismissAskFastingForToday()}>
+              <DialogContent className="max-w-sm" aria-describedby="ask-fasting-description">
+                <DialogTitle id="ask-fasting-title">Are you fasting today?</DialogTitle>
+                <p id="ask-fasting-description" className="text-sm text-muted-foreground">
+                  {askFastingContext ?? "Log your fast so we can show your countdown and progress."}
+                </p>
+                <div className="flex flex-col gap-2 pt-2">
+                  <Button onClick={handleAskFastingYes} className="w-full gap-2">
+                    <Sunrise className="w-4 h-4 shrink-0" aria-hidden />
+                    Yes, I&apos;m fasting
+                  </Button>
+                  <Button variant="outline" onClick={handleAskFastingNo} className="w-full">
+                    I didn&apos;t fast today
+                  </Button>
+                  <Button variant="ghost" onClick={dismissAskFastingForToday} className="w-full text-muted-foreground">
+                    Later
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
             <BreakFastReasonDialog
               open={showBreakFastDialog}
               onOpenChange={setShowBreakFastDialog}
               onSelectReason={(reasonId, brokeAt) => breakFastingToday(progress, setProgress, reasonId, todayStr, brokeAt)}
               userType={preferences.userType}
-              notInFastingPeriod={!isFasting}
+              notInFastingPeriod={!inFastingWindow}
             />
             <div className="mt-6">
               <DailyMissionsCard />
@@ -1663,22 +1751,32 @@ const Dashboard = () => {
                 <span className="text-sm text-muted-foreground">
                   {selectedDate > todayStr
                     ? "You can only log fasting for today or a past date."
-                    : !isSelectedToday
-                      ? "Mark this day as completed if you fasted it (e.g. make-up day)."
-                      : selectedDayComplete
-                        ? "Logged: you fasted this day (dawn to sunset)"
-                        : "Did you fast this day from dawn to sunset?"}
+                    : selectedDayBroken
+                      ? "This day was logged as broken. Mark as completed if you want to count it."
+                      : !isSelectedToday
+                        ? "Mark this day as completed if you fasted it (e.g. make-up day)."
+                        : selectedDayComplete
+                          ? "Logged: you fasted this day (dawn to sunset)"
+                          : "Did you fast this day from dawn to sunset?"}
                 </span>
                 {selectedDate <= todayStr ? (
                   <button
                     type="button"
-                    onClick={() => setDayCompleted(progress, setProgress, selectedDate, !selectedDayComplete)}
-                    aria-label={selectedDayComplete ? `Undo fast for ${selectedDate}` : `Mark ${selectedDate} as fasted`}
+                    onClick={() => {
+                      if (selectedDayComplete) {
+                        setDayCompleted(progress, setProgress, selectedDate, false);
+                      } else if (selectedDayBroken) {
+                        setBrokenDayToCompleted(progress, setProgress, selectedDate);
+                      } else {
+                        setDayCompleted(progress, setProgress, selectedDate, true);
+                      }
+                    }}
+                    aria-label={selectedDayComplete ? `Undo fast for ${selectedDate}` : selectedDayBroken ? `Mark ${selectedDate} as completed anyway` : `Mark ${selectedDate} as fasted`}
                     className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-colors shrink-0 min-h-[44px] touch-manipulation ${
                       selectedDayComplete ? "bg-secondary/20 text-secondary border border-secondary/40" : "bg-muted hover:bg-muted/80"
                     }`}
                   >
-                    {selectedDayComplete ? "Yes, logged ✓" : "Yes, mark complete"}
+                    {selectedDayComplete ? "Yes, logged ✓" : selectedDayBroken ? "Mark as completed anyway" : "Yes, mark complete"}
                   </button>
                 ) : (
                   <button

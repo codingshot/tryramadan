@@ -166,9 +166,11 @@ export function buildIcalContent(options: ExportOptions): string {
   d.setHours(0, 0, 0, 0);
   const endDay = new Date(end);
   endDay.setHours(23, 59, 59, 999);
+  let lastPt: PrayerTimes | null = null;
   while (d.getTime() <= endDay.getTime()) {
     const dateStr = toLocalDateString(d);
-    const pt = prayerTimesMap[dateStr];
+    const pt = prayerTimesMap[dateStr] ?? (lastPt ? { ...lastPt, date: dateStr } : null);
+    if (pt) lastPt = pt;
     if (includePrayers && pt) {
       if (includeTypes) {
         TYPE_TO_SUMMARY_AND_KEY.forEach(({ type, summary, timeKey }) => {

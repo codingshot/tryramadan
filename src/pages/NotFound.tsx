@@ -22,13 +22,15 @@ const NotFound = () => {
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <a
             href="/"
-            className="inline-flex items-center justify-center min-h-[44px] px-6 py-3 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center justify-center min-h-[44px] px-6 py-3 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            aria-label="Return to home page"
           >
             Return to Home
           </a>
           <a
             href="/dashboard"
-            className="inline-flex items-center justify-center min-h-[44px] px-6 py-3 rounded-xl border border-border bg-background font-medium hover:bg-muted transition-colors"
+            className="inline-flex items-center justify-center min-h-[44px] px-6 py-3 rounded-xl border border-border bg-background font-medium hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            aria-label="Go to dashboard"
           >
             Go to Dashboard
           </a>

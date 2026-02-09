@@ -846,7 +846,9 @@ const Settings = () => {
                   <Check className="w-5 h-5 text-secondary" />
                   <span className="text-sm">Notifications enabled</span>
                 </div>
-                
+                <p className="text-xs text-muted-foreground mb-4">
+                  You will receive push notifications when suhoor and {iftarLabelShort} alarm times are reached (and at prayer times if enabled on the Prayers page). Keep the app open or in the background for alarms to fire.
+                </p>
                 <div className="space-y-3">
                   <label className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-muted/50">
                     <span className="text-sm flex items-center gap-2">

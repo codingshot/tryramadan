@@ -171,6 +171,26 @@ describe("buildIcalContent", () => {
     expect(eventCount).toBe(2);
   });
 
+  it("fills missing days from previous day so range has no gaps", () => {
+    const prayerTimesMap: Record<string, PrayerTimes> = {
+      "2025-03-01": { ...mockPrayerTimes, imsak: "05:00", maghrib: "18:40", date: "01 Mar 2025" },
+      "2025-03-03": { ...mockPrayerTimes, imsak: "04:55", maghrib: "18:44", date: "03 Mar 2025" },
+    };
+    const ics = buildIcalContent({
+      prayerTimesMap,
+      customEvents: {},
+      dateRange: ["2025-03-01", "2025-03-03"],
+      exportMode: "fasting",
+    });
+    expect(ics).toContain("Suhoor ends (Imsak)");
+    expect(ics).toContain("Iftar (Maghrib)");
+    const eventCount = (ics.match(/BEGIN:VEVENT/g) ?? []).length;
+    expect(eventCount).toBe(6);
+    expect(ics).toMatch(/20250301T\d{6}/);
+    expect(ics).toMatch(/20250302T\d{6}/);
+    expect(ics).toMatch(/20250303T\d{6}/);
+  });
+
   it("returns valid empty calendar for invalid or empty date range", () => {
     const icsEmpty = buildIcalContent({
       prayerTimesMap: {},

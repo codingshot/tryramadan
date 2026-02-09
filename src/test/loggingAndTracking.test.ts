@@ -23,6 +23,8 @@ import {
   setBrokenDayToCompleted,
   setBrokenDayToInProgress,
   normalizeProgressSameDayConflict,
+  setDayCompleted,
+  completeFastingToday,
   didCompleteAllPrayers,
   getPrayerCountForDate,
   getPrayerStreak,
@@ -111,6 +113,20 @@ describe("Fasting progress edge cases", () => {
       fastingLog: [{ date: "2020-01-01", startedAt: "2020-01-01T05:00:00Z", status: "completed" }],
     };
     expect(getTodayFastingLog(progress)).toBeUndefined();
+  });
+
+  it("getTodayFastingLog returns last entry when multiple entries for same date (legacy EC-OV-8)", () => {
+    const dateStr = "2025-03-01";
+    const progress: FastingProgress = {
+      ...defaultProgress,
+      fastingLog: [
+        { date: dateStr, startedAt: `${dateStr}T05:00:00Z`, status: "in_progress" },
+        { date: dateStr, startedAt: `${dateStr}T05:00:00Z`, completedAt: `${dateStr}T19:00:00Z`, status: "completed", hoursFasted: 14 },
+      ],
+    };
+    const entry = getTodayFastingLog(progress, dateStr);
+    expect(entry?.status).toBe("completed");
+    expect(entry?.hoursFasted).toBe(14);
   });
 
   it("isFastingToday returns false when no today log", () => {
@@ -291,6 +307,43 @@ describe("hoursBetween", () => {
   it("handles same time", () => {
     const t = "2025-01-01T12:00:00Z";
     expect(hoursBetween(t, t)).toBe(0);
+  });
+});
+
+describe("Make-up and completed vs skipped (STATE-TRANSITION-TESTING-FASTING §5)", () => {
+  it("setDayCompleted(..., true) removes day from skippedDays so day is only in completedDays", () => {
+    const dateStr = "2025-03-10";
+    const progress: FastingProgress = {
+      ...defaultProgress,
+      completedDays: [],
+      skippedDays: ["2025-03-09", dateStr, "2025-03-11"],
+    };
+    let next: FastingProgress = progress;
+    const setProgress = (v: FastingProgress | ((p: FastingProgress) => FastingProgress)) => {
+      next = typeof v === "function" ? v(next) : v;
+    };
+    setDayCompleted(next, setProgress, dateStr, true);
+    expect(next.completedDays).toContain(dateStr);
+    expect(next.skippedDays).not.toContain(dateStr);
+    expect(next.skippedDays).toEqual(["2025-03-09", "2025-03-11"]);
+  });
+
+  it("completeFastingToday removes today from skippedDays when marking complete", () => {
+    const todayStr = "2025-03-15";
+    const progress: FastingProgress = {
+      ...defaultProgress,
+      completedDays: [],
+      skippedDays: [todayStr],
+      fastingLog: [],
+    };
+    let next: FastingProgress = progress;
+    const setProgress = (v: FastingProgress | ((p: FastingProgress) => FastingProgress)) => {
+      next = typeof v === "function" ? v(next) : v;
+    };
+    completeFastingToday(next, setProgress, todayStr);
+    expect(next.completedDays).toContain(todayStr);
+    expect(next.skippedDays).not.toContain(todayStr);
+    expect(next.fastingLog?.some((e) => e.date === todayStr && e.status === "completed")).toBe(true);
   });
 });
 
