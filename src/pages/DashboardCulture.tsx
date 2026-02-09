@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PageSEO } from "@/components/PageSEO";
+import { getRecipes } from "@/lib/cultureRecipes";
 
 type Country = {
   id: string;
@@ -35,6 +36,8 @@ export default function DashboardCulture() {
 
   const countryA = useMemo(() => allCountries.find((c) => c.id === compareA), [compareA]);
   const countryB = useMemo(() => allCountries.find((c) => c.id === compareB), [compareB]);
+  const recipesA = useMemo(() => getRecipes({ countryId: compareA }), [compareA]);
+  const recipesB = useMemo(() => getRecipes({ countryId: compareB }), [compareB]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -130,6 +133,23 @@ export default function DashboardCulture() {
                   </ul>
                   <p className="text-xs text-secondary mb-1 font-medium">Foods</p>
                   <p className="text-sm">{countryA.foods.join(", ")}</p>
+                  {recipesA.length > 0 && (
+                    <div className="mt-3">
+                      <p className="text-xs text-secondary mb-1.5 font-medium">Recipes</p>
+                      <div className="flex flex-wrap gap-1.5" role="navigation" aria-label={`Recipes from ${countryA.name}`}>
+                        {recipesA.map(({ mealType, recipe }) => (
+                          <Link
+                            key={`${mealType}-${recipe.id}`}
+                            to={`/recipe/${mealType}/${recipe.id}`}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-secondary/10 text-secondary border border-secondary/20 hover:bg-secondary/20"
+                          >
+                            {recipe.emoji && <span aria-hidden>{recipe.emoji}</span>}
+                            {recipe.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   {countryA.specialNote && (
                     <p className="text-xs text-muted-foreground mt-2 italic">{countryA.specialNote}</p>
                   )}
@@ -154,6 +174,23 @@ export default function DashboardCulture() {
                   </ul>
                   <p className="text-xs text-secondary mb-1 font-medium">Foods</p>
                   <p className="text-sm">{countryB.foods.join(", ")}</p>
+                  {recipesB.length > 0 && (
+                    <div className="mt-3">
+                      <p className="text-xs text-secondary mb-1.5 font-medium">Recipes</p>
+                      <div className="flex flex-wrap gap-1.5" role="navigation" aria-label={`Recipes from ${countryB.name}`}>
+                        {recipesB.map(({ mealType, recipe }) => (
+                          <Link
+                            key={`${mealType}-${recipe.id}`}
+                            to={`/recipe/${mealType}/${recipe.id}`}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-secondary/10 text-secondary border border-secondary/20 hover:bg-secondary/20"
+                          >
+                            {recipe.emoji && <span aria-hidden>{recipe.emoji}</span>}
+                            {recipe.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   {countryB.specialNote && (
                     <p className="text-xs text-muted-foreground mt-2 italic">{countryB.specialNote}</p>
                   )}

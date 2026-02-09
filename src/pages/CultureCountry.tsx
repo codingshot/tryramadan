@@ -209,6 +209,26 @@ export default function CultureCountry() {
                   </span>
                 ))}
               </div>
+              {recipesFromCountry.length > 0 && (
+                <div className="mt-4">
+                  <p className="text-sm font-medium text-muted-foreground mb-2">Recipes from {country.name}</p>
+                  <div className="flex flex-wrap gap-2" role="navigation" aria-label="Recipes from this country">
+                    {recipesFromCountry.map(({ mealType, recipe }) => (
+                      <Link
+                        key={`${mealType}-${recipe.id}`}
+                        to={`/recipe/${mealType}/${recipe.id}`}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium bg-secondary/10 text-secondary border border-secondary/20 hover:bg-secondary/20 transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      >
+                        {recipe.emoji && <span aria-hidden>{recipe.emoji}</span>}
+                        {recipe.name}
+                        <span className="text-muted-foreground font-normal text-xs">
+                          {mealType === "suhoor" ? "Suhoor" : iftarLabel}
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </section>
 
             {country.sources && country.sources.length > 0 && (
@@ -377,6 +397,24 @@ export default function CultureCountry() {
                   .
                 </p>
               ) : (
+                <>
+                  <p className="text-sm text-muted-foreground mb-3">Try these recipes:</p>
+                  <div className="flex flex-wrap gap-2 mb-6" role="navigation" aria-label="Recipes from this country">
+                    {recipesFromCountry.map(({ mealType, recipe }) => (
+                      <Link
+                        key={`${mealType}-${recipe.id}`}
+                        to={`/recipe/${mealType}/${recipe.id}`}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium bg-secondary/10 text-secondary border border-secondary/20 hover:bg-secondary/20 transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                      >
+                        {recipe.emoji && <span aria-hidden>{recipe.emoji}</span>}
+                        {recipe.name}
+                        <span className="text-muted-foreground font-normal text-xs">
+                          {mealType === "suhoor" ? "Suhoor" : iftarLabel}
+                        </span>
+                      </Link>
+                    ))}
+                  </div>
+                  <p className="text-sm font-medium text-muted-foreground mb-3">Recipe details</p>
                 <ul className="space-y-3">
                   {recipesFromCountry.map(({ mealType, recipe }) => (
                     <li key={`${mealType}-${recipe.id}`}>
@@ -408,6 +446,7 @@ export default function CultureCountry() {
                     </li>
                   ))}
                 </ul>
+                </>
               )}
             </section>
           </motion.article>

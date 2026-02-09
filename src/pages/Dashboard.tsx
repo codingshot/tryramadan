@@ -1907,6 +1907,7 @@ const Dashboard = () => {
                 const byId = new Map(DASHBOARD_QUICK_ACTIONS.map((a) => [a.id, a]));
                 return quickActionOrder
                   .filter((id) => id !== "macros" || (preferences.macroTrackingEnabled ?? false))
+                  .filter((id) => id !== "prayers" || preferences.userType === "muslim")
                   .map((id) => {
                     const action = byId.get(id);
                     if (!action) return null;
@@ -1962,7 +1963,7 @@ const Dashboard = () => {
                       aria-haspopup="dialog"
                     >
                       <Clock className="w-5 h-5 text-secondary" />
-                      Today&apos;s Prayer Times
+                      {preferences.userType === "muslim" ? "Today's Prayer Times" : "Today's Fasting Times"}
                       <span className="text-xs font-normal text-muted-foreground">(click for time until/ago)</span>
                     </button>
                   </PopoverTrigger>
@@ -1995,13 +1996,15 @@ const Dashboard = () => {
                         });
                       })()}
                     </ul>
-                    <Link
-                      to="/dashboard/prayers"
-                      onClick={() => setPrayerTimesPopoverOpen(false)}
-                      className="text-xs text-secondary hover:underline font-medium mt-3 block"
-                    >
-                      Full prayer page →
-                    </Link>
+                    {preferences.userType === "muslim" && (
+                      <Link
+                        to="/dashboard/prayers"
+                        onClick={() => setPrayerTimesPopoverOpen(false)}
+                        className="text-xs text-secondary hover:underline font-medium mt-3 block"
+                      >
+                        Full prayer page →
+                      </Link>
+                    )}
                   </PopoverContent>
                 </Popover>
               </div>

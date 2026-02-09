@@ -7,6 +7,8 @@ import {
   PenLine,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
   Download,
   Calendar as CalendarIcon,
   Smile,
@@ -21,6 +23,7 @@ import { Footer } from "@/components/Footer";
 import { useLocalStorage, useUserPreferences, useHabitLog } from "@/hooks/useLocalStorage";
 import { Clock } from "lucide-react";
 import { getHabitsForUser, getShortLabelsForHabitIds } from "@/data/ramadan-habits";
+import { isRamadanDay } from "@/lib/ramadan";
 import { Calendar } from "@/components/ui/calendar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
@@ -100,6 +103,17 @@ const SLOT_PROMPTS: Record<JournalSlot, Record<string, string>> = {
 const MOOD_LABELS = ["Low", "Okay", "Good", "Great", "Amazing"];
 const MOOD_EMOJI = ["😢", "😐", "🙂", "😊", "😄"];
 
+const GRATITUDE_QUICK_ADD = [
+  "Family",
+  "Health",
+  "Food",
+  "This moment",
+  "Friends",
+  "Faith",
+  "Peace",
+  "Community",
+];
+
 export function getPromptForDate(isoDate: string, userType?: string, slot?: JournalSlot): string {
   const u = userType === "muslim" ? "muslim" : "non-muslim";
   if (slot && slot !== "general") {
@@ -123,6 +137,7 @@ export default function DashboardJournal() {
   const [entries, setEntries] = useLocalStorage<JournalEntry[]>("tryramadan-journal", []);
   const [habitLog, setHabitLog] = useHabitLog();
   const [prayerTracker, setPrayerTracker] = useLocalStorage<Record<string, Record<string, boolean>>>("tryramadan-prayer-tracker", {});
+  const [taraweehTracker, setTaraweehTracker] = useLocalStorage<Record<string, { done: boolean; rakats?: number }>>("tryramadan-taraweeh", {});
   const today = new Date().toISOString().split("T")[0];
   const dateFromUrl = searchParams.get("date");
   const initialDate = dateFromUrl && isValidDateString(dateFromUrl) ? dateFromUrl : today;
@@ -341,6 +356,7 @@ export default function DashboardJournal() {
   }, []);
 
   const entryDates = useMemo(() => new Set(entries.map((e) => e.date)), [entries]);
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const [calendarMonth, setCalendarMonth] = useState(() => {
     const d = new Date(writeDate + "T12:00:00");
     return new Date(d.getFullYear(), d.getMonth(), 1);
@@ -393,40 +409,7 @@ export default function DashboardJournal() {
             )}
           </motion.div>
 
-          {/* Calendar of entries */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 }}
-            className="mb-8 p-6 rounded-2xl bg-card border border-border"
-          >
-            <h3 className="font-display font-bold mb-2 flex items-center gap-2">
-              <CalendarIcon className="w-5 h-5 text-secondary" />
-              Calendar
-            </h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Days with an entry are marked. Click any day to write or edit — past, today, or future dates.
-            </p>
-            <Calendar
-              mode="single"
-              selected={new Date(writeDate + "T12:00:00")}
-              onSelect={handleSelectDate}
-              month={calendarMonth}
-              onMonthChange={(month) => month && setCalendarMonth(month)}
-              className="rounded-xl border border-border inline-block"
-              modifiers={{
-                hasEntry: (date) => entryDates.has(date.toISOString().split("T")[0]),
-              }}
-              modifiersClassNames={{
-                hasEntry: "bg-secondary/20 font-semibold",
-              }}
-            />
-            <p className="text-xs text-muted-foreground mt-2">
-              {entries.length} entr{entries.length === 1 ? "y" : "ies"} total
-            </p>
-          </motion.div>
-
-          {/* Write for date + prompt + content + gratitude + mood */}
+          {/* Write for date + prompt + content + gratitude + mood — journal entry above calendar */}
           <motion.div
             ref={editorSectionRef}
             initial={{ opacity: 0, y: 20 }}
@@ -566,11 +549,27 @@ export default function DashboardJournal() {
               ))}
             </div>
             <label className="block text-sm font-medium mb-1">One thing I'm grateful for (optional)</label>
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {GRATITUDE_QUICK_ADD.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => setGratitude(option)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                    gratitude === option
+                      ? "bg-secondary text-secondary-foreground"
+                      : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
             <input
               type="text"
               value={gratitude}
               onChange={(e) => setGratitude(e.target.value)}
-              placeholder="e.g. Family, health, this moment..."
+              placeholder="Or type your own..."
               className="w-full p-3 rounded-xl border border-border bg-background text-sm focus:ring-2 focus:ring-secondary outline-none"
             />
             {preferences.userType === "muslim" && (
@@ -589,7 +588,7 @@ export default function DashboardJournal() {
                       <label key={name} className="flex items-center gap-2 cursor-pointer">
                         <input
                           type="checkbox"
-                          checked={done}
+                          checked={!!done}
                           onChange={(e) => {
                             setPrayerTracker((prev) => ({
                               ...prev,
@@ -604,6 +603,61 @@ export default function DashboardJournal() {
                     );
                   })}
                 </div>
+                {isRamadanDay(new Date(writeDate + "T12:00:00")) && (
+                  <div className="mt-4 pt-3 border-t border-border/60">
+                    <p className="text-xs font-medium text-muted-foreground mb-2">
+                      Taraweeh (optional night prayer during Ramadan)
+                    </p>
+                    <div className="flex flex-wrap items-center gap-3">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={!!(taraweehTracker[writeDate] ?? {}).done}
+                          onChange={(e) => {
+                            setTaraweehTracker((prev) => ({
+                              ...prev,
+                              [writeDate]: {
+                                done: e.target.checked,
+                                rakats: (prev[writeDate] ?? {}).rakats ?? 8,
+                              },
+                            }));
+                          }}
+                          className="rounded border-border"
+                          aria-label="Mark Taraweeh as completed"
+                        />
+                        <span className="text-sm font-medium">Completed</span>
+                      </label>
+                      <label className="flex items-center gap-2 text-sm">
+                        <span className="text-muted-foreground">Rak&apos;ats:</span>
+                        <Select
+                          value={(taraweehTracker[writeDate] ?? {}).rakats != null ? String((taraweehTracker[writeDate] ?? {}).rakats) : ""}
+                          onValueChange={(v) => {
+                            const n = v === "" ? undefined : parseInt(v, 10);
+                            setTaraweehTracker((prev) => ({
+                              ...prev,
+                              [writeDate]: {
+                                ...(prev[writeDate] ?? { done: false }),
+                                rakats: n,
+                              },
+                            }));
+                          }}
+                        >
+                          <SelectTrigger className="w-[72px] h-8 text-sm" aria-label="Taraweeh rak'ats">
+                            <SelectValue placeholder="—" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="">—</SelectItem>
+                            <SelectItem value="8">8</SelectItem>
+                            <SelectItem value="20">20</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </label>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-1.5">
+                      Often 8 or 20 rak&apos;ats; varies by mosque and tradition.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
             {trackableHabits.length > 0 && (
@@ -702,6 +756,114 @@ export default function DashboardJournal() {
               <Download className="w-4 h-4" />
               Download journal as JSON
             </button>
+          </motion.div>
+
+          {/* Day strip + calendar (dashboard-style): date with sliders, Today button, calendar only on expand */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.08 }}
+            className="mb-8 p-4 rounded-2xl bg-card border border-border"
+          >
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 p-2 rounded-xl bg-muted/50 border border-border">
+              <button
+                type="button"
+                onClick={() => {
+                  const d = new Date(writeDate + "T12:00:00");
+                  d.setDate(d.getDate() - 1);
+                  handleSelectDate(d);
+                  setCalendarMonth(d);
+                }}
+                className="p-2.5 rounded-lg hover:bg-muted transition-colors min-h-[44px] min-w-[44px] touch-manipulation shrink-0"
+                aria-label="Previous day"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <span className="flex-1 min-w-0 text-center sm:text-left font-display font-semibold text-sm sm:text-base truncate px-2">
+                {new Date(writeDate + "T12:00:00").toLocaleDateString("en", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
+              </span>
+              {writeDate !== today && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleSelectDate(new Date(today + "T12:00:00"));
+                    setCalendarMonth(new Date(today + "T12:00:00"));
+                    scrollToEditor();
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-primary/20 text-foreground text-sm font-medium hover:bg-primary/30 shrink-0"
+                  aria-label="Go to today"
+                >
+                  Today
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => {
+                  const d = new Date(writeDate + "T12:00:00");
+                  d.setDate(d.getDate() + 1);
+                  handleSelectDate(d);
+                  setCalendarMonth(d);
+                }}
+                className="p-2.5 rounded-lg hover:bg-muted transition-colors min-h-[44px] min-w-[44px] touch-manipulation shrink-0"
+                aria-label="Next day"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+            <Collapsible open={calendarOpen} onOpenChange={setCalendarOpen} className="mt-3">
+              <CollapsibleTrigger
+                className="inline-flex items-center gap-2 w-full justify-center sm:justify-start py-2 px-3 rounded-lg border border-border bg-background text-sm font-medium hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                aria-expanded={calendarOpen}
+                aria-label={calendarOpen ? "Hide calendar" : "Show calendar"}
+              >
+                <CalendarIcon className="w-4 h-4 text-secondary" />
+                Calendar
+                {calendarOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <p className="text-xs text-muted-foreground mt-2 mb-2">
+                  Days with an entry are marked. Click a day to write or edit.
+                </p>
+                <div className="inline-block">
+                  <Calendar
+                    mode="single"
+                    selected={new Date(writeDate + "T12:00:00")}
+                    onSelect={(date) => {
+                      if (date) {
+                        handleSelectDate(date);
+                        setCalendarMonth(date);
+                        setCalendarOpen(false);
+                        scrollToEditor();
+                      }
+                    }}
+                    month={calendarMonth}
+                    onMonthChange={(month) => month && setCalendarMonth(month)}
+                    className="rounded-xl border border-border p-2"
+                    classNames={{
+                      month: "space-y-2",
+                      caption_label: "text-xs font-medium",
+                      head_cell: "text-muted-foreground rounded-md w-8 font-normal text-[0.7rem]",
+                      row: "flex w-full mt-1",
+                      cell: "h-8 w-8 text-center text-xs p-0 relative [&:has([aria-selected].day-range-end)]:rounded-r-md [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                      day: "h-8 w-8 p-0 text-xs font-normal rounded-md hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground aria-selected:opacity-100",
+                      day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
+                      day_today: "bg-accent text-accent-foreground",
+                      day_outside: "text-muted-foreground opacity-50",
+                      nav_button: "h-6 w-6",
+                    }}
+                    modifiers={{
+                      hasEntry: (date) => entryDates.has(date.toISOString().split("T")[0]),
+                    }}
+                    modifiersClassNames={{
+                      hasEntry: "bg-secondary/20 font-semibold",
+                    }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {entries.length} entr{entries.length === 1 ? "y" : "ies"} total
+                </p>
+              </CollapsibleContent>
+            </Collapsible>
           </motion.div>
 
           {/* Past entries list */}

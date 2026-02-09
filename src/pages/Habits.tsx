@@ -24,7 +24,11 @@ function isQuranUrl(url: string): boolean {
 function HabitCard({ habit }: { habit: RamadanHabit }) {
   const primaryIsQuran = isQuranUrl(habit.sourceUrl);
   return (
-    <article className="rounded-2xl border border-border bg-card p-4 sm:p-5 space-y-4">
+    <Link
+      to={`/habit/${habit.id}`}
+      className="block rounded-2xl border border-border bg-card p-4 sm:p-5 space-y-4 transition-colors hover:border-secondary/40 hover:bg-card/95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+    >
+      <article className="space-y-4">
       <div className="flex flex-wrap items-center gap-2">
         <span
           className={`text-xs font-medium px-2 py-1 rounded-full ${
@@ -84,7 +88,8 @@ function HabitCard({ habit }: { habit: RamadanHabit }) {
         </div>
       </div>
       <p className="text-sm text-foreground leading-relaxed">{habit.explanation}</p>
-    </article>
+      </article>
+    </Link>
   );
 }
 
@@ -228,7 +233,9 @@ export default function Habits() {
                 <ul className="space-y-1.5">
                   {topHabits.map(({ id, count, label }) => (
                     <li key={id} className="flex items-center justify-between text-sm">
-                      <span>{label}</span>
+                      <Link to={`/habit/${id}`} className="text-foreground hover:text-secondary hover:underline">
+                        {label}
+                      </Link>
                       <span className="font-mono text-secondary tabular-nums">{count}×</span>
                     </li>
                   ))}

@@ -85,17 +85,23 @@ const DashboardPrayers = () => {
   const minutesUntilNext = nextPrayerResult?.minutesUntil ?? 0;
   const countdownNext = nextPrayer ? `${Math.floor(minutesUntilNext / 60)}h ${Math.floor(minutesUntilNext % 60)}m` : "";
 
+  const isMuslim = preferences.userType === "muslim";
   return (
     <div className="min-h-screen bg-background">
       <PageSEO
-        title="Prayer Times | TryRamadan.app"
-        description="Daily prayer times for your location: Fajr, Dhuhr, Asr, Maghrib, Isha. Track prayers and set suhoor/iftar reminders."
+        title={isMuslim ? "Prayer Times | TryRamadan.app" : "Fasting Times | TryRamadan.app"}
+        description={isMuslim ? "Daily prayer times for your location: Fajr, Dhuhr, Asr, Maghrib, Isha. Track prayers and set suhoor/iftar reminders." : "Fasting times for your location: when to stop eating (Fajr) and when to break fast (Maghrib)."}
         path="/dashboard/prayers"
       />
       <Navbar />
       
       <main id="main-content" className="main-content">
         <div className="container mx-auto px-4 max-w-4xl min-w-0">
+          {preferences.userType !== "muslim" && (
+            <div className="mb-4 p-3 rounded-xl bg-muted/50 border border-border text-sm text-muted-foreground">
+              Fasting times for your location. Prayer logging and adhan reminders are for Muslims; you can still use Fajr and Maghrib as your eating cutoff and break-fast times.
+            </div>
+          )}
           <Link 
             to="/dashboard" 
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
@@ -112,12 +118,12 @@ const DashboardPrayers = () => {
             <Tooltip>
               <TooltipTrigger asChild>
                 <h1 className="text-2xl md:text-3xl font-display font-bold cursor-help border-b border-dotted border-transparent hover:border-muted-foreground/40 w-fit">
-                  Prayer Times
+                  {isMuslim ? "Prayer Times" : "Fasting Times"}
                 </h1>
               </TooltipTrigger>
               <TooltipContent className="max-w-xs p-3">
-                <p className="text-sm text-foreground">{GENERAL_TOOLTIPS.prayerTimes.body}</p>
-                <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{GENERAL_TOOLTIPS.prayerTimes.bodyAr}</span></p>
+                <p className="text-sm text-foreground">{isMuslim ? GENERAL_TOOLTIPS.prayerTimes.body : "Fajr = eating cutoff (suhoor end). Maghrib = time to break fast. Other times shown for context."}</p>
+                {isMuslim && <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{GENERAL_TOOLTIPS.prayerTimes.bodyAr}</span></p>}
               </TooltipContent>
             </Tooltip>
             <p className="text-muted-foreground mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
@@ -289,26 +295,28 @@ const DashboardPrayers = () => {
                         </div>
                       )}
                       <span className="text-2xl font-bold">{prayer.time}</span>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setTodayPrayer(prayer.name, !todayPrayers[prayer.name]);
-                            }}
-                            className={`p-2 rounded-lg border-2 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
-                              todayPrayers[prayer.name] ? "bg-secondary border-secondary text-secondary-foreground" : "border-border hover:border-secondary"
-                            }`}
-                            aria-label={todayPrayers[prayer.name] ? `Mark ${prayer.name} as not prayed` : `Mark ${prayer.name} as prayed`}
-                          >
-                            <Check className="w-5 h-5" />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent side="left">
-                          {todayPrayers[prayer.name] ? "Mark as not prayed" : "Mark as prayed"}
-                        </TooltipContent>
-                      </Tooltip>
+                      {preferences.userType === "muslim" && ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"].includes(prayer.name) && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setTodayPrayer(prayer.name, !todayPrayers[prayer.name]);
+                              }}
+                              className={`p-2 rounded-lg border-2 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
+                                todayPrayers[prayer.name] ? "bg-secondary border-secondary text-secondary-foreground" : "border-border hover:border-secondary"
+                              }`}
+                              aria-label={todayPrayers[prayer.name] ? `Mark ${prayer.name} as not prayed` : `Mark ${prayer.name} as prayed`}
+                            >
+                              <Check className="w-5 h-5" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="left">
+                            {todayPrayers[prayer.name] ? "Mark as not prayed" : "Mark as prayed"}
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
                     </div>
                   </div>
                 </motion.div>
@@ -385,7 +393,8 @@ const DashboardPrayers = () => {
           </motion.div>
           )}
 
-          {/* Notification note */}
+          {/* Notification note — only relevant for Muslims (prayer reminders) */}
+          {preferences.userType === "muslim" && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -397,8 +406,9 @@ const DashboardPrayers = () => {
               Prayer reminders use browser notifications. Enable notifications in your device settings and allow this site to send them when prompted.
             </p>
           </motion.div>
+          )}
 
-          {/* Prayer tutorial link */}
+          {/* Prayer tutorial link — learning is for everyone */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

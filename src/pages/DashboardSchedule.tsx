@@ -294,6 +294,8 @@ const DashboardSchedule = () => {
   const [showQuickActionsEditor, setShowQuickActionsEditor] = useState(false);
   const [quickActionOrder, setQuickActionOrder] = useDashboardQuickActions();
   const [addFoodMeal, setAddFoodMeal] = useState<MealType | null>(null);
+  /** Which recipe Select dropdown is open; close after picking so user can edit the added row. */
+  const [recipeSelectOpen, setRecipeSelectOpen] = useState<"mealplan-suhoor" | "mealplan-iftar" | "foodlog" | null>(null);
   const [addFoodCustomInputs, setAddFoodCustomInputs] = useState({ name: "", cal: "", portions: "1", protein: "", carbs: "", fat: "", imageDataUrl: "" });
   const [addFoodImageResizing, setAddFoodImageResizing] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
@@ -781,7 +783,7 @@ const DashboardSchedule = () => {
         [selectedDate]: { ...prev[selectedDate], [meal]: appended },
       };
     });
-    setAddFoodMeal(null);
+    setRecipeSelectOpen(null);
   };
 
   const scheduleAddFoodCulturalFoods = useMemo(() => [...new Set(getAllCountries().flatMap((c) => c.foods ?? []))].filter(Boolean), []);
@@ -2422,16 +2424,18 @@ const DashboardSchedule = () => {
                         Quick-add {suhoorLabel}, {iftarLabel}, prayers, Taraweeh, get food. These plus your custom events are included when you export.
                       </p>
                       <div className="flex flex-wrap gap-1.5 mb-2 items-center">
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="sm"
-                          className="text-xs h-8"
-                          onClick={quickAddAllPrayers}
-                          disabled={!effectiveSelectedDayPrayerTimes}
-                        >
-                          Quick add all prayers
-                        </Button>
+                        {preferences?.userType === "muslim" && (
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="sm"
+                            className="text-xs h-8"
+                            onClick={quickAddAllPrayers}
+                            disabled={!effectiveSelectedDayPrayerTimes}
+                          >
+                            Quick add all prayers
+                          </Button>
+                        )}
                         {QUICK_ADD_TEMPLATES.map((t) => (
                           <Button
                             key={t.type}
@@ -2621,7 +2625,9 @@ const DashboardSchedule = () => {
                             />
                             {canEditMealPlan && (
                               <Select
-                                onValueChange={(v) => addFoodFromRecipe("suhoor", v)}
+                                open={recipeSelectOpen === "mealplan-suhoor"}
+                                onOpenChange={(open) => setRecipeSelectOpen(open ? "mealplan-suhoor" : null)}
+                                onValueChange={(v) => { addFoodFromRecipe("suhoor", v); setRecipeSelectOpen(null); }}
                                 value=""
                               >
                                 <SelectTrigger className="w-[180px] h-9 shrink-0" aria-label="Add Suhoor recipe">
@@ -2671,7 +2677,9 @@ const DashboardSchedule = () => {
                             />
                             {canEditMealPlan && (
                               <Select
-                                onValueChange={(v) => addFoodFromRecipe("iftar", v)}
+                                open={recipeSelectOpen === "mealplan-iftar"}
+                                onOpenChange={(open) => setRecipeSelectOpen(open ? "mealplan-iftar" : null)}
+                                onValueChange={(v) => { addFoodFromRecipe("iftar", v); setRecipeSelectOpen(null); }}
                                 value=""
                               >
                                 <SelectTrigger className="w-[180px] h-9 shrink-0" aria-label={`Add ${iftarLabel} recipe`}>
@@ -2902,7 +2910,9 @@ const DashboardSchedule = () => {
                               <div className="min-w-[160px]">
                                 <Label className="text-xs">From recipe</Label>
                                 <Select
-                                  onValueChange={(v) => addFoodFromRecipe(addFoodMeal, v)}
+                                  open={recipeSelectOpen === "foodlog"}
+                                  onOpenChange={(open) => setRecipeSelectOpen(open ? "foodlog" : null)}
+                                  onValueChange={(v) => { addFoodFromRecipe(addFoodMeal, v); setRecipeSelectOpen(null); }}
                                   value=""
                                 >
                                   <SelectTrigger className="mt-0.5 h-9">

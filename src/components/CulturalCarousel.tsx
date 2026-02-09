@@ -1,8 +1,9 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight, ExternalLink, Keyboard, Utensils } from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import culturalData from "@/data/cultural-traditions.json";
+import { getRecipes } from "@/lib/cultureRecipes";
 
 export const CulturalCarousel = () => {
   const [activeRegion, setActiveRegion] = useState(0);
@@ -12,6 +13,10 @@ export const CulturalCarousel = () => {
   const currentRegion = regions[activeRegion];
   const countries = currentRegion.countries;
   const currentCountry = countries[activeCountry];
+  const recipesForCountry = useMemo(
+    () => (currentCountry ? getRecipes({ countryId: currentCountry.id }) : []),
+    [currentCountry?.id]
+  );
 
   const nextRegion = useCallback(() => {
     setActiveRegion((prev) => (prev + 1) % regions.length);
@@ -190,6 +195,27 @@ export const CulturalCarousel = () => {
           </div>
         </div>
 
+        {/* Recipe pills — link to recipes for this country */}
+        {recipesForCountry.length > 0 && (
+          <div className="mb-4">
+            <h5 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground mb-2">
+              Recipes
+            </h5>
+            <div className="flex flex-wrap gap-2" role="navigation" aria-label={`Recipes from ${currentCountry.name}`}>
+              {recipesForCountry.map(({ mealType, recipe }) => (
+                <Link
+                  key={`${mealType}-${recipe.id}`}
+                  to={`/recipe/${mealType}/${recipe.id}`}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-secondary/10 text-secondary border border-secondary/20 hover:bg-secondary/20 transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                >
+                  {recipe.emoji && <span aria-hidden>{recipe.emoji}</span>}
+                  {recipe.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-wrap items-center gap-3">
           <Link
             to={`/culture/${currentCountry.id}`}
@@ -199,11 +225,13 @@ export const CulturalCarousel = () => {
             <ExternalLink className="w-4 h-4" aria-hidden />
           </Link>
           <Link
-            to={`/recipes?region=${encodeURIComponent(currentRegion.name)}`}
+            to={`/recipes?country=${encodeURIComponent(currentCountry.id)}`}
             className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-secondary hover:underline"
           >
             <Utensils className="w-4 h-4" aria-hidden />
-            Recipes from {currentRegion.name}
+            {recipesForCountry.length > 0
+              ? `All ${currentCountry.name} recipes (${recipesForCountry.length})`
+              : `Recipes from ${currentRegion.name}`}
           </Link>
         </div>
       </motion.div>
