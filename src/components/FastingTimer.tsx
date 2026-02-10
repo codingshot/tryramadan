@@ -18,12 +18,15 @@ interface FastingTimerProps {
   suhoorTime?: string;
   iftarTime?: string;
   isFasting?: boolean;
+  /** When false, hide the "days until Ramadan" badge and "Add to calendar" link (e.g. on home where that lives in the green section below). */
+  showDaysUntilRamadan?: boolean;
 }
 
 export const FastingTimer = ({ 
   suhoorTime: propSuhoorTime, 
   iftarTime: propIftarTime,
-  isFasting = true 
+  isFasting = true,
+  showDaysUntilRamadan = true,
 }: FastingTimerProps) => {
   const [timeRemaining, setTimeRemaining] = useState({ hours: 0, minutes: 0, seconds: 0 });
   const [nextLabel, setNextLabel] = useState<"Suhoor end" | "Iftar">("Iftar");
@@ -215,8 +218,8 @@ export const FastingTimer = ({
           </div>
         )}
 
-        {/* Days until Ramadan Badge (double-click for when Ramadan starts) */}
-        {!isRamadan && daysUntilRamadan > 0 && (
+        {/* Days until Ramadan Badge (double-click for when Ramadan starts) — hidden on home where the green section below has this. */}
+        {showDaysUntilRamadan && !isRamadan && daysUntilRamadan > 0 && (
           <>
             <motion.div
               initial={{ opacity: 0, y: -10 }}

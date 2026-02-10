@@ -12,6 +12,7 @@ import { RecipeSection } from "@/components/RecipeSection";
 import { ProgressTracker } from "@/components/ProgressTracker";
 import { CTASection } from "@/components/CTASection";
 import { Footer } from "@/components/Footer";
+import { GoalsUntilRamadanCard } from "@/components/GoalsUntilRamadanCard";
 import { ArabicTerm } from "@/components/ArabicTerm";
 import { useFastingProgress, useIftarLabelShort, useUserPreferences, calculateStreak, getTotalHoursFasted } from "@/hooks/useLocalStorage";
 import { PageSEO } from "@/components/PageSEO";
@@ -67,6 +68,13 @@ const Index = () => {
       <main id="main-content">
       {/* Hero Section */}
       <HeroSection />
+
+      {/* Days until Ramadan — green section (countdown, explanation, add to calendar) */}
+      <section className="py-12 md:py-16 bg-secondary/10 border-y border-secondary/20">
+        <div className="container mx-auto px-4 max-w-2xl">
+          <GoalsUntilRamadanCard />
+        </div>
+      </section>
 
       {/* Features Section */}
       <FeaturesSection />

@@ -8,20 +8,12 @@ import { useAutoLocation } from "@/hooks/useLocation";
 
 // Hero image served from public/ so index.html can preload it for LCP (see docs/PERFORMANCE.md)
 const HERO_BG_URL = "/hero-bg.jpg";
-import { getDaysUntilRamadan } from "@/lib/ramadan";
-import { useRamadanRange } from "@/hooks/useRamadanRange";
 
 export const HeroSection = () => {
   const [preferences] = useUserPreferences();
   const { location: autoLocation } = useAutoLocation();
-  const ramadanRange = useRamadanRange();
   const hasLocation = !!(preferences.locationCoords || (autoLocation?.lat != null && autoLocation?.lng != null));
   const onboardingComplete = preferences.onboardingComplete === true;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const inRamadan = ramadanRange.isRamadanDay(today);
-  const ramadanDay = inRamadan ? ramadanRange.getRamadanDayNumber(today) ?? 1 : null;
-  const daysUntil = inRamadan ? 0 : today < ramadanRange.start ? Math.ceil((ramadanRange.start.getTime() - today.getTime()) / 86400000) : getDaysUntilRamadan();
   return (
     <>
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -80,14 +72,6 @@ export const HeroSection = () => {
                   className="w-20 h-20 md:w-28 md:h-28 drop-shadow-2xl"
                 />
               </motion.picture>
-              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/20 text-secondary text-sm font-medium backdrop-blur-sm">
-                <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
-                {inRamadan && ramadanDay
-                  ? ramadanRange.isLastDayOfRamadan(new Date())
-                    ? "Last day of Ramadan"
-                    : `Day ${ramadanDay} of Ramadan`
-                  : `${daysUntil} day${daysUntil === 1 ? "" : "s"} until Ramadan`}
-              </span>
             </motion.div>
 
             {/* Main headline - responsive for mobile */}
@@ -97,21 +81,18 @@ export const HeroSection = () => {
               transition={{ delay: 0.1 }}
               className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-display font-bold text-center text-primary-foreground mb-4 leading-tight px-1"
             >
-              Experience{" "}
+              Fast like a Muslim for the holy month of{" "}
               <span className="text-gradient-gold text-xl sm:text-2xl md:text-4xl">Ramadan</span>
-              <br />
-              <span className="text-primary-foreground/90 text-xl sm:text-2xl md:text-4xl">Through Cultural Immersion</span>
             </motion.h1>
 
-            {/* Subtitle + AEO direct answer */}
+            {/* Subtitle */}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
               className="text-base md:text-lg text-primary-foreground/80 text-center max-w-2xl mx-auto mb-4"
             >
-              Fast like a Muslim for the holy month of{" "}
-              <span className="text-secondary font-semibold">Ramadan</span>.
+              Practice healthy habits during the largest fasting tradition of all time.
             </motion.p>
 
 
@@ -147,14 +128,14 @@ export const HeroSection = () => {
               </p>
             )}
 
-            {/* Timer preview — min-height reserves space to avoid CLS while timer loads */}
+            {/* Timer preview — min-height reserves space to avoid CLS while timer loads. Days-until-Ramadan lives in the green section below. */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.4 }}
               className="max-w-xl mx-auto min-h-[300px]"
             >
-              <FastingTimer />
+              <FastingTimer showDaysUntilRamadan={false} />
             </motion.div>
 
             {/* Stats — dark backdrop so text stays visible in light mode on mobile (gradient fades to background) */}
