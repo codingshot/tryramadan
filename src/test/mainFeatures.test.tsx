@@ -209,11 +209,11 @@ describe("Emergency and support", () => {
 });
 
 describe("Home and navigation", () => {
-  it("home has nav links to Programs, Recipes, Culture", () => {
+  it("home has nav links to Programs, Meals, Culture", () => {
     renderAt("/", <Index />);
     const links = screen.getAllByRole("link");
     expect(links.some((l) => l.getAttribute("href") === "/programs")).toBe(true);
-    expect(links.some((l) => l.getAttribute("href") === "/recipes")).toBe(true);
+    expect(links.some((l) => l.getAttribute("href") === "/dashboard/meals")).toBe(true);
     expect(links.some((l) => l.getAttribute("href") === "/culture")).toBe(true);
   });
 });

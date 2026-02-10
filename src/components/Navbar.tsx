@@ -52,9 +52,7 @@ export function Navbar() {
 
   const navLinks = [
     { name: "Programs", nameAr: "البرامج", to: "/programs" },
-    { name: "Habits", nameAr: "العادات", to: "/habits" },
-    { name: "Track meals", nameAr: "تتبع الوجبات", to: "/dashboard/meals" },
-    { name: "Recipes", nameAr: "وصفات", to: "/recipes" },
+    { name: "Meals", nameAr: "الوجبات", to: "/dashboard/meals" },
     { name: "Culture", nameAr: "الثقافة", to: "/culture" },
     { name: "Journal", nameAr: "يوميات", to: "/dashboard/journal" },
   ];
@@ -167,9 +165,9 @@ export function Navbar() {
                   to="/onboarding/welcome"
                   onClick={handleStartJourney}
                   className="bg-primary text-primary-foreground hover:bg-primary/90 px-5 py-2.5 rounded-xl font-semibold text-sm transition-all"
-                  aria-label="Start your journey"
+                  aria-label="Start fasting"
                 >
-                  Start your journey
+                  Start fasting
                 </Link>
               )}
             </div>
