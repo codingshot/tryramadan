@@ -26,6 +26,7 @@ import { getNowInTimezone, toLocalDateString } from "@/lib/utils";
 const DashboardPrayers = () => {
   const [preferences] = useUserPreferences();
   const displayTimezone = useDisplayTimezone();
+  const hasLocation = !!(preferences.locationCoords?.lat != null && preferences.locationCoords?.lng != null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [prayerTracker, setPrayerTracker] = useLocalStorage<Record<string, Record<string, boolean>>>("tryramadan-prayer-tracker", {});
   const [prayerNotifications, setPrayerNotifications] = usePrayerNotificationPrefs();
@@ -44,7 +45,8 @@ const DashboardPrayers = () => {
   
   const { prayerTimes, hijriDate, loading, error: prayerError, refetch: refetchPrayers, isFromCache } = usePrayerTimes(
     preferences.locationCoords?.lat ?? null,
-    preferences.locationCoords?.lng ?? null
+    preferences.locationCoords?.lng ?? null,
+    displayTimezone
   );
   
   useEffect(() => {
@@ -68,7 +70,9 @@ const DashboardPrayers = () => {
           const n = getNowInTimezone(displayTimezone);
           return n.hours * 60 + n.minutes + n.seconds / 60;
         })()
-      : currentTime.getHours() * 60 + currentTime.getMinutes() + currentTime.getSeconds() / 60;
+      : hasLocation
+        ? 0
+        : currentTime.getHours() * 60 + currentTime.getMinutes() + currentTime.getSeconds() / 60;
     for (const prayer of prayers) {
       const [h, m] = prayer.time.split(':').map(Number);
       const prayerMinutes = h * 60 + m;
@@ -140,13 +144,22 @@ const DashboardPrayers = () => {
           >
             <div className="text-center">
               <p className="text-sm opacity-80 mb-1">
-                {currentTime.toLocaleDateString('en', {
-                  weekday: 'long',
-                  month: 'long',
-                  day: 'numeric',
-                  year: 'numeric',
-                  ...(displayTimezone && { timeZone: displayTimezone }),
-                })}
+                {displayTimezone
+                  ? currentTime.toLocaleDateString('en', {
+                      weekday: 'long',
+                      month: 'long',
+                      day: 'numeric',
+                      year: 'numeric',
+                      timeZone: displayTimezone,
+                    })
+                  : hasLocation
+                    ? "—"
+                    : currentTime.toLocaleDateString('en', {
+                        weekday: 'long',
+                        month: 'long',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}
               </p>
               {hijriDate && preferences.userType === "muslim" && (
                 <Tooltip>
@@ -162,12 +175,20 @@ const DashboardPrayers = () => {
                 </Tooltip>
               )}
               <p className="text-5xl font-bold font-display">
-                {currentTime.toLocaleTimeString('en', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  second: '2-digit',
-                  ...(displayTimezone && { timeZone: displayTimezone }),
-                })}
+                {displayTimezone
+                  ? currentTime.toLocaleTimeString('en', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
+                      timeZone: displayTimezone,
+                    })
+                  : hasLocation
+                    ? "—:——:——"
+                    : currentTime.toLocaleTimeString('en', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                      })}
               </p>
               {nextPrayer && (
                 <div className="mt-3" aria-live="polite" aria-atomic="true" role="status">

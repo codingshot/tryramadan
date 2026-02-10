@@ -86,21 +86,34 @@ export const FastingTimer = ({
   // Get Sunnah fasting info
   const sunnahInfo = getSunnahFastingInfo();
 
+  const hasLocation = effectiveLat != null && effectiveLng != null;
   useEffect(() => {
     const formatLocalTime = () => {
-      setLocalTime(
-        new Date().toLocaleTimeString(undefined, {
-          hour: "numeric",
-          minute: "2-digit",
-          hour12: true,
-          ...(displayTimezone && { timeZone: displayTimezone }),
-        })
-      );
+      if (displayTimezone) {
+        setLocalTime(
+          new Date().toLocaleTimeString(undefined, {
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+            timeZone: displayTimezone,
+          })
+        );
+      } else if (hasLocation) {
+        setLocalTime("—");
+      } else {
+        setLocalTime(
+          new Date().toLocaleTimeString(undefined, {
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+          })
+        );
+      }
     };
     formatLocalTime();
     const t = setInterval(formatLocalTime, TICK_MS);
     return () => clearInterval(t);
-  }, [displayTimezone, TICK_MS]);
+  }, [displayTimezone, hasLocation, TICK_MS]);
 
   const imsakSec = timeStringToSecondsSinceMidnight(suhoorTime);
   const maghribSec = timeStringToSecondsSinceMidnight(iftarTime);

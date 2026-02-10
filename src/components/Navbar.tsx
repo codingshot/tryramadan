@@ -24,6 +24,7 @@ export function Navbar() {
   useEffect(() => {
     const formatTime = () => {
       const tz = displayTimezone?.trim();
+      const hasLocation = !!preferences.locationCoords;
       if (tz) {
         const formatter = new Intl.DateTimeFormat(undefined, {
           hour: "2-digit",
@@ -32,6 +33,8 @@ export function Navbar() {
           timeZone: tz,
         });
         setLocalTime(formatter.format(new Date()));
+      } else if (hasLocation) {
+        setLocalTime("—:——:——");
       } else {
         setLocalTime(
           new Date().toLocaleTimeString(undefined, {
@@ -45,7 +48,7 @@ export function Navbar() {
     formatTime();
     const interval = setInterval(formatTime, 2000);
     return () => clearInterval(interval);
-  }, [displayTimezone]);
+  }, [displayTimezone, preferences.locationCoords]);
 
   const navLinks = [
     { name: "Programs", nameAr: "البرامج", to: "/programs" },
