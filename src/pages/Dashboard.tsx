@@ -369,7 +369,10 @@ const Dashboard = () => {
   }, []);
 
   const tickFastingAndCountdown = useCallback(() => {
-    if (!prayerTimes?.imsak || !prayerTimes?.maghrib) return;
+    if (!prayerTimes?.imsak || !prayerTimes?.maghrib) {
+      console.warn('[Dashboard] Missing prayer times:', { imsak: prayerTimes?.imsak, maghrib: prayerTimes?.maghrib });
+      return;
+    }
     const fastingToday = isFastingToday(progress, todayStr);
     const suhoorForTomorrow = imsakTomorrow ?? prayerTimes.imsak;
     if (displayTimezone) {
@@ -382,6 +385,18 @@ const Dashboard = () => {
       );
       const inWindow =
         nowSeconds >= imsakSeconds && nowSeconds < maghribSeconds;
+
+      console.log('[Dashboard] Fasting window check:', {
+        nowSeconds,
+        imsakSeconds,
+        maghribSeconds,
+        inWindow,
+        fastingToday,
+        currentTime: new Date().toLocaleTimeString(),
+        imsakTime: prayerTimes.imsak,
+        maghribTime: prayerTimes.maghrib,
+      });
+
       setInFastingWindow(inWindow);
       setIsFasting(inWindow && fastingToday);
       if (inWindow) {
@@ -428,9 +443,15 @@ const Dashboard = () => {
             s: Math.floor((diff % 6e4) / 1000),
           });
       } else {
-        // Past iftar: use tomorrow's imsak (changes day by day)
-        const imsakTarget = new Date(imsakTomorrowTime);
-        imsakTarget.setDate(imsakTarget.getDate() + 1);
+        // Past iftar: use tomorrow's imsak (suhoorForTomorrow is already tomorrow's time)
+        // If we're past today's maghrib, count down to tomorrow's imsak
+        const baseImsakTime = new Date(imsakTomorrowTime);
+
+        // If baseImsakTime is in the past (already passed today), move to tomorrow
+        const imsakTarget = baseImsakTime.getTime() < now.getTime()
+          ? new Date(baseImsakTime.setDate(baseImsakTime.getDate() + 1))
+          : baseImsakTime;
+
         const diff = imsakTarget.getTime() - now.getTime();
         if (diff > 0)
           setCountdownToSuhoor({
@@ -632,13 +653,18 @@ const Dashboard = () => {
   // Prayer tracking handler
   const handlePrayerCheck = useCallback(
     (prayer: string, checked: boolean) => {
-      setPrayerTracker((prev) => ({
-        ...prev,
-        [todayStr]: {
-          ...(prev[todayStr] || {}),
-          [prayer]: checked,
-        },
-      }));
+      console.log('[Dashboard] Prayer check:', { prayer, checked, todayStr });
+      setPrayerTracker((prev) => {
+        const updated = {
+          ...prev,
+          [todayStr]: {
+            ...(prev[todayStr] || {}),
+            [prayer]: checked,
+          },
+        };
+        console.log('[Dashboard] Updated prayer tracker:', updated);
+        return updated;
+      });
     },
     [todayStr, setPrayerTracker],
   );

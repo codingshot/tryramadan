@@ -120,15 +120,17 @@ export const DashboardPrayerTracking = ({
                 } ${prayer.isPast && !prayer.isChecked ? "opacity-60" : ""}`}
               >
                 {/* Checkbox + Prayer Name */}
-                <div className="flex items-center gap-3 flex-1">
+                <label className="flex items-center gap-3 flex-1 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={prayer.isChecked}
-                    onChange={(e) => onPrayerCheck(prayer.name.toLowerCase(), e.target.checked)}
-                    className="w-5 h-5 rounded border-2 border-primary text-primary focus:ring-2 focus:ring-primary/20 cursor-pointer"
-                    aria-label={`Mark ${prayer.name} as prayed`}
+                    onChange={(e) => {
+                      console.log('[PrayerTracking] Checkbox clicked:', prayer.name, e.target.checked);
+                      onPrayerCheck(prayer.name.toLowerCase(), e.target.checked);
+                    }}
+                    className="w-5 h-5 rounded border-2 border-primary text-primary focus:ring-2 focus:ring-primary/20 cursor-pointer shrink-0 accent-primary"
                   />
-                  <div>
+                  <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <span
                         className={`font-medium ${
@@ -145,7 +147,7 @@ export const DashboardPrayerTracking = ({
                     </div>
                     <span className="text-sm text-muted-foreground">{prayer.time}</span>
                   </div>
-                </div>
+                </label>
 
                 {/* Status */}
                 <div className="text-sm text-muted-foreground">
