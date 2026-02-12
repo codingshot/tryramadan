@@ -11,7 +11,6 @@ import { getOnboardingBackPath } from "./getOnboardingBackPath";
 const STEPS = [
   { path: "welcome", label: "Welcome" },
   { path: "mode", label: "Mode" },
-  { path: "knowledge", label: "Knowledge" },
   { path: "health", label: "Health" },
   { path: "gender", label: "Gender" },
   { path: "location", label: "Location" },

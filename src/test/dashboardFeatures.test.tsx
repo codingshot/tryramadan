@@ -78,7 +78,8 @@ describe("Dashboard features", () => {
     renderDashboard();
     const todayLink = await screen.findByRole("link", { name: /^today$/i }, { timeout: 8000 });
     const scheduleLink = screen.getByRole("link", { name: /^schedule$/i });
-    const mealsLink = screen.getByRole("link", { name: /^meals$/i });
+    const mealsLinks = screen.getAllByRole("link", { name: /^meals$/i });
+    const mealsLink = mealsLinks.find((l) => l.getAttribute("href") === "/dashboard/meals") ?? mealsLinks[0];
     const journalLink = screen.getAllByRole("link").find((l) => l.getAttribute("href") === "/dashboard/journal");
     expect(todayLink).toHaveAttribute("href", "/dashboard/today");
     expect(scheduleLink).toHaveAttribute("href", "/dashboard/schedule");

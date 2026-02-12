@@ -25,7 +25,6 @@ export default function OnboardingWelcome() {
         </p>
         <ul className="text-left text-sm text-muted-foreground space-y-2 mb-8 max-w-sm mx-auto">
           <li><span aria-hidden>🌱</span> Choose your mode (learning or full observance)</li>
-          <li><span aria-hidden>📝</span> Quick knowledge check for tailored content</li>
           <li><span aria-hidden>❤️</span> Health screening for your safety</li>
           <li><span aria-hidden>📍</span> Location for accurate prayer & fasting times</li>
           <li><span aria-hidden>⏰</span> Schedule and reminders</li>

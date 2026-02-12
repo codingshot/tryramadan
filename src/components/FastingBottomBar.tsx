@@ -67,16 +67,7 @@ export function FastingBottomBar() {
   const isFasting = isFastingToday(progress, todayStr);
   const { text: iftarText, isPast: iftarPast } = useIftarCountdown(prayerTimes?.maghrib, displayTimezone);
 
-  useEffect(() => {
-    if (isFasting) {
-      document.body.classList.add("has-fasting-bottom-bar");
-    } else {
-      document.body.classList.remove("has-fasting-bottom-bar");
-    }
-    return () => document.body.classList.remove("has-fasting-bottom-bar");
-  }, [isFasting]);
-
-  if (!isFasting) return null;
+  if (!prayerTimes?.maghrib) return null;
 
   return (
     <nav

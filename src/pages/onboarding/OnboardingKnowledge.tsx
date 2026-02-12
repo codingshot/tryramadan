@@ -7,21 +7,6 @@ import { useOnboarding } from "@/contexts/OnboardingContext";
 const QUIZ = [
   { q: "What is Ramadan?", options: ["A festival", "A month of fasting", "A prayer"], emojis: ["🎉", "🌙", "🤲"], correct: 1 },
   { q: "When do Muslims break their daily fast?", options: ["At noon", "At sunset (Maghrib)", "At midnight"], emojis: ["☀️", "🌅", "🌙"], correct: 1 },
-  { q: "What is Suhoor?", options: ["Evening meal", "Pre-dawn meal", "Midday snack"], emojis: ["🍽️", "🌄", "☀️"], correct: 1 },
-  { q: "How long does Ramadan last?", options: ["One week", "One lunar month", "One year"], emojis: ["📅", "🌙", "📆"], correct: 1 },
-  {
-    q: "Which one is NOT one of the Five Pillars of Islam?",
-    options: [
-      "Declaration of faith (Shahada)",
-      "Five daily prayers (Salat)",
-      "Charity to the needy (Zakat)",
-      "Fasting in Ramadan (Sawm)",
-      "Pilgrimage to Mecca (Hajj)",
-      "Jihad (striving or struggle)",
-    ],
-    emojis: ["📜", "🕌", "💝", "🌙", "🕋", "⚔️"],
-    correct: 5, // Jihad is not a pillar; the five pillars are Shahada, Salat, Zakat, Sawm, Hajj
-  },
 ];
 
 export default function OnboardingKnowledge() {

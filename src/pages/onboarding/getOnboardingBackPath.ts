@@ -18,7 +18,7 @@ export function getOnboardingBackPath(
       // Knowledge is multi-step (quiz); the page handles Back / ArrowLeft itself
       return null;
     case "health":
-      return mode === "muslim" ? "/onboarding/mode" : "/onboarding/knowledge";
+      return "/onboarding/mode";
     case "gender":
       return "/onboarding/health";
     case "location":

@@ -48,22 +48,14 @@
     font-size: clamp(1.5rem, 5vw + 1rem, 3.75rem);
   }
   /* Main content area: below fixed navbar + safe area (notch/home indicator) */
+  /* Reserve 52px bottom on mobile for FastingBottomBar to prevent CLS when it appears */
   .main-content {
     padding-top: calc(4rem + env(safe-area-inset-top, 0px));
-    padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(4rem + 52px + env(safe-area-inset-bottom, 0px));
   }
   @media (min-width: 768px) {
     .main-content {
       padding-top: calc(5rem + env(safe-area-inset-top, 0px));
-      padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
-    }
-  }
-  /* When fasting bottom bar is visible (mobile), add extra bottom padding so content isn't hidden */
-  body.has-fasting-bottom-bar .main-content {
-    padding-bottom: calc(4rem + 52px + env(safe-area-inset-bottom, 0px));
-  }
-  @media (min-width: 768px) {
-    body.has-fasting-bottom-bar .main-content {
       padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
     }
   }
@@ -238,6 +230,11 @@
   
   html {
     scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
   }
   
   body {

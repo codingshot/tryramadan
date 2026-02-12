@@ -408,8 +408,10 @@ const Dashboard = () => {
 
   const todayComplete = progress.completedDays.includes(todayStr);
   const todaySkipped = (progress.skippedDays ?? []).includes(todayStr);
+  const todayBroken = progress.fastingLog?.some((e) => e.date === todayStr && e.status === "broken") ?? false;
   const fastingToday = isFastingToday(progress, todayStr);
   const todayLog = getTodayFastingLog(progress, todayStr);
+  const [showChangeStatusDialog, setShowChangeStatusDialog] = useState(false);
   const recentLog = (progress.fastingLog || []).slice(-7).reverse();
 
   const ASK_FASTING_DISMISSED_KEY = "tryramadan-ask-fasting-dismissed";
@@ -747,12 +749,17 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1.4fr),minmax(220px,0.6fr)] gap-6 lg:gap-8 mb-6">
             {/* Left column: Current Fast Status + Suhoor/Iftar + Today's schedule + Daily missions */}
             <div className="min-w-0 space-y-4 w-full">
-          {/* Current Fast Status Card */}
+          {/* Current Fast Status Card — tap to open and change fasting status */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.08 }}
-            className={`p-4 sm:p-5 rounded-2xl border-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 w-full min-w-0 ${
+            role="button"
+            tabIndex={0}
+            onClick={() => setShowChangeStatusDialog(true)}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setShowChangeStatusDialog(true); } }}
+            aria-label="Fasting status and countdown — tap to change status"
+            className={`p-4 sm:p-5 rounded-2xl border-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 w-full min-w-0 cursor-pointer hover:border-primary/30 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
               isFasting ? "bg-primary/10 border-primary/30" : inFastingWindow ? "bg-muted/50 border-border" : "bg-muted/50 border-border"
             }`}
           >
@@ -770,6 +777,8 @@ const Dashboard = () => {
                     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-secondary/20 text-secondary border border-secondary/40" aria-live="polite">Complete ✓</span>
                   ) : todaySkipped ? (
                     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-muted text-muted-foreground border border-border" aria-live="polite">Skipped</span>
+                  ) : todayBroken ? (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-destructive/20 text-destructive border border-destructive/40" aria-live="polite">Broken</span>
                   ) : fastingToday ? (
                     <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-primary/20 text-primary border border-primary/40" aria-live="polite">Fasting</span>
                   ) : (
@@ -806,7 +815,7 @@ const Dashboard = () => {
                       <TooltipTrigger asChild>
                         <button
                           type="button"
-                          onClick={toggleTodayComplete}
+                          onClick={(e) => { e.stopPropagation(); toggleTodayComplete(); }}
                           aria-label={todayComplete ? "Fasted today (tap to undo)" : "Mark today as fasted"}
                           className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors ${
                             todayComplete
@@ -841,6 +850,115 @@ const Dashboard = () => {
               </div>
             </div>
           </motion.div>
+
+          {/* Change fasting status dialog — correct accidental status */}
+          <Dialog open={showChangeStatusDialog} onOpenChange={setShowChangeStatusDialog}>
+            <DialogContent className="sm:max-w-md" aria-labelledby="change-status-title" aria-describedby="change-status-desc">
+              <DialogTitle id="change-status-title">Change fasting status</DialogTitle>
+              <p id="change-status-desc" className="text-sm text-muted-foreground">Update today&apos;s status if you tapped the wrong option.</p>
+              <div className="flex flex-col gap-2 pt-2">
+                {todaySkipped && (
+                  <>
+                    <Button
+                      onClick={() => {
+                        startFastingToday(progress, setProgress, todayStr);
+                        setShowChangeStatusDialog(false);
+                        toast.success("Status updated — you're fasting today");
+                      }}
+                      className="justify-start"
+                    >
+                      <Sunrise className="w-4 h-4 mr-2 shrink-0" aria-hidden />
+                      Actually I&apos;m fasting
+                    </Button>
+                    <Button variant="outline" onClick={() => setShowChangeStatusDialog(false)}>Leave as skipped</Button>
+                  </>
+                )}
+                {todayComplete && (
+                  <>
+                    <Button
+                      onClick={() => {
+                        uncompleteFastingToday(progress, setProgress, todayStr);
+                        setShowChangeStatusDialog(false);
+                        toast.success("Undone — today is no longer marked complete");
+                      }}
+                      variant="outline"
+                      className="justify-start"
+                    >
+                      Undo complete
+                    </Button>
+                    <Button variant="outline" onClick={() => setShowChangeStatusDialog(false)}>Leave as complete</Button>
+                  </>
+                )}
+                {todayBroken && (
+                  <>
+                    <Button
+                      onClick={() => {
+                        setBrokenDayToCompleted(progress, setProgress, todayStr);
+                        setShowChangeStatusDialog(false);
+                        toast.success("Marked as completed");
+                      }}
+                      className="justify-start"
+                    >
+                      Mark as completed anyway
+                    </Button>
+                    <Button variant="outline" onClick={() => setShowChangeStatusDialog(false)}>Leave as broken</Button>
+                  </>
+                )}
+                {fastingToday && (
+                  <>
+                    <Button
+                      variant="destructive"
+                      onClick={() => {
+                        setShowChangeStatusDialog(false);
+                        setShowBreakFastConfirm(true);
+                      }}
+                      className="justify-start"
+                    >
+                      <Sunset className="w-4 h-4 mr-2 shrink-0" aria-hidden />
+                      Break fast
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setDaySkipped(progress, setProgress, todayStr);
+                        setShowChangeStatusDialog(false);
+                        toast.success("Marked as not fasting today");
+                      }}
+                      className="justify-start"
+                    >
+                      I didn&apos;t fast today
+                    </Button>
+                  </>
+                )}
+                {!todaySkipped && !todayComplete && !todayBroken && !fastingToday && (
+                  <>
+                    <Button
+                      onClick={() => {
+                        startFastingToday(progress, setProgress, todayStr);
+                        setShowChangeStatusDialog(false);
+                        toast.success("You're fasting today");
+                      }}
+                      className="justify-start"
+                    >
+                      <Sunrise className="w-4 h-4 mr-2 shrink-0" aria-hidden />
+                      I&apos;m fasting
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setDaySkipped(progress, setProgress, todayStr);
+                        setShowChangeStatusDialog(false);
+                        toast.success("Marked as not fasting today");
+                      }}
+                      className="justify-start"
+                    >
+                      I didn&apos;t fast today
+                    </Button>
+                  </>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
 
           {/* Suhoor/Iftar strip — reserve min-height when loading to avoid CLS */}
           {!prayerTimes && (timesLoading || locationLoading) && (

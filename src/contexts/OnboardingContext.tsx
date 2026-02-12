@@ -20,7 +20,7 @@ export type OnboardingGender = 'male' | 'female' | 'prefer-not-to-say' | null;
 export interface OnboardingState {
   mode: OnboardingMode;
   experience: string;
-  knowledgeScore: number; // 0-5 from quiz
+  knowledgeScore: number; // 0-N from quiz (deferred to Learn; default 0)
   healthWarnings: string[]; // e.g. ["diabetes", "pregnancy"]
   gender: OnboardingGender;
   location: LocationResult | null;

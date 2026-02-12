@@ -4,7 +4,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 
-const KNOWLEDGE_QUIZ_LENGTH = 5;
+const KNOWLEDGE_QUIZ_LENGTH = 2; // reduced quiz; used for Muslim auto-score
 
 export default function OnboardingMode() {
   const { state, setMode, setKnowledgeScore } = useOnboarding();
@@ -22,12 +22,8 @@ export default function OnboardingMode() {
 
   const handleSelect = useCallback((mode: "new" | "muslim") => {
     setMode(mode);
-    if (mode === "muslim") {
-      setKnowledgeScore(KNOWLEDGE_QUIZ_LENGTH);
-      navigate("/onboarding/health");
-    } else {
-      navigate("/onboarding/knowledge");
-    }
+    setKnowledgeScore(mode === "muslim" ? KNOWLEDGE_QUIZ_LENGTH : 0);
+    navigate("/onboarding/health");
   }, [setMode, setKnowledgeScore, navigate]);
 
   useEffect(() => {

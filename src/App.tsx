@@ -1,4 +1,4 @@
-import { useEffect, lazy, Suspense } from "react";
+import { useEffect, useLayoutEffect, lazy, Suspense } from "react";
 import { useLocation } from "react-router-dom";
 import { useUserPreferences } from "@/hooks/useLocalStorage";
 import { Toaster } from "@/components/ui/toaster";
@@ -85,10 +85,10 @@ function PageFallback() {
   );
 }
 
-/** Scroll to top when the route changes so each page starts at the top. */
+/** Scroll to top when the route changes so each page starts at the top. Uses useLayoutEffect to run before paint and avoid visible scroll glitch. */
 function ScrollToTop(): null {
   const { pathname } = useLocation();
-  useEffect(() => {
+  useLayoutEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     document.documentElement.scrollTo?.({ top: 0, left: 0, behavior: "auto" });
   }, [pathname]);
