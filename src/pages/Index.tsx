@@ -42,6 +42,13 @@ const Index = () => {
   const useRealData = onboardingComplete;
   const hasRealProgress = useRealData && (completedDayNumbers.length > 0 || (todayRamadanDay != null && todayRamadanDay <= TOTAL_DAYS));
 
+  // After onboarding, dashboard is the home page — redirect "/" to "/dashboard"
+  useEffect(() => {
+    if (onboardingComplete) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [onboardingComplete, navigate]);
+
   // Scroll to section when landing on home with hash or state (e.g. footer "Features" / "About")
   useEffect(() => {
     if (location.pathname !== "/") return;
@@ -56,6 +63,11 @@ const Index = () => {
       return () => cancelAnimationFrame(raf);
     }
   }, [location.pathname, location.hash, location.state]);
+
+  // Avoid flashing landing content when redirecting to dashboard
+  if (onboardingComplete) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background">
