@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronRight, Flame, Check } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { type PrayerTimes } from "@/hooks/usePrayerTimes";
 import { type FastingProgress, useDisplayTimezone } from "@/hooks/useLocalStorage";
 import { timeStringToSecondsSinceMidnight, getNowSecondsSinceMidnightInTimezone } from "@/lib/utils";
@@ -166,29 +167,68 @@ export const DashboardPrayerTracking = ({
         </div>
       </div>
 
-      {/* Quick Stats Row */}
-      <div className="flex items-center justify-center gap-4 p-4 rounded-xl bg-muted/30">
-        <div className="flex items-center gap-2">
-          <Flame className="w-5 h-5 text-orange-500" />
-          <span className="font-semibold">{progress.currentStreak}</span>
-          <span className="text-sm text-muted-foreground">days</span>
-        </div>
+      {/* Quick Stats Row — fasting progress, with labels and hover explanations */}
+      <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 p-4 rounded-xl bg-muted/30">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 cursor-help border-b border-transparent hover:border-foreground/30 transition-colors pb-0.5">
+              <div className="flex items-center gap-2">
+                <Flame className="w-5 h-5 text-orange-500 shrink-0" aria-hidden />
+                <span className="font-semibold">{progress.currentStreak}</span>
+                <span className="text-sm text-muted-foreground">days</span>
+              </div>
+              <span className="text-xs text-muted-foreground sm:block">Streak</span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="max-w-[240px]">
+            <p className="font-medium">Fasting streak</p>
+            <p className="text-muted-foreground text-xs mt-0.5">
+              Consecutive days you completed the full fast (dawn to sunset). Skipped or broken days reset the streak.
+            </p>
+          </TooltipContent>
+        </Tooltip>
 
-        <div className="w-px h-6 bg-border" />
+        <div className="w-px h-8 bg-border shrink-0" aria-hidden />
 
-        <div className="flex items-center gap-2">
-          <Check className="w-5 h-5 text-secondary" />
-          <span className="font-semibold">
-            {progress.completedDays.length}/{progress.totalDays}
-          </span>
-        </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 cursor-help border-b border-transparent hover:border-foreground/30 transition-colors pb-0.5">
+              <div className="flex items-center gap-2">
+                <Check className="w-5 h-5 text-secondary shrink-0" aria-hidden />
+                <span className="font-semibold">
+                  {progress.completedDays.length}/{progress.totalDays}
+                </span>
+              </div>
+              <span className="text-xs text-muted-foreground sm:block">Fasts done</span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="max-w-[240px]">
+            <p className="font-medium">Fasts completed</p>
+            <p className="text-muted-foreground text-xs mt-0.5">
+              Days you marked as &quot;Mark complete&quot; (fasted full day) out of total Ramadan days so far.
+            </p>
+          </TooltipContent>
+        </Tooltip>
 
-        <div className="w-px h-6 bg-border" />
+        <div className="w-px h-8 bg-border shrink-0" aria-hidden />
 
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">📊</span>
-          <span className="font-semibold">{completionRate}%</span>
-        </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 cursor-help border-b border-transparent hover:border-foreground/30 transition-colors pb-0.5">
+              <div className="flex items-center gap-2">
+                <span className="text-xl sm:text-2xl" aria-hidden>📊</span>
+                <span className="font-semibold">{completionRate}%</span>
+              </div>
+              <span className="text-xs text-muted-foreground sm:block">Completion</span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="max-w-[240px]">
+            <p className="font-medium">Ramadan completion</p>
+            <p className="text-muted-foreground text-xs mt-0.5">
+              Percentage of Ramadan days you completed (full fast). Based on total days in this Ramadan so far.
+            </p>
+          </TooltipContent>
+        </Tooltip>
       </div>
     </motion.div>
   );

@@ -1440,6 +1440,56 @@ export function useHabitLog(): [Record<string, Record<string, boolean>>, (value:
 export const HADITH_VIEWED_DATES_KEY = 'tryramadan-hadith-viewed-dates';
 const HADITH_VIEWED_MAX_DAYS = 60;
 
+/** Global activity log: hadith read and other actions. Single source of truth for "read hadith" so today's chart and mission can be derived and edited. */
+export const ACTIVITY_LOG_KEY = 'tryramadan-activity-log';
+const ACTIVITY_LOG_MAX_ENTRIES = 500;
+
+export type ActivityLogEntry =
+  | { id: string; type: 'hadith_read'; date: string; hadithId?: string }
+  ;
+
+function generateActivityId(): string {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+  return `act-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+/** Hook: activity log (hadith read, etc.) with add and remove. Entries sorted by date desc, newest first. */
+export function useActivityLog(): [
+  ActivityLogEntry[],
+  (entry: Omit<ActivityLogEntry, 'id'>) => void,
+  (id: string) => void,
+] {
+  const [entries, setEntries] = useLocalStorage<ActivityLogEntry[]>(ACTIVITY_LOG_KEY, []);
+  const migrationAttempted = React.useRef(false);
+
+  React.useEffect(() => {
+    if (migrationAttempted.current || entries.length > 0) return;
+    migrationAttempted.current = true;
+    try {
+      const raw = window.localStorage.getItem(HADITH_VIEWED_DATES_KEY);
+      if (!raw) return;
+      const dates: string[] = JSON.parse(raw);
+      if (!Array.isArray(dates) || dates.length === 0) return;
+      const newEntries = dates.map((date) => ({ id: generateActivityId(), type: 'hadith_read' as const, date })) as ActivityLogEntry[];
+      setEntries(newEntries);
+      window.localStorage.removeItem(HADITH_VIEWED_DATES_KEY);
+    } catch {
+      // ignore
+    }
+  }, [entries.length, setEntries]);
+
+  const addEntry = React.useCallback((entry: Omit<ActivityLogEntry, 'id'>) => {
+    const id = generateActivityId();
+    setEntries((prev) => [{ ...entry, id } as ActivityLogEntry, ...prev].slice(0, ACTIVITY_LOG_MAX_ENTRIES));
+  }, [setEntries]);
+
+  const removeEntry = React.useCallback((id: string) => {
+    setEntries((prev) => prev.filter((e) => e.id !== id));
+  }, [setEntries]);
+
+  return [entries, addEntry, removeEntry];
+}
+
 export interface DailyMission {
   id: string;
   label: string;
@@ -1447,27 +1497,38 @@ export interface DailyMission {
   path?: string;
 }
 
-/** Mark that the user viewed hadith/learn content today (for "Read one hadith" mission). */
+/** Mark that the user viewed hadith/learn content today (for "Read one hadith" mission). Writes to activity log. */
 export function markHadithViewedToday(): void {
   try {
-    const raw = window.localStorage.getItem(HADITH_VIEWED_DATES_KEY);
-    const dates: string[] = raw ? JSON.parse(raw) : [];
+    const raw = window.localStorage.getItem(ACTIVITY_LOG_KEY);
+    const entries: ActivityLogEntry[] = raw ? JSON.parse(raw) : [];
     const today = getTodayDateString();
-    if (dates.includes(today)) return;
-    const next = [...dates, today].slice(-HADITH_VIEWED_MAX_DAYS);
-    window.localStorage.setItem(HADITH_VIEWED_DATES_KEY, JSON.stringify(next));
+    if (entries.some((e) => e.type === 'hadith_read' && e.date === today)) return;
+    const next = [{ id: generateActivityId(), type: 'hadith_read' as const, date: today }, ...entries].slice(0, ACTIVITY_LOG_MAX_ENTRIES);
+    window.localStorage.setItem(ACTIVITY_LOG_KEY, JSON.stringify(next));
   } catch {
     // ignore
   }
 }
 
-export function useHadithViewedDates(): [string[], (date?: string) => void] {
-  const [dates, setDates] = useLocalStorage<string[]>(HADITH_VIEWED_DATES_KEY, []);
-  const markToday = React.useCallback((date?: string) => {
-    const target = date ?? getTodayDateString();
-    if (dates.includes(target)) return;
-    setDates((prev) => [...prev, target].slice(-HADITH_VIEWED_MAX_DAYS));
-  }, [dates, setDates]);
+/** Hadith viewed dates derived from activity log. Used for today's chart and daily missions. */
+export function useHadithViewedDates(): [string[], (date?: string, hadithId?: string) => void] {
+  const [entries, addEntry] = useActivityLog();
+
+  const dates = React.useMemo(
+    () => [...new Set(entries.filter((e) => e.type === 'hadith_read').map((e) => e.date))].sort().reverse().slice(0, HADITH_VIEWED_MAX_DAYS),
+    [entries],
+  );
+
+  const markToday = React.useCallback(
+    (date?: string, hadithId?: string) => {
+      const target = date ?? getTodayDateString();
+      if (dates.includes(target) && !hadithId) return;
+      addEntry({ type: 'hadith_read', date: target, hadithId });
+    },
+    [dates, addEntry],
+  );
+
   return [dates, markToday];
 }
 

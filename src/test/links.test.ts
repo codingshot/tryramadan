@@ -18,6 +18,7 @@ const INTERNAL_PATHS_USED = new Set([
   "/health-safety",
   "/emergency",
   "/settings",
+  "/learn",
   "/learn/glossary",
   "/learn/hadith",
   "/guides",

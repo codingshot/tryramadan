@@ -1,26 +1,31 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowLeft, BookOpen, ExternalLink, Filter } from "lucide-react";
+import { ArrowLeft, BookOpen, Check, ExternalLink, Filter } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { HadithSunnahLink } from "@/components/HadithSunnahLink";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { markHadithViewedToday } from "@/hooks/useLocalStorage";
+import { useActivityLog, useDisplayTimezone, getTodayDateString } from "@/hooks/useLocalStorage";
+import { getTodayStringInTimezone } from "@/lib/utils";
 import hadithsData from "@/data/hadiths.json";
 import { PageSEO } from "@/components/PageSEO";
 
 const LearnHadith = () => {
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  const [activityEntries, addEntry] = useActivityLog();
+  const displayTimezone = useDisplayTimezone();
+  const todayStr = displayTimezone ? getTodayStringInTimezone(displayTimezone) : getTodayDateString();
 
-  useEffect(() => {
-    markHadithViewedToday();
-  }, []);
-  
-  const topics = [...new Set(hadithsData.hadiths.map(h => h.topic))];
-  
-  const filteredHadiths = selectedTopic 
-    ? hadithsData.hadiths.filter(h => h.topic === selectedTopic)
+  const readHadithIds = useMemo(
+    () => new Set(activityEntries.filter((e) => e.type === "hadith_read" && e.hadithId != null).map((e) => e.hadithId)),
+    [activityEntries],
+  );
+
+  const topics = [...new Set(hadithsData.hadiths.map((h) => h.topic))];
+
+  const filteredHadiths = selectedTopic
+    ? hadithsData.hadiths.filter((h) => h.topic === selectedTopic)
     : hadithsData.hadiths;
 
   return (
@@ -114,13 +119,28 @@ const LearnHadith = () => {
                   "{hadith.text}"
                 </blockquote>
                 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <HadithSunnahLink source={hadith.source} className="text-sm text-muted-foreground hover:text-secondary transition-colors flex items-center gap-1">
                     {hadith.source}
                     <ExternalLink className="w-3 h-3 ml-0.5" />
                   </HadithSunnahLink>
+                  {readHadithIds.has(String(hadith.id)) ? (
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-secondary">
+                      <Check className="w-4 h-4" aria-hidden />
+                      Read
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => addEntry({ type: "hadith_read", date: todayStr, hadithId: String(hadith.id) })}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-muted/50 hover:bg-muted text-sm font-medium transition-colors"
+                    >
+                      <Check className="w-4 h-4" aria-hidden />
+                      Mark as read
+                    </button>
+                  )}
                 </div>
-                
+
                 <div className="mt-4 pt-4 border-t border-border">
                   <p className="text-sm text-muted-foreground">
                     <span className="font-medium text-foreground">Context: </span>

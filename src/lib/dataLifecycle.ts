@@ -41,6 +41,7 @@ export const TRYRAMADAN_LOCALSTORAGE_KEYS = [
   "tryramadan-day-food-log",
   "tryramadan-schedule-notes",
   "tryramadan-hadith-viewed-dates",
+  "tryramadan-activity-log",
   "tryramadan-quran-verse-viewed-dates",
   "tryramadan-learn-read",
   "tryramadan-prayer-tracker",

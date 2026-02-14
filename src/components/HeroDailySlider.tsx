@@ -45,7 +45,10 @@ export const HeroDailySlider = () => {
 
   const isToday = dayOffset === 0;
   const sectionRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef<number | null>(null);
+  const SWIPE_THRESHOLD = 50;
 
+  // Arrow keys to change day when focus is inside the slider
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const el = sectionRef.current;
@@ -62,14 +65,32 @@ export const HeroDailySlider = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current == null) return;
+    const endX = e.changedTouches[0].clientX;
+    const delta = touchStartX.current - endX;
+    touchStartX.current = null;
+    if (Math.abs(delta) < SWIPE_THRESHOLD) return;
+    if (delta > 0) setDayOffset((o) => o + 1); // swipe left -> next day
+    else setDayOffset((o) => o - 1); // swipe right -> previous day
+  };
+
   return (
     <motion.div
       ref={sectionRef}
-      tabIndex={-1}
+      tabIndex={0}
+      role="region"
+      aria-label="Daily hadith and Quran; use Left and Right arrow keys to change day"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.35 }}
-      className="w-full rounded-2xl bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
+      className="w-full rounded-2xl bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary touch-pan-y"
     >
       {/* Toggle: Daily Hadith | Daily Quran */}
       <div className="flex border-b border-primary-foreground/20">

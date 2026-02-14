@@ -5,6 +5,7 @@ import { Menu, X, MapPin, User } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { useUserPreferences, useFastingProgress, isFastingToday, useDisplayTimezone } from "@/hooks/useLocalStorage";
 import { useAutoLocation } from "@/hooks/useLocation";
+import { useRamadanRange } from "@/hooks/useRamadanRange";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function Navbar() {
@@ -14,8 +15,17 @@ export function Navbar() {
   const [preferences] = useUserPreferences();
   const [progress] = useFastingProgress();
   const { location: autoLocation } = useAutoLocation();
+  const ramadanRange = useRamadanRange();
   const fastingToday = isFastingToday(progress);
-  const daysFasting = (progress.completedDays ?? []).length;
+  const completedDays = progress.completedDays ?? [];
+  const ramadanStart = ramadanRange.startStr ?? "";
+  const ramadanEnd = ramadanRange.endStr ?? "";
+  const completedInRamadan = completedDays.filter((d) => d >= ramadanStart && d <= ramadanEnd);
+  const completedOutsideRamadan = completedDays.length - completedInRamadan.length;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const inRamadan = ramadanRange.isRamadanDay(today);
+  const daysFasting = inRamadan ? completedInRamadan.length : completedDays.length;
 
   const displayLocation = preferences.location || (autoLocation ? autoLocation.displayName : null);
   const locationShort = displayLocation ? displayLocation.split(",").slice(0, 2).join(",").trim() : "Set location";
@@ -51,7 +61,6 @@ export function Navbar() {
   }, [displayTimezone, preferences.locationCoords]);
 
   const navLinks = [
-    { name: "Programs", nameAr: "البرامج", to: "/programs" },
     { name: "Meals", nameAr: "الوجبات", to: "/dashboard/meals" },
     { name: "Culture", nameAr: "الثقافة", to: "/culture" },
     { name: "Journal", nameAr: "يوميات", to: "/dashboard/journal" },
@@ -96,16 +105,37 @@ export function Navbar() {
                       to="/dashboard"
                       onClick={() => setIsOpen(false)}
                       className="inline-flex items-center px-2 py-0.5 rounded-full bg-secondary/20 text-secondary text-xs font-medium shrink-0 cursor-pointer hover:bg-secondary/30 transition-colors"
-                      aria-label={`Fasting today; ${daysFasting} day${daysFasting === 1 ? "" : "s"} completed — open dashboard`}
+                      aria-label={
+                        inRamadan
+                          ? `Fasting today; ${daysFasting} day${daysFasting === 1 ? "" : "s"} completed this Ramadan — open dashboard`
+                          : `Fasting today; ${daysFasting} fasting day${daysFasting === 1 ? "" : "s"} (voluntary/Sunnah) — open dashboard`
+                      }
                     >
                       <span className="sm:hidden">{daysFasting} day{daysFasting === 1 ? "" : "s"}</span>
-                      <span className="hidden sm:inline">Fasting · {daysFasting} day{daysFasting === 1 ? "" : "s"}</span>
+                      <span className="hidden sm:inline">
+                        Fasting · {daysFasting} day{daysFasting === 1 ? "" : "s"}
+                        {inRamadan ? "" : " fasted"}
+                      </span>
                     </Link>
                   </TooltipTrigger>
                   <TooltipContent side="bottom" className="max-w-xs">
                     <p className="font-medium text-sm">You&apos;re fasting today</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {daysFasting} day{daysFasting === 1 ? "" : "s"} completed this Ramadan. Click to open dashboard.
+                      {inRamadan ? (
+                        <>
+                          {completedInRamadan.length} day{completedInRamadan.length === 1 ? "" : "s"} completed this
+                          Ramadan.
+                          {completedOutsideRamadan > 0 && (
+                            <> {completedOutsideRamadan} voluntary day{completedOutsideRamadan === 1 ? "" : "s"} outside Ramadan.</>
+                          )}{" "}
+                          Click to open dashboard.
+                        </>
+                      ) : (
+                        <>
+                          {completedDays.length} fasting day{completedDays.length === 1 ? "" : "s"} completed
+                          (voluntary/Sunnah; Ramadan has not started). Click to open dashboard.
+                        </>
+                      )}
                     </p>
                   </TooltipContent>
                 </Tooltip>

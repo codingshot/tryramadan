@@ -48,9 +48,11 @@ export const DashboardHero = ({
       {/* Large Hero Card */}
       <div
         className={`p-6 md:p-8 rounded-2xl border-2 ${
-          isFasting
-            ? "bg-primary/10 border-primary/30"
-            : "bg-muted/50 border-border"
+          todayBroken
+            ? "bg-destructive/5 border-destructive/30"
+            : isFasting
+              ? "bg-primary/10 border-primary/30"
+              : "bg-muted/50 border-border"
         }`}
       >
         {/* Status Header */}
@@ -58,10 +60,12 @@ export const DashboardHero = ({
           <div className="flex items-center gap-3">
             <div
               className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                isFasting ? "bg-primary/20" : "bg-muted"
+                todayBroken ? "bg-destructive/20" : isFasting ? "bg-primary/20" : "bg-muted"
               }`}
             >
-              {isFasting ? (
+              {todayBroken ? (
+                <AlertTriangle className="w-6 h-6 text-destructive" />
+              ) : isFasting ? (
                 <Moon className="w-6 h-6 text-primary" />
               ) : (
                 <Sun className="w-6 h-6 text-muted-foreground" />
@@ -71,24 +75,28 @@ export const DashboardHero = ({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <h2 className="text-xl md:text-2xl font-bold cursor-help border-b border-dotted border-transparent hover:border-foreground/40">
-                    {isFasting ? "Currently Fasting" : "Eating Window"}
+                    {todayBroken ? "Broke fast" : isFasting ? "Currently Fasting" : "Eating Window"}
                   </h2>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs p-3">
                   <p className="font-semibold text-sm">
-                    {isFasting
-                      ? GENERAL_TOOLTIPS.fastingPeriod.title
-                      : "Eating Window"}
+                    {todayBroken
+                      ? "Broke fast"
+                      : isFasting
+                        ? GENERAL_TOOLTIPS.fastingPeriod.title
+                        : "Eating Window"}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {isFasting
-                      ? GENERAL_TOOLTIPS.fastingPeriod.body
-                      : "You're between sunset (Maghrib) and dawn (Fajr). You can eat and drink."}
+                    {todayBroken
+                      ? "You logged that you broke your fast today. Countdown below is until Iftar or next Suhoor."
+                      : isFasting
+                        ? GENERAL_TOOLTIPS.fastingPeriod.body
+                        : "You're between sunset (Maghrib) and dawn (Fajr). You can eat and drink."}
                   </p>
                 </TooltipContent>
               </Tooltip>
               <p className="text-sm text-muted-foreground">
-                {isFasting ? "No food or drink" : "You can eat now"}
+                {todayBroken ? "Logged breaking fast today" : isFasting ? "No food or drink" : "You can eat now"}
               </p>
             </div>
           </div>
@@ -111,25 +119,42 @@ export const DashboardHero = ({
           )}
         </div>
 
-        {/* Large Countdown Timer */}
-        <div className="text-center py-6 md:py-8">
-          <motion.div
-            key={`${countdown.h}-${countdown.m}-${countdown.s}`}
-            initial={{ scale: 0.95, opacity: 0.8 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.2 }}
-            className="text-5xl md:text-7xl font-bold tabular-nums mb-2"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            {String(countdown.h).padStart(2, "0")}:
-            {String(countdown.m).padStart(2, "0")}:
-            {String(countdown.s).padStart(2, "0")}
-          </motion.div>
-          <p className="text-lg md:text-xl text-muted-foreground">
-            until {targetLabel}
-          </p>
-        </div>
+        {/* Large Countdown Timer — hidden when complete or skipped; when broke fast we still show countdown */}
+        {!todayComplete && !todaySkipped && (
+          <div className="text-center py-6 md:py-8">
+            <motion.div
+              key={`${countdown.h}-${countdown.m}-${countdown.s}`}
+              initial={{ scale: 0.95, opacity: 0.8 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.2 }}
+              className="text-5xl md:text-7xl font-bold tabular-nums mb-2"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              {String(countdown.h).padStart(2, "0")}:
+              {String(countdown.m).padStart(2, "0")}:
+              {String(countdown.s).padStart(2, "0")}
+            </motion.div>
+            <p className="text-lg md:text-xl text-muted-foreground">
+              until {targetLabel}
+              {todayBroken && (
+                <span className="block text-sm mt-1 text-destructive/90">(you broke fast today)</span>
+              )}
+            </p>
+          </div>
+        )}
+        {todayComplete && (
+          <div className="text-center py-6 md:py-8">
+            <p className="text-2xl md:text-3xl font-bold text-secondary">Day complete</p>
+            <p className="text-sm text-muted-foreground mt-1">You marked today&apos;s fast as completed</p>
+          </div>
+        )}
+        {todaySkipped && (
+          <div className="text-center py-6 md:py-8">
+            <p className="text-xl md:text-2xl font-bold text-muted-foreground">Skipped</p>
+            <p className="text-sm text-muted-foreground mt-1">Today is marked as not fasting</p>
+          </div>
+        )}
 
         {/* Next Prayer Indicator */}
         {nextPrayer && (
@@ -154,7 +179,7 @@ export const DashboardHero = ({
             {isFasting && (
               <button
                 onClick={onBreakFast}
-                className="flex-1 py-3 px-4 rounded-xl border-2 border-destructive/40 bg-destructive/10 text-destructive font-semibold hover:bg-destructive/20 transition-colors flex items-center justify-center gap-2 min-h-[48px]"
+                className="hidden md:flex flex-1 py-3 px-4 rounded-xl border-2 border-destructive/40 bg-destructive/10 text-destructive font-semibold hover:bg-destructive/20 transition-colors items-center justify-center gap-2 min-h-[48px]"
               >
                 <AlertTriangle className="w-5 h-5" />
                 Break Fast

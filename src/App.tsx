@@ -253,6 +253,7 @@ const App = () => (
             }
           />
           <Route path="/dashboard/glossary" element={<Suspense fallback={<PageFallback />}><LearnGlossary /></Suspense>} />
+          <Route path="/learn" element={<Navigate to="/dashboard/learn" replace />} />
           <Route path="/learn/glossary" element={<Suspense fallback={<PageFallback />}><LearnGlossary /></Suspense>} />
           <Route path="/learn/hadith" element={<Suspense fallback={<PageFallback />}><LearnHadith /></Suspense>} />
           <Route path="/health" element={<Suspense fallback={<PageFallback />}><Health /></Suspense>} />

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import {
   Moon,
   Sun,
@@ -35,6 +35,7 @@ import { ProgressRing } from "@/components/ProgressRing";
 import dailyFactsData from "@/data/daily-facts.json";
 import { SunnahFastingBadge } from "@/components/SunnahFastingBadge";
 import { DashboardHero } from "@/components/dashboard/DashboardHero";
+import { DashboardFastingCornerWidget } from "@/components/dashboard/DashboardFastingCornerWidget";
 import { DashboardPrayerTracking } from "@/components/dashboard/DashboardPrayerTracking";
 import { DashboardHistory } from "@/components/dashboard/DashboardHistory";
 import { DashboardContent } from "@/components/dashboard/DashboardContent";
@@ -82,6 +83,9 @@ import {
   planToFoodLogEntries,
   useDisplayTimezone,
   useHabitLog,
+  type LearningPriority,
+  type CultureRecipesPriority,
+  type QuranPriority,
 } from "@/hooks/useLocalStorage";
 import {
   getHabitLogStreak,
@@ -169,6 +173,7 @@ const Dashboard = () => {
   const [showBreakFastConfirm, setShowBreakFastConfirm] = useState(false);
   const [datePopoverOpen, setDatePopoverOpen] = useState(false);
   const [prayerTimesPopoverOpen, setPrayerTimesPopoverOpen] = useState(false);
+  const [modeQuickSettingsOpen, setModeQuickSettingsOpen] = useState(false);
   const [statsDialog, setStatsDialog] = useState<
     "streak" | "total" | "sunnah" | "broken" | null
   >(null);
@@ -203,6 +208,14 @@ const Dashboard = () => {
   );
   const [showPrayerTimesModal, setShowPrayerTimesModal] = useState(false);
 
+  const location = useLocation();
+  useEffect(() => {
+    if ((location.state as { openBreakFast?: boolean })?.openBreakFast) {
+      setShowBreakFastConfirm(true);
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, location.pathname, navigate]);
+
   // Auto-detect location if not set
   const { location: autoLocation, loading: locationLoading } =
     useAutoLocation();
@@ -216,6 +229,10 @@ const Dashboard = () => {
   );
 
   const displayTimezone = useDisplayTimezone();
+  const displayCity =
+    preferences.location?.split(",")[0]?.trim() ||
+    autoLocation?.displayName?.split(",")[0]?.trim() ||
+    null;
   const todayStr = displayTimezone
     ? getTodayStringInTimezone(displayTimezone)
     : toLocalDateString(new Date());
@@ -231,13 +248,17 @@ const Dashboard = () => {
     displayTimezone,
   );
 
-  // Don't redirect to onboarding if user already has location/prayer times
+  // Don't redirect to onboarding if user already has location/prayer times or has used the app (e.g. logged fast/break/skip)
   const hasTime = !!(locationCoords || prayerTimes);
+  const hasProgress =
+    (progress.fastingLog?.length ?? 0) > 0 ||
+    (progress.completedDays?.length ?? 0) > 0 ||
+    (progress.skippedDays?.length ?? 0) > 0;
   useEffect(() => {
-    if (preferences.onboardingComplete || hasTime) return;
+    if (preferences.onboardingComplete || hasTime || hasProgress) return;
     if (locationLoading) return; // Wait for auto-location to resolve
     navigate("/onboarding/welcome", { replace: true });
-  }, [preferences.onboardingComplete, hasTime, locationLoading, navigate]);
+  }, [preferences.onboardingComplete, hasTime, hasProgress, locationLoading, navigate]);
 
   // Prayer times for selected day (for day view)
   const { prayerTimes: selectedDayPrayerTimes } = usePrayerTimesForDate(
@@ -631,7 +652,7 @@ const Dashboard = () => {
     setShowAskFastingPopup(true);
   }, [inFastingWindow, fastingToday, todayComplete, todaySkipped, todayStr]);
 
-  const dismissAskFastingForToday = useCallback(() => {
+  const markAskFastingAnsweredForToday = useCallback(() => {
     try {
       window.localStorage.setItem(ASK_FASTING_DISMISSED_KEY, todayStr);
     } catch {
@@ -640,17 +661,19 @@ const Dashboard = () => {
     setShowAskFastingPopup(false);
   }, [todayStr]);
 
+  const dismissAskFastingForToday = markAskFastingAnsweredForToday;
+
   const handleAskFastingYes = useCallback(() => {
     startFastingToday(progress, setProgress, todayStr);
-    setShowAskFastingPopup(false);
+    markAskFastingAnsweredForToday();
     toast.success("You're fasting today");
-  }, [progress, setProgress, todayStr]);
+  }, [progress, setProgress, todayStr, markAskFastingAnsweredForToday]);
 
   const handleAskFastingNo = useCallback(() => {
     setDaySkipped(progress, setProgress, todayStr);
-    setShowAskFastingPopup(false);
+    markAskFastingAnsweredForToday();
     toast.success("Marked as not fasting today");
-  }, [progress, setProgress, todayStr]);
+  }, [progress, setProgress, todayStr, markAskFastingAnsweredForToday]);
 
   // Prayer tracking handler
   const handlePrayerCheck = useCallback(
@@ -808,7 +831,7 @@ const Dashboard = () => {
   };
   const tip = getQuickTip();
 
-  if (!preferences.onboardingComplete && !hasTime) {
+  if (!preferences.onboardingComplete && !hasTime && !hasProgress) {
     return null;
   }
 
@@ -864,7 +887,8 @@ const Dashboard = () => {
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <span className="cursor-help border-b border-dotted border-transparent hover:border-muted-foreground/50">
-                          Looking forward to Ramadan
+                          <span className="sm:hidden">Looking forward</span>
+                          <span className="hidden sm:inline">Looking forward to Ramadan</span>
                         </span>
                       </TooltipTrigger>
                       <TooltipContent className="max-w-xs p-3" side="bottom">
@@ -909,12 +933,151 @@ const Dashboard = () => {
                   <>Your Fasting Journey</>
                 )}
               </h1>
-              <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+              <div className="flex items-center gap-1 sm:gap-2 shrink-0 flex-wrap">
+                <Popover open={modeQuickSettingsOpen} onOpenChange={setModeQuickSettingsOpen}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onDoubleClick={() => setModeQuickSettingsOpen(true)}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border bg-muted/50 hover:bg-muted text-sm font-medium min-h-[36px] touch-manipulation"
+                        aria-label={`Mode: ${preferences.userType === "muslim" ? "Muslim" : "Non-Muslim"}. Double-click for quick settings.`}
+                      >
+                        <span aria-hidden>{preferences.userType === "muslim" ? "☪" : "🌱"}</span>
+                        <span>{preferences.userType === "muslim" ? "Muslim" : "Non-Muslim"}</span>
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      <p>Double-click for quick settings & learning</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <PopoverContent align="start" className="w-[min(100vw-2rem,340px)] p-4" aria-label="Quick settings for your mode">
+                    <h3 className="font-semibold text-sm mb-3">
+                      {preferences.userType === "muslim" ? "Muslim" : "Non-Muslim"} · Quick settings
+                    </h3>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      Settings and learning that match this mode. Change in full Settings anytime.
+                    </p>
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground mb-1.5">Learning</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {(["minimal", "moderate", "deep"] as LearningPriority[]).map((v) => (
+                            <button
+                              key={v}
+                              type="button"
+                              onClick={() => setPreferences({ ...preferences, learningPriority: v })}
+                              className={`px-2.5 py-1 rounded-md text-xs font-medium capitalize ${
+                                (preferences.learningPriority ?? "moderate") === v
+                                  ? "bg-secondary text-secondary-foreground"
+                                  : "bg-muted/70 hover:bg-muted border border-transparent"
+                              }`}
+                              aria-pressed={(preferences.learningPriority ?? "moderate") === v}
+                            >
+                              {v}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground mb-1.5">Culture & recipes</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {(["none", "some", "lots"] as CultureRecipesPriority[]).map((v) => (
+                            <button
+                              key={v}
+                              type="button"
+                              onClick={() => setPreferences({ ...preferences, cultureRecipesPriority: v })}
+                              className={`px-2.5 py-1 rounded-md text-xs font-medium capitalize ${
+                                (preferences.cultureRecipesPriority ?? "some") === v
+                                  ? "bg-secondary text-secondary-foreground"
+                                  : "bg-muted/70 hover:bg-muted border border-transparent"
+                              }`}
+                              aria-pressed={(preferences.cultureRecipesPriority ?? "some") === v}
+                            >
+                              {v}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      {preferences.userType === "muslim" && (
+                        <>
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground mb-1.5">Quran & glossary</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {(["none", "some", "daily"] as QuranPriority[]).map((v) => (
+                                <button
+                                  key={v}
+                                  type="button"
+                                  onClick={() => setPreferences({ ...preferences, quranPriority: v })}
+                                  className={`px-2.5 py-1 rounded-md text-xs font-medium capitalize ${
+                                    (preferences.quranPriority ?? "some") === v
+                                      ? "bg-secondary text-secondary-foreground"
+                                      : "bg-muted/70 hover:bg-muted border border-transparent"
+                                  }`}
+                                  aria-pressed={(preferences.quranPriority ?? "some") === v}
+                                >
+                                  {v}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground mb-1.5">Sunnah fasting</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {[
+                                { id: "monday-thursday", label: "Mon/Thu" },
+                                { id: "ayyam-al-beed", label: "Ayyam al-Beed" },
+                              ].map(({ id, label }) => {
+                                const selected = (preferences.voluntaryFasting ?? []).includes(id);
+                                return (
+                                  <button
+                                    key={id}
+                                    type="button"
+                                    onClick={() => {
+                                      const curr = preferences.voluntaryFasting ?? [];
+                                      const next = selected ? curr.filter((x) => x !== id) : [...curr, id];
+                                      setPreferences({ ...preferences, voluntaryFasting: next });
+                                    }}
+                                    className={`px-2.5 py-1 rounded-md text-xs font-medium ${
+                                      selected ? "bg-primary/20 text-primary border border-primary/40" : "bg-muted/70 hover:bg-muted border border-transparent"
+                                    }`}
+                                    aria-pressed={selected}
+                                  >
+                                    {label}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    <Link
+                      to="/settings"
+                      onClick={() => setModeQuickSettingsOpen(false)}
+                      className="mt-3 inline-block text-xs font-medium text-secondary hover:underline"
+                    >
+                      All settings →
+                    </Link>
+                  </PopoverContent>
+                </Popover>
                 <LocationDisplay
                   compact
                   open={locationEditorOpen}
                   onOpenChange={setLocationEditorOpen}
                 />
+                <button
+                  type="button"
+                  onClick={() => setLocationEditorOpen(true)}
+                  className="text-xs text-muted-foreground hover:text-foreground hover:underline transition-colors text-left"
+                  aria-label={displayCity ? `Prayer times for ${displayCity}. Click to change location.` : "Set location for prayer times"}
+                >
+                  {displayCity ? (
+                    <>Prayer times ({displayCity})</>
+                  ) : (
+                    <>Prayer times · Set location</>
+                  )}
+                </button>
                 {(locationLoading || timesLoading) && (
                   <span className="text-xs text-muted-foreground animate-pulse">
                     updating...
@@ -1019,7 +1182,7 @@ const Dashboard = () => {
               const isSunnahDay = sunnahInfo && !inRamadan;
               if (isSunnahDay) {
                 const todayTimesNote = prayerTimes
-                  ? `Today (your location): Suhoor end (Fajr) ${prayerTimes.fajr} · Iftar (Maghrib) ${prayerTimes.maghrib}`
+                  ? `Today (${displayCity ?? "your location"}): Suhoor end (Fajr) ${prayerTimes.fajr} · Iftar (Maghrib) ${prayerTimes.maghrib}`
                   : "Set your location in settings for today's prayer times.";
                 return (
                   <div className="mt-2 flex items-center gap-2">
@@ -1125,28 +1288,28 @@ const Dashboard = () => {
                     )}
                   </button>
                 </PopoverTrigger>
-                <PopoverContent align="start" className="w-56 p-3">
-                  <p className="text-xs font-medium text-muted-foreground mb-2">
+                <PopoverContent align="start" className="w-48 sm:w-56 p-2.5 sm:p-3">
+                  <p className="text-xs font-medium text-muted-foreground mb-1.5 px-0.5">
                     Add to calendar
                   </p>
-                  <div className="flex flex-col gap-1">
+                  <div className="flex flex-col gap-0.5">
                     <Link
                       to="/dashboard/schedule"
                       onClick={() => setDatePopoverOpen(false)}
-                      className="text-sm py-2 px-2 rounded-lg hover:bg-muted"
+                      className="text-sm py-2 px-2 rounded-md hover:bg-muted min-h-[40px] flex items-center touch-manipulation"
                     >
                       Today → Schedule
                     </Link>
                     <Link
                       to="/dashboard/schedule?export=ramadan"
                       onClick={() => setDatePopoverOpen(false)}
-                      className="text-sm py-2 px-2 rounded-lg hover:bg-muted"
+                      className="text-sm py-2 px-2 rounded-md hover:bg-muted min-h-[40px] flex items-center touch-manipulation"
                     >
-                      All Ramadan → Export .ics
+                      Ramadan → .ics
                     </Link>
                   </div>
                   {getDaysUntilRamadan() > 0 && (
-                    <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border">
+                    <p className="text-[11px] sm:text-xs text-muted-foreground mt-1.5 pt-1.5 border-t border-border px-0.5">
                       {getDaysUntilRamadan()} day
                       {getDaysUntilRamadan() === 1 ? "" : "s"} until Ramadan
                     </p>
@@ -1177,23 +1340,119 @@ const Dashboard = () => {
           {/* Desktop: two columns — left: main content (70%); right: sidebar (30%) */}
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 lg:gap-8 mb-6">
             {/* Left column: Main dashboard content */}
-            <div className="min-w-0 space-y-4 w-full">
-              {/* NEW: Dashboard Hero - Fast Status + Timer + Next Prayer */}
-              <DashboardHero
-                progress={progress}
-                isFasting={isFasting}
-                countdownToIftar={countdownToIftar}
-                countdownToSuhoor={countdownToSuhoor}
-                prayerTimes={prayerTimes}
-                todayStr={todayStr}
-                nextPrayer={nextPrayer}
-                onMarkComplete={toggleTodayComplete}
-                onBreakFast={() => setShowBreakFastConfirm(true)}
-                onSkip={() => {
-                  setDaySkipped(progress, setProgress, todayStr);
-                  toast.success("Marked as not fasting today");
-                }}
-              />
+            <div className="min-w-0 space-y-4 w-full relative">
+              {/* When viewing another day: corner widget (current fast + upcoming prayers); main area = selected day info + CTAs */}
+              {!isSelectedToday ? (
+                <>
+                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-0 sm:justify-between sm:items-start">
+                    {/* Selected day: date + this day's prayer times + actions */}
+                    <div className="flex-1 min-w-0 p-4 sm:p-5 rounded-2xl border-2 border-border bg-muted/30">
+                      <h2 className="text-lg font-semibold mb-1">
+                        {selectedDateObj.toLocaleDateString("en", {
+                          weekday: "short",
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </h2>
+                      {selectedDayPrayerTimes ? (
+                        <p className="text-sm text-muted-foreground mb-3">
+                          {suhoorLabelShort} end{" "}
+                          <span className="font-medium text-foreground">
+                            {selectedDayPrayerTimes.imsak ?? selectedDayPrayerTimes.fajr}
+                          </span>
+                          {" · "}
+                          {iftarLabelShort}{" "}
+                          <span className="font-medium text-foreground">
+                            {selectedDayPrayerTimes.maghrib}
+                          </span>
+                        </p>
+                      ) : (
+                        <p className="text-sm text-muted-foreground mb-3">
+                          Set location for this day&apos;s times
+                        </p>
+                      )}
+                      <div className="flex flex-wrap gap-2">
+                        {!selectedDayComplete && !selectedDayBroken && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setDayCompleted(progress, setProgress, selectedDate, true);
+                              toast.success("Marked as completed");
+                            }}
+                            className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90"
+                          >
+                            Mark complete
+                          </button>
+                        )}
+                        {!selectedDayComplete && !(progress.skippedDays ?? []).includes(selectedDate) && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setDaySkipped(progress, setProgress, selectedDate);
+                              toast.success("Marked as skipped");
+                            }}
+                            className="px-3 py-1.5 rounded-lg border border-border text-sm font-medium hover:bg-muted"
+                          >
+                            Didn&apos;t fast
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={goToToday}
+                          className="px-3 py-1.5 rounded-lg bg-primary/20 text-primary text-sm font-medium hover:bg-primary/30"
+                        >
+                          Go to today
+                        </button>
+                        <Link
+                          to="/dashboard/schedule"
+                          className="px-3 py-1.5 rounded-lg border border-border text-sm font-medium hover:bg-muted inline-flex items-center"
+                        >
+                          Schedule
+                        </Link>
+                      </div>
+                    </div>
+                    {/* Corner widget: current fast + upcoming prayers */}
+                    <div className="sm:shrink-0 sm:absolute sm:top-0 sm:right-0 lg:right-0">
+                      <DashboardFastingCornerWidget
+                        progress={progress}
+                        isFasting={isFasting}
+                        countdownToIftar={countdownToIftar}
+                        countdownToSuhoor={countdownToSuhoor}
+                        prayerTimes={prayerTimes}
+                        todayStr={todayStr}
+                        nextPrayer={nextPrayer}
+                        onMarkComplete={toggleTodayComplete}
+                        onBreakFast={() => setShowBreakFastConfirm(true)}
+                        onSkip={() => {
+                          setDaySkipped(progress, setProgress, todayStr);
+                          toast.success("Marked as not fasting today");
+                        }}
+                        onGoToToday={goToToday}
+                      />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Today: full hero - Fast Status + Timer + Next Prayer */}
+                  <DashboardHero
+                    progress={progress}
+                    isFasting={isFasting}
+                    countdownToIftar={countdownToIftar}
+                    countdownToSuhoor={countdownToSuhoor}
+                    prayerTimes={prayerTimes}
+                    todayStr={todayStr}
+                    nextPrayer={nextPrayer}
+                    onMarkComplete={toggleTodayComplete}
+                    onBreakFast={() => setShowBreakFastConfirm(true)}
+                    onSkip={() => {
+                      setDaySkipped(progress, setProgress, todayStr);
+                      toast.success("Marked as not fasting today");
+                    }}
+                  />
+                </>
+              )}
 
               {/* Daily Hadith & Quran Slider */}
               <HeroDailySlider />
@@ -1295,8 +1554,13 @@ const Dashboard = () => {
         notInFastingPeriod={!inFastingWindow}
       />
 
-      {/* Ask Fasting Popup */}
-      <Dialog open={showAskFastingPopup} onOpenChange={setShowAskFastingPopup}>
+      {/* Ask Fasting Popup — once closed (any method), don't ask again this fasting period for today */}
+      <Dialog
+        open={showAskFastingPopup}
+        onOpenChange={(open) => {
+          if (!open) markAskFastingAnsweredForToday();
+        }}
+      >
         <DialogContent className="max-w-sm">
           <DialogTitle>Are you fasting today?</DialogTitle>
           <p className="text-sm text-muted-foreground mb-4">

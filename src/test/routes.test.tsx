@@ -36,6 +36,7 @@ export const ROUTES = [
   "/health-safety",
   "/emergency",
   "/settings",
+  "/learn",
   "/learn/glossary",
   "/learn/hadith",
   "/dashboard",

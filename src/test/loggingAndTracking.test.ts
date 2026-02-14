@@ -30,6 +30,8 @@ import {
   getPrayerStreak,
   getTotalPrayerCount,
   getJournalStreak,
+  markHadithViewedToday,
+  ACTIVITY_LOG_KEY,
   type FastingProgress,
   type DayFoodLog,
 } from "@/hooks/useLocalStorage";
@@ -208,6 +210,67 @@ describe("Daily missions edge cases", () => {
     });
     const readHadith = missions.find((m) => m.id === "read_hadith");
     expect(readHadith?.completed).toBe(true);
+  });
+
+  it("read_hadith mission not completed when hadithViewedDates empty", () => {
+    const missions = getDailyMissions({
+      todayStr,
+      progress: defaultProgress,
+      mealPlans: {},
+      foodLog: {},
+      scheduleNotes: {},
+      quranVerseViewedDates: [],
+      hadithViewedDates: [],
+    });
+    const readHadith = missions.find((m) => m.id === "read_hadith");
+    expect(readHadith?.completed).toBe(false);
+  });
+
+  it("read_hadith mission not completed when today not in hadithViewedDates", () => {
+    const missions = getDailyMissions({
+      todayStr,
+      progress: defaultProgress,
+      mealPlans: {},
+      foodLog: {},
+      scheduleNotes: {},
+      quranVerseViewedDates: [],
+      hadithViewedDates: ["2025-01-01", "2025-01-02"],
+    });
+    const readHadith = missions.find((m) => m.id === "read_hadith");
+    expect(readHadith?.completed).toBe(false);
+  });
+});
+
+describe("Activity log / hadith", () => {
+  const todayStr = new Date().toISOString().split("T")[0];
+
+  beforeEach(() => {
+    try {
+      localStorage.removeItem("tryramadan-activity-log");
+      localStorage.removeItem("tryramadan-hadith-viewed-dates");
+    } catch {
+      // ignore
+    }
+  });
+
+  it("markHadithViewedToday adds one hadith_read entry for today", () => {
+    markHadithViewedToday();
+    const raw = localStorage.getItem(ACTIVITY_LOG_KEY);
+    expect(raw).toBeTruthy();
+    const entries = JSON.parse(raw!);
+    expect(Array.isArray(entries)).toBe(true);
+    const hadithRead = entries.filter((e: { type: string }) => e.type === "hadith_read");
+    expect(hadithRead.length).toBeGreaterThanOrEqual(1);
+    expect(hadithRead.some((e: { date: string }) => e.date === todayStr)).toBe(true);
+  });
+
+  it("markHadithViewedToday is idempotent for same day", () => {
+    markHadithViewedToday();
+    markHadithViewedToday();
+    const raw = localStorage.getItem(ACTIVITY_LOG_KEY);
+    const entries = JSON.parse(raw!);
+    const forToday = entries.filter((e: { type: string; date: string }) => e.type === "hadith_read" && e.date === todayStr);
+    expect(forToday.length).toBe(1);
   });
 });
 

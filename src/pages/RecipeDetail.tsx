@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Coffee, Utensils, Clock, Globe, BookOpen, Flame, ListOrdered, ExternalLink, Users, ChevronRight } from "lucide-react";
+import { ArrowLeft, Coffee, Utensils, Clock, Globe, BookOpen, Flame, ListOrdered, ExternalLink, Users, ChevronRight, Download, Share2, Image, Printer } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { PageSEO } from "@/components/PageSEO";
@@ -16,6 +16,14 @@ import {
 } from "@/lib/cultureRecipes";
 import { useIftarLabel } from "@/hooks/useLocalStorage";
 import { buildRecipeSchema, buildBreadcrumbSchema } from "@/lib/jsonld";
+import { getRecipeAsText, getRecipeAsMarkdown, getRecipeAsJson, downloadString } from "@/lib/recipeExport";
+import { RecipeShareCard, type RecipeCardStyle } from "@/components/RecipeShareCard";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { toast } from "sonner";
 
 export default function RecipeDetail() {
   const { mealType, id } = useParams<{ mealType: string; id: string }>();
@@ -29,6 +37,10 @@ export default function RecipeDetail() {
   const defaultServings = recipe ? getDefaultServings(recipe) : 4;
   const [portions, setPortions] = useState(defaultServings);
   const multiplier = recipe && defaultServings > 0 ? portions / defaultServings : 1;
+  const [exportPopoverOpen, setExportPopoverOpen] = useState(false);
+  const [imageCardStyle, setImageCardStyle] = useState<RecipeCardStyle>("full");
+  const [generatingImage, setGeneratingImage] = useState(false);
+  const recipeCardRef = useRef<HTMLDivElement>(null);
 
   if (!recipe || !result) {
     return (
@@ -91,6 +103,69 @@ export default function RecipeDetail() {
     { name: recipe.name, url: recipePath },
   ]);
 
+  const handleDownload = (format: "text" | "json" | "markdown") => {
+    const baseName = recipe.name.replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").slice(0, 40);
+    if (format === "text") {
+      downloadString(getRecipeAsText(recipe, mealLabel, portions, multiplier), `${baseName}.txt`, "text/plain");
+      toast.success("Downloaded as text");
+    } else if (format === "json") {
+      downloadString(getRecipeAsJson(recipe, mealLabel, portions, multiplier), `${baseName}.json`, "application/json");
+      toast.success("Downloaded as JSON");
+    } else {
+      downloadString(getRecipeAsMarkdown(recipe, mealLabel, portions, multiplier), `${baseName}.md`, "text/markdown");
+      toast.success("Downloaded as Markdown");
+    }
+    setExportPopoverOpen(false);
+  };
+
+  const handleGenerateImage = async () => {
+    if (!recipeCardRef.current) return;
+    setGeneratingImage(true);
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+      const canvas = await html2canvas(recipeCardRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: "#1a1a1a",
+        logging: false,
+      });
+      const dataUrl = canvas.toDataURL("image/png");
+      const fileName = `${recipe.name.replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").slice(0, 30)}-recipe.png`;
+
+      if (navigator.share && navigator.canShare?.({ files: [] })) {
+        try {
+          const blob = await (await fetch(dataUrl)).blob();
+          const file = new File([blob], fileName, { type: "image/png" });
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: recipe.name,
+              text: `${mealLabel} recipe from TryRamadan`,
+              files: [file],
+            });
+            toast.success("Image shared");
+            setExportPopoverOpen(false);
+            return;
+          } catch (e) {
+            if ((e as Error).name !== "AbortError") throw e;
+          }
+        } catch {
+          // fall back to download
+        }
+      }
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = fileName;
+      a.click();
+      toast.success("Image downloaded");
+      setExportPopoverOpen(false);
+    } catch (err) {
+      toast.error("Could not generate image");
+      console.error(err);
+    } finally {
+      setGeneratingImage(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <PageSEO
@@ -105,13 +180,119 @@ export default function RecipeDetail() {
       <Navbar />
       <main id="main-content" className="main-content" aria-label="Recipe">
         <div className="container mx-auto px-4 max-w-3xl min-w-0">
-          <Link
-            to="/recipes"
-            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 min-h-[44px] items-center"
-          >
-            <ArrowLeft className="w-4 h-4 flex-shrink-0" aria-hidden />
-            Back to Recipes
-          </Link>
+            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+              <Link
+                to="/recipes"
+                className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground min-h-[44px] items-center"
+              >
+                <ArrowLeft className="w-4 h-4 flex-shrink-0" aria-hidden />
+                Back to Recipes
+              </Link>
+              <Popover open={exportPopoverOpen} onOpenChange={setExportPopoverOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-border bg-muted/50 hover:bg-muted text-sm font-medium min-h-[44px]"
+                    aria-label="Download or share recipe"
+                  >
+                    <Download className="w-4 h-4" aria-hidden />
+                    Download / Share
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent align="end" className="w-[min(100vw-2rem,360px)] p-4" aria-label="Recipe download and share options">
+                  <h3 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                    <Download className="w-4 h-4" aria-hidden />
+                    Download recipe
+                  </h3>
+                  <p className="text-xs text-muted-foreground mb-3">Save in different formats.</p>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    <button
+                      type="button"
+                      onClick={() => handleDownload("text")}
+                      className="px-3 py-2 rounded-lg border border-border bg-background hover:bg-muted text-sm font-medium"
+                    >
+                      Plain text
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDownload("json")}
+                      className="px-3 py-2 rounded-lg border border-border bg-background hover:bg-muted text-sm font-medium"
+                    >
+                      JSON
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDownload("markdown")}
+                      className="px-3 py-2 rounded-lg border border-border bg-background hover:bg-muted text-sm font-medium"
+                    >
+                      Markdown
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { window.print(); setExportPopoverOpen(false); toast.success("Print dialog opened — save as PDF from there"); }}
+                      className="px-3 py-2 rounded-lg border border-border bg-background hover:bg-muted text-sm font-medium inline-flex items-center gap-1.5"
+                    >
+                      <Printer className="w-3.5 h-3.5" aria-hidden />
+                      Print / PDF
+                    </button>
+                  </div>
+                  <h3 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                    <Image className="w-4 h-4" aria-hidden />
+                    Recipe image card
+                  </h3>
+                  <p className="text-xs text-muted-foreground mb-2">Generate an image to share. Pick a card style:</p>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {(["minimal", "full", "nutrition"] as RecipeCardStyle[]).map((style) => (
+                      <button
+                        key={style}
+                        type="button"
+                        onClick={() => setImageCardStyle(style)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize ${
+                          imageCardStyle === style ? "bg-secondary text-secondary-foreground" : "bg-muted/70 hover:bg-muted border border-transparent"
+                        }`}
+                        aria-pressed={imageCardStyle === style}
+                      >
+                        {style}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleGenerateImage}
+                    disabled={generatingImage}
+                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
+                  >
+                    {generatingImage ? (
+                      "Generating…"
+                    ) : (
+                      <>
+                        <Share2 className="w-4 h-4" aria-hidden />
+                        Generate image &amp; download or share
+                      </>
+                    )}
+                  </button>
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Off-screen card for html2canvas (rendered when popover open so ref is ready) */}
+            {exportPopoverOpen && (
+              <div
+                style={{ position: "fixed", left: -9999, top: 0, zIndex: -1 }}
+                aria-hidden="true"
+              >
+                <div ref={recipeCardRef}>
+                  <RecipeShareCard
+                    recipe={recipe}
+                    mealLabel={mealLabel}
+                    portions={portions}
+                    multiplier={multiplier}
+                    style={imageCardStyle}
+                    forImage
+                  />
+                </div>
+              </div>
+            )}
 
           <motion.article
             initial={{ opacity: 0, y: 20 }}
@@ -138,6 +319,16 @@ export default function RecipeDetail() {
                     {recipe.region}
                   </Link>
                 )}
+                {country && (
+                  <Link
+                    to={`/culture/${country.id}`}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-medium bg-muted/60 text-muted-foreground hover:bg-secondary/20 hover:text-secondary border border-border/60 transition-colors"
+                    title={`Explore ${country.name} traditions`}
+                  >
+                    <span aria-hidden>{country.flag}</span>
+                    <span>{country.name}</span>
+                  </Link>
+                )}
               </div>
               <h1 className="text-xl sm:text-2xl md:text-4xl font-display font-bold break-words">{recipe.name}</h1>
               <p className="text-muted-foreground mt-2 sm:mt-3 text-sm sm:text-base max-w-2xl">
@@ -153,23 +344,6 @@ export default function RecipeDetail() {
                   Cultural significance
                 </h2>
                 <p className="text-sm">{recipe.significance}</p>
-              </section>
-            )}
-
-            {country && (
-              <section className="mb-6">
-                <h2 className="sr-only">Part of this culture</h2>
-                <Link
-                  to={`/culture/${country.id}`}
-                  className="inline-flex items-center gap-2 p-4 rounded-2xl bg-card border border-border hover:border-secondary/50 transition-all"
-                >
-                  <span className="text-2xl" aria-hidden>{country.flag}</span>
-                  <div>
-                    <span className="font-medium">Part of {country.name} traditions</span>
-                    <p className="text-sm text-muted-foreground">Explore Ramadan customs in {country.name}</p>
-                  </div>
-                  <Globe className="w-5 h-5 text-muted-foreground ml-auto" aria-hidden />
-                </Link>
               </section>
             )}
 

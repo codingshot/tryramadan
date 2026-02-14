@@ -1,7 +1,16 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Moon, Utensils, Clock, AlertCircle } from "lucide-react";
-import { useFastingProgress, isFastingToday, useDisplayTimezone } from "@/hooks/useLocalStorage";
+import { Link, useNavigate } from "react-router-dom";
+import { Moon, Utensils, Clock, AlertTriangle, BookOpen, Sunrise, Sunset } from "lucide-react";
+import { toast } from "sonner";
+import {
+  useFastingProgress,
+  isFastingToday,
+  useDisplayTimezone,
+  getTodayFastingLog,
+  getTodayDateString,
+  startFastingToday,
+  setDaySkipped,
+} from "@/hooks/useLocalStorage";
 import { useUserPreferences } from "@/hooks/useLocalStorage";
 import { usePrayerTimes } from "@/hooks/usePrayerTimes";
 import { useAutoLocation } from "@/hooks/useLocation";
@@ -57,17 +66,38 @@ function useIftarCountdown(maghrib: string | undefined, displayTimezone: string 
 }
 
 export function FastingBottomBar() {
-  const [progress] = useFastingProgress();
+  const [progress, setProgress] = useFastingProgress();
   const [preferences] = useUserPreferences();
   const displayTimezone = useDisplayTimezone();
+  const navigate = useNavigate();
   const { location: autoLocation } = useAutoLocation();
   const coords = preferences.locationCoords || (autoLocation ? { lat: autoLocation.lat, lng: autoLocation.lng } : null);
   const { prayerTimes } = usePrayerTimes(coords?.lat ?? null, coords?.lng ?? null, displayTimezone);
-  const todayStr = displayTimezone ? getTodayStringInTimezone(displayTimezone) : undefined;
-  const isFasting = isFastingToday(progress, todayStr);
+  const todayStr = displayTimezone ? getTodayStringInTimezone(displayTimezone) : getTodayDateString();
+  const fastingToday = isFastingToday(progress, todayStr);
+  const todayEntry = getTodayFastingLog(progress, todayStr);
+  const todayBroken = todayEntry?.status === "broken";
+  const todayComplete = progress.completedDays.includes(todayStr);
+  const todaySkipped = (progress.skippedDays ?? []).includes(todayStr);
   const { text: iftarText, isPast: iftarPast } = useIftarCountdown(prayerTimes?.maghrib, displayTimezone);
 
+  const handleBreakFast = () => {
+    navigate("/dashboard", { state: { openBreakFast: true } });
+  };
+  const handleStartFasting = () => {
+    startFastingToday(progress, setProgress, todayStr);
+    toast.success("You're fasting today");
+  };
+  const handleNotFasting = () => {
+    setDaySkipped(progress, setProgress, todayStr);
+    toast.success("Marked as not fasting today");
+  };
+
   if (!prayerTimes?.maghrib) return null;
+
+  const showBreakFast = fastingToday && !todayBroken;
+  const showQuickMark = !todayComplete && !todaySkipped && !todayBroken && !fastingToday;
+  const showLearn = todayComplete || todaySkipped || todayBroken;
 
   return (
     <nav
@@ -86,35 +116,73 @@ export function FastingBottomBar() {
             · {(progress.completedDays ?? []).length} days
           </span>
         </div>
-        {/* Quick controls */}
+        {/* Quick controls: Today, Meals, then dynamic slot(s) */}
         <div className="flex items-center gap-1 shrink-0">
           <Link
-            to="/dashboard/today"
-            className="flex flex-col items-center justify-center min-h-[44px] min-w-[48px] px-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
-            aria-label="Today"
-            title="Today's fast – timer, intention, hydration"
+            to="/dashboard"
+            className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] px-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+            aria-label="Dashboard"
+            title="Dashboard – timer, intention, progress"
           >
             <Moon className="w-5 h-5" />
             <span className="text-[10px] font-medium">Today</span>
           </Link>
           <Link
             to="/dashboard/meals"
-            className="flex flex-col items-center justify-center min-h-[44px] min-w-[48px] px-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+            className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] px-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
             aria-label="Meals"
             title="Meal planning – suhoor and iftar recipes"
           >
             <Utensils className="w-5 h-5" />
             <span className="text-[10px] font-medium">Meals</span>
           </Link>
-          <Link
-            to="/emergency"
-            className="flex flex-col items-center justify-center min-h-[44px] min-w-[48px] px-2 rounded-lg hover:bg-destructive/10 transition-colors text-muted-foreground hover:text-destructive"
-            aria-label="Break fast"
-            title="Break fast – reassurance and log reason"
-          >
-            <AlertCircle className="w-5 h-5" />
-            <span className="text-[10px] font-medium">Break</span>
-          </Link>
+          {showBreakFast && (
+            <button
+              type="button"
+              onClick={handleBreakFast}
+              className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] px-1.5 rounded-lg hover:bg-destructive/10 transition-colors text-destructive"
+              aria-label="Break fast"
+              title="Break fast – log reason"
+            >
+              <AlertTriangle className="w-5 h-5" />
+              <span className="text-[10px] font-medium">Break</span>
+            </button>
+          )}
+          {showQuickMark && (
+            <>
+              <button
+                type="button"
+                onClick={handleStartFasting}
+                className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] px-1.5 rounded-lg hover:bg-primary/10 transition-colors text-primary"
+                aria-label="I'm fasting"
+                title="Mark that you're fasting today"
+              >
+                <Sunrise className="w-5 h-5" />
+                <span className="text-[10px] font-medium">Fasting</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleNotFasting}
+                className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] px-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground"
+                aria-label="Not fasting"
+                title="Mark as not fasting today"
+              >
+                <Sunset className="w-5 h-5" />
+                <span className="text-[10px] font-medium">Skip</span>
+              </button>
+            </>
+          )}
+          {showLearn && (
+            <Link
+              to="/dashboard/learn"
+              className="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] px-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+              aria-label="Learn"
+              title="Learn – guides and hadith"
+            >
+              <BookOpen className="w-5 h-5" />
+              <span className="text-[10px] font-medium">Learn</span>
+            </Link>
+          )}
         </div>
       </div>
     </nav>

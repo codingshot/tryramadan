@@ -34,6 +34,8 @@ import {
   useIftarLabel,
   useIftarLabelShort,
   useDisplayTimezone,
+  useActivityLog,
+  type ActivityLogEntry,
 } from "@/hooks/useLocalStorage";
 import { getTodayStringInTimezone } from "@/lib/utils";
 import { useNotifications } from "@/hooks/useNotifications";
@@ -62,6 +64,72 @@ import { getRamadanDayNumber, isRamadanDay, getRamadanDateRange } from "@/lib/ra
 import { useRamadanRange } from "@/hooks/useRamadanRange";
 import { deleteAllUserData, clearJournalOnly, clearHealthDataOnly, clearLocationFromPreferences, saveBackupBeforeClear, TRYRAMADAN_LOCALSTORAGE_KEYS } from "@/lib/dataLifecycle";
 import type { UserPreferences } from "@/hooks/useLocalStorage";
+
+function ActivityLogSection() {
+  const [entries, addEntry, removeEntry] = useActivityLog();
+  const [addDate, setAddDate] = useState("");
+  const hadithReadEntries = entries.filter((e): e is ActivityLogEntry & { type: "hadith_read" } => e.type === "hadith_read");
+
+  const handleAddHadithRead = () => {
+    if (!addDate.trim()) return;
+    addEntry({ type: "hadith_read", date: addDate.trim() });
+    setAddDate("");
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.35 }}
+      className="p-6 rounded-2xl bg-card border border-border mb-6"
+    >
+      <h2 className="font-display font-bold mb-2 flex items-center gap-2">
+        <BookOpen className="w-5 h-5 text-secondary flex-shrink-0" />
+        Activity log
+      </h2>
+      <p className="text-sm text-muted-foreground mb-4">
+        Log of actions like &quot;read hadith&quot; that feed into today&apos;s chart and daily missions. You can add or remove entries to correct your history.
+      </p>
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <label htmlFor="activity-add-date" className="sr-only">Date for hadith read</label>
+          <input
+            id="activity-add-date"
+            type="date"
+            value={addDate}
+            onChange={(e) => setAddDate(e.target.value)}
+            className="px-3 py-2 rounded-lg border border-border bg-background text-sm"
+          />
+          <Button type="button" variant="secondary" size="sm" onClick={handleAddHadithRead} disabled={!addDate.trim()}>
+            Add hadith read for date
+          </Button>
+        </div>
+        {hadithReadEntries.length > 0 ? (
+          <ul className="space-y-2 max-h-48 overflow-y-auto rounded-lg border border-border p-2">
+            {hadithReadEntries.map((e) => (
+              <li key={e.id} className="flex items-center justify-between gap-2 py-1.5 px-2 rounded-md hover:bg-muted/50">
+                <span className="text-sm">
+                  Hadith read · {new Date(e.date + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
+                  {e.hadithId != null && <span className="text-muted-foreground ml-1">(hadith #{e.hadithId})</span>}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => removeEntry(e.id)}
+                  className="p-1.5 rounded-md hover:bg-destructive/20 text-muted-foreground hover:text-destructive transition-colors"
+                  aria-label={`Remove hadith read for ${e.date}`}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-muted-foreground">No hadith-read entries yet. Mark hadiths as read on the Hadith page, or add one above.</p>
+        )}
+      </div>
+    </motion.div>
+  );
+}
 
 function RamadanDatesSection({
   preferences,
@@ -1159,6 +1227,9 @@ const Settings = () => {
               </p>
             </div>
           </motion.div>
+
+          {/* Activity log (hadith read, etc.) — editable so today's chart can be corrected */}
+          <ActivityLogSection />
 
           {/* Data Management */}
           <motion.div

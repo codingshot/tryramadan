@@ -111,26 +111,24 @@ export const CulturalCarousel = () => {
         </button>
       </div>
 
-      {/* Country tabs — Left/Right arrows move between countries */}
+      {/* Country tabs — clickable to go to country page; Left/Right arrows move between countries */}
       <div className="flex flex-wrap justify-center gap-2">
         {countries.map((country, index) => (
-          <button
+          <Link
             key={country.id}
-            type="button"
-            onClick={() => setActiveCountry(index)}
+            to={`/culture/${country.id}`}
             className={`
-              px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary
+              inline-flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2
               ${activeCountry === index
-                ? "bg-gradient-gold text-foreground shadow-gold"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
+                ? "bg-gradient-gold text-foreground shadow-gold hover:opacity-90"
+                : "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground"
               }
             `}
-            aria-label={`${country.name} (country ${index + 1} of ${countries.length})`}
-            aria-current={activeCountry === index ? "true" : undefined}
+            aria-label={`${country.name} — go to country page (country ${index + 1} of ${countries.length})`}
           >
-            <span className="mr-2">{country.flag}</span>
+            <span className="mr-2" aria-hidden>{country.flag}</span>
             {country.name}
-          </button>
+          </Link>
         ))}
       </div>
 
@@ -145,7 +143,14 @@ export const CulturalCarousel = () => {
         <div className="flex items-center gap-3 mb-4">
           <span className="text-4xl">{currentCountry.flag}</span>
           <div>
-            <h4 className="text-lg font-bold font-display">{currentCountry.name}</h4>
+            <h4 className="text-lg font-bold font-display">
+              <Link
+                to={`/culture/${currentCountry.id}`}
+                className="hover:text-secondary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 rounded"
+              >
+                {currentCountry.name}
+              </Link>
+            </h4>
             <p className="text-sm text-muted-foreground">{currentCountry.specialNote}</p>
           </div>
         </div>

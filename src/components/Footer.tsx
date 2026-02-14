@@ -172,6 +172,46 @@ export const Footer = () => {
                 </a>
               </li>
               <li>
+                <a 
+                  href="https://praysap.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm flex items-center gap-1"
+                >
+                  PRAYSAP.com <ExternalLink className="w-3 h-3" />
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="https://muslimname.me" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm flex items-center gap-1"
+                >
+                  MuslimName.me <ExternalLink className="w-3 h-3" />
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="https://hajj.ummah.build" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm flex items-center gap-1"
+                >
+                  Hajj Guide <ExternalLink className="w-3 h-3" />
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="https://sunnahsleep.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm flex items-center gap-1"
+                >
+                  SunnahSleep.com <ExternalLink className="w-3 h-3" />
+                </a>
+              </li>
+              <li>
                 <Link to="/" state={{ scrollTo: "about" }} className="text-primary-foreground/70 hover:text-secondary transition-colors text-sm">
                   About Us
                 </Link>
