@@ -275,3 +275,23 @@ export function getRamadanRangeLength(start: Date, end: Date): number {
   e.setHours(0, 0, 0, 0);
   return Math.floor((e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 }
+
+/** Hero pre-title: "X days until Ramadan", "Day X/Y of Ramadan", or "X days until Ramadan (YYYY)" after Ramadan. */
+export function getHeroPretitle(): string {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const daysUntil = getDaysUntilRamadan();
+  if (daysUntil === 0) {
+    const start = getNextRamadanStart();
+    start.setHours(0, 0, 0, 0);
+    const end = getRamadanEndForYear(start.getFullYear());
+    end.setHours(0, 0, 0, 0);
+    const dayNum = getRamadanDayNumber(today) ?? 1;
+    const total = getRamadanRangeLength(start, end);
+    return `Day ${dayNum}/${total} of Ramadan`;
+  }
+  const nextStart = getNextRamadanStart();
+  const nextYear = nextStart.getFullYear();
+  if (nextYear > today.getFullYear()) return `${daysUntil} days until Ramadan (${nextYear})`;
+  return `${daysUntil} days until Ramadan`;
+}

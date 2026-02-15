@@ -5,6 +5,7 @@ import { FastingTimer } from "./FastingTimer";
 import logo from "@/assets/logo.png";
 import { useUserPreferences } from "@/hooks/useLocalStorage";
 import { useAutoLocation } from "@/hooks/useLocation";
+import { getHeroPretitle } from "@/lib/ramadan";
 
 // Hero image served from public/ so index.html can preload it for LCP (see docs/PERFORMANCE.md)
 const HERO_BG_URL = "/hero-bg.jpg";
@@ -73,6 +74,17 @@ export const HeroSection = () => {
                 />
               </motion.picture>
             </motion.div>
+
+            {/* Pre-title: days until / day of Ramadan */}
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.05 }}
+              className="text-sm sm:text-base text-primary-foreground/90 text-center mb-2"
+              aria-live="polite"
+            >
+              {getHeroPretitle()}
+            </motion.p>
 
             {/* Main headline - responsive for mobile */}
             <motion.h1
