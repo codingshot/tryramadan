@@ -137,16 +137,18 @@ export default function RecipeDetail() {
           const blob = await (await fetch(dataUrl)).blob();
           const file = new File([blob], fileName, { type: "image/png" });
           if (navigator.canShare({ files: [file] })) {
-            await navigator.share({
-              title: recipe.name,
-              text: `${mealLabel} recipe from TryRamadan`,
-              files: [file],
-            });
-            toast.success("Image shared");
-            setExportPopoverOpen(false);
-            return;
-          } catch (e) {
-            if ((e as Error).name !== "AbortError") throw e;
+            try {
+              await navigator.share({
+                title: recipe.name,
+                text: `${mealLabel} recipe from TryRamadan`,
+                files: [file],
+              });
+              toast.success("Image shared");
+              setExportPopoverOpen(false);
+              return;
+            } catch (e) {
+              if ((e as Error).name !== "AbortError") throw e;
+            }
           }
         } catch {
           // fall back to download
