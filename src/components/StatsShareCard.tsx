@@ -105,26 +105,44 @@ export function StatsShareCard({
 
   const chartData = buildChartData(completedDates, ramadanStart, ramadanEnd);
 
-  const captureCard = useCallback(async () => {
+  const captureCard = useCallback(async (showBadges: boolean): Promise<string | null> => {
     if (!cardRef.current) return null;
-    const html2canvas = (await import("html2canvas")).default;
-    const canvas = await html2canvas(cardRef.current, {
-      backgroundColor: "hsl(var(--background))",
-      scale: 2,
-      useCORS: true,
-      logging: false,
-    });
-    return canvas.toDataURL("image/png");
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+      const canvas = await html2canvas(cardRef.current, {
+        backgroundColor: "hsl(var(--background))",
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        allowTaint: true,
+        imageTimeout: 0,
+        onclone(_, el) {
+          const badges = el.querySelector("[data-stats-badges]");
+          if (badges) (badges as HTMLElement).style.display = showBadges ? "" : "none";
+        },
+      });
+      return canvas.toDataURL("image/png");
+    } catch (err) {
+      console.warn("[StatsShareCard] html2canvas failed:", err);
+      return null;
+    }
   }, []);
 
+  const prevIncludeBadgesRef = useRef(includeBadges);
   useEffect(() => {
     if (!saveImageDialogOpen || !cardRef.current) return;
+    if (prevIncludeBadgesRef.current === includeBadges) return;
+    prevIncludeBadgesRef.current = includeBadges;
     setCapturingPreview(true);
     const t = setTimeout(() => {
-      captureCard()
-        .then((dataUrl) => setCaptureDataUrl(dataUrl))
+      captureCard(includeBadges)
+        .then((dataUrl) => {
+          setCaptureDataUrl(dataUrl ?? null);
+          if (dataUrl == null) toast.error("Could not update preview. Try again.");
+        })
+        .catch(() => toast.error("Could not update preview. Try again."))
         .finally(() => setCapturingPreview(false));
-    }, includeBadges ? 150 : 0);
+    }, 100);
     return () => clearTimeout(t);
   }, [saveImageDialogOpen, includeBadges, captureCard]);
 
@@ -174,13 +192,21 @@ export function StatsShareCard({
   const handleSaveImageClick = useCallback(async () => {
     if (!cardRef.current) return;
     setCapturing(true);
+    setCaptureDataUrl(null);
     try {
-      setSaveImageDialogOpen(true);
-      setCaptureDataUrl(null);
+      const dataUrl = await captureCard(includeBadges);
+      if (dataUrl) {
+        setCaptureDataUrl(dataUrl);
+        setSaveImageDialogOpen(true);
+      } else {
+        toast.error("Could not capture image. Try again.");
+      }
+    } catch {
+      toast.error("Could not capture image. Try again.");
     } finally {
       setCapturing(false);
     }
-  }, []);
+  }, [captureCard, includeBadges]);
 
   const getImageBlob = useCallback(
     async (): Promise<{ blob: Blob; ext: string }> => {
@@ -307,26 +333,29 @@ export function StatsShareCard({
         </div>
       </div>
 
-      {saveImageDialogOpen && includeBadges && (
-        <div className="flex flex-wrap gap-2 mb-4" data-stats-badges>
-          {currentStreak > 0 && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-secondary/20 text-secondary border border-secondary/30">
-              <Flame className="w-3.5 h-3.5" aria-hidden />
-              {currentStreak} day streak
-            </span>
-          )}
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-primary/15 text-primary border border-primary/30">
-            <Target className="w-3.5 h-3.5" aria-hidden />
-            {completionRate}% complete
+      <div
+        className="flex flex-wrap gap-2 mb-4"
+        data-stats-badges
+        style={{ display: saveImageDialogOpen && includeBadges ? undefined : "none" }}
+        aria-hidden={!(saveImageDialogOpen && includeBadges)}
+      >
+        {currentStreak > 0 && (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-secondary/20 text-secondary border border-secondary/30">
+            <Flame className="w-3.5 h-3.5" aria-hidden />
+            {currentStreak} day streak
           </span>
-          {completedDays >= totalDays && totalDays > 0 && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/40">
-              <Trophy className="w-3.5 h-3.5" aria-hidden />
-              Full month
-            </span>
-          )}
-        </div>
-      )}
+        )}
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-primary/15 text-primary border border-primary/30">
+          <Target className="w-3.5 h-3.5" aria-hidden />
+          {completionRate}% complete
+        </span>
+        {completedDays >= totalDays && totalDays > 0 && (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/40">
+            <Trophy className="w-3.5 h-3.5" aria-hidden />
+            Full month
+          </span>
+        )}
+      </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
         <div className="p-3 rounded-xl bg-secondary/10 border border-secondary/20 text-center">

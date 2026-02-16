@@ -622,3 +622,72 @@ export async function checkAyyamAlBeed(lat: number, lng: number): Promise<{ isAy
     return null;
   }
 }
+
+/** Aladhan gToHCalendar response: one entry per day of the Gregorian month with hijri day/month/year. */
+interface GToHCalendarDay {
+  hijri: { day: string; month: { number: number; en: string }; year: string };
+  gregorian: { date: string; day: string; month: { number: number; en: string }; year: string };
+}
+
+/** Fetch next Ayyam al-Beed (13th, 14th, 15th of Islamic month) as Gregorian dates. Uses Aladhan gToHCalendar. */
+export async function getNextAyyamAlBeedDates(): Promise<{ label: string; dateStrs: string[] } | null> {
+  try {
+    const now = new Date();
+    const thisMonth = now.getMonth() + 1;
+    const thisYear = now.getFullYear();
+    const todayStr = toLocalDateString(now);
+
+    const nextMonth = thisMonth === 12 ? 1 : thisMonth + 1;
+    const nextYear = thisMonth === 12 ? thisYear + 1 : thisYear;
+
+    const [resCur, resNext] = await Promise.all([
+      fetch(`${API_CONFIG.aladhan}/v1/gToHCalendar/${thisMonth}/${thisYear}`),
+      fetch(`${API_CONFIG.aladhan}/v1/gToHCalendar/${nextMonth}/${nextYear}`),
+    ]);
+    if (!resCur.ok || !resNext.ok) return null;
+
+    const dataCur: { data: GToHCalendarDay[] } = await resCur.json();
+    const dataNext: { data: GToHCalendarDay[] } = await resNext.json();
+    const allDays = [...(dataCur.data || []), ...(dataNext.data || [])];
+
+    const whiteDays: { dateStr: string; gregorian: GToHCalendarDay["gregorian"] }[] = [];
+    for (const day of allDays) {
+      const d = parseInt(day.hijri.day, 10);
+      if (d < 13 || d > 15) continue;
+      const [dd, mm, yyyy] = day.gregorian.date.split("-");
+      const dateStr = `${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}`;
+      if (dateStr >= todayStr) whiteDays.push({ dateStr, gregorian: day.gregorian });
+    }
+    whiteDays.sort((a, b) => a.dateStr.localeCompare(b.dateStr));
+    const nextThree = whiteDays.slice(0, 3);
+    if (nextThree.length === 0) return null;
+
+    const dateStrs = nextThree.map((x) => x.dateStr);
+    const first = nextThree[0].gregorian;
+    const last = nextThree[nextThree.length - 1].gregorian;
+    const label =
+      nextThree.length === 3 && first.month.number === last.month.number && first.year === last.year
+        ? `${first.day}–${last.day} ${first.month.en} ${first.year}`
+        : nextThree.map((x) => `${x.gregorian.day} ${x.gregorian.month.en}`).join(", ") + ` ${last.year}`;
+    return { label, dateStrs };
+  } catch {
+    return null;
+  }
+}
+
+/** Hook: next Ayyam al-Beed dates for display on Programs page. */
+export function useNextAyyamAlBeedDates(): { nextDates: { label: string; dateStrs: string[] } | null; loading: boolean } {
+  const [nextDates, setNextDates] = useState<{ label: string; dateStrs: string[] } | null>(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    getNextAyyamAlBeedDates().then((res) => {
+      if (!cancelled) {
+        if (res) setNextDates(res);
+        setLoading(false);
+      }
+    });
+    return () => { cancelled = true; };
+  }, []);
+  return { nextDates, loading };
+}

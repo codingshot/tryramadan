@@ -4,6 +4,14 @@
  * bodyAr = short Arabic line for tooltips.
  */
 
+/** Short one-line text for native title attribute (hover) across the app. Saves space vs full tooltip. */
+export const EATING_TIME_TITLE = {
+  suhoor: "Suhoor • السحور — Pre-dawn meal; last chance to eat before the fast (ends at Fajr).",
+  iftar: "Iftar • الإفطار — Meal at sunset (Maghrib) when you break the fast; often dates and water first.",
+  suhoorEnd: "Eating cutoff — Finish suhoor before Fajr; after this, no food or drink until Maghrib.",
+  iftarTime: "Time to break your fast (Maghrib). Many break fast with dates and water, then pray.",
+} as const;
+
 export const EATING_TIME_TOOLTIPS = {
   suhoor: {
     title: "Suhoor • السحور",

@@ -5,7 +5,7 @@
       "name": "Full Ramadan Fast",
       "nameAr": "صيام رمضان الكامل",
       "duration": "Dawn to Sunset",
-      "description": "Experience fasting as Muslims do during Ramadan - from the pre-dawn suhoor until sunset iftar. This is the authentic Ramadan experience.",
+      "description": "Experience fasting as Muslims do during Ramadan: from pre-dawn (suhoor) until sunset (iftar), no food or water—same rules as Ramadan. This is the authentic Ramadan experience.",
       "recommended": true,
       "weeklySchedule": [
         { "week": 1, "hours": "Full", "focus": "Embracing the complete experience" },
@@ -59,7 +59,7 @@
   "sunnahFasting": {
     "title": "Voluntary Fasting in Islamic Tradition",
     "arabicName": "صوم السنة",
-    "description": "Beyond Ramadan, there are recommended voluntary fasts throughout the year that Muslims may observe.",
+    "description": "Beyond Ramadan, there are recommended voluntary fasts throughout the year that Muslims may observe. The same fasting rules apply: no food, no water, and no other intake during the fast (from dawn to sunset or for the chosen duration).",
     "types": [
       {
         "id": "monday-thursday",

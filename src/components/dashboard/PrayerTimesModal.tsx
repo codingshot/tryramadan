@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
 import { type PrayerTimes } from "@/hooks/usePrayerTimes";
+import { EATING_TIME_TITLE } from "@/data/eating-times-tooltips";
 import {
   Dialog,
   DialogContent,
@@ -53,6 +54,7 @@ export const PrayerTimesModal = ({
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 className="flex items-center justify-between p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors"
+                title={prayer.name === "Maghrib" ? EATING_TIME_TITLE.iftarTime : undefined}
               >
                 <div className="flex items-center gap-3">
                   {!prayer.noCheckbox && (

@@ -33,7 +33,7 @@ const Programs = () => {
               Fasting Programs
             </h1>
             <p className="text-muted-foreground mt-2 text-sm sm:text-base">
-              Full Ramadan fast (dawn to sunset) and voluntary Sunnah fasting. The authentic Ramadan experience.
+              Full Ramadan fast (dawn to sunset) and voluntary Sunnah fasting. During fasting hours: no food, no water, and no other intake—same rules as Ramadan. The authentic experience.
             </p>
           </motion.div>
           <FastingPrograms />

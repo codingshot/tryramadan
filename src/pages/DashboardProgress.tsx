@@ -1,13 +1,14 @@
-import { useCallback } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { 
-  ArrowLeft, TrendingUp, Flame, Calendar, Trophy, 
+import {
+  ArrowLeft, TrendingUp, Flame, Calendar, Trophy,
   BookOpen, ChevronRight, Download, FileText, Utensils, Landmark
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useFastingProgress, getTodayFastingLog, getBrokenReasonLabel, isFastingToday, useLocalStorage, calculateStreak, getLongestStreak, getJournalStreak, getMindfulEatingStreak, getPrayerStreak, getTotalPrayerCount, useDayMealPlans, useDayFoodLog, useUserPreferences, useDisplayTimezone } from "@/hooks/useLocalStorage";
+import type { DayFoodLog, DayMealPlan, FoodLogEntry } from "@/hooks/useLocalStorage";
 import { useRamadanRange } from "@/hooks/useRamadanRange";
 import { getTodayStringInTimezone, toLocalDateString } from "@/lib/utils";
 import type { EnergyEntry } from "@/hooks/useLocalStorage";
@@ -15,8 +16,36 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Button } from "@/components/ui/button";
 import { PageSEO } from "@/components/PageSEO";
 import { StatsShareCard } from "@/components/StatsShareCard";
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 type TodayStore = Record<string, { energyEntries?: EnergyEntry[] }>;
+
+const EXPORT_SECTIONS = [
+  { id: "summary" as const, label: "Summary (days, streak, completion)" },
+  { id: "fastingLog" as const, label: "Fasting log" },
+  { id: "journal" as const, label: "Journal entries" },
+  { id: "prayerLog" as const, label: "Prayer log" },
+  { id: "meals" as const, label: "Meals (plans & food log)" },
+];
+
+function escapeCsvCell(value: string): string {
+  return `"${String(value).replace(/"/g, '""')}"`;
+}
+
+function rowsToCsv(rows: string[][]): string {
+  return rows.map((r) => r.map(escapeCsvCell).join(",")).join("\n");
+}
 
 const DashboardProgress = () => {
   const [preferences] = useUserPreferences();
@@ -36,40 +65,141 @@ const DashboardProgress = () => {
   const totalPrayers = getTotalPrayerCount(prayerTracker);
   const isMuslim = preferences.userType === "muslim";
 
-  const exportCsv = useCallback(() => {
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [exportSections, setExportSections] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(EXPORT_SECTIONS.map((s) => [s.id, true]))
+  );
+  const [exportFormat, setExportFormat] = useState<"csv" | "json">("csv");
+
+  const exportPayload = useMemo(() => {
     const totalDays = ramadanRange.totalDays || 30;
-    const completedInRange = (progress.completedDays || []).filter((d) => d >= ramadanRange.startStr && d <= ramadanRange.endStr);
-    const completedDays = completedInRange.length;
-    const completionRate = totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0;
-    const rows = [
-      ["TryRamadan Progress Report", ""],
-      ["Generated", new Date().toISOString().split("T")[0]],
-      ["", ""],
-      ["Summary", ""],
-      ["Days completed", String(completedDays)],
-      ["Total days", String(totalDays)],
-      ["Completion rate (%)", String(completionRate)],
-      ["Current streak", String(progress.currentStreak)],
-      ["Longest streak", String(getLongestStreak(progress))],
-      ["", ""],
-      ["Fasting log", ""],
-      ["Date", "Started", "Completed", "Status"],
-      ...(progress.fastingLog || []).slice().reverse().map((e) => [
-        e.date,
-        e.startedAt ? new Date(e.startedAt).toLocaleTimeString() : "",
-        e.completedAt ? new Date(e.completedAt).toLocaleTimeString() : "",
-        e.status,
-      ]),
-    ];
-    const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const startStr = ramadanRange.startStr ?? "";
+    const endStr = ramadanRange.endStr ?? "";
+    const completedInRange = (progress.completedDays || []).filter((d) => d >= startStr && d <= endStr);
+    const completedDaysCount = completedInRange.length;
+    const completionRate = totalDays > 0 ? Math.round((completedDaysCount / totalDays) * 100) : 0;
+    const payload: Record<string, unknown> = { exportedAt: new Date().toISOString() };
+    if (exportSections.summary) {
+      payload.summary = {
+        daysCompleted: completedDaysCount,
+        totalDays,
+        completionRate,
+        currentStreak: progress.currentStreak,
+        longestStreak: getLongestStreak(progress),
+        ramadanStart: startStr,
+        ramadanEnd: endStr,
+      };
+    }
+    if (exportSections.fastingLog && (progress.fastingLog?.length ?? 0) > 0) {
+      payload.fastingLog = (progress.fastingLog || []).slice().reverse().map((e) => ({
+        date: e.date,
+        startedAt: e.startedAt ?? "",
+        completedAt: e.completedAt ?? "",
+        status: e.status,
+        hoursFasted: e.hoursFasted,
+      }));
+    }
+    if (exportSections.journal && (journalEntries?.length ?? 0) > 0) {
+      payload.journal = journalEntries;
+    }
+    if (exportSections.prayerLog && prayerTracker && Object.keys(prayerTracker).length > 0) {
+      payload.prayerLog = Object.entries(prayerTracker)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([date, day]) => ({ date, ...day }));
+    }
+    if (exportSections.meals) {
+      const mealPlansList = Object.entries(mealPlans || {}).sort(([a], [b]) => a.localeCompare(b));
+      const foodLogList = Object.entries(foodLogs || {}).sort(([a], [b]) => a.localeCompare(b));
+      if (mealPlansList.length > 0 || foodLogList.length > 0) {
+        payload.meals = {
+          mealPlans: Object.fromEntries(mealPlansList),
+          foodLog: Object.fromEntries(foodLogList),
+        };
+      }
+    }
+    return payload;
+  }, [progress, ramadanRange, journalEntries, prayerTracker, mealPlans, foodLogs, exportSections]);
+
+  const exportPreviewText = useMemo(() => {
+    if (exportFormat === "json") {
+      return JSON.stringify(exportPayload, null, 2);
+    }
+    const totalDays = ramadanRange.totalDays || 30;
+    const startStr = ramadanRange.startStr ?? "";
+    const endStr = ramadanRange.endStr ?? "";
+    const completedInRange = (progress.completedDays || []).filter((d) => d >= startStr && d <= endStr);
+    const completedDaysCount = completedInRange.length;
+    const completionRate = totalDays > 0 ? Math.round((completedDaysCount / totalDays) * 100) : 0;
+    const rows: string[][] = [];
+    if (exportSections.summary) {
+      rows.push(["TryRamadan Progress Report", ""], ["Generated", new Date().toISOString().split("T")[0]], [""], ["Summary", ""]);
+      rows.push(["Days completed", String(completedDaysCount)], ["Total days", String(totalDays)], ["Completion rate (%)", String(completionRate)], ["Current streak", String(progress.currentStreak)], ["Longest streak", String(getLongestStreak(progress))], [""]);
+    }
+    if (exportSections.fastingLog && (progress.fastingLog?.length ?? 0) > 0) {
+      rows.push(["Fasting log", ""], ["Date", "Started", "Completed", "Status"]);
+      for (const e of (progress.fastingLog || []).slice().reverse()) {
+        rows.push([e.date, e.startedAt ? new Date(e.startedAt).toLocaleTimeString() : "", e.completedAt ? new Date(e.completedAt).toLocaleTimeString() : "", e.status]);
+      }
+      rows.push([""]);
+    }
+    if (exportSections.journal && (journalEntries?.length ?? 0) > 0) {
+      rows.push(["Journal", ""], ["Date", "Prompt", "Content", "Gratitude", "Mood"]);
+      for (const e of journalEntries as Array<Record<string, unknown>>) {
+        rows.push([String(e.date ?? ""), String((e as { prompt?: string }).prompt ?? ""), String((e as { content?: string }).content ?? ""), String((e as { gratitude?: string }).gratitude ?? ""), String((e as { mood?: number }).mood ?? "")]);
+      }
+      rows.push([""]);
+    }
+    if (exportSections.prayerLog && prayerTracker && Object.keys(prayerTracker).length > 0) {
+      rows.push(["Prayer log", ""], ["Date", "Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]);
+      for (const [date, day] of Object.entries(prayerTracker).sort(([a], [b]) => a.localeCompare(b))) {
+        const d = day && typeof day === "object" ? day : {};
+        rows.push([date, d.Fajr ? "1" : "0", d.Dhuhr ? "1" : "0", d.Asr ? "1" : "0", d.Maghrib ? "1" : "0", d.Isha ? "1" : "0"]);
+      }
+      rows.push([""]);
+    }
+    if (exportSections.meals) {
+      const plans = mealPlans || {};
+      const logs = foodLogs || {};
+      const dates = [...new Set([...Object.keys(plans), ...Object.keys(logs)])].sort();
+      if (dates.length > 0) {
+        rows.push(["Meals", ""], ["Date", "Meal", "Type", "Content"]);
+        for (const date of dates) {
+          const plan = plans[date] as DayMealPlan | undefined;
+          const dayLog = logs[date] as DayFoodLog | undefined;
+          if (plan?.suhoor) rows.push([date, "suhoor", "plan", plan.suhoor]);
+          if (plan?.iftar) rows.push([date, "iftar", "plan", plan.iftar]);
+          const suhoor = dayLog?.suhoor ?? [];
+          const iftar = dayLog?.iftar ?? [];
+          const between = dayLog?.between ?? [];
+          for (const item of suhoor as FoodLogEntry[]) rows.push([date, "suhoor", "log", `${item.name} (${item.portions} portions)`]);
+          for (const item of iftar as FoodLogEntry[]) rows.push([date, "iftar", "log", `${item.name} (${item.portions} portions)`]);
+          for (const item of between as FoodLogEntry[]) rows.push([date, "between", "log", `${item.name} (${item.portions} portions)`]);
+        }
+      }
+    }
+    if (rows.length > 0) return rowsToCsv(rows);
+    const anySection = EXPORT_SECTIONS.some((s) => exportSections[s.id]);
+    return anySection ? "No data for the selected sections." : "Select at least one section to export.";
+  }, [exportFormat, exportPayload, exportSections, progress, ramadanRange, journalEntries, prayerTracker, mealPlans, foodLogs]);
+
+  const hasAnySection = EXPORT_SECTIONS.some((s) => exportSections[s.id]);
+  const canDownload = hasAnySection && (exportFormat === "json" ? Object.keys(exportPayload).length > 1 : !exportPreviewText.startsWith("Select") && !exportPreviewText.startsWith("No data"));
+
+  const handleExportDownload = useCallback(() => {
+    if (!canDownload) return;
+    const mime = exportFormat === "json" ? "application/json" : "text/csv;charset=utf-8";
+    const ext = exportFormat === "json" ? "json" : "csv";
+    const blob = new Blob([exportPreviewText], { type: mime });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `tryramadan-progress-${new Date().toISOString().split("T")[0]}.csv`;
+    a.download = `tryramadan-progress-${new Date().toISOString().split("T")[0]}.${ext}`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [progress, ramadanRange]);
+    toast.success(exportFormat === "json" ? "JSON downloaded" : "CSV downloaded");
+    setExportDialogOpen(false);
+  }, [canDownload, exportFormat, exportPreviewText]);
+
   const fastingToday = isFastingToday(progress, todayStr);
   const todayLog = getTodayFastingLog(progress, todayStr);
   const recentLog = (progress.fastingLog || []).slice(-14).reverse();
@@ -432,11 +562,11 @@ const DashboardProgress = () => {
                 <Download className="w-6 h-6 text-secondary" />
                 <div>
                   <span className="font-medium block">Export progress</span>
-                  <p className="text-sm text-muted-foreground">Download report as CSV</p>
+                  <p className="text-sm text-muted-foreground">Choose data and format, preview, then download</p>
                 </div>
               </div>
-              <Button variant="outline" size="sm" onClick={exportCsv}>
-                Download CSV
+              <Button variant="outline" size="sm" onClick={() => setExportDialogOpen(true)} aria-label="Open export options">
+                Export progress
               </Button>
             </div>
             <Link
@@ -477,7 +607,74 @@ const DashboardProgress = () => {
           </motion.div>
         </div>
       </main>
-      
+
+      <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] flex flex-col gap-4" aria-describedby="export-preview-desc">
+          <DialogHeader>
+            <DialogTitle>Export progress</DialogTitle>
+            <DialogDescription id="export-preview-desc">
+              Select which data to include, choose CSV or JSON, then preview and download.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <fieldset className="space-y-3">
+              <Label className="text-sm font-medium">Include in export</Label>
+              <div className="flex flex-wrap gap-4">
+                {EXPORT_SECTIONS.map(({ id, label }) => (
+                  <div key={id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`export-${id}`}
+                      checked={!!exportSections[id]}
+                      onCheckedChange={(checked) =>
+                        setExportSections((prev) => ({ ...prev, [id]: checked === true }))
+                      }
+                      aria-describedby={id === "summary" ? undefined : undefined}
+                    />
+                    <Label htmlFor={`export-${id}`} className="text-sm font-normal cursor-pointer">
+                      {label}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </fieldset>
+            <fieldset className="space-y-2">
+              <Label className="text-sm font-medium">Format</Label>
+              <RadioGroup
+                value={exportFormat}
+                onValueChange={(v) => setExportFormat(v as "csv" | "json")}
+                className="flex gap-4"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="csv" id="export-format-csv" />
+                  <Label htmlFor="export-format-csv" className="font-normal cursor-pointer">CSV</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="json" id="export-format-json" />
+                  <Label htmlFor="export-format-json" className="font-normal cursor-pointer">JSON</Label>
+                </div>
+              </RadioGroup>
+            </fieldset>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Preview</Label>
+              <div className="rounded-lg border border-border bg-muted/30 p-3 min-h-[200px] max-h-[280px] overflow-auto">
+                <pre className="text-xs text-foreground whitespace-pre-wrap break-words font-mono" role="log" aria-live="polite">
+                  {exportPreviewText}
+                </pre>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setExportDialogOpen(false)}>
+              Close
+            </Button>
+            <Button type="button" onClick={handleExportDownload} disabled={!canDownload} className="gap-2">
+              <Download className="w-4 h-4" aria-hidden />
+              Download {exportFormat === "json" ? "JSON" : "CSV"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Footer />
     </div>
   );

@@ -1,6 +1,7 @@
 import { Moon, Sun } from "lucide-react";
 import { type FastingProgress, getTodayFastingLog } from "@/hooks/useLocalStorage";
 import { type PrayerTimes } from "@/hooks/usePrayerTimes";
+import { EATING_TIME_TITLE } from "@/data/eating-times-tooltips";
 
 interface DashboardFastingCornerWidgetProps {
   progress: FastingProgress;
@@ -73,7 +74,7 @@ export function DashboardFastingCornerWidget({
                 {String(countdown.m).padStart(2, "0")}:
                 {String(countdown.s).padStart(2, "0")}
               </p>
-              <p className="text-[10px] text-muted-foreground">until {targetLabel}</p>
+              <p className="text-[10px] text-muted-foreground" title={isFasting ? EATING_TIME_TITLE.iftarTime : EATING_TIME_TITLE.suhoor}>until {targetLabel}</p>
             </>
           ) : (
             <p className="text-sm font-semibold text-muted-foreground">—</p>
@@ -89,7 +90,9 @@ export function DashboardFastingCornerWidget({
 
       {prayerTimes && (
         <p className="text-[10px] text-muted-foreground border-t border-border pt-2 mb-2">
-          Suhoor {prayerTimes.imsak} · Iftar {prayerTimes.maghrib}
+          <span title={EATING_TIME_TITLE.suhoor}>Suhoor {prayerTimes.imsak}</span>
+          {" · "}
+          <span title={EATING_TIME_TITLE.iftar}>Iftar {prayerTimes.maghrib}</span>
         </p>
       )}
 

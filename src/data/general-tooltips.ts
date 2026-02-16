@@ -81,9 +81,28 @@ export const GENERAL_TOOLTIPS = {
   },
   ayyamAlBeed: {
     title: "Ayyam al-Beed • أيام البيض",
-    body: "The 'white days'—13th, 14th, and 15th of each Islamic month (full moon period). Voluntary fasting on these days is a Sunnah (recommended) practice.",
+    body: "The 'white days'—13th, 14th, and 15th of each Islamic month (full moon period). Voluntary fasting on these days is a Sunnah (recommended) practice. Same rules: no food, no water from dawn to sunset.",
     bodyAr: "صيام أيام البيض سنة",
   },
+  /** Tooltips for voluntary fasting types on Programs page */
+  voluntaryFasting: {
+    "monday-thursday": {
+      title: "Monday & Thursday",
+      body: "Fasting every Monday and Thursday. Deeds are presented to Allah on these days (hadith). Next: this week's Mon and Thu. Same rules: no food, no water from dawn to sunset.",
+    },
+    "ayyam-al-beed": {
+      title: "Ayyam al-Beed (White days)",
+      body: "13th, 14th, and 15th of each Islamic (lunar) month—dates change each month in the Gregorian calendar. Same rules: no food, no water from dawn to sunset.",
+    },
+    "day-of-arafah": {
+      title: "Day of Arafah",
+      body: "9th of Dhul Hijjah (Islamic month). One day per year; Gregorian date shifts yearly. For non-pilgrims, fasting is highly recommended. Same rules: no food, no water from dawn to sunset.",
+    },
+    "six-days-shawwal": {
+      title: "Six days of Shawwal",
+      body: "Any six days in the month after Ramadan (Shawwal). Often done consecutively after Eid. Combined with Ramadan = reward of fasting the year. Same rules: no food, no water from dawn to sunset.",
+    },
+  } as Record<string, { title: string; body: string }>,
   todayMissions: {
     title: "Today's missions",
     body: "Small, actionable steps for your fasting day: start fasting, log meals, add a note, read a hadith, and complete or break your fast. Tap an item to open the right page.",

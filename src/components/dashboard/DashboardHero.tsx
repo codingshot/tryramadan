@@ -4,6 +4,7 @@ import { type FastingProgress, getTodayFastingLog } from "@/hooks/useLocalStorag
 import { type PrayerTimes } from "@/hooks/usePrayerTimes";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
+import { EATING_TIME_TITLE } from "@/data/eating-times-tooltips";
 
 interface DashboardHeroProps {
   progress: FastingProgress;
@@ -135,7 +136,7 @@ export const DashboardHero = ({
               {String(countdown.m).padStart(2, "0")}:
               {String(countdown.s).padStart(2, "0")}
             </motion.div>
-            <p className="text-lg md:text-xl text-muted-foreground">
+            <p className="text-lg md:text-xl text-muted-foreground" title={isFasting ? EATING_TIME_TITLE.iftarTime : EATING_TIME_TITLE.suhoor}>
               until {targetLabel}
               {todayBroken && (
                 <span className="block text-sm mt-1 text-destructive/90">(you broke fast today)</span>
@@ -199,11 +200,11 @@ export const DashboardHero = ({
         {/* Suhoor & Iftar Times Footer */}
         {prayerTimes && (
           <div className="mt-6 pt-6 border-t border-border flex items-center justify-center gap-4 text-sm text-muted-foreground">
-            <span>
+            <span title={EATING_TIME_TITLE.suhoor}>
               Suhoor: <span className="font-semibold">{prayerTimes.imsak}</span>
             </span>
             <span>•</span>
-            <span>
+            <span title={EATING_TIME_TITLE.iftar}>
               Iftar: <span className="font-semibold">{prayerTimes.maghrib}</span>
             </span>
           </div>

@@ -9,6 +9,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useRecipeFavorites, useRecentRecipes, useDayMealPlans, useDayFoodLog, normalizeDayFoodLog, clampCalories, useSuhoorLabel, useIftarLabel, useUserPreferences, useFastingProgress, isFastingToday } from "@/hooks/useLocalStorage";
+import { EATING_TIME_TITLE } from "@/data/eating-times-tooltips";
 import { getRecipes, getAllRegions, parseNutrient, getIngredientName, type Recipe, type RecipeIngredient } from "@/lib/cultureRecipes";
 import { resizeImageToDataUrl } from "@/lib/foodImage";
 import { toast } from "sonner";
@@ -314,6 +315,7 @@ const DashboardMeals = () => {
                   : 'border-border hover:border-secondary/50'
               }`}
               aria-label={preferences?.userType === "muslim" ? "Suhoor — morning meal" : "Suhoor — pre-dawn meal"}
+              title={EATING_TIME_TITLE.suhoor}
             >
               <Sunrise className="w-5 h-5 shrink-0" aria-hidden />
               <div className="text-left">
@@ -329,6 +331,7 @@ const DashboardMeals = () => {
                   : 'border-border hover:border-secondary/50'
               }`}
               aria-label={`${iftarLabel} — evening meal`}
+              title={EATING_TIME_TITLE.iftar}
             >
               <Sunset className="w-5 h-5 shrink-0" aria-hidden />
               <div className="text-left">

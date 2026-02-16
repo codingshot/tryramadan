@@ -88,7 +88,7 @@ import { usePrayerTimes, usePrayerTimesForDate, getEffectivePrayerTimes, useRama
 import { buildIcalContent, downloadIcal } from "@/lib/ical";
 import { fetchPrayerTimesForMonth } from "@/hooks/usePrayerTimes";
 import { getRecipes, getRecipe, parseNutrient, getAllCountries, type MealType } from "@/lib/cultureRecipes";
-import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
+import { EATING_TIME_TOOLTIPS, EATING_TIME_TITLE } from "@/data/eating-times-tooltips";
 import { EXTERNAL_LINKS } from "@/lib/config";
 import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
 import { resizeImageToDataUrl } from "@/lib/foodImage";
@@ -1314,8 +1314,8 @@ const DashboardSchedule = () => {
                     <thead>
                       <tr className="border-b border-border">
                         <th className="text-left py-2 px-2 font-medium w-[120px]">Date</th>
-                        <th className="text-left py-2 px-2 font-medium">Suhoor</th>
-                        <th className="text-left py-2 px-2 font-medium">{iftarLabel}</th>
+                        <th className="text-left py-2 px-2 font-medium" title={EATING_TIME_TITLE.suhoor}>Suhoor</th>
+                        <th className="text-left py-2 px-2 font-medium" title={EATING_TIME_TITLE.iftar}>{iftarLabel}</th>
                         <th className="w-10" aria-label="Go to day" />
                       </tr>
                     </thead>
@@ -1612,7 +1612,7 @@ const DashboardSchedule = () => {
                       onChange={(e) => setCalendarIncludeTypes((prev) => ({ ...prev, [t]: e.target.checked }))}
                       className="rounded border-border"
                     />
-                    <span className="text-xs sm:text-sm">{t === "suhoor" ? "Suhoor end" : iftarLabelShort}</span>
+                    <span className="text-xs sm:text-sm" title={t === "suhoor" ? EATING_TIME_TITLE.suhoorEnd : EATING_TIME_TITLE.iftarTime}>{t === "suhoor" ? "Suhoor end" : iftarLabelShort}</span>
                   </label>
                 ))}
                 {(["fajr", "dhuhr", "asr", "maghrib", "isha"] as const).map((t) => (
@@ -1690,7 +1690,7 @@ const DashboardSchedule = () => {
               <div className="flex flex-wrap gap-3 items-center">
                 {(["suhoor", "iftar", "fajr", "dhuhr", "asr", "maghrib", "isha", "taraweeh"] as const).map((type) => (
                   <label key={type} className="flex items-center gap-1.5 text-sm">
-                    <span className="capitalize w-16 truncate">{type === "suhoor" ? "Suhoor" : type === "iftar" ? "Iftar" : type}</span>
+                    <span className="capitalize w-16 truncate" title={type === "suhoor" ? EATING_TIME_TITLE.suhoor : type === "iftar" ? EATING_TIME_TITLE.iftar : undefined}>{type === "suhoor" ? "Suhoor" : type === "iftar" ? "Iftar" : type}</span>
                     <input
                       type="number"
                       min={1}
@@ -2348,11 +2348,11 @@ const DashboardSchedule = () => {
                     {effectiveSelectedDayPrayerTimes ? (
                       <div className="rounded-xl bg-secondary/10 border-2 border-secondary/20 p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Eating cutoff (Suhoor end)</p>
+                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide" title={EATING_TIME_TITLE.suhoorEnd}>Eating cutoff (Suhoor end)</p>
                           <p className="font-mono text-lg font-bold text-secondary tabular-nums">{effectiveSelectedDayPrayerTimes.imsak || "—"}</p>
                         </div>
                         <div>
-                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Break fast ({iftarLabelShort})</p>
+                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide" title={EATING_TIME_TITLE.iftarTime}>Break fast ({iftarLabelShort})</p>
                           <p className="font-mono text-lg font-bold text-secondary tabular-nums">{effectiveSelectedDayPrayerTimes.maghrib || "—"}</p>
                         </div>
                         {getFastingHoursForDay(effectiveSelectedDayPrayerTimes.imsak, effectiveSelectedDayPrayerTimes.maghrib) != null && (

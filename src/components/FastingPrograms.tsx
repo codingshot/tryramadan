@@ -1,6 +1,22 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useNextAyyamAlBeedDates } from "@/hooks/usePrayerTimes";
+import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
 import fastingData from "@/data/fasting-programs.json";
+
+function getNextMondayAndThursday(): string {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  const day = d.getDay();
+  const daysToMon = day === 0 ? 1 : day === 1 ? 7 : (8 - day) % 7 || 7;
+  const daysToThu = day === 4 ? 7 : day < 4 ? 4 - day : 4 - day + 7;
+  const nextMon = new Date(d);
+  nextMon.setDate(nextMon.getDate() + daysToMon);
+  const nextThu = new Date(d);
+  nextThu.setDate(nextThu.getDate() + daysToThu);
+  return `${nextMon.toLocaleDateString("en", { weekday: "short", day: "numeric", month: "short" })} & ${nextThu.toLocaleDateString("en", { weekday: "short", day: "numeric", month: "short" })}`;
+}
 
 interface FastingProgramsProps {
   onSelectProgram?: (programId: string) => void;
@@ -12,9 +28,13 @@ const RAMADAN_PROGRAM_IDS = ["traditional"];
 
 export const FastingPrograms = ({ onSelectProgram, selectedProgram = "traditional" }: FastingProgramsProps) => {
   const programs = fastingData.programs.filter((p) => RAMADAN_PROGRAM_IDS.includes(p.id));
+  const { nextDates: nextAyyamAlBeed, loading: ayyamLoading } = useNextAyyamAlBeedDates();
 
   return (
     <div className="space-y-6">
+      <p className="text-sm text-muted-foreground rounded-lg bg-muted/40 px-4 py-2 border border-border/50">
+        <strong className="text-foreground">Rules of fasting:</strong> No food, no water, and no other intake during fasting hours (dawn to sunset for Ramadan-style fasts).
+      </p>
       <div className="grid md:grid-cols-3 gap-4">
         {programs.map((program, index) => (
           <motion.div
@@ -105,25 +125,52 @@ export const FastingPrograms = ({ onSelectProgram, selectedProgram = "traditiona
 
             <div className="grid sm:grid-cols-2 gap-3">
               {fastingData.sunnahFasting.types.map((type) => {
-                const slug = (type as { id?: string }).id ?? type.name.toLowerCase().replace(/\s+/g, "-").replace(/&/g, "and");
+                const typeId = (type as { id?: string }).id ?? "";
+                const slug = typeId || type.name.toLowerCase().replace(/\s+/g, "-").replace(/&/g, "and");
+                const tooltip = GENERAL_TOOLTIPS.voluntaryFasting[typeId];
+                const nextMonThu = typeId === "monday-thursday" ? getNextMondayAndThursday() : null;
+                const nextAyyam = typeId === "ayyam-al-beed" && nextAyyamAlBeed ? nextAyyamAlBeed.label : null;
                 return (
-                  <Link
-                    key={type.name}
-                    to={`/programs/${slug}`}
-                    className="block p-3 rounded-lg bg-background/50 hover:bg-background/70 hover:border-secondary/30 border border-transparent transition-colors cursor-pointer text-left"
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-semibold text-sm">{type.name}</span>
-                      <span className="text-xs text-secondary">{type.frequency}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">{type.description}</p>
-                    {type.hadithOutline && (
-                      <p className="text-xs text-secondary mt-2 border-t border-border/50 pt-2">
-                        Hadith: {type.hadithOutline}
-                      </p>
-                    )}
-                    <p className="text-xs text-secondary mt-1">View details →</p>
-                  </Link>
+                  <Tooltip key={type.name}>
+                    <TooltipTrigger asChild>
+                      <Link
+                        to={`/programs/${slug}`}
+                        className="block p-3 rounded-lg bg-background/50 hover:bg-background/70 hover:border-secondary/30 border border-transparent transition-colors text-left cursor-pointer"
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-semibold text-sm">{type.name}</span>
+                          <span className="text-xs text-secondary">{type.frequency}</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{type.description}</p>
+                        {nextMonThu && (
+                          <p className="text-xs text-primary font-medium mt-1.5">Next: {nextMonThu}</p>
+                        )}
+                        {ayyamLoading && typeId === "ayyam-al-beed" && (
+                          <p className="text-xs text-muted-foreground mt-1.5">Loading next dates…</p>
+                        )}
+                        {nextAyyam && !ayyamLoading && (
+                          <p className="text-xs text-primary font-medium mt-1.5">Next: {nextAyyam}</p>
+                        )}
+                        {type.hadithOutline && (
+                          <p className="text-xs text-secondary mt-2 border-t border-border/50 pt-2">
+                            <span className="font-medium text-foreground/90">From {type.hadithSource ?? "Hadith"}:</span>{" "}
+                            {type.hadithOutline}
+                          </p>
+                        )}
+                        <p className="text-xs text-secondary mt-1">View details →</p>
+                      </Link>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[280px]">
+                      {tooltip ? (
+                        <>
+                          <p className="font-medium">{tooltip.title}</p>
+                          <p className="text-muted-foreground text-xs mt-0.5">{tooltip.body}</p>
+                        </>
+                      ) : (
+                        <p className="text-sm">{type.description}</p>
+                      )}
+                    </TooltipContent>
+                  </Tooltip>
                 );
               })}
             </div>

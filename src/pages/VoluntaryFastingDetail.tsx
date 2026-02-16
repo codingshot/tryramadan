@@ -4,7 +4,10 @@ import { ArrowLeft, ExternalLink, Calendar } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { PageSEO } from "@/components/PageSEO";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { EXTERNAL_LINKS } from "@/lib/config";
+import { useNextAyyamAlBeedDates } from "@/hooks/usePrayerTimes";
+import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
 import fastingData from "@/data/fasting-programs.json";
 
 type SunnahType = {
@@ -17,11 +20,28 @@ type SunnahType = {
   hadithOutline?: string;
 };
 
+function getNextMondayAndThursday(): string {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  const day = d.getDay();
+  const daysToMon = day === 0 ? 1 : day === 1 ? 7 : (8 - day) % 7 || 7;
+  const daysToThu = day === 4 ? 7 : day < 4 ? 4 - day : 4 - day + 7;
+  const nextMon = new Date(d);
+  nextMon.setDate(nextMon.getDate() + daysToMon);
+  const nextThu = new Date(d);
+  nextThu.setDate(nextThu.getDate() + daysToThu);
+  return `${nextMon.toLocaleDateString("en", { weekday: "long", day: "numeric", month: "short" })} and ${nextThu.toLocaleDateString("en", { weekday: "long", day: "numeric", month: "short" })}`;
+}
+
 export default function VoluntaryFastingDetail() {
   const { slug } = useParams<{ slug: string }>();
   const types = (fastingData.sunnahFasting as { types: SunnahType[] }).types;
-  const type = types.find((t) => (t as SunnahType & { id?: string }).id === slug || 
+  const type = types.find((t) => (t as SunnahType & { id?: string }).id === slug ||
     t.name.toLowerCase().replace(/\s+/g, "-").replace(/&/g, "and") === slug?.replace(/&/g, "and"));
+
+  const typeId = type ? (type as SunnahType & { id?: string }).id ?? "" : "";
+  const { nextDates: nextAyyamAlBeed, loading: ayyamLoading } = useNextAyyamAlBeedDates();
+  const tooltip = typeId ? GENERAL_TOOLTIPS.voluntaryFasting[typeId] : null;
 
   if (!type) {
     return <Navigate to="/programs" replace />;
@@ -29,6 +49,8 @@ export default function VoluntaryFastingDetail() {
 
   const hadithSource = type.hadithSource ?? "Sahih al-Bukhari fasting voluntary";
   const searchUrl = `${EXTERNAL_LINKS.sunnah}/search?q=${encodeURIComponent(hadithSource)}`;
+  const nextMonThu = typeId === "monday-thursday" ? getNextMondayAndThursday() : null;
+  const nextAyyam = typeId === "ayyam-al-beed" && nextAyyamAlBeed ? nextAyyamAlBeed.label : null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -54,11 +76,25 @@ export default function VoluntaryFastingDetail() {
             animate={{ opacity: 1, y: 0 }}
             className="mb-10"
           >
-            <div className="flex items-center gap-2 mb-4">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/20 text-primary text-sm font-medium">
-                <Calendar className="w-4 h-4" />
-                {type.frequency}
-              </span>
+            <div className="flex items-center gap-2 mb-4 flex-wrap">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/20 text-primary text-sm font-medium cursor-help border-b border-transparent hover:border-primary/50">
+                    <Calendar className="w-4 h-4" />
+                    {type.frequency}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-[280px]">
+                  {tooltip ? (
+                    <>
+                      <p className="font-medium">{tooltip.title}</p>
+                      <p className="text-muted-foreground text-xs mt-0.5">{tooltip.body}</p>
+                    </>
+                  ) : (
+                    <p className="text-sm">When this voluntary fast occurs.</p>
+                  )}
+                </TooltipContent>
+              </Tooltip>
               {type.arabicName && (
                 <span className="font-arabic text-lg text-secondary" dir="rtl">
                   {type.arabicName}
@@ -70,18 +106,40 @@ export default function VoluntaryFastingDetail() {
               {type.name}
             </h1>
 
-            <p className="text-muted-foreground leading-relaxed mb-6">
+            <p className="text-muted-foreground leading-relaxed mb-4">
               {type.description}
             </p>
 
-            {type.hadithOutline && (
+            {(nextMonThu || nextAyyam || (typeId === "ayyam-al-beed" && ayyamLoading)) && (
+              <div className="rounded-xl bg-muted/50 border border-border px-4 py-3 mb-6">
+                <p className="text-sm font-medium text-foreground mb-1">Next fasting dates</p>
+                {typeId === "monday-thursday" && nextMonThu && (
+                  <p className="text-sm text-muted-foreground">{nextMonThu}</p>
+                )}
+                {typeId === "ayyam-al-beed" && ayyamLoading && (
+                  <p className="text-sm text-muted-foreground">Loading…</p>
+                )}
+                {typeId === "ayyam-al-beed" && nextAyyam && !ayyamLoading && (
+                  <p className="text-sm text-muted-foreground">{nextAyyam} (13th, 14th, 15th of the Islamic month)</p>
+                )}
+              </div>
+            )}
+
+            {(type.hadithOutline || type.hadithSource) && (
               <div className="p-4 rounded-2xl bg-secondary/10 border border-secondary/20 mb-6">
                 <h2 className="text-sm font-semibold text-secondary uppercase tracking-wide mb-2">
-                  Hadith reference
+                  Where this tradition comes from
                 </h2>
-                <p className="text-sm text-foreground leading-relaxed mb-4">
-                  {type.hadithOutline}
-                </p>
+                {type.hadithSource && (
+                  <p className="text-sm font-medium text-foreground mb-1.5">
+                    Hadith: {type.hadithSource}
+                  </p>
+                )}
+                {type.hadithOutline && (
+                  <p className="text-sm text-foreground leading-relaxed mb-4">
+                    {type.hadithOutline}
+                  </p>
+                )}
                 <a
                   href={searchUrl}
                   target="_blank"

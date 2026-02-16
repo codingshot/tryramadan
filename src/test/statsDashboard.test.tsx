@@ -59,12 +59,42 @@ describe("Stats dashboard", () => {
     expect(stats.length).toBeGreaterThan(0);
   });
 
-  it("export CSV button is present and clickable", () => {
+  it("export progress button opens dialog with sections and preview", () => {
     renderProgress();
-    const exportBtn = screen.getByRole("button", { name: /export|download|csv/i });
+    const exportBtn = screen.getByRole("button", { name: /open export options/i });
     expect(exportBtn).toBeInTheDocument();
     fireEvent.click(exportBtn);
-    expect(exportBtn).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: /export progress/i })).toBeInTheDocument();
+    expect(screen.getByText(/select which data to include/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/summary \(days/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^fasting log$/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/journal entries/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/prayer log/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/meals \(plans/i)).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /^csv$/i })).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /^json$/i })).toBeInTheDocument();
+    const preview = document.querySelector("pre[role='log']");
+    expect(preview).toBeInTheDocument();
+    const downloadBtn = screen.getByRole("button", { name: /download csv/i });
+    expect(downloadBtn).toBeInTheDocument();
+    expect(downloadBtn).not.toBeDisabled();
+  });
+
+  it("export dialog disables download when no section selected", () => {
+    renderProgress();
+    fireEvent.click(screen.getByRole("button", { name: /open export options/i }));
+    const summaryCheckbox = screen.getByLabelText(/summary \(days/i);
+    const fastingCheckbox = screen.getByLabelText(/^fasting log$/i);
+    const journalCheckbox = screen.getByLabelText(/journal entries/i);
+    const prayerCheckbox = screen.getByLabelText(/prayer log/i);
+    const mealsCheckbox = screen.getByLabelText(/meals \(plans/i);
+    fireEvent.click(summaryCheckbox);
+    fireEvent.click(fastingCheckbox);
+    fireEvent.click(journalCheckbox);
+    fireEvent.click(prayerCheckbox);
+    fireEvent.click(mealsCheckbox);
+    const downloadBtn = screen.getByRole("button", { name: /download csv/i });
+    expect(downloadBtn).toBeDisabled();
   });
 
   it("shows StatsShareCard with Share and Save image buttons", () => {
