@@ -297,6 +297,8 @@ const DashboardSchedule = () => {
   }, [location.state, searchParams]);
   const [showQuickActionsEditor, setShowQuickActionsEditor] = useState(false);
   const [quickActionOrder, setQuickActionOrder] = useDashboardQuickActions();
+  const [quickActionDragIndex, setQuickActionDragIndex] = useState<number | null>(null);
+  const [quickActionDropTargetIndex, setQuickActionDropTargetIndex] = useState<number | null>(null);
   const [addFoodMeal, setAddFoodMeal] = useState<MealType | null>(null);
   /** Which recipe Select dropdown is open; close after picking so user can edit the added row. */
   const [recipeSelectOpen, setRecipeSelectOpen] = useState<"mealplan-suhoor" | "mealplan-iftar" | "foodlog" | null>(null);
@@ -1462,9 +1464,55 @@ const DashboardSchedule = () => {
                       return (
                         <li
                           key={action.id}
-                          className="flex items-center gap-2 p-2 rounded-xl bg-muted/50 border border-border"
+                          className={`flex items-center gap-2 p-2 rounded-xl border transition-colors ${
+                            quickActionDragIndex === index ? "opacity-50 bg-muted/30 border-dashed" : "bg-muted/50 border-border"
+                          } ${quickActionDropTargetIndex === index ? "ring-2 ring-primary/50 ring-offset-2 ring-offset-background" : ""}`}
+                          onDragOver={(e) => {
+                            e.preventDefault();
+                            e.dataTransfer.dropEffect = "move";
+                            if (quickActionDragIndex !== null && quickActionDragIndex !== index) {
+                              setQuickActionDropTargetIndex(index);
+                            }
+                          }}
+                          onDragLeave={() => setQuickActionDropTargetIndex(null)}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            setQuickActionDropTargetIndex(null);
+                            const dragIndexStr = e.dataTransfer.getData("text/plain");
+                            if (dragIndexStr === "") return;
+                            const dragIndex = parseInt(dragIndexStr, 10);
+                            if (Number.isNaN(dragIndex) || dragIndex === index) return;
+                            const next = [...quickActionOrder];
+                            const [removed] = next.splice(dragIndex, 1);
+                            next.splice(index, 0, removed);
+                            setQuickActionOrder(next);
+                          }}
                         >
-                          <GripVertical className="w-4 h-4 text-muted-foreground shrink-0" aria-hidden />
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span
+                                draggable
+                                onDragStart={(e) => {
+                                  e.dataTransfer.effectAllowed = "move";
+                                  e.dataTransfer.setData("text/plain", String(index));
+                                  setQuickActionDragIndex(index);
+                                }}
+                                onDragEnd={() => {
+                                  setQuickActionDragIndex(null);
+                                  setQuickActionDropTargetIndex(null);
+                                }}
+                                className="cursor-grab active:cursor-grabbing touch-none p-1 -m-1 rounded text-muted-foreground hover:text-foreground hover:bg-muted/80 shrink-0"
+                                role="button"
+                                tabIndex={0}
+                                aria-label={`Drag to reorder ${action.label}`}
+                              >
+                                <GripVertical className="w-4 h-4" aria-hidden />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent side="right">
+                              <p>Drag to reorder</p>
+                            </TooltipContent>
+                          </Tooltip>
                           <span className="font-medium text-sm flex-1 min-w-0 truncate">{action.label}</span>
                           <div className="flex items-center gap-0.5 shrink-0">
                             <Button

@@ -1,7 +1,7 @@
 /**
  * User guide flows for TryRamadan. Each guide has steps with optional
- * screenshot/gif paths (place in public/guide-assets/). Quick links
- * jump to the corresponding app page/section.
+ * quick links to the corresponding app page/section. Step images can be
+ * added later (e.g. real app screenshots in public/guide-assets/).
  */
 
 export interface GuideQuickLink {
@@ -34,8 +34,6 @@ export interface Guide {
   category: "onboarding" | "dashboard" | "learn" | "health" | "settings" | "general";
 }
 
-const ASSETS = "/guide-assets";
-
 export const guides: Guide[] = [
   {
     slug: "getting-started",
@@ -49,25 +47,21 @@ export const guides: Guide[] = [
       {
         title: "Open the app",
         body: "Visit TryRamadan.app in your browser or open the installed PWA. The home page shows features, programs, and a live fasting timer preview. No sign-up required—everything works in your browser.",
-        image: `${ASSETS}/getting-started-home.png`,
         quickLink: { path: "/", label: "Go to Home" },
       },
       {
         title: "Start your journey",
         body: "Tap “Start your journey” to begin, or “I'm Muslim” for a faster path tailored to practicing Muslims. You’ll be taken to the onboarding flow—you can always change preferences later in Settings.",
-        image: `${ASSETS}/getting-started-home.png`,
         quickLink: { path: "/onboarding", label: "Go to Onboarding" },
       },
       {
         title: "Complete onboarding",
         body: "Follow the steps: Welcome → Mode (new or Muslim) → Knowledge check → Health disclaimer → Location (for prayer times) → Schedule → Notifications → Priorities → Goals. Tip: Set your location for accurate suhoor and iftar times.",
-        image: `${ASSETS}/onboarding-welcome.png`,
         quickLink: { path: "/onboarding", label: "Open Onboarding" },
       },
       {
         title: "Reach the dashboard",
         body: "After onboarding you’ll land on the Dashboard. You’ll see the fasting timer, progress ring, and quick links to Today, Schedule, Prayers, Meals, and more. If you already have location set, you may skip onboarding and go straight to the dashboard.",
-        image: `${ASSETS}/dashboard-overview.png`,
         quickLink: { path: "/dashboard", label: "Open Dashboard" },
       },
     ],
@@ -84,55 +78,46 @@ export const guides: Guide[] = [
       {
         title: "Welcome",
         body: "The welcome screen introduces TryRamadan. Tap “Get started” to begin. Muslim users can choose “I'm Muslim” on the home page to skip ahead with pre-selected options.",
-        image: `${ASSETS}/onboarding-welcome.png`,
         quickLink: { path: "/onboarding/welcome", label: "Open Welcome" },
       },
       {
         title: "Experience mode",
         body: "Choose “New to Ramadan” or “Muslim”. Muslim mode tailors language (e.g. “Iftar” instead of “break fast”), offers Quran/glossary priorities, and lets you skip the knowledge quiz.",
-        image: `${ASSETS}/onboarding-mode.png`,
         quickLink: { path: "/onboarding/mode", label: "Open Mode" },
       },
       {
         title: "Knowledge",
         body: "Answer a few quick questions about fasting. Used only to personalize content. Muslim users can tap “Skip — I already know this” to bypass this step.",
-        image: `${ASSETS}/onboarding-knowledge.png`,
         quickLink: { path: "/onboarding/knowledge", label: "Open Knowledge" },
       },
       {
         title: "Health",
         body: "Read the health disclaimer. If you have medical conditions, pregnancy, or take medication, consult a doctor before fasting. Tap “Continue” when ready.",
-        image: `${ASSETS}/onboarding-health.png`,
         quickLink: { path: "/onboarding/health", label: "Open Health" },
       },
       {
         title: "Location",
         body: "Set your location for accurate prayer and suhoor/iftar times. Use “Use my location” for GPS, or search for a city. Times are location-based—this step is important for the timer and calendar.",
-        image: `${ASSETS}/onboarding-location.png`,
         quickLink: { path: "/onboarding/location", label: "Open Location" },
       },
       {
         title: "Schedule",
         body: "Confirm your Ramadan start date (or pick Full Ramadan, Sunnah fasting, etc.). The app uses this for the 30-day countdown and schedule calendar.",
-        image: `${ASSETS}/onboarding-schedule.png`,
         quickLink: { path: "/onboarding/schedule", label: "Open Schedule" },
       },
       {
         title: "Notifications",
         body: "Enable suhoor and iftar reminders if you like. Choose how many minutes before each time to be notified. You can adjust or disable these later in Settings.",
-        image: `${ASSETS}/onboarding-notifications.png`,
         quickLink: { path: "/onboarding/notifications", label: "Open Notifications" },
       },
       {
         title: "Priorities",
         body: "Set priorities: Learning depth, Culture & recipes, Quran & glossary, macro tracking, and simplification. This shapes which dashboard cards and features you see first.",
-        image: `${ASSETS}/onboarding-priorities.png`,
         quickLink: { path: "/onboarding/priorities", label: "Open Priorities" },
       },
       {
         title: "Goals",
         body: "Set optional pre-Ramadan goals (e.g. learn about Ramadan, adjust sleep, read Quran). Tap “Go to dashboard” when done. Muslim users can tap “Skip — go to dashboard” to finish quickly.",
-        image: `${ASSETS}/onboarding-goals.png`,
         quickLink: { path: "/onboarding/goals", label: "Open Goals" },
       },
     ],
@@ -175,7 +160,6 @@ export const guides: Guide[] = [
       {
         title: "Dashboard home",
         body: "The dashboard shows the main fasting timer (suhoor/iftar), your progress ring, and quick action cards.",
-        image: `${ASSETS}/dashboard-overview.png`,
         quickLink: { path: "/dashboard", label: "Open Dashboard" },
       },
       {
@@ -217,7 +201,6 @@ export const guides: Guide[] = [
       {
         title: "Open Today",
         body: "From the dashboard, tap “Today’s Fast” or go to Dashboard → Today. You’ll see the main timer and countdowns.",
-        image: `${ASSETS}/today-fast.png`,
         quickLink: { path: "/dashboard/today", label: "Open Today" },
       },
       {
@@ -249,7 +232,6 @@ export const guides: Guide[] = [
       {
         title: "Open Schedule",
         body: "From the dashboard, tap “Schedule” or “View schedule”. You’ll see a month calendar with today highlighted.",
-        image: `${ASSETS}/schedule-calendar.png`,
         quickLink: { path: "/dashboard/schedule", label: "Open Schedule" },
       },
       {
@@ -291,7 +273,6 @@ export const guides: Guide[] = [
       {
         title: "Open Prayers",
         body: "From the dashboard, tap “Prayers”. You’ll see today’s prayer times for your location.",
-        image: `${ASSETS}/prayers.png`,
         quickLink: { path: "/dashboard/prayers", label: "Open Prayers" },
       },
       {
@@ -349,7 +330,6 @@ export const guides: Guide[] = [
       {
         title: "Open Meals",
         body: "From the dashboard, tap “Meals”. You’ll see meal plans for the selected day with suhoor and iftar suggestions.",
-        image: `${ASSETS}/meals.png`,
         quickLink: { path: "/dashboard/meals", label: "Open Meals" },
       },
       {
@@ -376,7 +356,6 @@ export const guides: Guide[] = [
       {
         title: "Open Learn",
         body: "From the dashboard, tap “Learn”. You’ll see the glossary preview and daily hadith.",
-        image: `${ASSETS}/learn.png`,
         quickLink: { path: "/dashboard/learn", label: "Open Learn" },
       },
       {
@@ -403,7 +382,6 @@ export const guides: Guide[] = [
       {
         title: "Open Progress",
         body: "From the dashboard, tap “Progress”. You’ll see your ring, streak, completed days, and fasting log.",
-        image: `${ASSETS}/progress.png`,
         quickLink: { path: "/dashboard/progress", label: "Open Progress" },
       },
       {
@@ -425,7 +403,6 @@ export const guides: Guide[] = [
       {
         title: "Open Journal",
         body: "From the dashboard, tap “Journal”. Use the calendar to select a date, then write your entry.",
-        image: `${ASSETS}/journal.png`,
         quickLink: { path: "/dashboard/journal", label: "Open Journal" },
       },
       {
@@ -452,7 +429,6 @@ export const guides: Guide[] = [
       {
         title: "Emergency page",
         body: "If you need to break your fast now, open the Emergency page. It offers reassurance, simple steps (water, light food, rest), and the option to log that you broke your fast.",
-        image: `${ASSETS}/emergency.png`,
         quickLink: { path: "/emergency", label: "Open Emergency" },
       },
     ],
@@ -469,7 +445,6 @@ export const guides: Guide[] = [
       {
         title: "Open Settings",
         body: "Tap “Settings” in the footer or from the dashboard. You’ll see all preference sections.",
-        image: `${ASSETS}/settings.png`,
         quickLink: { path: "/settings", label: "Open Settings" },
       },
       {
@@ -646,7 +621,6 @@ export const guides: Guide[] = [
       {
         title: "Open Programs",
         body: "From the home page or footer, open Fasting Programs (or /programs). You'll see Full Ramadan and voluntary Sunnah options: Monday & Thursday, Ayyam al-Beed, Day of Arafah, Six Days of Shawwal.",
-        image: `${ASSETS}/programs.png`,
         quickLink: { path: "/programs", label: "Open Programs" },
       },
       {
@@ -704,7 +678,6 @@ export const guides: Guide[] = [
       {
         title: "Open Prayers",
         body: "Go to Dashboard → Prayers. Scroll down to see per-prayer notification toggles (Fajr, Dhuhr, Asr, Maghrib, Isha) and the Play adhan sound switch.",
-        image: `${ASSETS}/prayers.png`,
         quickLink: { path: "/dashboard/prayers", label: "Open Prayers" },
       },
       {
@@ -762,7 +735,6 @@ export const guides: Guide[] = [
       {
         title: "Open Goals",
         body: "From the dashboard, tap the Goals card or go to Dashboard → Goals. You'll see the countdown to Ramadan and your list of goals.",
-        image: `${ASSETS}/goals.png`,
         quickLink: { path: "/dashboard/goals", label: "Open Goals" },
       },
       {

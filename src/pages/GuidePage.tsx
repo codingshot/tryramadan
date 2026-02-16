@@ -44,8 +44,6 @@ function StepContent({
   stepIndex: number;
   totalSteps: number;
 }) {
-  const imgSrc = step.gif ?? step.image ?? "/placeholder.svg";
-
   return (
     <section
       aria-labelledby={`step-${stepIndex}-title`}
@@ -63,26 +61,7 @@ function StepContent({
         {step.title}
       </h2>
       <p className="text-muted-foreground leading-relaxed">{step.body}</p>
-      {(step.image || step.gif) && (
-        <figure className="rounded-2xl border border-border overflow-hidden bg-muted/30">
-          <img
-            src={imgSrc}
-            alt={`${step.title} - TryRamadan app screenshot, mobile view`}
-            className="w-full max-w-md mx-auto block object-contain"
-            loading="lazy"
-            decoding="async"
-            onError={(e) => {
-              const target = e.currentTarget;
-              if (target.src !== "/placeholder.svg") {
-                target.src = "/placeholder.svg";
-              }
-            }}
-          />
-          <figcaption className="sr-only">
-            {step.title} — step {stepIndex + 1}
-          </figcaption>
-        </figure>
-      )}
+      {/* Step images hidden until real app screenshots are available for each flow */}
       {step.quickLink && (
         <p>
           <Link
