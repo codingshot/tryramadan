@@ -67,19 +67,24 @@ function eventToIcal(
   dateStr: string,
   timeStr: string,
   durationMinutes: number = 15,
-  timezone?: string | null
+  timezone?: string | null,
+  location?: string | null,
+  description?: string | null
 ): string {
   const { start, end } = formatIcalDateTime(dateStr, timeStr, durationMinutes);
   const dtStart = timezone ? `DTSTART;TZID=${timezone}:${start}` : `DTSTART:${start}`;
   const dtEnd = timezone ? `DTEND;TZID=${timezone}:${end}` : `DTEND:${end}`;
-  return [
+  const lines = [
     "BEGIN:VEVENT",
     `UID:${uid()}`,
     dtStart,
     dtEnd,
     `SUMMARY:${escapeIcalText(summary)}`,
-    "END:VEVENT",
-  ].join("\r\n");
+  ];
+  if (location?.trim()) lines.push(`LOCATION:${escapeIcalText(location.trim())}`);
+  if (description?.trim()) lines.push(`DESCRIPTION:${escapeIcalText(description.trim())}`);
+  lines.push("END:VEVENT");
+  return lines.join("\r\n");
 }
 
 /** "Fasting only" = Suhoor end + Iftar; "Full" = all five prayers + Taraweeh. */
@@ -132,6 +137,10 @@ export interface ExportOptions {
   includeTypes?: Partial<Record<CalendarEventType, boolean>>;
   /** Duration in minutes per type (used when includeTypes is set). */
   eventDurations?: Partial<Record<CalendarEventType, number>>;
+  /** Mosque/location name for Taraweeh events */
+  taraweehMosque?: string | null;
+  /** Include meal blocking events (Suhoor prep, Iftar prep) */
+  includeMealBlocking?: boolean;
 }
 
 const DEFAULT_DURATION: Partial<Record<CalendarEventType, number>> = {
@@ -150,6 +159,8 @@ export function buildIcalContent(options: ExportOptions): string {
     exportMode = "full",
     includeTypes,
     eventDurations,
+    taraweehMosque,
+    includeMealBlocking,
   } = options;
   const [startStr, endStr] = dateRange;
   if (!startStr || !endStr) return [ICS_HEADER, ICS_FOOTER].join("\r\n");
@@ -186,12 +197,26 @@ export function buildIcalContent(options: ExportOptions): string {
           const tHour = ih + 1 + Math.floor(tm / 60);
           const tMin = tm % 60;
           const tStr = `${tHour.toString().padStart(2, "0")}:${tMin.toString().padStart(2, "0")}`;
-          events.push(eventToIcal("Taraweeh (optional) • تراويح", dateStr, tStr, durations.taraweeh ?? 60, tz));
+          events.push(eventToIcal("Taraweeh (optional) • تراويح", dateStr, tStr, durations.taraweeh ?? 60, tz, taraweehMosque, "Night prayer in Ramadan. One juz of the Quran is typically recited."));
         }
       } else {
         prayerTimesToEvents(dateStr, pt, includeTaraweeh, exportMode).forEach((e) => {
-          if (e.time && e.time.trim()) events.push(eventToIcal(e.summary, dateStr, e.time, e.durationMinutes, tz));
+          if (e.time && e.time.trim()) {
+            const isTaraweeh = e.summary.includes("Taraweeh");
+            events.push(eventToIcal(e.summary, dateStr, e.time, e.durationMinutes, tz, isTaraweeh ? taraweehMosque : undefined, isTaraweeh ? "Night prayer in Ramadan. One juz of the Quran is typically recited." : undefined));
+          }
         });
+      }
+      // Meal blocking events
+      if (includeMealBlocking && pt.imsak && pt.maghrib) {
+        const { hour: imsakH, min: imsakM } = parseTimeForIcal(pt.imsak);
+        const suhoorPrepH = imsakH - 1 >= 0 ? imsakH - 1 : 23;
+        const suhoorPrepStr = `${suhoorPrepH.toString().padStart(2, "0")}:${imsakM.toString().padStart(2, "0")}`;
+        events.push(eventToIcal("🍽️ Suhoor Prep • تحضير السحور", dateStr, suhoorPrepStr, 60, tz, undefined, "Prepare and eat suhoor before the fast begins at Fajr."));
+        const { hour: maghribH, min: maghribM } = parseTimeForIcal(pt.maghrib);
+        const iftarPrepH = maghribH - 1 >= 0 ? maghribH - 1 : 23;
+        const iftarPrepStr = `${iftarPrepH.toString().padStart(2, "0")}:${maghribM.toString().padStart(2, "0")}`;
+        events.push(eventToIcal("🍽️ Iftar Prep • تحضير الإفطار", dateStr, iftarPrepStr, 60, tz, undefined, "Prepare iftar meal before breaking fast at Maghrib."));
       }
     }
     const dayEvents = customEvents[dateStr] ?? [];
