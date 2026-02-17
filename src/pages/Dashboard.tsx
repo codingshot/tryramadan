@@ -46,6 +46,8 @@ import { DailyMissionsCard } from "@/components/DailyMissionsCard";
 import { TodayScheduleTimeline } from "@/components/TodayScheduleTimeline";
 import { LocationDisplay } from "@/components/LocationDisplay";
 import { PWAInstallBanner } from "@/components/PWAInstallBanner";
+import { RamadanContextCard } from "@/components/RamadanContextCard";
+import { DashboardWalkthrough } from "@/components/DashboardWalkthrough";
 import {
   useUserPreferences,
   useFastingProgress,
@@ -1323,6 +1325,11 @@ const Dashboard = () => {
               return null;
             })()}
 
+            {/* Ramadan context for non-Muslim users */}
+            {preferences.userType !== "muslim" && (
+              <RamadanContextCard compact className="mt-4" />
+            )}
+
             {/* Day selector — arrows inline with date; click date for calendar add options */}
             <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-4 p-3 sm:p-4 rounded-xl bg-muted/50 border border-border">
               <button
@@ -1657,6 +1664,9 @@ const Dashboard = () => {
       </Dialog>
 
       <Footer />
+
+      {/* Guided walkthrough for first-time non-Muslim users */}
+      <DashboardWalkthrough userType={preferences.userType} />
     </div>
   );
 };
