@@ -16,53 +16,82 @@ import { usePrayerTimes } from "@/hooks/usePrayerTimes";
 import { useAutoLocation } from "@/hooks/useLocation";
 import { getTodayStringInTimezone, getNowSecondsSinceMidnightInTimezone, timeStringToSecondsSinceMidnight, secondsUntilTimeInTimezone } from "@/lib/utils";
 
-/** Countdown to iftar (maghrib) or "Iftar HH:MM" if past. Uses location time when displayTimezone is set. */
-function useIftarCountdown(maghrib: string | undefined, displayTimezone: string | null | undefined) {
-  const [text, setText] = useState<string>("—");
-  const [isPast, setIsPast] = useState(false);
+/** Countdown text based on eating windows: fasting window → "Iftar in Xh Xm", eating window → "Suhoor ends in Xh Xm". Calibrated with display timezone. */
+function useEatingWindowCountdown(
+  imsak: string | undefined,
+  maghrib: string | undefined,
+  displayTimezone: string | null | undefined
+): { label: string; text: string } {
+  const [out, setOut] = useState<{ label: string; text: string }>({ label: "Iftar", text: "—" });
 
   useEffect(() => {
     if (!maghrib) {
-      setText("—");
+      setOut({ label: "Iftar", text: "—" });
       return;
     }
+    const hasImsak = imsak != null && imsak.trim() !== "";
+    const imsakSec = hasImsak ? timeStringToSecondsSinceMidnight(imsak) : 0;
+    const maghribSec = timeStringToSecondsSinceMidnight(maghrib);
+
     const update = () => {
       if (displayTimezone) {
         const nowSec = getNowSecondsSinceMidnightInTimezone(displayTimezone);
-        const maghribSec = timeStringToSecondsSinceMidnight(maghrib);
-        if (nowSec >= maghribSec) {
-          setIsPast(true);
-          setText(`Iftar ${maghrib.trim().indexOf(" ") >= 0 ? maghrib.trim().slice(0, maghrib.trim().indexOf(" ")) : maghrib}`);
-          return;
+        const inFastingWindow = hasImsak ? nowSec >= imsakSec && nowSec < maghribSec : nowSec < maghribSec;
+        if (inFastingWindow) {
+          const diff = secondsUntilTimeInTimezone(nowSec, maghribSec);
+          const h = Math.floor(diff / 3600);
+          const m = Math.floor((diff % 3600) / 60);
+          setOut({ label: "Iftar", text: h > 0 ? `${h}h ${m}m` : `${m}m` });
+        } else if (hasImsak) {
+          const diff = secondsUntilTimeInTimezone(nowSec, imsakSec);
+          const h = Math.floor(diff / 3600);
+          const m = Math.floor((diff % 3600) / 60);
+          setOut({ label: "Suhoor ends", text: h > 0 ? `${h}h ${m}m` : `${m}m` });
+        } else {
+          const diff = secondsUntilTimeInTimezone(nowSec, maghribSec);
+          const h = Math.floor(diff / 3600);
+          const m = Math.floor((diff % 3600) / 60);
+          setOut({ label: "Iftar", text: h > 0 ? `${h}h ${m}m` : `${m}m` });
         }
-        const diff = secondsUntilTimeInTimezone(nowSec, maghribSec);
-        const hours = Math.floor(diff / 3600);
-        const minutes = Math.floor((diff % 3600) / 60);
-        setText(hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`);
-        setIsPast(false);
       } else {
         const now = new Date();
-        const [h, m] = maghrib.split(":").map(Number);
-        const iftar = new Date(now);
-        iftar.setHours(h, m, 0, 0);
-        if (now >= iftar) {
-          setIsPast(true);
-          setText(`Iftar ${maghrib}`);
-          return;
+        const nowSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+        const inFastingWindow = hasImsak ? nowSec >= imsakSec && nowSec < maghribSec : nowSec < maghribSec;
+        if (inFastingWindow) {
+          const [hh, mm] = maghrib.split(":").map(Number);
+          const iftar = new Date(now);
+          iftar.setHours(hh, mm, 0, 0);
+          const ms = iftar.getTime() - now.getTime();
+          const h = Math.floor(ms / 36e5);
+          const m = Math.floor((ms % 36e5) / 6e4);
+          setOut({ label: "Iftar", text: h > 0 ? `${h}h ${m}m` : `${m}m` });
+        } else if (hasImsak) {
+          const [hh, mm] = imsak!.split(":").map(Number);
+          const suhoorEnd = new Date(now);
+          suhoorEnd.setHours(hh, mm, 0, 0);
+          if (now >= suhoorEnd) suhoorEnd.setDate(suhoorEnd.getDate() + 1);
+          const ms = suhoorEnd.getTime() - now.getTime();
+          const h = Math.floor(ms / 36e5);
+          const m = Math.floor((ms % 36e5) / 6e4);
+          setOut({ label: "Suhoor ends", text: h > 0 ? `${h}h ${m}m` : `${m}m` });
+        } else {
+          const [hh, mm] = maghrib.split(":").map(Number);
+          const iftar = new Date(now);
+          iftar.setHours(hh, mm, 0, 0);
+          if (now >= iftar) iftar.setDate(iftar.getDate() + 1);
+          const ms = iftar.getTime() - now.getTime();
+          const h = Math.floor(ms / 36e5);
+          const m = Math.floor((ms % 36e5) / 6e4);
+          setOut({ label: "Iftar", text: h > 0 ? `${h}h ${m}m` : `${m}m` });
         }
-        const ms = iftar.getTime() - now.getTime();
-        const hours = Math.floor(ms / (1000 * 60 * 60));
-        const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
-        setText(hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`);
-        setIsPast(false);
       }
     };
     update();
-    const t = setInterval(update, displayTimezone ? 2000 : 60000); // Throttle for INP when timezone set
+    const t = setInterval(update, displayTimezone ? 2000 : 60000);
     return () => clearInterval(t);
-  }, [maghrib, displayTimezone]);
+  }, [imsak, maghrib, displayTimezone]);
 
-  return { text, isPast };
+  return out;
 }
 
 export function FastingBottomBar() {
@@ -77,9 +106,14 @@ export function FastingBottomBar() {
   const fastingToday = isFastingToday(progress, todayStr);
   const todayEntry = getTodayFastingLog(progress, todayStr);
   const todayBroken = todayEntry?.status === "broken";
+  const todayNoNeedToFast = todayBroken && todayEntry?.brokenReason === "menstruation";
   const todayComplete = progress.completedDays.includes(todayStr);
   const todaySkipped = (progress.skippedDays ?? []).includes(todayStr);
-  const { text: iftarText, isPast: iftarPast } = useIftarCountdown(prayerTimes?.maghrib, displayTimezone);
+  const { label: eatingWindowLabel, text: eatingWindowText } = useEatingWindowCountdown(
+    prayerTimes?.imsak,
+    prayerTimes?.maghrib,
+    displayTimezone
+  );
 
   const handleBreakFast = () => {
     navigate("/dashboard", { state: { openBreakFast: true } });
@@ -106,14 +140,15 @@ export function FastingBottomBar() {
       aria-label="Fasting quick actions"
     >
       <div className="flex items-center justify-between gap-2 px-3 py-2 min-h-[52px]">
-        {/* Times + days */}
+        {/* Time to suhoor end / iftar based on eating window */}
         <div className="flex items-center gap-2 min-w-0 shrink">
           <Clock className="w-4 h-4 text-secondary shrink-0" />
           <span className="text-sm font-medium tabular-nums truncate">
-            {iftarPast ? `Iftar ${prayerTimes?.maghrib ?? "—"}` : `Iftar in ${iftarText}`}
-          </span>
-          <span className="text-xs text-muted-foreground shrink-0">
-            · {(progress.completedDays ?? []).length} days
+            {todayNoNeedToFast
+              ? "No need to fast"
+              : eatingWindowLabel === "Iftar"
+                ? `Iftar in ${eatingWindowText}`
+                : `Suhoor ends in ${eatingWindowText}`}
           </span>
         </div>
         {/* Quick controls: Today, Meals, then dynamic slot(s) */}

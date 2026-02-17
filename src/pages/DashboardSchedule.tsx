@@ -167,11 +167,14 @@ function FoodLogRow({
           P{totalP ?? "—"} C{totalC ?? "—"} F{totalF ?? "—"}
         </span>
       )}
-      {entry.recipeId && (
-        <Link to={`/recipe/${entry.mealType}/${entry.recipeId.split("-")[1]}`} className="text-xs text-secondary hover:underline shrink-0">
-          View recipe
-        </Link>
-      )}
+      {entry.recipeId && (() => {
+        const idPart = entry.recipeId.includes("-") ? entry.recipeId.split("-")[1] : undefined;
+        return idPart ? (
+          <Link to={`/recipe/${entry.mealType}/${idPart}`} className="text-xs text-secondary hover:underline shrink-0">
+            View recipe
+          </Link>
+        ) : null;
+      })()}
       <button type="button" onClick={onRemove} className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded border border-transparent hover:border-destructive/30 hover:bg-destructive/20 text-muted-foreground hover:text-destructive ml-auto" aria-label="Remove">
         <Trash2 className="w-3.5 h-3.5" />
       </button>
@@ -242,7 +245,7 @@ const DashboardSchedule = () => {
     const endStr = ramadanRange.endStr ?? toLocalDateString(ramadanRange.end);
     const [sy, sm, sd] = startStr.split("-").map(Number);
     const [ey, em, ed] = endStr.split("-").map(Number);
-    let d = new Date(sy, sm - 1, sd);
+    const d = new Date(sy, sm - 1, sd);
     const end = new Date(ey, em - 1, ed);
     let lastEffective: import("@/hooks/usePrayerTimes").PrayerTimes | null = null;
     while (d.getTime() <= end.getTime()) {

@@ -22,6 +22,10 @@ import {
   useSuhoorLabelShort,
   useDisplayTimezone,
   isPredictedMenstruationDay,
+  useMenstruationTrackingEnabled,
+  isInMenstrualPeriod,
+  startMenstrualPeriod,
+  endMenstrualPeriod,
 } from "@/hooks/useLocalStorage";
 import { getTodayStringInTimezone, getNowSecondsSinceMidnightInTimezone, timeStringToSecondsSinceMidnight, secondsUntilTimeInTimezone, toLocalDateString } from "@/lib/utils";
 import { BreakFastReasonDialog } from "@/components/BreakFastReasonDialog";
@@ -31,6 +35,7 @@ import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
 import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
 import { PrayerLocationBadge } from "@/components/PrayerLocationBadge";
 import { PageSEO } from "@/components/PageSEO";
+import { toast } from "sonner";
 import {
   getRecommendedHydrationGoalMl,
   getHydrationRecommendationLabel,
@@ -108,6 +113,8 @@ const DashboardToday = () => {
   /** Only show "I broke my fast" when user has started fasting today and has not yet broken or marked complete */
   const fastingToday = !!todayLog && todayLog.status !== "broken" && !todayCompleted && !todaySkipped;
   const isPredictedPeriodDay = isPredictedMenstruationDay(todayStr, preferences);
+  const menstruationTrackingEnabled = useMenstruationTrackingEnabled();
+  const inMenstrualPeriod = isInMenstrualPeriod(progress);
 
   const imsakStr = prayerTimes?.imsak ?? prayerTimes?.fajr;
   const isFastingWindow =
@@ -195,6 +202,59 @@ const DashboardToday = () => {
               Track your current fast and monitor how you're feeling
             </p>
           </motion.div>
+
+          {/* Menstrual period: rule and mark in period / no longer menstruating */}
+          {menstruationTrackingEnabled && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.03 }}
+              className="mb-6 p-4 rounded-xl border border-border bg-card"
+              role="region"
+              aria-label="Menstrual period tracking"
+            >
+              {inMenstrualPeriod ? (
+                <>
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted border border-border text-sm font-medium">
+                      No need to fast
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    You&apos;re in your menstrual period. In Islam there is no obligation to fast during menstruation. These days don&apos;t break your streak.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      endMenstrualPeriod(progress, setProgress, todayStr);
+                      toast.success("Marked as no longer menstruating. Logged.");
+                    }}
+                    className="text-sm font-medium px-3 py-2 rounded-lg bg-primary/20 text-primary hover:bg-primary/30 border border-primary/30 focus-visible:ring-2 focus-visible:ring-offset-2"
+                    aria-label="Mark as no longer menstruating and log period end"
+                  >
+                    No longer menstruating?
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    In Islam there is no obligation to fast during menstruation. Mark when you&apos;re in your period so we show &quot;No need to fast&quot; and log it.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      startMenstrualPeriod(progress, setProgress, todayStr);
+                      toast.success("Marked as in menstrual period. No need to fast.");
+                    }}
+                    className="text-sm font-medium px-3 py-2 rounded-lg border border-border hover:bg-muted focus-visible:ring-2 focus-visible:ring-offset-2"
+                    aria-label="Mark as in menstrual period (no need to fast today)"
+                  >
+                    Mark as in menstrual period
+                  </button>
+                </>
+              )}
+            </motion.div>
+          )}
           
           {/* Today's fast status: mark fasted / broke — above countdown */}
           <motion.div
@@ -234,14 +294,57 @@ const DashboardToday = () => {
             ) : isPredictedPeriodDay && !todayCompleted && !todaySkipped && !todayBrokenEntry && !fastingToday ? (
               <div className="py-3 px-4 rounded-xl bg-secondary/10 border border-secondary/30 text-center">
                 <span className="font-medium text-secondary">Predicted excused day</span>
-                <p className="text-xs text-muted-foreground mt-1">Based on your pattern, today may be an excused fasting day. Tap below to mark it—no guilt. Tradition recognises this.</p>
-                <button
-                  type="button"
-                  onClick={() => setDaySkipped(progress, setProgress, todayStr)}
-                  className="mt-3 min-h-[44px] px-4 py-2 rounded-xl border border-secondary/50 text-secondary font-medium text-sm hover:bg-secondary/10 transition-colors"
-                >
-                  I didn&apos;t fast today (excused)
-                </button>
+                <p className="text-xs text-muted-foreground mt-1">Based on your pattern, today may be an excused fasting day. Mark as in period to preserve your streak; tradition recognises this.</p>
+                {menstruationTrackingEnabled ? (
+                  <div className="mt-3 flex flex-col sm:flex-row gap-2 justify-center">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        startMenstrualPeriod(progress, setProgress, todayStr);
+                        toast.success("Marked as in menstrual period. No need to fast.");
+                      }}
+                      className="min-h-[44px] px-4 py-2 rounded-xl bg-secondary/20 border border-secondary/50 text-secondary font-medium text-sm hover:bg-secondary/30 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-secondary"
+                      aria-label="Mark as in menstrual period (excused, preserves streak)"
+                    >
+                      Mark as in menstrual period
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDaySkipped(progress, setProgress, todayStr)}
+                      className="min-h-[44px] px-4 py-2 rounded-xl border border-border font-medium text-sm hover:bg-muted transition-colors focus-visible:ring-2 focus-visible:ring-offset-2"
+                      aria-label="I didn't fast today (skip)"
+                    >
+                      I didn&apos;t fast today
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setDaySkipped(progress, setProgress, todayStr)}
+                    className="mt-3 min-h-[44px] px-4 py-2 rounded-xl border border-secondary/50 text-secondary font-medium text-sm hover:bg-secondary/10 transition-colors focus-visible:ring-2 focus-visible:ring-offset-2"
+                    aria-label="I didn't fast today (excused)"
+                  >
+                    I didn&apos;t fast today (excused)
+                  </button>
+                )}
+              </div>
+            ) : todayBrokenEntry?.brokenReason === "menstruation" ? (
+              <div className="py-3 px-4 rounded-xl border border-border bg-muted/50 text-center text-sm">
+                <span className="font-medium text-muted-foreground">No need to fast</span>
+                <p className="text-xs text-muted-foreground mt-1">You&apos;re in your menstrual period. In Islam there is no obligation to fast during menstruation. These days don&apos;t break your streak.</p>
+                {inMenstrualPeriod && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      endMenstrualPeriod(progress, setProgress, todayStr);
+                      toast.success("Marked as no longer menstruating. Logged.");
+                    }}
+                    className="mt-3 min-h-[44px] px-4 py-2 rounded-xl border border-border font-medium text-sm hover:bg-muted transition-colors focus-visible:ring-2 focus-visible:ring-offset-2"
+                    aria-label="Mark as no longer menstruating and log period end"
+                  >
+                    No longer menstruating?
+                  </button>
+                )}
               </div>
             ) : todayBrokenEntry ? (
               <div className="py-3 px-4 rounded-xl border border-destructive/40 bg-destructive/10 text-center text-sm">

@@ -162,7 +162,7 @@ export function buildIcalContent(options: ExportOptions): string {
   const tz = timezone && timezone.trim() ? timezone.trim() : undefined;
   const durations = { ...DEFAULT_DURATION, ...eventDurations };
 
-  let d = new Date(start);
+  const d = new Date(start);
   d.setHours(0, 0, 0, 0);
   const endDay = new Date(end);
   endDay.setHours(23, 59, 59, 999);

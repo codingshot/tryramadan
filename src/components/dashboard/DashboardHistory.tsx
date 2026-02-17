@@ -3,6 +3,12 @@ import { Calendar, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Target } f
 import { Link } from "react-router-dom";
 import { type FastingProgress } from "@/hooks/useLocalStorage";
 import { toLocalDateString } from "@/lib/utils";
+
+function formatPeriodRange(startDate: string, endDate: string): string {
+  const start = new Date(startDate + "T12:00:00");
+  const end = new Date(endDate + "T12:00:00");
+  return `${start.toLocaleDateString("en", { month: "short", day: "numeric", year: "numeric" })} – ${end.toLocaleDateString("en", { month: "short", day: "numeric", year: "numeric" })}`;
+}
 import {
   Collapsible,
   CollapsibleContent,
@@ -219,6 +225,35 @@ export const DashboardHistory = ({
                       </span>
                     </li>
                   ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Menstrual period log (no longer menstruating entries) */}
+            {((progress.menstrualPeriodLog?.length ?? 0) > 0 || progress.menstrualPeriodStartDate) && (
+              <div className="mt-4">
+                <h4 className="font-semibold mb-3 flex items-center gap-2 text-sm text-muted-foreground">
+                  <Calendar className="w-4 h-4" />
+                  Period log
+                </h4>
+                <ul className="space-y-2 text-sm">
+                  {(progress.menstrualPeriodLog ?? []).slice().reverse().map((period, i) => (
+                    <li
+                      key={`${period.startDate}-${period.endDate}-${i}`}
+                      className="flex items-center justify-between py-2 px-3 rounded-lg bg-muted/30"
+                    >
+                      <span className="text-muted-foreground">Period ended</span>
+                      <span className="font-medium">{formatPeriodRange(period.startDate, period.endDate)}</span>
+                    </li>
+                  ))}
+                  {progress.menstrualPeriodStartDate && (
+                    <li className="flex items-center justify-between py-2 px-3 rounded-lg bg-muted/30 border border-border">
+                      <span className="text-muted-foreground">In period (no need to fast)</span>
+                      <span className="font-medium">
+                        started {new Date(progress.menstrualPeriodStartDate + "T12:00:00").toLocaleDateString("en", { month: "short", day: "numeric" })}
+                      </span>
+                    </li>
+                  )}
                 </ul>
               </div>
             )}

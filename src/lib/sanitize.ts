@@ -25,8 +25,9 @@ export function stripHtml(unsafe: string): string {
  */
 export function isSafeUrl(s: string): boolean {
   const trimmed = s.trim().toLowerCase();
+  // Reject script-like URL schemes (we check the prefix to reject, not to use as URL)
   if (
-    trimmed.startsWith("javascript:") ||
+    trimmed.startsWith("javascript:") || // eslint-disable-line no-script-url -- checking prefix to reject
     trimmed.startsWith("data:") ||
     trimmed.startsWith("vbscript:")
   )

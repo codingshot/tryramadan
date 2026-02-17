@@ -5,8 +5,12 @@ import { ArrowLeft, ArrowRight, Check, X } from "lucide-react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 
 const QUIZ = [
-  { q: "What is Ramadan?", options: ["A festival", "A month of fasting", "A prayer"], emojis: ["🎉", "🌙", "🤲"], correct: 1 },
-  { q: "When do Muslims break their daily fast?", options: ["At noon", "At sunset (Maghrib)", "At midnight"], emojis: ["☀️", "🌅", "🌙"], correct: 1 },
+  { q: "What is Ramadan?", options: ["A festival", "A month of fasting", "A prayer"], emojis: ["🎉", "🌙", "🤲"], correct: 1, explanation: "Ramadan is the ninth month of the Islamic calendar, when Muslims fast from dawn to sunset as one of the Five Pillars of Islam." },
+  { q: "When do Muslims break their daily fast?", options: ["At noon", "At sunset (Maghrib)", "At midnight"], emojis: ["☀️", "🌅", "🌙"], correct: 1, explanation: "The fast is broken at Maghrib (sunset), often with dates and water, following the Prophet’s example." },
+  { q: "When does the daily fast begin?", options: ["At midnight", "At dawn (before Fajr)", "At sunrise"], emojis: ["🌙", "🌄", "☀️"], correct: 1, explanation: "The fast begins at dawn, when Fajr prayer time starts. Suhoor (pre-dawn meal) should be finished before this time." },
+  { q: "Which of these intentionally breaks the fast?", options: ["Taking medicine for illness", "Eating or drinking", "Brushing teeth without swallowing"], emojis: ["💊", "🍽️", "🪥"], correct: 1, explanation: "Intentionally eating or drinking breaks the fast. Necessary medicine may be permitted for the ill; scholars differ on brushing teeth." },
+  { q: "Who is generally exempt from fasting?", options: ["Only the elderly", "Travelers, the sick, and pregnant/nursing women", "Only children"], emojis: ["👴", "🚗🤒🤱", "👶"], correct: 1, explanation: "Islam allows exemption for travelers, the sick, pregnant and nursing women, the elderly, and children. Missed days are made up later when possible." },
+  { q: "What is the pre-dawn meal called?", options: ["Iftar", "Suhoor", "Taraweeh"], emojis: ["🌙", "🌅", "🕌"], correct: 1, explanation: "Suhoor is the pre-dawn meal eaten before Fajr. Iftar is the meal at sunset when the fast is broken; Taraweeh is the Ramadan night prayer." },
 ];
 
 export default function OnboardingKnowledge() {
@@ -145,7 +149,9 @@ export default function OnboardingKnowledge() {
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mt-4 p-4 rounded-xl border-2 border-secondary/30 bg-secondary/5"
+                className="mt-4 p-4 rounded-xl border-2 border-secondary/30 bg-secondary/5 space-y-2"
+                role="status"
+                aria-live="polite"
               >
                 <p className={`font-medium flex items-center gap-2 ${isCorrect ? "text-green-700 dark:text-green-400" : "text-destructive"}`}>
                   {isCorrect ? (
@@ -160,6 +166,7 @@ export default function OnboardingKnowledge() {
                     </>
                   )}
                 </p>
+                <p className="text-sm text-muted-foreground">{question.explanation}</p>
               </motion.div>
             )}
           </div>

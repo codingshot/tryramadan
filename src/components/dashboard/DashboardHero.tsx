@@ -35,6 +35,7 @@ export const DashboardHero = ({
   const todayComplete = progress.completedDays.includes(todayStr);
   const todaySkipped = progress.skippedDays?.includes(todayStr);
   const todayBroken = todayEntry?.status === "broken";
+  const todayExcusedMenstruation = todayBroken && todayEntry?.brokenReason === "menstruation";
 
   const countdown = isFasting ? countdownToIftar : countdownToSuhoor;
   const targetLabel = isFasting ? "Iftar" : "Suhoor";
@@ -49,11 +50,13 @@ export const DashboardHero = ({
       {/* Large Hero Card */}
       <div
         className={`p-6 md:p-8 rounded-2xl border-2 ${
-          todayBroken
-            ? "bg-destructive/5 border-destructive/30"
-            : isFasting
-              ? "bg-primary/10 border-primary/30"
-              : "bg-muted/50 border-border"
+          todayExcusedMenstruation
+            ? "bg-muted/50 border-border"
+            : todayBroken
+              ? "bg-destructive/5 border-destructive/30"
+              : isFasting
+                ? "bg-primary/10 border-primary/30"
+                : "bg-muted/50 border-border"
         }`}
       >
         {/* Status Header */}
@@ -61,10 +64,12 @@ export const DashboardHero = ({
           <div className="flex items-center gap-3">
             <div
               className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                todayBroken ? "bg-destructive/20" : isFasting ? "bg-primary/20" : "bg-muted"
+                todayExcusedMenstruation ? "bg-muted" : todayBroken ? "bg-destructive/20" : isFasting ? "bg-primary/20" : "bg-muted"
               }`}
             >
-              {todayBroken ? (
+              {todayExcusedMenstruation ? (
+                <Sun className="w-6 h-6 text-muted-foreground" />
+              ) : todayBroken ? (
                 <AlertTriangle className="w-6 h-6 text-destructive" />
               ) : isFasting ? (
                 <Moon className="w-6 h-6 text-primary" />
@@ -76,28 +81,32 @@ export const DashboardHero = ({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <h2 className="text-xl md:text-2xl font-bold cursor-help border-b border-dotted border-transparent hover:border-foreground/40">
-                    {todayBroken ? "Broke fast" : isFasting ? "Currently Fasting" : "Eating Window"}
+                    {todayExcusedMenstruation ? "No need to fast" : todayBroken ? "Broke fast" : isFasting ? "Currently Fasting" : "Eating Window"}
                   </h2>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs p-3">
                   <p className="font-semibold text-sm">
-                    {todayBroken
-                      ? "Broke fast"
-                      : isFasting
-                        ? GENERAL_TOOLTIPS.fastingPeriod.title
-                        : "Eating Window"}
+                    {todayExcusedMenstruation
+                      ? "No need to fast"
+                      : todayBroken
+                        ? "Broke fast"
+                        : isFasting
+                          ? GENERAL_TOOLTIPS.fastingPeriod.title
+                          : "Eating Window"}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {todayBroken
-                      ? "You logged that you broke your fast today. Countdown below is until Iftar or next Suhoor."
-                      : isFasting
-                        ? GENERAL_TOOLTIPS.fastingPeriod.body
-                        : "You're between sunset (Maghrib) and dawn (Fajr). You can eat and drink."}
+                    {todayExcusedMenstruation
+                      ? "You're in your menstrual period. In Islam there is no obligation to fast during menstruation. These days don't break your streak."
+                      : todayBroken
+                        ? "You logged that you broke your fast today. Countdown below is until Iftar or next Suhoor."
+                        : isFasting
+                          ? GENERAL_TOOLTIPS.fastingPeriod.body
+                          : "You're between sunset (Maghrib) and dawn (Fajr). You can eat and drink."}
                   </p>
                 </TooltipContent>
               </Tooltip>
               <p className="text-sm text-muted-foreground">
-                {todayBroken ? "Logged breaking fast today" : isFasting ? "No food or drink" : "You can eat now"}
+                {todayExcusedMenstruation ? "Excused (menstruation)" : todayBroken ? "Logged breaking fast today" : isFasting ? "No food or drink" : "You can eat now"}
               </p>
             </div>
           </div>
@@ -113,7 +122,12 @@ export const DashboardHero = ({
               Skipped
             </span>
           )}
-          {todayBroken && (
+          {todayExcusedMenstruation && (
+            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-muted/80 text-muted-foreground border border-border">
+              No need to fast
+            </span>
+          )}
+          {todayBroken && !todayExcusedMenstruation && (
             <span className="px-3 py-1 rounded-full text-xs font-semibold bg-destructive/20 text-destructive border border-destructive/40">
               Broke Fast
             </span>

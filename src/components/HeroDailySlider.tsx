@@ -90,17 +90,17 @@ export const HeroDailySlider = () => {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.35 }}
-      className="w-full rounded-2xl bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary touch-pan-y"
+      className="w-full rounded-2xl bg-card backdrop-blur-sm border border-border overflow-hidden outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-background touch-pan-y"
     >
       {/* Toggle: Daily Hadith | Daily Quran */}
-      <div className="flex border-b border-primary-foreground/20">
+      <div className="flex border-b border-border">
         <button
           type="button"
           onClick={() => setMode("hadith")}
           className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${
             mode === "hadith"
               ? "bg-primary text-primary-foreground"
-              : "text-primary-foreground/80 hover:bg-primary-foreground/10"
+              : "text-muted-foreground hover:bg-muted"
           }`}
           aria-pressed={mode === "hadith"}
           aria-label="Show daily hadith"
@@ -114,7 +114,7 @@ export const HeroDailySlider = () => {
           className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${
             mode === "quran"
               ? "bg-primary text-primary-foreground"
-              : "text-primary-foreground/80 hover:bg-primary-foreground/10"
+              : "text-muted-foreground hover:bg-muted"
           }`}
           aria-pressed={mode === "quran"}
           aria-label="Show daily Quran verse"
@@ -125,16 +125,16 @@ export const HeroDailySlider = () => {
       </div>
 
       {/* Date + prev/next */}
-      <div className="flex items-center justify-between gap-2 px-4 py-2 bg-primary-foreground/5">
+      <div className="flex items-center justify-between gap-2 px-4 py-2 bg-muted/50">
         <button
           type="button"
           onClick={() => setDayOffset((o) => o - 1)}
-          className="p-2 rounded-lg text-primary-foreground/80 hover:bg-primary-foreground/10 hover:text-primary-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
+          className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
           aria-label="Previous day"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
-        <time dateTime={viewDate.toISOString().slice(0, 10)} className="text-sm text-primary-foreground font-medium">
+        <time dateTime={viewDate.toISOString().slice(0, 10)} className="text-sm text-foreground font-medium">
           {dateLabel}
           {isToday && (
             <span className="ml-2 text-xs text-secondary font-normal">(today)</span>
@@ -143,7 +143,7 @@ export const HeroDailySlider = () => {
         <button
           type="button"
           onClick={() => setDayOffset((o) => o + 1)}
-          className="p-2 rounded-lg text-primary-foreground/80 hover:bg-primary-foreground/10 hover:text-primary-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
+          className="p-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary"
           aria-label="Next day"
         >
           <ChevronRight className="w-5 h-5" />
@@ -162,10 +162,10 @@ export const HeroDailySlider = () => {
               transition={{ duration: 0.2 }}
               className="space-y-2"
             >
-              <blockquote className="text-sm md:text-base leading-relaxed text-primary-foreground font-display">
+              <blockquote className="text-sm md:text-base leading-relaxed text-foreground font-display">
                 "{hadith.text}"
               </blockquote>
-              <p className="text-xs text-primary-foreground/80">
+              <p className="text-xs text-muted-foreground">
                 <HadithSunnahLink source={hadith.source} className="text-secondary hover:text-secondary/90">
                   {hadith.source}
                 </HadithSunnahLink>
@@ -182,10 +182,10 @@ export const HeroDailySlider = () => {
               transition={{ duration: 0.2 }}
               className="space-y-2"
             >
-              <blockquote className="text-sm md:text-base leading-relaxed text-primary-foreground font-display">
+              <blockquote className="text-sm md:text-base leading-relaxed text-foreground font-display">
                 "{verse.text}"
               </blockquote>
-              <p className="text-xs text-primary-foreground/80">
+              <p className="text-xs text-muted-foreground">
                 <a
                   href={`${EXTERNAL_LINKS.quran}/${verse.surahNumber}/${verse.verseNumber}`}
                   target="_blank"

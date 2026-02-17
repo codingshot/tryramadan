@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -16,6 +16,7 @@ import {
   CheckSquare,
   Search,
   SlidersHorizontal,
+  X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Navbar } from "@/components/Navbar";
@@ -282,6 +283,7 @@ export default function DashboardJournal() {
   const handleExport = () => {
     if (entries.length === 0) {
       toast.info("No entries to export.");
+      return;
     }
     const data = {
       exportedAt: new Date().toISOString(),
@@ -314,6 +316,10 @@ export default function DashboardJournal() {
   const [slotFilter, setSlotFilter] = useState<JournalSlot | "all">("all");
   const [moodFilter, setMoodFilter] = useState<number | "all">("all");
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [readModeOpen, setReadModeOpen] = useState(false);
+  const [readModeIndex, setReadModeIndex] = useState(0);
+  const swipeStartX = useRef<number | null>(null);
+  const readModeRef = useRef<HTMLDivElement>(null);
 
   const filteredAndSortedEntries = useMemo(() => {
     let result = [...entries];
@@ -368,6 +374,12 @@ export default function DashboardJournal() {
       return () => clearTimeout(t);
     }
   }, [scrollToPastEntries]);
+
+  useEffect(() => {
+    if (readModeOpen && readModeRef.current) {
+      readModeRef.current.focus();
+    }
+  }, [readModeOpen]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -874,13 +886,28 @@ export default function DashboardJournal() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
           >
-            <h3 className="font-display font-bold mb-4 flex items-center gap-2">
+            <h3 className="font-display font-bold mb-4 flex items-center gap-2 flex-wrap">
               <BookOpen className="w-5 h-5 text-secondary" />
               Past entries
               {filteredAndSortedEntries.length < entries.length && (
                 <span className="text-sm font-normal text-muted-foreground">
                   ({filteredAndSortedEntries.length} of {entries.length})
                 </span>
+              )}
+              {filteredAndSortedEntries.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setReadModeIndex(0);
+                    setReadModeOpen(true);
+                  }}
+                  className="ml-auto inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-secondary/50 bg-secondary/10 text-secondary text-sm font-medium hover:bg-secondary/20 transition-colors"
+                  aria-label="Open swipe to read mode"
+                >
+                  <ChevronLeft className="w-4 h-4" aria-hidden />
+                  <ChevronRight className="w-4 h-4" aria-hidden />
+                  Swipe to read
+                </button>
               )}
             </h3>
 
@@ -1043,7 +1070,7 @@ export default function DashboardJournal() {
                       {entry.gratitude && (
                         <p className="text-xs text-secondary mt-2">Grateful: {entry.gratitude}</p>
                       )}
-                      <div className="flex gap-2 mt-2">
+                      <div className="flex flex-wrap gap-2 mt-2">
                         <button
                           type="button"
                           onClick={() => {
@@ -1063,6 +1090,19 @@ export default function DashboardJournal() {
                           className="text-xs font-medium text-secondary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
                         >
                           {isExpanded ? "Show less" : "View full"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const idx = filteredAndSortedEntries.findIndex(
+                              (e) => e.date === entry.date && (e.slot ?? "general") === (entry.slot ?? "general")
+                            );
+                            setReadModeIndex(idx >= 0 ? idx : 0);
+                            setReadModeOpen(true);
+                          }}
+                          className="text-xs font-medium text-secondary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
+                        >
+                          Swipe to read
                         </button>
                       </div>
                     </li>
@@ -1091,6 +1131,149 @@ export default function DashboardJournal() {
           </motion.div>
         </div>
       </main>
+
+      {/* Swipe / Read mode: full-screen reader with swipe or arrows */}
+      <AnimatePresence>
+        {readModeOpen && filteredAndSortedEntries.length > 0 && (
+          <motion.div
+            ref={readModeRef}
+            tabIndex={0}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 bg-background flex flex-col outline-none"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Journal read mode — swipe or use arrows to navigate"
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setReadModeOpen(false);
+              if (e.key === "ArrowLeft" && readModeIndex > 0) {
+                e.preventDefault();
+                setReadModeIndex((i) => i - 1);
+              }
+              if (e.key === "ArrowRight" && readModeIndex < filteredAndSortedEntries.length - 1) {
+                e.preventDefault();
+                setReadModeIndex((i) => i + 1);
+              }
+            }}
+          >
+            <div className="flex items-center justify-between gap-4 p-4 border-b border-border shrink-0 bg-background">
+              <span className="text-sm font-medium text-muted-foreground tabular-nums">
+                {Math.min(readModeIndex + 1, filteredAndSortedEntries.length)} of {filteredAndSortedEntries.length}
+              </span>
+              <button
+                type="button"
+                onClick={() => setReadModeOpen(false)}
+                className="p-2 rounded-lg hover:bg-muted transition-colors"
+                aria-label="Close read mode"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div
+              className="flex-1 overflow-hidden flex items-stretch min-h-0 touch-pan-y"
+              onTouchStart={(e) => {
+                swipeStartX.current = e.touches[0].clientX;
+              }}
+              onTouchEnd={(e) => {
+                const start = swipeStartX.current;
+                if (start == null) return;
+                const end = e.changedTouches[0].clientX;
+                const delta = end - start;
+                if (delta > 60 && readModeIndex > 0) {
+                  setReadModeIndex((i) => i - 1);
+                } else if (delta < -60 && readModeIndex < filteredAndSortedEntries.length - 1) {
+                  setReadModeIndex((i) => i + 1);
+                }
+                swipeStartX.current = null;
+              }}
+            >
+              <div className="flex-1 overflow-y-auto overflow-x-hidden w-full">
+                <AnimatePresence mode="wait" initial={false}>
+                  {(() => {
+                    const entry = filteredAndSortedEntries[Math.min(readModeIndex, filteredAndSortedEntries.length - 1)];
+                    if (!entry) return null;
+                    const entryKey = `${entry.date}-${entry.slot ?? "general"}`;
+                    return (
+                      <motion.article
+                        key={entryKey}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.2 }}
+                        className="p-6 max-w-xl mx-auto pb-24"
+                      >
+                        <p className="text-sm text-muted-foreground mb-1">
+                          {new Date(entry.date + "T12:00:00").toLocaleDateString("en", {
+                            weekday: "long",
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                        </p>
+                        {(entry.slot ?? "general") !== "general" && (
+                          <p className="text-xs text-secondary mb-3">{SLOT_LABELS[entry.slot ?? "general"]}</p>
+                        )}
+                        <div className="prose prose-sm dark:prose-invert max-w-none">
+                          <p className="whitespace-pre-wrap text-foreground leading-relaxed">{entry.content}</p>
+                        </div>
+                        {entry.gratitude && (
+                          <p className="text-sm text-secondary mt-4 font-medium">Grateful: {entry.gratitude}</p>
+                        )}
+                        {entry.mood != null && (
+                          <p className="text-sm text-muted-foreground mt-2 flex items-center gap-2">
+                            <span aria-hidden>{MOOD_EMOJI[entry.mood - 1]}</span>
+                            {MOOD_LABELS[entry.mood - 1]}
+                          </p>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setWriteDate(entry.date);
+                            setActiveSlot(entry.slot ?? "general");
+                            setCalendarMonth(new Date(entry.date + "T12:00:00"));
+                            handleSelectDate(new Date(entry.date + "T12:00:00"));
+                            setReadModeOpen(false);
+                            setTimeout(scrollToEditor, 150);
+                          }}
+                          className="mt-6 text-sm font-medium text-secondary hover:underline"
+                        >
+                          Edit this entry
+                        </button>
+                      </motion.article>
+                    );
+                  })()}
+                </AnimatePresence>
+              </div>
+            </div>
+            <div className="shrink-0 flex items-center justify-between gap-4 p-4 border-t border-border bg-background safe-area-bottom">
+              <button
+                type="button"
+                onClick={() => setReadModeIndex((i) => Math.max(0, i - 1))}
+                disabled={readModeIndex === 0}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-card font-medium text-sm disabled:opacity-40 disabled:pointer-events-none hover:bg-muted transition-colors min-h-[44px] touch-manipulation"
+                aria-label="Previous entry"
+              >
+                <ChevronLeft className="w-5 h-5" />
+                Previous
+              </button>
+              <p className="text-xs text-muted-foreground hidden sm:block">Swipe or use ← → keys</p>
+              <button
+                type="button"
+                onClick={() => setReadModeIndex((i) => Math.min(filteredAndSortedEntries.length - 1, i + 1))}
+                disabled={readModeIndex >= filteredAndSortedEntries.length - 1}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-card font-medium text-sm disabled:opacity-40 disabled:pointer-events-none hover:bg-muted transition-colors min-h-[44px] touch-manipulation"
+                aria-label="Next entry"
+              >
+                Next
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <Footer />
     </div>
   );

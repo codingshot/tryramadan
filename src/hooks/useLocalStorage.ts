@@ -325,6 +325,12 @@ export interface FastingLogEntry {
   brokenReason?: string;
 }
 
+/** One recorded menstrual period (start → end). Used for logs and history. */
+export interface MenstrualPeriodLogEntry {
+  startDate: string; // ISO date YYYY-MM-DD
+  endDate: string;   // ISO date YYYY-MM-DD
+}
+
 // Fasting progress interface
 export interface FastingProgress {
   currentDay: number;
@@ -337,6 +343,10 @@ export interface FastingProgress {
   longestStreak: number;
   startDate: string | null;
   fastingLog: FastingLogEntry[]; // log of fasting sessions
+  /** When set, user has marked themselves as currently in menstrual period (no obligation to fast). */
+  menstrualPeriodStartDate?: string | null;
+  /** History of period start/end for logs. Newest last. */
+  menstrualPeriodLog?: MenstrualPeriodLogEntry[];
 }
 
 export const defaultProgress: FastingProgress = {
@@ -349,6 +359,8 @@ export const defaultProgress: FastingProgress = {
   longestStreak: 0,
   startDate: null,
   fastingLog: [],
+  menstrualPeriodStartDate: null,
+  menstrualPeriodLog: [],
 };
 
 /** Normalize progress so no date is in both completedDays and skippedDays (skipped wins). See FALL-OFF-AND-RETURN-FLOWS §3. */
@@ -370,6 +382,8 @@ export function useFastingProgress() {
       completedDays: Array.isArray(stored.completedDays) ? stored.completedDays : [],
       fastingLog: Array.isArray(stored.fastingLog) ? stored.fastingLog : [],
       skippedDays: Array.isArray(stored.skippedDays) ? stored.skippedDays : [],
+      menstrualPeriodStartDate: stored.menstrualPeriodStartDate ?? null,
+      menstrualPeriodLog: Array.isArray(stored.menstrualPeriodLog) ? stored.menstrualPeriodLog : [],
     };
     return normalizeProgressSameDayConflict(migrated);
   }, [stored]);
@@ -627,6 +641,69 @@ export function setBrokenDayToInProgress(
   );
   setProgress({ ...progress, fastingLog: updatedLog });
   console.log(`${LOG_PREFIX} Broken day ${dateStr} set back to in progress.`);
+}
+
+/** Whether user is currently marked as in menstrual period (no obligation to fast). */
+export function isInMenstrualPeriod(progress: FastingProgress): boolean {
+  return !!progress.menstrualPeriodStartDate;
+}
+
+/** Start menstrual period today: set start date and ensure today is logged as excused (broken with reason menstruation) so streak is preserved. Pass todayOverride when using location-based "today". */
+export function startMenstrualPeriod(
+  progress: FastingProgress,
+  setProgress: (value: FastingProgress | ((prev: FastingProgress) => FastingProgress)) => void,
+  todayOverride?: string
+): void {
+  const today = todayOverride ?? getTodayDateString();
+  const now = new Date().toISOString();
+  const entry = progress.fastingLog?.find((e) => e.date === today);
+  const startedAt = entry?.startedAt ?? now;
+  const hoursFasted = entry?.status === 'in_progress' ? hoursBetween(startedAt, now) : 0;
+
+  const newOrUpdatedEntry: FastingLogEntry = {
+    date: today,
+    startedAt,
+    completedAt: now,
+    status: 'broken',
+    hoursFasted,
+    brokenReason: 'menstruation',
+  };
+  const updatedLog = (progress.fastingLog ?? []).filter((e) => e.date !== today);
+  updatedLog.push(newOrUpdatedEntry);
+
+  const completedDays = progress.completedDays.filter((d) => d !== today);
+  const skippedDays = (progress.skippedDays ?? []).filter((d) => d !== today);
+
+  setProgress({
+    ...progress,
+    menstrualPeriodStartDate: today,
+    fastingLog: updatedLog,
+    completedDays,
+    skippedDays,
+  });
+  console.log(`${LOG_PREFIX} Menstrual period started. ${today} marked as excused (no need to fast).`);
+}
+
+/** End menstrual period today: append to period log and clear current period. Pass todayOverride when using location-based "today". */
+export function endMenstrualPeriod(
+  progress: FastingProgress,
+  setProgress: (value: FastingProgress | ((prev: FastingProgress) => FastingProgress)) => void,
+  todayOverride?: string
+): void {
+  const today = todayOverride ?? getTodayDateString();
+  const startDate = progress.menstrualPeriodStartDate;
+  if (!startDate) {
+    console.log(`${LOG_PREFIX} No active menstrual period to end.`);
+    return;
+  }
+  const logEntry: MenstrualPeriodLogEntry = { startDate, endDate: today };
+  const menstrualPeriodLog = [...(progress.menstrualPeriodLog ?? []), logEntry];
+  setProgress({
+    ...progress,
+    menstrualPeriodStartDate: null,
+    menstrualPeriodLog,
+  });
+  console.log(`${LOG_PREFIX} Menstrual period ended. ${startDate} – ${today} logged.`);
 }
 
 // Notification settings

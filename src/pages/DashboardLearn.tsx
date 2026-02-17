@@ -15,9 +15,16 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { PageSEO } from "@/components/PageSEO";
 
 const QUIZ_QUESTIONS = [
-  { q: "In which month of the Islamic calendar does Ramadan fall?", options: ["Seventh", "Eighth", "Ninth", "Tenth"], correct: 2 },
-  { q: "What is the pre-dawn meal before fasting called?", options: ["Iftar", "Suhoor", "Taraweeh", "Zakat"], correct: 1 },
-  { q: "Laylat al-Qadr is often sought on which nights?", options: ["First ten", "Even nights of last ten", "Odd nights of last ten", "First and last night"], correct: 2 },
+  { q: "In which month of the Islamic calendar does Ramadan fall?", options: ["Seventh", "Eighth", "Ninth", "Tenth"], correct: 2, explanation: "Ramadan is the ninth month of the Islamic (lunar) calendar. It is the month in which the Quran was first revealed." },
+  { q: "What is the pre-dawn meal before fasting called?", options: ["Iftar", "Suhoor", "Taraweeh", "Zakat"], correct: 1, explanation: "Suhoor is the meal eaten before dawn. Iftar is the meal at sunset when the fast is broken; Zakat is charity." },
+  { q: "Laylat al-Qadr is often sought on which nights?", options: ["First ten", "Even nights of last ten", "Odd nights of last ten", "First and last night"], correct: 2, explanation: "Laylat al-Qadr (Night of Decree) is most likely one of the odd nights of the last ten days of Ramadan (21st, 23rd, 25th, 27th, or 29th)." },
+  { q: "When does the daily fast begin?", options: ["At midnight", "At dawn (before Fajr)", "At sunrise", "At noon"], correct: 1, explanation: "The fast begins at dawn (Fajr time). The pre-dawn meal (suhoor) should be finished before Fajr begins." },
+  { q: "When do Muslims break the fast?", options: ["At noon (Dhuhr)", "At sunset (Maghrib)", "At midnight", "After Isha"], correct: 1, explanation: "The fast is broken at Maghrib (sunset). Many break it with dates and water, following the Prophet’s tradition." },
+  { q: "Which intentionally breaks the fast?", options: ["Rinsing the mouth", "Eating or drinking", "Brushing teeth without swallowing water", "Using eye drops"], correct: 1, explanation: "Intentionally eating or drinking breaks the fast. Rinsing the mouth, brushing teeth without swallowing, and eye drops are generally considered not to break it." },
+  { q: "Who is generally exempt from fasting?", options: ["Only children under 7", "Travelers, the sick, pregnant/nursing women", "Only the elderly", "Only those who work"], correct: 1, explanation: "Exemptions include travelers, the sick, pregnant and nursing women, the elderly, and children. Missed days are made up (qada) when possible." },
+  { q: "What should Muslims who miss fasts do?", options: ["Nothing", "Make up missed days later (qada)", "Donate only", "Fast double next year"], correct: 1, explanation: "Missed fasts must be made up later (qada) when one is able. Fidyah (feeding the poor) may apply for those who cannot make them up." },
+  { q: "What is the intention (niyyah) for fasting?", options: ["Optional", "Required for the fast to be valid", "Only on the first day", "Only for voluntary fasts"], correct: 1, explanation: "Having the intention (niyyah) to fast is required for the fast to be valid. It can be made in the heart, ideally before Fajr." },
+  { q: "What is the night prayer often performed in Ramadan called?", options: ["Isha", "Fajr", "Taraweeh", "Witr only"], correct: 2, explanation: "Taraweeh is the extra night prayer performed in Ramadan, usually after Isha. It is a sunnah (recommended) practice." },
 ];
 
 const DashboardLearn = () => {
@@ -191,7 +198,7 @@ const DashboardLearn = () => {
             className="p-6 rounded-2xl bg-card border border-border mb-8"
           >
             <h3 className="font-display font-bold mb-2">Quick knowledge check</h3>
-            <p className="text-sm text-muted-foreground mb-4">Test your Ramadan knowledge with a short quiz.</p>
+            <p className="text-sm text-muted-foreground mb-4">Test your Ramadan knowledge: basic rules, when to fast, what breaks the fast, who is exempt, and more.</p>
             {!quizStarted && quizScore === null && (
               <Button variant="outline" onClick={startQuiz}>Start quiz</Button>
             )}
@@ -199,19 +206,40 @@ const DashboardLearn = () => {
               <div>
                 <p className="font-medium mb-3">{QUIZ_QUESTIONS[quizIndex].q}</p>
                 <div className="space-y-2">
-                  {QUIZ_QUESTIONS[quizIndex].options.map((opt, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => setQuizAnswer(i)}
-                      className={`block w-full text-left px-4 py-2 rounded-lg border transition-colors ${
-                        quizAnswer === i ? "border-secondary bg-secondary/10" : "border-border hover:border-secondary/50"
-                      }`}
-                    >
-                      {opt}
-                    </button>
-                  ))}
+                  {QUIZ_QUESTIONS[quizIndex].options.map((opt, i) => {
+                    const correctIdx = QUIZ_QUESTIONS[quizIndex].correct;
+                    const selected = quizAnswer === i;
+                    const showCorrect = quizAnswer !== null && i === correctIdx;
+                    const showIncorrect = quizAnswer !== null && selected && i !== correctIdx;
+                    return (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => quizAnswer === null && setQuizAnswer(i)}
+                        disabled={quizAnswer !== null}
+                        className={`block w-full text-left px-4 py-2 rounded-lg border transition-colors ${
+                          quizAnswer === null
+                            ? "border-border hover:border-secondary/50"
+                            : showCorrect
+                              ? "border-green-600 bg-green-500/10 text-green-700 dark:text-green-400"
+                              : showIncorrect
+                                ? "border-destructive/60 bg-destructive/10 text-destructive"
+                                : "border-border text-muted-foreground"
+                        }`}
+                      >
+                        {opt}
+                      </button>
+                    );
+                  })}
                 </div>
+                {quizAnswer !== null && (
+                  <div className="mt-4 p-4 rounded-xl border border-secondary/30 bg-secondary/5 space-y-2" role="status" aria-live="polite">
+                    <p className={`font-medium text-sm ${quizAnswer === QUIZ_QUESTIONS[quizIndex].correct ? "text-green-700 dark:text-green-400" : "text-destructive"}`}>
+                      {quizAnswer === QUIZ_QUESTIONS[quizIndex].correct ? "Correct!" : `Correct answer: ${QUIZ_QUESTIONS[quizIndex].options[QUIZ_QUESTIONS[quizIndex].correct]}`}
+                    </p>
+                    <p className="text-sm text-muted-foreground">{QUIZ_QUESTIONS[quizIndex].explanation}</p>
+                  </div>
+                )}
                 <Button className="mt-4" onClick={handleQuizSubmit} disabled={quizAnswer === null}>
                   {quizIndex + 1 >= QUIZ_QUESTIONS.length ? "Finish" : "Next"}
                 </Button>

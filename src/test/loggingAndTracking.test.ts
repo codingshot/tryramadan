@@ -32,6 +32,9 @@ import {
   getJournalStreak,
   markHadithViewedToday,
   ACTIVITY_LOG_KEY,
+  startMenstrualPeriod,
+  endMenstrualPeriod,
+  isInMenstrualPeriod,
   type FastingProgress,
   type DayFoodLog,
 } from "@/hooks/useLocalStorage";
@@ -679,5 +682,60 @@ describe("getJournalStreak (non-fasting achievements)", () => {
       { date: twoDaysAgo },
     ];
     expect(getJournalStreak(entries)).toBe(1);
+  });
+});
+
+describe("Menstrual period tracking", () => {
+  const todayStr = "2025-03-15";
+
+  it("isInMenstrualPeriod returns false when menstrualPeriodStartDate is not set", () => {
+    const progress: FastingProgress = { ...defaultProgress };
+    expect(isInMenstrualPeriod(progress)).toBe(false);
+  });
+
+  it("isInMenstrualPeriod returns true when menstrualPeriodStartDate is set", () => {
+    const progress: FastingProgress = { ...defaultProgress, menstrualPeriodStartDate: "2025-03-10" };
+    expect(isInMenstrualPeriod(progress)).toBe(true);
+  });
+
+  it("startMenstrualPeriod sets start date and logs today as broken with reason menstruation", () => {
+    const progress: FastingProgress = { ...defaultProgress };
+    let next = progress;
+    const setProgress = (v: FastingProgress | ((p: FastingProgress) => FastingProgress)) => {
+      next = typeof v === "function" ? v(next) : v;
+    };
+    startMenstrualPeriod(progress, setProgress, todayStr);
+    expect(next.menstrualPeriodStartDate).toBe(todayStr);
+    const entry = next.fastingLog?.find((e) => e.date === todayStr);
+    expect(entry?.status).toBe("broken");
+    expect(entry?.brokenReason).toBe("menstruation");
+  });
+
+  it("endMenstrualPeriod appends to log and clears start date", () => {
+    const endStr = "2025-03-20";
+    const progress: FastingProgress = {
+      ...defaultProgress,
+      menstrualPeriodStartDate: "2025-03-10",
+      menstrualPeriodLog: [],
+    };
+    let next = progress;
+    const setProgress = (v: FastingProgress | ((p: FastingProgress) => FastingProgress)) => {
+      next = typeof v === "function" ? v(next) : v;
+    };
+    endMenstrualPeriod(progress, setProgress, endStr);
+    expect(next.menstrualPeriodStartDate).toBeNull();
+    expect(next.menstrualPeriodLog).toHaveLength(1);
+    expect(next.menstrualPeriodLog?.[0]).toEqual({ startDate: "2025-03-10", endDate: endStr });
+  });
+
+  it("endMenstrualPeriod no-op when no active period", () => {
+    const progress: FastingProgress = { ...defaultProgress, menstrualPeriodLog: [] };
+    let next = progress;
+    const setProgress = (v: FastingProgress | ((p: FastingProgress) => FastingProgress)) => {
+      next = typeof v === "function" ? v(next) : v;
+    };
+    endMenstrualPeriod(progress, setProgress, todayStr);
+    expect(next.menstrualPeriodStartDate).toBeFalsy();
+    expect(next.menstrualPeriodLog).toEqual([]);
   });
 });

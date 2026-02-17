@@ -4,7 +4,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 
-const KNOWLEDGE_QUIZ_LENGTH = 2; // reduced quiz; used for Muslim auto-score
+const KNOWLEDGE_QUIZ_LENGTH = 6; // used for Muslim skip (full score)
 
 export default function OnboardingMode() {
   const { state, setMode, setKnowledgeScore } = useOnboarding();

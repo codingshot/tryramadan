@@ -16,6 +16,7 @@ import {
   useNotificationSettings,
   useLocalStorage,
   getQuickActionOrderFromPriorities,
+  persistQuickActionsSync,
   useDashboardQuickActions,
   defaultPreferences,
   defaultProgress,
@@ -58,8 +59,10 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
 import { LANGUAGE_OPTIONS, COUNTRY_OPTIONS } from "@/data/languages-and-countries";
 import { getDefaultHydrationGoalMl, getHydrationUnit, ML_PER_US_CUP } from "@/lib/hydration";
+import { kgToLb, lbToKg, isImperialWeightCountry } from "@/lib/weight";
 import { getRamadanDayNumber, isRamadanDay, getRamadanDateRange } from "@/lib/ramadan";
 import { useRamadanRange } from "@/hooks/useRamadanRange";
 import { deleteAllUserData, clearJournalOnly, clearHealthDataOnly, clearLocationFromPreferences, saveBackupBeforeClear, TRYRAMADAN_LOCALSTORAGE_KEYS } from "@/lib/dataLifecycle";
@@ -238,7 +241,10 @@ const Settings = () => {
       : getDefaultHydrationGoalMl(preferences.country || "US");
 
   const applyPrioritiesToDashboard = () => {
-    setQuickActionOrder(getQuickActionOrderFromPriorities(preferences));
+    const order = getQuickActionOrderFromPriorities(preferences);
+    persistQuickActionsSync(order);
+    setQuickActionOrder(order);
+    toast.success("Quick access updated. Go to Dashboard to see your links.");
   };
 
   useEffect(() => {
@@ -603,10 +609,14 @@ const Settings = () => {
             <button
               onClick={applyPrioritiesToDashboard}
               className="mt-4 w-full min-h-[44px] py-2.5 rounded-xl border-2 border-secondary/50 text-secondary hover:bg-secondary/10 font-medium text-sm flex items-center justify-center gap-2"
+              aria-label="Apply current priorities to dashboard quick access links"
             >
-              <Target className="w-4 h-4" />
+              <Target className="w-4 h-4" aria-hidden />
               Apply to dashboard quick access
             </button>
+            <p className="text-xs text-muted-foreground mt-2">
+              Reorders the Quick Actions on the dashboard. To add, remove, or drag to reorder links, go to Schedule → Dashboard quick access.
+            </p>
           </motion.div>
 
           {/* Gender & menstruation — personalization and excused fasting days */}
@@ -673,7 +683,7 @@ const Settings = () => {
                     </button>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    We&apos;ll predict your excused fasting days during Ramadan. Tradition recognises these days as exempt—no guilt. You can still log them as &quot;I didn&apos;t fast today&quot; or use the break-fast reason.
+                    We&apos;ll predict your excused fasting days during Ramadan. On the dashboard you can mark &quot;In menstrual period&quot; and &quot;No longer menstruating&quot; so we show &quot;No need to fast&quot; and log periods—these days don&apos;t break your streak. Tradition recognises these days as exempt.
                   </p>
                   {preferences.menstruationTrackingEnabled && (
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -727,25 +737,63 @@ const Settings = () => {
               )}
 
               <div>
-                <label htmlFor="settings-body-weight" className="text-xs font-semibold text-muted-foreground block mb-2">Body weight (kg)</label>
-                <input
-                  id="settings-body-weight"
-                  type="number"
-                  min={20}
-                  max={300}
-                  step={0.5}
-                  placeholder="e.g. 70"
-                  className="w-full max-w-[120px] min-h-[44px] px-3 rounded-lg border border-border bg-background text-foreground text-sm"
-                  value={preferences.bodyWeightKg != null && preferences.bodyWeightKg > 0 ? String(preferences.bodyWeightKg) : ""}
-                  onChange={(e) => {
-                    const v = e.target.value.trim();
-                    const num = v === "" ? null : parseFloat(v);
-                    const bodyWeightKg = num != null && !Number.isNaN(num) && num > 0 ? num : null;
-                    setPreferences({ ...preferences, bodyWeightKg });
-                    setDailyGoals((g) => ({ ...g, calories: getSuggestedCalories(preferences.sexForCalories ?? null, bodyWeightKg) }));
-                  }}
-                />
-                <p className="text-xs text-muted-foreground mt-1">Optional. With gender, used to suggest daily calories in the macro tracker.</p>
+                {(() => {
+                  const useLb = isImperialWeightCountry(preferences.country);
+                  const primaryUnit = useLb ? "lb" : "kg";
+                  const displayValue =
+                    preferences.bodyWeightKg != null && preferences.bodyWeightKg > 0
+                      ? useLb
+                        ? kgToLb(preferences.bodyWeightKg)
+                        : preferences.bodyWeightKg
+                      : null;
+                  const secondaryValue =
+                    preferences.bodyWeightKg != null && preferences.bodyWeightKg > 0
+                      ? useLb
+                        ? preferences.bodyWeightKg
+                        : kgToLb(preferences.bodyWeightKg)
+                      : null;
+                  const [min, max, step, placeholder] = useLb
+                    ? [44, 660, 1, "e.g. 154"]
+                    : [20, 300, 0.5, "e.g. 70"];
+                  return (
+                    <>
+                      <label htmlFor="settings-body-weight" className="text-xs font-semibold text-muted-foreground block mb-2">
+                        Body weight ({primaryUnit})
+                        {secondaryValue != null && (
+                          <span className="font-normal text-muted-foreground ml-1">
+                            ({secondaryValue.toFixed(1)} {useLb ? "kg" : "lb"})
+                          </span>
+                        )}
+                      </label>
+                      <input
+                        id="settings-body-weight"
+                        type="number"
+                        min={min}
+                        max={max}
+                        step={step}
+                        placeholder={placeholder}
+                        className="w-full max-w-[120px] min-h-[44px] px-3 rounded-lg border border-border bg-background text-foreground text-sm"
+                        value={displayValue != null ? String(displayValue) : ""}
+                        onChange={(e) => {
+                          const v = e.target.value.trim();
+                          const num = v === "" ? null : parseFloat(v);
+                          const bodyWeightKg =
+                            num != null && !Number.isNaN(num) && num > 0
+                              ? useLb
+                                ? lbToKg(num)
+                                : num
+                              : null;
+                          setPreferences({ ...preferences, bodyWeightKg });
+                          setDailyGoals((g) => ({ ...g, calories: getSuggestedCalories(preferences.sexForCalories ?? null, bodyWeightKg) }));
+                        }}
+                        aria-describedby="settings-body-weight-desc"
+                      />
+                      <p id="settings-body-weight-desc" className="text-xs text-muted-foreground mt-1">
+                        Optional. With gender, used to suggest daily calories in the macro tracker. Default unit is based on your region.
+                      </p>
+                    </>
+                  );
+                })()}
               </div>
 
               {/* Daily calorie goal override — id for deep link from macro tracker */}

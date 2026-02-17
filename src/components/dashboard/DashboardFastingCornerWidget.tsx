@@ -34,6 +34,7 @@ export function DashboardFastingCornerWidget({
   const todayComplete = progress.completedDays.includes(todayStr);
   const todaySkipped = progress.skippedDays?.includes(todayStr);
   const todayBroken = todayEntry?.status === "broken";
+  const todayNoNeedToFast = todayBroken && todayEntry?.brokenReason === "menstruation";
 
   const countdown = isFasting ? countdownToIftar : countdownToSuhoor;
   const targetLabel = isFasting ? "Iftar" : "Suhoor";
@@ -61,7 +62,7 @@ export function DashboardFastingCornerWidget({
         </div>
         <div className="min-w-0">
           <p className="text-xs font-medium text-muted-foreground truncate">
-            {todayComplete ? "Completed" : todaySkipped ? "Skipped" : todayBroken ? "Broke fast" : isFasting ? "Fasting" : "Eating window"}
+            {todayComplete ? "Completed" : todaySkipped ? "Skipped" : todayNoNeedToFast ? "No need to fast" : todayBroken ? "Broke fast" : isFasting ? "Fasting" : "Eating window"}
           </p>
           {showCountdown ? (
             <>

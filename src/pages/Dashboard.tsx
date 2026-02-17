@@ -83,6 +83,10 @@ import {
   planToFoodLogEntries,
   useDisplayTimezone,
   useHabitLog,
+  useMenstruationTrackingEnabled,
+  isInMenstrualPeriod,
+  startMenstrualPeriod,
+  endMenstrualPeriod,
   type LearningPriority,
   type CultureRecipesPriority,
   type QuranPriority,
@@ -638,6 +642,8 @@ const Dashboard = () => {
   const todayLog = getTodayFastingLog(progress, todayStr);
   const [showChangeStatusDialog, setShowChangeStatusDialog] = useState(false);
   const recentLog = (progress.fastingLog || []).slice(-7).reverse();
+  const menstruationTrackingEnabled = useMenstruationTrackingEnabled();
+  const inMenstrualPeriod = isInMenstrualPeriod(progress);
 
   const ASK_FASTING_DISMISSED_KEY = "tryramadan-ask-fasting-dismissed";
   useEffect(() => {
@@ -937,18 +943,19 @@ const Dashboard = () => {
                 <Popover open={modeQuickSettingsOpen} onOpenChange={setModeQuickSettingsOpen}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        onDoubleClick={() => setModeQuickSettingsOpen(true)}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border bg-muted/50 hover:bg-muted text-sm font-medium min-h-[36px] touch-manipulation"
-                        aria-label={`Mode: ${preferences.userType === "muslim" ? "Muslim" : "Non-Muslim"}. Double-click for quick settings.`}
-                      >
-                        <span aria-hidden>{preferences.userType === "muslim" ? "☪" : "🌱"}</span>
-                        <span>{preferences.userType === "muslim" ? "Muslim" : "Non-Muslim"}</span>
-                      </button>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border bg-muted/50 hover:bg-muted text-sm font-medium min-h-[36px] touch-manipulation"
+                          aria-label={`Mode: ${preferences.userType === "muslim" ? "Muslim" : "Non-Muslim"}. Click for quick settings.`}
+                        >
+                          <span aria-hidden>{preferences.userType === "muslim" ? "☪" : "🌱"}</span>
+                          <span>{preferences.userType === "muslim" ? "Muslim" : "Non-Muslim"}</span>
+                        </button>
+                      </PopoverTrigger>
                     </TooltipTrigger>
                     <TooltipContent side="bottom">
-                      <p>Double-click for quick settings & learning</p>
+                      <p>Click for quick settings & learning</p>
                     </TooltipContent>
                   </Tooltip>
                   <PopoverContent align="start" className="w-[min(100vw-2rem,340px)] p-4" aria-label="Quick settings for your mode">
@@ -1150,7 +1157,9 @@ const Dashboard = () => {
                             "tryramadan-dismissed-location-banner",
                             "1",
                           );
-                        } catch {}
+                        } catch {
+                          // ignore localStorage quota/access errors
+                        }
                         setLocationBannerDismissed(true);
                       }}
                       className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground"
@@ -1161,6 +1170,64 @@ const Dashboard = () => {
                   </div>
                 </div>
               )}
+
+            {/* Menstrual period: outline rule (no obligation to fast), "No need to fast" tag, mark start/end */}
+            {menstruationTrackingEnabled && (
+              <div className="mt-4 p-4 rounded-xl border border-border bg-card" role="region" aria-label="Menstrual period tracking">
+                {inMenstrualPeriod ? (
+                  <>
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted border border-border text-sm font-medium">
+                        No need to fast
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        Period started {progress.menstrualPeriodStartDate}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      You&apos;re in your menstrual period. In Islam there is no obligation to fast during menstruation—you can resume fasting after you&apos;re no longer menstruating. These days don&apos;t break your streak.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        endMenstrualPeriod(progress, setProgress, todayStr);
+                        toast.success("Marked as no longer menstruating. Logged.");
+                      }}
+                      className="text-sm font-medium px-3 py-2 rounded-lg bg-primary/20 text-primary hover:bg-primary/30 border border-primary/30 focus-visible:ring-2 focus-visible:ring-offset-2"
+                      aria-label="Mark as no longer menstruating and log period end"
+                    >
+                      No longer menstruating?
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      In Islam there is no obligation to fast during menstruation. Mark when you&apos;re in your period so we show &quot;No need to fast&quot; and log it.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        startMenstrualPeriod(progress, setProgress, todayStr);
+                        toast.success("Marked as in menstrual period. No need to fast.");
+                      }}
+                      className="text-sm font-medium px-3 py-2 rounded-lg border border-border hover:bg-muted focus-visible:ring-2 focus-visible:ring-offset-2"
+                      aria-label="Mark as in menstrual period (no need to fast today)"
+                    >
+                      Mark as in menstrual period
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Hint for women who have not enabled period tracking */}
+            {preferences.gender === "female" && !menstruationTrackingEnabled && (
+              <div className="mt-4 p-3 rounded-xl border border-border bg-muted/30">
+                <p className="text-sm text-muted-foreground">
+                  Turn on <Link to="/settings" className="text-primary hover:underline font-medium">period tracking in Settings</Link> to mark excused days and see &quot;No need to fast&quot; during your period—these days won&apos;t break your streak.
+                </p>
+              </div>
+            )}
 
             {/* Compact Ramadan / Sunnah badge at top */}
             {(() => {

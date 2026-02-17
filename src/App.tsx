@@ -196,6 +196,7 @@ const App = () => (
           <Route path="/schedule" element={<Navigate to="/dashboard/schedule" replace />} />
           <Route path="/journal" element={<Navigate to="/dashboard/journal" replace />} />
           <Route path="/prayers" element={<Navigate to="/dashboard/prayers" replace />} />
+          <Route path="/quran" element={<Navigate to="/dashboard/quran" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/today" element={<Suspense fallback={<PageFallback />}><DashboardToday /></Suspense>} />
           <Route
@@ -254,6 +255,7 @@ const App = () => (
           />
           <Route path="/dashboard/glossary" element={<Suspense fallback={<PageFallback />}><LearnGlossary /></Suspense>} />
           <Route path="/learn" element={<Navigate to="/dashboard/learn" replace />} />
+          <Route path="/learn/" element={<Navigate to="/dashboard/learn" replace />} />
           <Route path="/learn/glossary" element={<Suspense fallback={<PageFallback />}><LearnGlossary /></Suspense>} />
           <Route path="/learn/hadith" element={<Suspense fallback={<PageFallback />}><LearnHadith /></Suspense>} />
           <Route path="/health" element={<Suspense fallback={<PageFallback />}><Health /></Suspense>} />

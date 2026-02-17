@@ -15,6 +15,19 @@ function useIsTouchDevice() {
   return isTouch;
 }
 
+/** True when viewport is mobile-sized — hide keyboard shortcuts icon. */
+function useIsMobileViewport() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    setIsMobile(mq.matches);
+    const handler = () => setIsMobile(mq.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return isMobile;
+}
+
 const SHORTCUTS = [
   { keys: ["g", "d"], description: "Go to Dashboard" },
   { keys: ["g", "t"], description: "Go to Today" },
@@ -31,16 +44,17 @@ const SHORTCUTS = [
 export function KeyboardShortcutsHelp() {
   const [isOpen, setIsOpen] = useState(false);
   const isTouch = useIsTouchDevice();
+  const isMobileViewport = useIsMobileViewport();
 
   useEffect(() => {
-    if (isTouch) return;
+    if (isTouch || isMobileViewport) return;
     const handler = () => setIsOpen(true);
     window.addEventListener("show-keyboard-shortcuts", handler);
     return () => window.removeEventListener("show-keyboard-shortcuts", handler);
-  }, [isTouch]);
+  }, [isTouch, isMobileViewport]);
 
-  // Don't show on mobile/touch devices (no physical keyboard)
-  if (isTouch) return null;
+  // Don't show on mobile/touch devices or narrow viewports (no physical keyboard, icon clutters small screens)
+  if (isTouch || isMobileViewport) return null;
 
   return (
     <>

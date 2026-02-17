@@ -61,7 +61,7 @@ function buildChartData(
   const start = new Date(ramadanStart + "T12:00:00");
   const end = new Date(ramadanEnd + "T12:00:00");
   if (isNaN(start.getTime()) || isNaN(end.getTime())) return [{ week: "—", completed: 0 }];
-  let d = new Date(start);
+  const d = new Date(start);
   while (d <= end) {
     const weekEnd = new Date(d);
     weekEnd.setDate(weekEnd.getDate() + 6);

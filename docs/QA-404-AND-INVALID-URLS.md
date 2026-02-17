@@ -1,6 +1,6 @@
 # QA: Invalid and Outdated URLs
 
-> **Implementation status:** Done. Vitest tests in `src/test/404-invalid-urls.test.tsx`. Old-path redirects added: `/today` → `/dashboard/today`, `/schedule` → `/dashboard/schedule`, `/journal` → `/dashboard/journal`, `/prayers` → `/dashboard/prayers`.
+> **Implementation status:** Done. Vitest tests in `src/test/404-invalid-urls.test.tsx`. Old-path redirects added: `/today` → `/dashboard/today`, `/schedule` → `/dashboard/schedule`, `/journal` → `/dashboard/journal`, `/prayers` → `/dashboard/prayers`, `/learn` (and `/learn/`) → `/dashboard/learn`, `/quran` → `/dashboard/quran`.
 
 Verifies that invalid or outdated URLs don't break the app. Documents 404 behavior, proposed test cases, and expected user experience.
 
@@ -82,6 +82,8 @@ Redirects are in place for backward compatibility:
 | `/schedule` | `/dashboard/schedule` | ✅ Redirect |
 | `/journal` | `/dashboard/journal` | ✅ Redirect |
 | `/prayers` | `/dashboard/prayers` | ✅ Redirect |
+| `/learn`, `/learn/` | `/dashboard/learn` | ✅ Redirect |
+| `/quran` | `/dashboard/quran` | ✅ Redirect |
 
 ### Invalid Dynamic Slugs
 
