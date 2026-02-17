@@ -83,6 +83,14 @@ const DashboardLearn = () => {
       color: 'bg-primary/20 text-foreground',
     },
     {
+      title: 'Taraweeh Prayer',
+      titleAr: 'صلاة التراويح',
+      description: 'Night prayers in Ramadan, Quran completion, and mosque traditions',
+      icon: Moon,
+      link: '/dashboard/prayers',
+      color: 'bg-violet-500/20 text-violet-600',
+    },
+    {
       title: 'Islamic Glossary',
       titleAr: 'المصطلحات الإسلامية',
       description: 'Arabic-English terms with definitions',

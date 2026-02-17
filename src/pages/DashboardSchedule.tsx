@@ -310,6 +310,8 @@ const DashboardSchedule = () => {
   const [exportLoading, setExportLoading] = useState(false);
   const [exportTimeRange, setExportTimeRange] = useState<"month" | "30days" | "ramadan" | "day">("month");
   const [exportTypePreset, setExportTypePreset] = useState<"fasting" | "full" | "custom">("full");
+  const [exportIncludeMealBlocking, setExportIncludeMealBlocking] = useState(false);
+  const [taraweehMosqueName] = useLocalStorage<string>("tryramadan-taraweeh-mosque", "");
   const [customEventTitle, setCustomEventTitle] = useState("");
   const [customEventTime, setCustomEventTime] = useState("18:00");
   const [editReasonOpen, setEditReasonOpen] = useState(false);
@@ -1213,6 +1215,8 @@ const DashboardSchedule = () => {
         exportMode: isCustom ? undefined : exportTypePreset === "fasting" ? "fasting" : "full",
         includeTypes: isCustom ? calendarIncludeTypes : undefined,
         eventDurations: defaultDurations,
+        taraweehMosque: taraweehMosqueName || undefined,
+        includeMealBlocking: exportIncludeMealBlocking,
       });
       downloadIcal(ics, `tryramadan-${startStr}-to-${endStr}.ics`);
       toast.success("Calendar exported successfully");
@@ -1688,6 +1692,25 @@ const DashboardSchedule = () => {
                 </label>
               </div>
             )}
+
+            {/* Extra export options */}
+            <div className="flex flex-wrap gap-x-4 gap-y-1.5 py-2 mb-2 border-t border-border pt-3">
+              <label className="flex items-center gap-2 cursor-pointer min-h-[32px]">
+                <input
+                  type="checkbox"
+                  checked={exportIncludeMealBlocking}
+                  onChange={(e) => setExportIncludeMealBlocking(e.target.checked)}
+                  className="rounded border-border"
+                />
+                <span className="text-xs sm:text-sm">Block off meal prep time (1hr before Suhoor & Iftar)</span>
+              </label>
+              {taraweehMosqueName && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <MapPin className="w-3 h-3" /> Taraweeh location: {taraweehMosqueName}
+                  <Link to="/dashboard/prayers" className="text-secondary hover:underline ml-1">Edit</Link>
+                </p>
+              )}
+            </div>
 
             <div className="flex flex-col gap-2 mb-2">
               <Button

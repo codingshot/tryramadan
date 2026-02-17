@@ -31,6 +31,9 @@ const DashboardPrayers = () => {
   const [prayerTracker, setPrayerTracker] = useLocalStorage<Record<string, Record<string, boolean>>>("tryramadan-prayer-tracker", {});
   const [prayerNotifications, setPrayerNotifications] = usePrayerNotificationPrefs();
   const [adhanSoundEnabled, setAdhanSoundEnabled] = useAdhanSoundEnabled();
+  // Taraweeh tracker: which nights attended, and which juz they're on
+  const [taraweehTracker, setTaraweehTracker] = useLocalStorage<Record<string, { attended: boolean; juz: number | null; mosque?: string }>>("tryramadan-taraweeh-tracker", {});
+  const [taraweehMosque, setTaraweehMosque] = useLocalStorage<string>("tryramadan-taraweeh-mosque", "");
   const { permission, requestPermission, supported } = useNotifications();
   const todayStr = displayTimezone
     ? new Date().toLocaleDateString("en-CA", { timeZone: displayTimezone })
@@ -347,6 +350,148 @@ const DashboardPrayers = () => {
             )}
           </motion.div>
           
+          {/* Taraweeh Tracker (Muslim mode only) */}
+          {preferences.userType === "muslim" && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.22 }}
+            className="mt-6 p-5 rounded-2xl bg-card border border-border"
+          >
+            <h3 className="font-display font-bold flex items-center gap-2 mb-1">
+              <Moon className="w-5 h-5 text-secondary" />
+              Taraweeh Tracker
+              <span className="font-arabic text-sm text-secondary ml-1">تراويح</span>
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Track your nightly Taraweeh attendance and which juz of the Quran is being recited at your mosque.
+            </p>
+
+            {/* Mosque name */}
+            <div className="mb-4">
+              <Label htmlFor="taraweeh-mosque" className="text-sm font-medium mb-1 block">Your mosque (optional)</Label>
+              <input
+                id="taraweeh-mosque"
+                type="text"
+                value={taraweehMosque}
+                onChange={(e) => setTaraweehMosque(e.target.value)}
+                placeholder="e.g. Islamic Center of NYC"
+                className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm"
+              />
+            </div>
+
+            {/* Tonight's Taraweeh */}
+            <div className="p-4 rounded-xl bg-muted/50 border border-border mb-4">
+              <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
+                <span className="font-medium text-sm">Tonight ({todayStr})</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const current = taraweehTracker[todayStr];
+                    setTaraweehTracker((prev) => ({
+                      ...prev,
+                      [todayStr]: {
+                        attended: !current?.attended,
+                        juz: current?.juz ?? null,
+                        mosque: taraweehMosque || undefined,
+                      },
+                    }));
+                  }}
+                  className={`min-h-[44px] px-4 py-2 rounded-lg border-2 text-sm font-medium transition-colors flex items-center gap-2 ${
+                    taraweehTracker[todayStr]?.attended
+                      ? "bg-secondary border-secondary text-secondary-foreground"
+                      : "border-border hover:border-secondary"
+                  }`}
+                >
+                  <Check className="w-4 h-4" />
+                  {taraweehTracker[todayStr]?.attended ? "Attended ✓" : "Mark attended"}
+                </button>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Label htmlFor="taraweeh-juz-today" className="text-sm text-muted-foreground shrink-0">Juz being recited:</Label>
+                <select
+                  id="taraweeh-juz-today"
+                  value={taraweehTracker[todayStr]?.juz ?? ""}
+                  onChange={(e) => {
+                    const juz = e.target.value ? parseInt(e.target.value, 10) : null;
+                    setTaraweehTracker((prev) => ({
+                      ...prev,
+                      [todayStr]: {
+                        ...prev[todayStr],
+                        attended: prev[todayStr]?.attended ?? true,
+                        juz,
+                        mosque: taraweehMosque || undefined,
+                      },
+                    }));
+                  }}
+                  className="px-2 py-1.5 rounded-lg border border-border bg-background text-sm min-w-[80px]"
+                >
+                  <option value="">—</option>
+                  {Array.from({ length: 30 }, (_, i) => (
+                    <option key={i + 1} value={i + 1}>Juz {i + 1}</option>
+                  ))}
+                </select>
+                {taraweehTracker[todayStr]?.juz && (
+                  <a
+                    href={`/dashboard/quran`}
+                    className="text-xs text-secondary hover:underline"
+                  >
+                    Read Juz {taraweehTracker[todayStr].juz}
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {/* Progress summary */}
+            {(() => {
+              const entries = Object.entries(taraweehTracker);
+              const attendedCount = entries.filter(([, v]) => v.attended).length;
+              const juzSet = new Set(entries.filter(([, v]) => v.juz != null).map(([, v]) => v.juz));
+              const highestJuz = juzSet.size > 0 ? Math.max(...[...juzSet] as number[]) : 0;
+              return (
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div className="p-3 rounded-xl bg-secondary/10 border border-secondary/20">
+                    <span className="block text-2xl font-bold text-secondary">{attendedCount}</span>
+                    <span className="text-xs text-muted-foreground">Nights attended</span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-secondary/10 border border-secondary/20">
+                    <span className="block text-2xl font-bold text-secondary">{juzSet.size}</span>
+                    <span className="text-xs text-muted-foreground">Juz covered</span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-secondary/10 border border-secondary/20">
+                    <span className="block text-2xl font-bold text-secondary">{highestJuz}/30</span>
+                    <span className="text-xs text-muted-foreground">Quran progress</span>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Recent history */}
+            {Object.entries(taraweehTracker).filter(([, v]) => v.attended).length > 0 && (
+              <div className="mt-4">
+                <h4 className="text-sm font-medium mb-2">Recent nights</h4>
+                <div className="flex flex-wrap gap-1.5">
+                  {Object.entries(taraweehTracker)
+                    .filter(([, v]) => v.attended)
+                    .sort(([a], [b]) => b.localeCompare(a))
+                    .slice(0, 10)
+                    .map(([date, v]) => (
+                      <span
+                        key={date}
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-secondary/10 border border-secondary/20 text-xs"
+                        title={`${date}${v.juz ? ` — Juz ${v.juz}` : ""}${v.mosque ? ` at ${v.mosque}` : ""}`}
+                      >
+                        <Check className="w-3 h-3 text-secondary" />
+                        {new Date(date + "T12:00:00").toLocaleDateString("en", { month: "short", day: "numeric" })}
+                        {v.juz && <span className="text-secondary font-medium">J{v.juz}</span>}
+                      </span>
+                    ))}
+                </div>
+              </div>
+            )}
+          </motion.div>
+          )}
+
           {/* Adhan: enable notification + play sound + test (Muslim users only) */}
           {preferences.userType === "muslim" && (
           <motion.div

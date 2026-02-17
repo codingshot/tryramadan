@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { Clock, Target, Lightbulb, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
-import { type PrayerTimes } from "@/lib/adhanService";
+import { type PrayerTimes } from "@/hooks/usePrayerTimes";
 import { useDailyMissions, useUserPreferences, type FastingProgress } from "@/hooks/useLocalStorage";
 import { DashboardProgressSummary } from "./DashboardProgressSummary";
 import { DashboardQuickActions } from "./DashboardQuickActions";
@@ -170,7 +170,7 @@ export const DashboardSidebar = ({
       </motion.div>
 
       {/* Today's Missions (Compact) */}
-      {dailyMissions.length > 0 && (
+      {dailyMissions.missions.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -182,19 +182,19 @@ export const DashboardSidebar = ({
             Today's Goals
           </h3>
           <ul className="space-y-2">
-            {dailyMissions.slice(0, 3).map((mission) => (
+            {dailyMissions.missions.slice(0, 3).map((mission) => (
               <li
                 key={mission.id}
                 className="text-sm flex items-start gap-2"
               >
                 <span className="text-muted-foreground mt-0.5">•</span>
-                <span className="text-muted-foreground">{mission.title}</span>
+                <span className="text-muted-foreground">{mission.label}</span>
               </li>
             ))}
           </ul>
-          {dailyMissions.length > 3 && (
+          {dailyMissions.missions.length > 3 && (
             <p className="text-xs text-muted-foreground mt-2">
-              +{dailyMissions.length - 3} more missions
+              +{dailyMissions.missions.length - 3} more missions
             </p>
           )}
         </motion.div>
