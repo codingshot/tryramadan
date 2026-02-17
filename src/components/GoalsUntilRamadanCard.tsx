@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Target, ChevronRight, Check, Circle, Moon, CalendarPlus, MapPin, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { useGoalsUntilRamadan, useUserPreferences } from "@/hooks/useLocalStorage";
-import { getDaysUntilRamadan, isCurrentlyRamadan, getRamadanDateRange } from "@/lib/ramadan";
+import { getDaysUntilRamadan, isCurrentlyRamadan, getRamadanDateRange, getRamadanDayNumber, getRamadanRangeLength, getNextRamadanStart, getRamadanEndForYear } from "@/lib/ramadan";
 import { useRamadanPrayerTimes } from "@/hooks/usePrayerTimes";
 import { buildIcalContent, downloadIcal } from "@/lib/ical";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -83,18 +83,32 @@ export function GoalsUntilRamadanCard() {
       </div>
       {inRamadan ? (
         <>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex items-center gap-2 p-3 rounded-xl bg-secondary/10 border border-secondary/20 mb-3 cursor-help">
-                <Moon className="w-5 h-5 text-secondary" />
-                <span className="font-medium text-secondary border-b border-dotted border-secondary/40">Ramadan Mubarak!</span>
-              </div>
-            </TooltipTrigger>
-            <TooltipContent className="max-w-xs p-3">
-              <p className="text-sm text-foreground">{GENERAL_TOOLTIPS.ramadanMubarak.body}</p>
-              <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{GENERAL_TOOLTIPS.ramadanMubarak.bodyAr}</span></p>
-            </TooltipContent>
-          </Tooltip>
+          {(() => {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const dayNum = getRamadanDayNumber(today) ?? 1;
+            const start = getNextRamadanStart();
+            start.setHours(0, 0, 0, 0);
+            const end = getRamadanEndForYear(start.getFullYear());
+            const total = getRamadanRangeLength(start, end);
+            return (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-2 p-3 rounded-xl bg-secondary/10 border border-secondary/20 mb-3 cursor-help">
+                    <Moon className="w-5 h-5 text-secondary" />
+                    <div>
+                      <span className="font-medium text-secondary border-b border-dotted border-secondary/40">Ramadan Mubarak!</span>
+                      <span className="text-xs text-muted-foreground ml-2">Day {dayNum} of {total}</span>
+                    </div>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs p-3">
+                  <p className="text-sm text-foreground">{GENERAL_TOOLTIPS.ramadanMubarak.body}</p>
+                  <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">Arabic: <span className="font-arabic" dir="rtl">{GENERAL_TOOLTIPS.ramadanMubarak.bodyAr}</span></p>
+                </TooltipContent>
+              </Tooltip>
+            );
+          })()}
           <button
             type="button"
             onClick={() => setShowExplanation(!showExplanation)}

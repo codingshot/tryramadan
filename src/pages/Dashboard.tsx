@@ -750,8 +750,9 @@ const Dashboard = () => {
     const today = new Date(todayStr + "T12:00:00");
     if (ramadanRange.isRamadanDay(today)) {
       const dayNum = ramadanRange.getRamadanDayNumber(today);
+      const total = ramadanRange.totalDays ?? 30;
       return dayNum != null
-        ? `Today is Ramadan Day ${dayNum}.`
+        ? `Today is Day ${dayNum} of ${total} of Ramadan.`
         : "Today is a Ramadan day.";
     }
     const sunnah = getSunnahFastingInfo();
@@ -1282,8 +1283,8 @@ const Dashboard = () => {
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/15 border border-primary/30 text-xs font-medium">
                       <Moon className="w-3.5 h-3.5" aria-hidden />
                       {lastDay
-                        ? "Last day of Ramadan"
-                        : `Day ${ramadanDay} of Ramadan`}
+                        ? `Last day of Ramadan (Day ${ramadanDay} of ${totalDays})`
+                        : `Day ${ramadanDay} of ${totalDays} of Ramadan`}
                     </span>
                   </div>
                 );
