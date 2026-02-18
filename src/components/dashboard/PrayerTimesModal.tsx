@@ -13,9 +13,9 @@ interface PrayerTimesModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   prayerTimes: PrayerTimes | null;
-  prayerTracker: Record<string, Record<string, boolean>>;
+  prayerTracker: Record<string, Record<string, boolean | 'half' | 'full'>>;
   todayStr: string;
-  onPrayerCheck: (prayer: string, checked: boolean) => void;
+  onPrayerCheck: (prayer: string, value: boolean | 'half' | 'full') => void;
 }
 
 export const PrayerTimesModal = ({
@@ -46,7 +46,8 @@ export const PrayerTimesModal = ({
 
         <div className="space-y-3 mt-4">
           {prayers.map((prayer) => {
-            const isChecked = prayerTracker[todayStr]?.[prayer.name.toLowerCase()] || false;
+            const raw = prayerTracker[todayStr]?.[prayer.name.toLowerCase()];
+            const isChecked = raw === true || raw === 'half' || raw === 'full';
 
             return (
               <motion.div

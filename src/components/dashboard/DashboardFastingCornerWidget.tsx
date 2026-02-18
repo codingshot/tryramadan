@@ -12,6 +12,8 @@ interface DashboardFastingCornerWidgetProps {
   todayStr: string;
   nextPrayer: { name: string; time: string; countdown: string } | null;
   onMarkComplete: () => void;
+  /** When true, Complete button is grayed out (before iftar). Click still fires and parent shows message. */
+  markCompleteDisabled?: boolean;
   onBreakFast: () => void;
   onSkip: () => void;
   onGoToToday?: () => void;
@@ -26,6 +28,7 @@ export function DashboardFastingCornerWidget({
   todayStr,
   nextPrayer,
   onMarkComplete,
+  markCompleteDisabled = false,
   onBreakFast,
   onSkip,
   onGoToToday,
@@ -102,7 +105,12 @@ export function DashboardFastingCornerWidget({
           <button
             type="button"
             onClick={onMarkComplete}
-            className="text-[10px] font-medium px-2 py-1 rounded bg-primary/20 text-primary hover:bg-primary/30"
+            aria-disabled={markCompleteDisabled}
+            className={`text-[10px] font-medium px-2 py-1 rounded ${
+              markCompleteDisabled
+                ? "bg-muted text-muted-foreground cursor-not-allowed opacity-60"
+                : "bg-primary/20 text-primary hover:bg-primary/30"
+            }`}
           >
             Complete
           </button>

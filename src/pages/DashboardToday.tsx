@@ -368,8 +368,19 @@ const DashboardToday = () => {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      onClick={() => completeFastingToday(progress, setProgress, todayStr)}
-                      className="flex-1 min-w-0 py-3 px-4 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                      onClick={() => {
+                        if (fastingToday && isFastingWindow) {
+                          toast.info("Fasting is not done yet. You can mark complete after iftar.");
+                          return;
+                        }
+                        completeFastingToday(progress, setProgress, todayStr);
+                      }}
+                      aria-disabled={!!(fastingToday && isFastingWindow)}
+                      className={`flex-1 min-w-0 py-3 px-4 rounded-xl font-medium transition-colors flex items-center justify-center gap-2 ${
+                        fastingToday && isFastingWindow
+                          ? "bg-muted text-muted-foreground cursor-not-allowed opacity-70"
+                          : "bg-primary text-primary-foreground hover:bg-primary/90"
+                      }`}
                     >
                       <Moon className="w-5 h-5 shrink-0" />
                       I fasted today — mark complete
@@ -377,7 +388,11 @@ const DashboardToday = () => {
                   </TooltipTrigger>
                   <TooltipContent>
                     <p className="font-medium">{GENERAL_TOOLTIPS.markComplete.title}</p>
-                    <p className="text-xs mt-1 text-muted-foreground">{GENERAL_TOOLTIPS.markComplete.body}</p>
+                    <p className="text-xs mt-1 text-muted-foreground">
+                      {fastingToday && isFastingWindow
+                        ? "Fasting is not done yet. You can mark complete after iftar."
+                        : GENERAL_TOOLTIPS.markComplete.body}
+                    </p>
                   </TooltipContent>
                 </Tooltip>
                 {fastingToday && (

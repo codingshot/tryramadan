@@ -150,10 +150,21 @@ const DashboardProgress = () => {
       rows.push([""]);
     }
     if (exportSections.prayerLog && prayerTracker && Object.keys(prayerTracker).length > 0) {
-      rows.push(["Prayer log", ""], ["Date", "Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]);
+      rows.push(["Prayer log", ""], ["Date", "Fajr", "Dhuhr", "Asr", "Maghrib", "Isha", "Taraweeh"]);
       for (const [date, day] of Object.entries(prayerTracker).sort(([a], [b]) => a.localeCompare(b))) {
         const d = day && typeof day === "object" ? day : {};
-        rows.push([date, d.Fajr ? "1" : "0", d.Dhuhr ? "1" : "0", d.Asr ? "1" : "0", d.Maghrib ? "1" : "0", d.Isha ? "1" : "0"]);
+        const truthy = (key: string) => !!(d[key as keyof typeof d] ?? d[(key.charAt(0).toUpperCase() + key.slice(1)) as keyof typeof d]);
+        const taraweeh = d.taraweeh ?? d.Taraweeh;
+        const taraweehStr = taraweeh === "half" ? "Half" : taraweeh === "full" ? "Full" : "";
+        rows.push([
+          date,
+          truthy("fajr") ? "1" : "0",
+          truthy("dhuhr") ? "1" : "0",
+          truthy("asr") ? "1" : "0",
+          truthy("maghrib") ? "1" : "0",
+          truthy("isha") ? "1" : "0",
+          taraweehStr,
+        ]);
       }
       rows.push([""]);
     }

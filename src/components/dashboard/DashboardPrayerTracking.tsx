@@ -6,13 +6,16 @@ import { type PrayerTimes } from "@/hooks/usePrayerTimes";
 import { type FastingProgress, useDisplayTimezone } from "@/hooks/useLocalStorage";
 import { timeStringToSecondsSinceMidnight, getNowSecondsSinceMidnightInTimezone } from "@/lib/utils";
 
+/** Prayer tracker value: boolean for daily prayers; 'half' | 'full' for Taraweeh. */
+export type PrayerTrackerValue = boolean | 'half' | 'full';
+
 interface DashboardPrayerTrackingProps {
   prayerTimes: PrayerTimes | null;
   progress: FastingProgress;
   completionRate: number;
-  prayerTracker: Record<string, Record<string, boolean>>;
+  prayerTracker: Record<string, Record<string, PrayerTrackerValue>>;
   todayStr: string;
-  onPrayerCheck: (prayer: string, checked: boolean) => void;
+  onPrayerCheck: (prayer: string, value: PrayerTrackerValue) => void;
   onViewAllPrayers: () => void;
 }
 
@@ -39,7 +42,7 @@ export const DashboardPrayerTracking = ({
         return n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds();
       })();
 
-  // Define all prayers with their times
+  // Define all daily prayers with their times (Taraweeh is separate, no fixed time)
   const allPrayers = [
     { name: "Fajr", time: prayerTimes.fajr },
     { name: "Dhuhr", time: prayerTimes.dhuhr },
@@ -48,11 +51,15 @@ export const DashboardPrayerTracking = ({
     { name: "Isha", time: prayerTimes.isha },
   ];
 
+  const taraweehValue = prayerTracker[todayStr]?.taraweeh;
+  const taraweehDone = taraweehValue === 'half' || taraweehValue === 'full';
+
   // Find next 3 prayers
   const prayersWithTime = allPrayers.map((prayer) => {
     const prayerSec = timeStringToSecondsSinceMidnight(prayer.time);
     const isPast = nowSec > prayerSec;
-    const isChecked = prayerTracker[todayStr]?.[prayer.name.toLowerCase()] || false;
+    const raw = prayerTracker[todayStr]?.[prayer.name.toLowerCase()];
+    const isChecked = raw === true || raw === 'half' || raw === 'full';
     const secondsUntil = isPast ? 0 : prayerSec - nowSec;
 
     return {
@@ -126,7 +133,6 @@ export const DashboardPrayerTracking = ({
                     type="checkbox"
                     checked={prayer.isChecked}
                     onChange={(e) => {
-                      console.log('[PrayerTracking] Checkbox clicked:', prayer.name, e.target.checked);
                       onPrayerCheck(prayer.name.toLowerCase(), e.target.checked);
                     }}
                     className="w-5 h-5 rounded border-2 border-primary text-primary focus:ring-2 focus:ring-primary/20 cursor-pointer shrink-0 accent-primary"
@@ -164,6 +170,64 @@ export const DashboardPrayerTracking = ({
               </div>
             );
           })}
+        </div>
+
+        {/* Taraweeh (optional night prayer) — half vs full */}
+        <div className="mt-3 pt-3 border-t border-border">
+          <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="font-medium cursor-help border-b border-dotted border-muted-foreground/40">
+                    Taraweeh
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="max-w-xs p-3">
+                  <p className="font-medium text-sm">Taraweeh (optional)</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Optional night prayer during Ramadan. Time depends on your mosque (usually after Isha).
+                    Half = typically 8 rak&apos;ahs, Full = typically 20 rak&apos;ahs.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+              <span className="text-sm text-muted-foreground shrink-0">Optional · after Isha (varies by mosque)</span>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                type="button"
+                onClick={() => onPrayerCheck('taraweeh', false)}
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                  !taraweehDone ? "bg-primary text-primary-foreground" : "bg-muted/70 text-muted-foreground hover:bg-muted"
+                }`}
+                aria-pressed={!taraweehDone}
+                aria-label="Taraweeh: none"
+              >
+                —
+              </button>
+              <button
+                type="button"
+                onClick={() => onPrayerCheck('taraweeh', taraweehValue === 'half' ? false : 'half')}
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                  taraweehValue === 'half' ? "bg-primary text-primary-foreground" : "bg-muted/70 text-muted-foreground hover:bg-muted"
+                }`}
+                aria-pressed={taraweehValue === 'half'}
+                aria-label="Taraweeh: half (8 rak'ahs)"
+              >
+                Half
+              </button>
+              <button
+                type="button"
+                onClick={() => onPrayerCheck('taraweeh', taraweehValue === 'full' ? false : 'full')}
+                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                  taraweehValue === 'full' ? "bg-primary text-primary-foreground" : "bg-muted/70 text-muted-foreground hover:bg-muted"
+                }`}
+                aria-pressed={taraweehValue === 'full'}
+                aria-label="Taraweeh: full (20 rak'ahs)"
+              >
+                Full
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

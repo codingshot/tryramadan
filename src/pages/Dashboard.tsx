@@ -293,7 +293,7 @@ const Dashboard = () => {
     [],
   );
   const [prayerTracker, setPrayerTracker] = useLocalStorage<
-    Record<string, Record<string, boolean>>
+    Record<string, Record<string, boolean | 'half' | 'full'>>
   >("tryramadan-prayer-tracker", {});
   const [habitLog] = useHabitLog();
   const habitStreak = useMemo(
@@ -517,6 +517,16 @@ const Dashboard = () => {
     }
   };
 
+  // Gray out "Mark complete" until iftar; on click before iftar show message
+  const markCompleteDisabled = isFasting && inFastingWindow;
+  const handleMarkComplete = () => {
+    if (markCompleteDisabled) {
+      toast.info("Fasting is not done yet. You can mark complete after iftar.");
+      return;
+    }
+    toggleTodayComplete();
+  };
+
   const allRecipesForAddFood = useMemo(() => getRecipes(), []);
   const allCulturalFoods = useMemo(
     () =>
@@ -683,21 +693,16 @@ const Dashboard = () => {
     toast.success("Marked as not fasting today");
   }, [progress, setProgress, todayStr, markAskFastingAnsweredForToday]);
 
-  // Prayer tracking handler
+  // Prayer tracking handler (boolean for daily prayers; 'half' | 'full' for Taraweeh)
   const handlePrayerCheck = useCallback(
-    (prayer: string, checked: boolean) => {
-      console.log('[Dashboard] Prayer check:', { prayer, checked, todayStr });
-      setPrayerTracker((prev) => {
-        const updated = {
-          ...prev,
-          [todayStr]: {
-            ...(prev[todayStr] || {}),
-            [prayer]: checked,
-          },
-        };
-        console.log('[Dashboard] Updated prayer tracker:', updated);
-        return updated;
-      });
+    (prayer: string, value: boolean | 'half' | 'full') => {
+      setPrayerTracker((prev) => ({
+        ...prev,
+        [todayStr]: {
+          ...(prev[todayStr] || {}),
+          [prayer]: value,
+        },
+      }));
     },
     [todayStr, setPrayerTracker],
   );
@@ -1497,7 +1502,8 @@ const Dashboard = () => {
                         prayerTimes={prayerTimes}
                         todayStr={todayStr}
                         nextPrayer={nextPrayer}
-                        onMarkComplete={toggleTodayComplete}
+                        onMarkComplete={handleMarkComplete}
+                        markCompleteDisabled={markCompleteDisabled}
                         onBreakFast={() => setShowBreakFastConfirm(true)}
                         onSkip={() => {
                           setDaySkipped(progress, setProgress, todayStr);
@@ -1519,7 +1525,8 @@ const Dashboard = () => {
                     prayerTimes={prayerTimes}
                     todayStr={todayStr}
                     nextPrayer={nextPrayer}
-                    onMarkComplete={toggleTodayComplete}
+                    onMarkComplete={handleMarkComplete}
+                    markCompleteDisabled={markCompleteDisabled}
                     onBreakFast={() => setShowBreakFastConfirm(true)}
                     onSkip={() => {
                       setDaySkipped(progress, setProgress, todayStr);

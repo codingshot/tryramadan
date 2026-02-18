@@ -15,6 +15,8 @@ interface DashboardHeroProps {
   todayStr: string;
   nextPrayer: { name: string; time: string; countdown: string } | null;
   onMarkComplete: () => void;
+  /** When true, Mark complete is grayed out (fasting not done yet; before iftar). Click still fires and parent shows message. */
+  markCompleteDisabled?: boolean;
   onBreakFast: () => void;
   onSkip: () => void;
 }
@@ -28,6 +30,7 @@ export const DashboardHero = ({
   todayStr,
   nextPrayer,
   onMarkComplete,
+  markCompleteDisabled = false,
   onBreakFast,
   onSkip,
 }: DashboardHeroProps) => {
@@ -186,7 +189,12 @@ export const DashboardHero = ({
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={onMarkComplete}
-              className="flex-1 py-3 px-4 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 min-h-[48px]"
+              aria-disabled={markCompleteDisabled}
+              className={`flex-1 py-3 px-4 rounded-xl font-semibold flex items-center justify-center gap-2 min-h-[48px] transition-colors ${
+                markCompleteDisabled
+                  ? "bg-muted text-muted-foreground cursor-not-allowed opacity-70"
+                  : "bg-primary text-primary-foreground hover:bg-primary/90"
+              }`}
             >
               <Moon className="w-5 h-5" />
               Mark Complete

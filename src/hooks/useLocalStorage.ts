@@ -1438,29 +1438,42 @@ export function getJournalStreak(entries: { date: string }[]): number {
   return count;
 }
 
-/** Prayer tracker: date -> { Fajr: true, Dhuhr: true, ... }. Stored in tryramadan-prayer-tracker. */
+/** Prayer tracker: date -> { fajr: true, dhuhr: true, ..., taraweeh?: 'half'|'full' }. Stored in tryramadan-prayer-tracker. */
 export const PRAYER_TRACKER_KEY = 'tryramadan-prayer-tracker';
 const PRAYER_NAMES = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as const;
 
-function getDayPrayers(tracker: Record<string, Record<string, boolean>>, dateStr: string): Record<string, boolean> {
+export type PrayerTrackerDay = Record<string, boolean | 'half' | 'full'>;
+export type PrayerTracker = Record<string, PrayerTrackerDay>;
+
+function getDayPrayers(tracker: PrayerTracker, dateStr: string): PrayerTrackerDay {
   const day = tracker[dateStr];
   return day && typeof day === "object" && !Array.isArray(day) ? day : {};
 }
 
-/** Check if all 5 daily prayers were completed for a date. */
-export function didCompleteAllPrayers(tracker: Record<string, Record<string, boolean>>, dateStr: string): boolean {
-  const day = getDayPrayers(tracker, dateStr);
-  return PRAYER_NAMES.every((name) => !!day[name]);
+function isPrayerDone(value: unknown): boolean {
+  return value === true || value === 'half' || value === 'full';
 }
 
-/** Count completed prayers for a date (0-5). */
-export function getPrayerCountForDate(tracker: Record<string, Record<string, boolean>>, dateStr: string): number {
+/** Check if all 5 daily prayers were completed for a date (Taraweeh not required). Supports both lowercase and capital keys. */
+export function didCompleteAllPrayers(tracker: PrayerTracker, dateStr: string): boolean {
   const day = getDayPrayers(tracker, dateStr);
-  return PRAYER_NAMES.filter((name) => !!day[name]).length;
+  return PRAYER_NAMES.every((name) => {
+    const key = name.toLowerCase();
+    return isPrayerDone(day[key] ?? day[name]);
+  });
+}
+
+/** Count completed daily prayers for a date (0-5). Taraweeh is not counted. Supports both lowercase and capital keys. */
+export function getPrayerCountForDate(tracker: PrayerTracker, dateStr: string): number {
+  const day = getDayPrayers(tracker, dateStr);
+  return PRAYER_NAMES.filter((name) => {
+    const key = name.toLowerCase();
+    return isPrayerDone(day[key] ?? day[name]);
+  }).length;
 }
 
 /** Consecutive days ending today where all 5 prayers were completed. todayOverride for display timezone. */
-export function getPrayerStreak(tracker: Record<string, Record<string, boolean>>, todayOverride?: string): number {
+export function getPrayerStreak(tracker: PrayerTracker, todayOverride?: string): number {
   const today = todayOverride ?? toLocalDateString(new Date());
   let count = 0;
   const d = new Date(today + 'T12:00:00');
@@ -1476,8 +1489,8 @@ export function getPrayerStreak(tracker: Record<string, Record<string, boolean>>
   return count;
 }
 
-/** Total prayer count across all dates (sum of completed prayers per day). */
-export function getTotalPrayerCount(tracker: Record<string, Record<string, boolean>>): number {
+/** Total prayer count across all dates (sum of completed daily prayers per day; Taraweeh not counted). */
+export function getTotalPrayerCount(tracker: PrayerTracker): number {
   if (!tracker || typeof tracker !== "object" || Array.isArray(tracker)) return 0;
   return Object.keys(tracker).reduce((sum, dateStr) => sum + getPrayerCountForDate(tracker, dateStr), 0);
 }
@@ -1648,9 +1661,9 @@ export function getDailyMissions(params: {
   suhoorLabelShort?: string;
 }): DailyMission[] {
   const { todayStr, progress, mealPlans, foodLog, scheduleNotes, quranVerseViewedDates, hadithViewedDates, iftarLabelShort = 'iftar', suhoorLabelShort = 'Suhoor' } = params;
-  const todayLog = progress.fastingLog?.find((e) => e.date === todayStr);
+  const todayLog = getTodayFastingLog(progress, todayStr);
   const todaySkipped = (progress.skippedDays ?? []).includes(todayStr);
-  const fastingToday = !!todayLog && todayLog.status !== 'broken' && !progress.completedDays.includes(todayStr) && !todaySkipped;
+  const fastingToday = isFastingToday(progress, todayStr);
   const todayComplete = progress.completedDays.includes(todayStr);
   const fastCompleteOrBroken = todayComplete || (todayLog?.status === 'broken') || todaySkipped;
   const dayMeals = mealPlans[todayStr];

@@ -201,6 +201,26 @@ describe("Daily missions edge cases", () => {
     expect(missions.every((m) => m.id && m.label && typeof m.completed === "boolean")).toBe(true);
   });
 
+  it("start_fasting mission completed when user has tapped I'm fasting (in_progress log for today)", () => {
+    const progressWithFastingToday: FastingProgress = {
+      ...defaultProgress,
+      fastingLog: [
+        { date: todayStr, startedAt: `${todayStr}T05:00:00Z`, status: "in_progress" },
+      ],
+    };
+    const missions = getDailyMissions({
+      todayStr,
+      progress: progressWithFastingToday,
+      mealPlans: {},
+      foodLog: {},
+      scheduleNotes: {},
+      quranVerseViewedDates: [],
+      hadithViewedDates: [],
+    });
+    const startFasting = missions.find((m) => m.id === "start_fasting");
+    expect(startFasting?.completed).toBe(true);
+  });
+
   it("read_hadith mission completed when today in hadithViewedDates", () => {
     const missions = getDailyMissions({
       todayStr,
