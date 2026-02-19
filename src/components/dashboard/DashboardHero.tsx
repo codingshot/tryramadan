@@ -9,6 +9,8 @@ import { EATING_TIME_TITLE } from "@/data/eating-times-tooltips";
 interface DashboardHeroProps {
   progress: FastingProgress;
   isFasting: boolean;
+  /** Time window: true = between Suhoor end and Iftar (fasting window). Used so countdown/label always reflect eating vs fasting time. */
+  inFastingWindow: boolean;
   countdownToIftar: { h: number; m: number; s: number };
   countdownToSuhoor: { h: number; m: number; s: number };
   prayerTimes: PrayerTimes | null;
@@ -24,6 +26,7 @@ interface DashboardHeroProps {
 export const DashboardHero = ({
   progress,
   isFasting,
+  inFastingWindow,
   countdownToIftar,
   countdownToSuhoor,
   prayerTimes,
@@ -40,8 +43,9 @@ export const DashboardHero = ({
   const todayBroken = todayEntry?.status === "broken";
   const todayExcusedMenstruation = todayBroken && todayEntry?.brokenReason === "menstruation";
 
-  const countdown = isFasting ? countdownToIftar : countdownToSuhoor;
-  const targetLabel = isFasting ? "Iftar" : "Suhoor";
+  /* Countdown always reflects time window: fasting window = time until Iftar; eating window = time until Suhoor */
+  const countdown = inFastingWindow ? countdownToIftar : countdownToSuhoor;
+  const targetLabel = inFastingWindow ? "Iftar" : "Suhoor";
 
   return (
     <motion.div
@@ -137,42 +141,34 @@ export const DashboardHero = ({
           )}
         </div>
 
-        {/* Large Countdown Timer — hidden when complete or skipped; when broke fast we still show countdown */}
-        {!todayComplete && !todaySkipped && (
-          <div className="text-center py-6 md:py-8">
-            <motion.div
-              key={`${countdown.h}-${countdown.m}-${countdown.s}`}
-              initial={{ scale: 0.95, opacity: 0.8 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.2 }}
-              className="text-5xl md:text-7xl font-bold tabular-nums mb-2"
-              aria-live="polite"
-              aria-atomic="true"
-            >
-              {String(countdown.h).padStart(2, "0")}:
-              {String(countdown.m).padStart(2, "0")}:
-              {String(countdown.s).padStart(2, "0")}
-            </motion.div>
-            <p className="text-lg md:text-xl text-muted-foreground" title={isFasting ? EATING_TIME_TITLE.iftarTime : EATING_TIME_TITLE.suhoor}>
-              until {targetLabel}
-              {todayBroken && (
-                <span className="block text-sm mt-1 text-destructive/90">(you broke fast today)</span>
-              )}
+        {/* Countdown always shown: fasting window = time until Iftar; eating window = time until Suhoor (regardless of completion/skip status) */}
+        <div className="text-center py-6 md:py-8">
+          {(todayComplete || todaySkipped) && (
+            <p className="text-sm font-semibold text-muted-foreground mb-2">
+              {todayComplete ? "Day complete" : "Skipped"}
             </p>
-          </div>
-        )}
-        {todayComplete && (
-          <div className="text-center py-6 md:py-8">
-            <p className="text-2xl md:text-3xl font-bold text-secondary">Day complete</p>
-            <p className="text-sm text-muted-foreground mt-1">You marked today&apos;s fast as completed</p>
-          </div>
-        )}
-        {todaySkipped && (
-          <div className="text-center py-6 md:py-8">
-            <p className="text-xl md:text-2xl font-bold text-muted-foreground">Skipped</p>
-            <p className="text-sm text-muted-foreground mt-1">Today is marked as not fasting</p>
-          </div>
-        )}
+          )}
+          <motion.div
+            key={`${countdown.h}-${countdown.m}-${countdown.s}`}
+            initial={{ scale: 0.95, opacity: 0.8 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.2 }}
+            className="text-5xl md:text-7xl font-bold tabular-nums mb-2"
+            aria-live="polite"
+            aria-atomic="true"
+            aria-label={`${countdown.h} hours ${countdown.m} minutes ${countdown.s} seconds until ${targetLabel}`}
+          >
+            {String(countdown.h).padStart(2, "0")}:
+            {String(countdown.m).padStart(2, "0")}:
+            {String(countdown.s).padStart(2, "0")}
+          </motion.div>
+          <p className="text-lg md:text-xl text-muted-foreground" title={inFastingWindow ? EATING_TIME_TITLE.iftarTime : EATING_TIME_TITLE.suhoor}>
+            until {targetLabel}
+            {todayBroken && (
+              <span className="block text-sm mt-1 text-destructive/90">(you broke fast today)</span>
+            )}
+          </p>
+        </div>
 
         {/* Next Prayer Indicator */}
         {nextPrayer && (

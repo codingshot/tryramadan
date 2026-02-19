@@ -204,28 +204,44 @@ export const DashboardPrayerTracking = ({
               >
                 —
               </button>
-              <button
-                type="button"
-                onClick={() => onPrayerCheck('taraweeh', taraweehValue === 'half' ? false : 'half')}
-                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                  taraweehValue === 'half' ? "bg-primary text-primary-foreground" : "bg-muted/70 text-muted-foreground hover:bg-muted"
-                }`}
-                aria-pressed={taraweehValue === 'half'}
-                aria-label="Taraweeh: half (8 rak'ahs)"
-              >
-                Half
-              </button>
-              <button
-                type="button"
-                onClick={() => onPrayerCheck('taraweeh', taraweehValue === 'full' ? false : 'full')}
-                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                  taraweehValue === 'full' ? "bg-primary text-primary-foreground" : "bg-muted/70 text-muted-foreground hover:bg-muted"
-                }`}
-                aria-pressed={taraweehValue === 'full'}
-                aria-label="Taraweeh: full (20 rak'ahs)"
-              >
-                Full
-              </button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={() => onPrayerCheck('taraweeh', taraweehValue === 'half' ? false : 'half')}
+                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                      taraweehValue === 'half' ? "bg-primary text-primary-foreground" : "bg-muted/70 text-muted-foreground hover:bg-muted"
+                    }`}
+                    aria-pressed={taraweehValue === 'half'}
+                    aria-label="Taraweeh: half (8 rak'ahs)"
+                  >
+                    Half
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-xs">
+                  <p className="font-medium text-sm">Half</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Typically 8 rak&apos;ahs (shorter set). Often prayed at home or when the mosque does a shorter Tarawih.</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    onClick={() => onPrayerCheck('taraweeh', taraweehValue === 'full' ? false : 'full')}
+                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                      taraweehValue === 'full' ? "bg-primary text-primary-foreground" : "bg-muted/70 text-muted-foreground hover:bg-muted"
+                    }`}
+                    aria-pressed={taraweehValue === 'full'}
+                    aria-label="Taraweeh: full (20 rak'ahs)"
+                  >
+                    Full
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-xs">
+                  <p className="font-medium text-sm">Full</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Typically 20 rak&apos;ahs (complete set). Common in many mosques; one thirtieth of the Quran is recited each night so the full Quran is completed by Eid.</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
           </div>
         </div>

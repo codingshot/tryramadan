@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { useUserPreferences, useDisplayTimezone } from "@/hooks/useLocalStorage";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { useUserPreferences, useDisplayTimezone, useFastingProgress, completeFastingToday, isFastingToday } from "@/hooks/useLocalStorage";
 import { usePrayerTimes } from "@/hooks/usePrayerTimes";
 import {
   usePrayerNotificationPrefs,
@@ -24,8 +26,12 @@ function timeToMinutes(timeStr: string): number {
  * For Muslim users with notifications: also shows browser notification for each prayer.
  */
 export function AdhanScheduler() {
+  const navigate = useNavigate();
   const [preferences] = useUserPreferences();
   const displayTimezone = useDisplayTimezone();
+  const [progress, setProgress] = useFastingProgress();
+  const todayStr = displayTimezone ? getTodayStringInTimezone(displayTimezone) : toLocalDateString(new Date());
+  const fastingToday = isFastingToday(progress, todayStr);
   const { permission, requestPermission } = useNotifications();
   const { prayerTimes } = usePrayerTimes(
     preferences.locationCoords?.lat ?? null,
@@ -131,9 +137,24 @@ export function AdhanScheduler() {
     return () => clearInterval(interval);
   }, [preferences.userType, preferences.notificationsEnabled, displayTimezone, prayerTimes, prayerNotifications, adhanSoundEnabled, setAdhanNotifiedToday]);
 
+  const handleIftarMarkComplete = () => {
+    completeFastingToday(progress, setProgress, todayStr);
+    toast.success("Fast marked complete. Ramadan Mubarak!");
+  };
+
+  const handleIftarBrokeEarlier = () => {
+    navigate("/dashboard", { state: { openBreakFast: true } });
+  };
+
   return (
     <>
-      <IftarDuaDialog open={showIftarPopup} onOpenChange={setShowIftarPopup} />
+      <IftarDuaDialog
+        open={showIftarPopup}
+        onOpenChange={setShowIftarPopup}
+        isFastingToday={fastingToday}
+        onMarkComplete={handleIftarMarkComplete}
+        onBreakFastEarlier={handleIftarBrokeEarlier}
+      />
     </>
   );
 }

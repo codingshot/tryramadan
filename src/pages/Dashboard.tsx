@@ -37,6 +37,7 @@ import { SunnahFastingBadge } from "@/components/SunnahFastingBadge";
 import { DashboardHero } from "@/components/dashboard/DashboardHero";
 import { DashboardFastingCornerWidget } from "@/components/dashboard/DashboardFastingCornerWidget";
 import { DashboardPrayerTracking } from "@/components/dashboard/DashboardPrayerTracking";
+import { DashboardCatchUpQuranHadith } from "@/components/dashboard/DashboardCatchUpQuranHadith";
 import { DashboardHistory } from "@/components/dashboard/DashboardHistory";
 import { DashboardContent } from "@/components/dashboard/DashboardContent";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
@@ -111,6 +112,7 @@ import {
   usePrayerTimesForDate,
   getSunnahFastingInfo,
   checkAyyamAlBeed,
+  type PrayerTimes,
 } from "@/hooks/usePrayerTimes";
 import { getDaysUntilRamadan, getCurrentRamadanStart } from "@/lib/ramadan";
 import { useRamadanRange } from "@/hooks/useRamadanRange";
@@ -151,6 +153,51 @@ import {
   type Recipe,
 } from "@/lib/cultureRecipes";
 
+/** Next prayer or Suhoor end (Imsak), with seconds until. Handles wrap after Isha (next = tomorrow's Imsak or Fajr). Skips empty time strings. */
+function getNextPrayerInfo(
+  prayerTimes: PrayerTimes | null,
+  nowSec: number,
+): { name: string; time: string; secondsUntil: number } | null {
+  if (!prayerTimes) return null;
+  const imsak = prayerTimes.imsak?.trim();
+  const list: { name: string; time: string }[] = [];
+  if (imsak) list.push({ name: "Suhoor end", time: imsak });
+  [
+    { name: "Fajr", time: prayerTimes.fajr },
+    { name: "Dhuhr", time: prayerTimes.dhuhr },
+    { name: "Asr", time: prayerTimes.asr },
+    { name: "Maghrib", time: prayerTimes.maghrib },
+    { name: "Isha", time: prayerTimes.isha },
+  ].forEach((p) => {
+    if (p.time?.trim()) list.push(p);
+  });
+  for (const p of list) {
+    const prayerSec = timeStringToSecondsSinceMidnight(p.time);
+    if (nowSec < prayerSec) {
+      return { name: p.name, time: p.time, secondsUntil: prayerSec - nowSec };
+    }
+  }
+  // After Isha: next is tomorrow's first (Suhoor end or Fajr)
+  const fajrTrimmed = prayerTimes.fajr?.trim();
+  if (!fajrTrimmed) return null;
+  const imsakSec = imsak ? timeStringToSecondsSinceMidnight(prayerTimes.imsak) : 24 * 3600;
+  const fajrSec = timeStringToSecondsSinceMidnight(prayerTimes.fajr);
+  const secUntilImsak = secondsUntilTimeInTimezone(nowSec, imsakSec);
+  const secUntilFajr = secondsUntilTimeInTimezone(nowSec, fajrSec);
+  if (imsak && secUntilImsak <= secUntilFajr) {
+    return {
+      name: "Suhoor end",
+      time: prayerTimes.imsak,
+      secondsUntil: secUntilImsak,
+    };
+  }
+  return {
+    name: "Fajr",
+    time: prayerTimes.fajr,
+    secondsUntil: secUntilFajr,
+  };
+}
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const [preferences, setPreferences] = useUserPreferences();
@@ -169,6 +216,8 @@ const Dashboard = () => {
     m: 0,
     s: 0,
   });
+  /** Ticks every 2s so next prayer and countdowns stay in sync with current time and prayer time updates. */
+  const [countdownTick, setCountdownTick] = useState(0);
   const [showAskFastingPopup, setShowAskFastingPopup] = useState(false);
   const [ayyamAlBeed, setAyyamAlBeed] = useState<{
     isAyyamAlBeed: boolean;
@@ -397,7 +446,6 @@ const Dashboard = () => {
 
   const tickFastingAndCountdown = useCallback(() => {
     if (!prayerTimes?.imsak || !prayerTimes?.maghrib) {
-      console.warn('[Dashboard] Missing prayer times:', { imsak: prayerTimes?.imsak, maghrib: prayerTimes?.maghrib });
       return;
     }
     const fastingToday = isFastingToday(progress, todayStr);
@@ -412,17 +460,6 @@ const Dashboard = () => {
       );
       const inWindow =
         nowSeconds >= imsakSeconds && nowSeconds < maghribSeconds;
-
-      console.log('[Dashboard] Fasting window check:', {
-        nowSeconds,
-        imsakSeconds,
-        maghribSeconds,
-        inWindow,
-        fastingToday,
-        currentTime: new Date().toLocaleTimeString(),
-        imsakTime: prayerTimes.imsak,
-        maghribTime: prayerTimes.maghrib,
-      });
 
       setInFastingWindow(inWindow);
       setIsFasting(inWindow && fastingToday);
@@ -502,7 +539,10 @@ const Dashboard = () => {
   }, [tickFastingAndCountdown]);
 
   useEffect(() => {
-    const t = setInterval(tickFastingAndCountdown, 2000); // Throttle for INP (was 1s)
+    const t = setInterval(() => {
+      tickFastingAndCountdown();
+      setCountdownTick((prev) => prev + 1);
+    }, 2000); // Throttle for INP (was 1s) — also drives next-prayer refresh
     return () => clearInterval(t);
   }, [tickFastingAndCountdown]);
 
@@ -715,41 +755,34 @@ const Dashboard = () => {
     );
   }, [progress.completedDays.length, ramadanRange?.totalDays]);
 
-  // Calculate next prayer
+  // Next prayer (or Suhoor end); recomputes on tick so countdown stays live and when prayer times change
   const nextPrayer = useMemo(() => {
-    if (!prayerTimes) return null;
-
-    const prayers = [
-      { name: "Fajr", time: prayerTimes.fajr },
-      { name: "Dhuhr", time: prayerTimes.dhuhr },
-      { name: "Asr", time: prayerTimes.asr },
-      { name: "Maghrib", time: prayerTimes.maghrib },
-      { name: "Isha", time: prayerTimes.isha },
-    ];
-
     const nowSec = displayTimezone
       ? getNowSecondsSinceMidnightInTimezone(displayTimezone)
       : (() => {
           const n = new Date();
           return n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds();
         })();
-
-    for (const prayer of prayers) {
-      const prayerSec = timeStringToSecondsSinceMidnight(prayer.time);
-      if (nowSec < prayerSec) {
-        const diff = prayerSec - nowSec;
-        const h = Math.floor(diff / 3600);
-        const m = Math.floor((diff % 3600) / 60);
-        return {
-          name: prayer.name,
-          time: prayer.time,
-          countdown: h > 0 ? `${h}h ${m}m` : `${m}m`,
-        };
-      }
-    }
-
-    return null;
-  }, [prayerTimes, displayTimezone]);
+    const info = getNextPrayerInfo(prayerTimes, nowSec);
+    if (!info) return null;
+    const h = Math.floor(info.secondsUntil / 3600);
+    const m = Math.floor((info.secondsUntil % 3600) / 60);
+    return {
+      name: info.name,
+      time: info.time,
+      countdown: h > 0 ? `${h}h ${m}m` : `${m}m`,
+    };
+  }, [
+    displayTimezone,
+    countdownTick,
+    prayerTimes,
+    prayerTimes?.imsak,
+    prayerTimes?.fajr,
+    prayerTimes?.dhuhr,
+    prayerTimes?.asr,
+    prayerTimes?.maghrib,
+    prayerTimes?.isha,
+  ]);
 
   const askFastingContext = useMemo(() => {
     const today = new Date(todayStr + "T12:00:00");
@@ -1497,6 +1530,7 @@ const Dashboard = () => {
                       <DashboardFastingCornerWidget
                         progress={progress}
                         isFasting={isFasting}
+                        inFastingWindow={inFastingWindow}
                         countdownToIftar={countdownToIftar}
                         countdownToSuhoor={countdownToSuhoor}
                         prayerTimes={prayerTimes}
@@ -1520,6 +1554,7 @@ const Dashboard = () => {
                   <DashboardHero
                     progress={progress}
                     isFasting={isFasting}
+                    inFastingWindow={inFastingWindow}
                     countdownToIftar={countdownToIftar}
                     countdownToSuhoor={countdownToSuhoor}
                     prayerTimes={prayerTimes}
@@ -1538,6 +1573,9 @@ const Dashboard = () => {
 
               {/* Daily Hadith & Quran Slider */}
               <HeroDailySlider />
+
+              {/* Catch up on past Quran & Hadith (from Ramadan start or last 60 days) */}
+              <DashboardCatchUpQuranHadith todayStr={todayStr} />
 
               {/* NEW: Prayer Tracking + Quick Stats */}
               <DashboardPrayerTracking

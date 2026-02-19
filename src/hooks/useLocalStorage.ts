@@ -1602,8 +1602,12 @@ export function markHadithViewedToday(): void {
 }
 
 /** Hadith viewed dates derived from activity log. Used for today's chart and daily missions. */
-export function useHadithViewedDates(): [string[], (date?: string, hadithId?: string) => void] {
-  const [entries, addEntry] = useActivityLog();
+export function useHadithViewedDates(): [
+  string[],
+  (date?: string, hadithId?: string) => void,
+  (date: string) => void,
+] {
+  const [entries, addEntry, removeEntry] = useActivityLog();
 
   const dates = React.useMemo(
     () => [...new Set(entries.filter((e) => e.type === 'hadith_read').map((e) => e.date))].sort().reverse().slice(0, HADITH_VIEWED_MAX_DAYS),
@@ -1619,20 +1623,35 @@ export function useHadithViewedDates(): [string[], (date?: string, hadithId?: st
     [dates, addEntry],
   );
 
-  return [dates, markToday];
+  const unmarkDate = React.useCallback(
+    (date: string) => {
+      const entry = entries.find((e) => e.type === 'hadith_read' && e.date === date);
+      if (entry) removeEntry(entry.id);
+    },
+    [entries, removeEntry],
+  );
+
+  return [dates, markToday, unmarkDate];
 }
 
 const QURAN_VERSE_VIEWED_DATES_KEY = 'tryramadan-quran-verse-viewed-dates';
 const QURAN_VERSE_VIEWED_MAX_DAYS = 60;
 
-export function useQuranVerseViewedDates(): [string[], (date?: string) => void] {
+export function useQuranVerseViewedDates(): [
+  string[],
+  (date?: string) => void,
+  (date: string) => void,
+] {
   const [dates, setDates] = useLocalStorage<string[]>(QURAN_VERSE_VIEWED_DATES_KEY, []);
   const markToday = React.useCallback((date?: string) => {
-    const today = date ?? getTodayDateString();
-    if (dates.includes(today)) return;
-    setDates((prev) => [...prev, today].slice(-QURAN_VERSE_VIEWED_MAX_DAYS));
+    const target = date ?? getTodayDateString();
+    if (dates.includes(target)) return;
+    setDates((prev) => [...prev, target].slice(-QURAN_VERSE_VIEWED_MAX_DAYS));
   }, [dates, setDates]);
-  return [dates, markToday];
+  const unmarkDate = React.useCallback((date: string) => {
+    setDates((prev) => prev.filter((d) => d !== date));
+  }, [setDates]);
+  return [dates, markToday, unmarkDate];
 }
 
 const CATCH_UP_DISMISSED_DATES_KEY = 'tryramadan-catch-up-dismissed-dates';

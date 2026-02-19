@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
-import { memo } from "react";
+import { memo, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { Target, Check, Circle, ChevronRight } from "lucide-react";
+import { Target, Check, Circle, ChevronRight, PenLine } from "lucide-react";
 import {
   useDailyMissions,
   useUserPreferences,
@@ -9,11 +9,18 @@ import {
   useDisplayTimezone,
   getTodayDateString,
   startFastingToday,
+  useLocalStorage,
+  SCHEDULE_NOTES_KEY,
   type DailyMission,
 } from "@/hooks/useLocalStorage";
 import { getTodayStringInTimezone } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
+import { toast } from "sonner";
 
 function getMissionTooltip(missionId: string, userType?: string): string | undefined {
   const tips: Record<string, string> = {
@@ -24,7 +31,7 @@ function getMissionTooltip(missionId: string, userType?: string): string | undef
     complete_fast: "When you break your fast at Maghrib (or earlier), use the dashboard to log it. Mark the day complete if you fasted dawn to sunset.",
     log_suhoor: "On the Schedule page, add a meal plan note or food log entry for your pre-dawn meal (suhoor).",
     log_iftar: "On the Schedule page, add a meal plan note or food log entry for your break-fast meal (iftar).",
-    add_note: "On the Schedule page, click a day and add a note in the Note field—e.g. how you felt or what you ate.",
+    add_note: "Tap here to add a quick note in a popup, or open the Schedule page to add a note for the day.",
     read_hadith: "Open the Hadith page (Learn → Hadith) and read a short saying of the Prophet (peace be upon him) about fasting or Ramadan.",
   };
   return tips[missionId];
@@ -34,13 +41,16 @@ const MissionRow = memo(function MissionRow({
   mission,
   userType,
   onStartFasting,
+  onQuickAddNote,
 }: {
   mission: DailyMission;
   userType?: string;
   onStartFasting?: () => void;
+  onQuickAddNote?: () => void;
 }) {
   const tip = getMissionTooltip(mission.id, userType);
   const canQuickStart = mission.id === "start_fasting" && !mission.completed && onStartFasting;
+  const canQuickAddNote = mission.id === "add_note" && !mission.completed && onQuickAddNote;
   const content = (
     <span className="flex items-center gap-2 text-sm">
       {mission.completed ? (
@@ -52,7 +62,7 @@ const MissionRow = memo(function MissionRow({
         <Tooltip>
           <TooltipTrigger asChild>
             <span
-              className={`${canQuickStart ? "cursor-pointer hover:text-secondary" : "cursor-help border-b border-dotted border-muted-foreground/30"} ${mission.completed ? "text-muted-foreground line-through" : ""}`}
+              className={`${canQuickStart || canQuickAddNote ? "cursor-pointer hover:text-secondary" : "cursor-help border-b border-dotted border-muted-foreground/30"} ${mission.completed ? "text-muted-foreground line-through" : ""}`}
             >
               {mission.label}
             </span>
@@ -67,12 +77,12 @@ const MissionRow = memo(function MissionRow({
         </Tooltip>
       ) : (
         <span
-          className={`${canQuickStart ? "cursor-pointer hover:text-secondary" : ""} ${mission.completed ? "text-muted-foreground line-through" : ""}`}
+          className={`${canQuickStart || canQuickAddNote ? "cursor-pointer hover:text-secondary" : ""} ${mission.completed ? "text-muted-foreground line-through" : ""}`}
         >
           {mission.label}
         </span>
       )}
-      {(mission.path || canQuickStart) && !mission.completed && (
+      {(mission.path || canQuickStart || canQuickAddNote) && !mission.completed && (
         <ChevronRight className="w-3.5 h-3.5 text-muted-foreground ml-auto shrink-0" aria-hidden />
       )}
     </span>
@@ -85,6 +95,19 @@ const MissionRow = memo(function MissionRow({
         onClick={onStartFasting}
         className="block w-full text-left py-2 px-3 rounded-lg hover:bg-muted/50 transition-colors"
         aria-label="Mark that you have started fasting today"
+      >
+        {content}
+      </button>
+    );
+  }
+
+  if (canQuickAddNote) {
+    return (
+      <button
+        type="button"
+        onClick={onQuickAddNote}
+        className="block w-full text-left py-2 px-3 rounded-lg hover:bg-muted/50 transition-colors"
+        aria-label="Add a note for today"
       >
         {content}
       </button>
@@ -112,13 +135,34 @@ const MissionRow = memo(function MissionRow({
 export const DailyMissionsCard = memo(function DailyMissionsCard() {
   const [preferences] = useUserPreferences();
   const [progress, setProgress] = useFastingProgress();
+  const [scheduleNotes, setScheduleNotes] = useLocalStorage<Record<string, string>>(SCHEDULE_NOTES_KEY, {});
   const displayTimezone = useDisplayTimezone();
   const { missions, completedCount, totalCount } = useDailyMissions();
   const todayStr = displayTimezone ? getTodayStringInTimezone(displayTimezone) : getTodayDateString();
 
+  const [noteDialogOpen, setNoteDialogOpen] = useState(false);
+  const [noteDraft, setNoteDraft] = useState("");
+
   const handleStartFasting = () => {
     startFastingToday(progress, setProgress, todayStr);
   };
+
+  const handleOpenNoteDialog = useCallback(() => {
+    setNoteDraft(scheduleNotes[todayStr] ?? "");
+    setNoteDialogOpen(true);
+  }, [scheduleNotes, todayStr]);
+
+  const handleSaveNote = useCallback(() => {
+    const trimmed = noteDraft.trim();
+    setScheduleNotes((prev) => {
+      const next = { ...prev };
+      if (trimmed) next[todayStr] = trimmed;
+      else delete next[todayStr];
+      return next;
+    });
+    setNoteDialogOpen(false);
+    toast.success(trimmed ? "Note saved" : "Note cleared");
+  }, [todayStr, noteDraft, setScheduleNotes]);
 
   return (
     <motion.div
@@ -162,10 +206,43 @@ export const DailyMissionsCard = memo(function DailyMissionsCard() {
               mission={m}
               userType={preferences?.userType}
               onStartFasting={m.id === "start_fasting" ? handleStartFasting : undefined}
+              onQuickAddNote={m.id === "add_note" ? handleOpenNoteDialog : undefined}
             />
           </li>
         ))}
       </ul>
+
+      <Dialog open={noteDialogOpen} onOpenChange={setNoteDialogOpen}>
+        <DialogContent className="max-w-md" aria-describedby="add-note-desc">
+          <DialogTitle className="flex items-center gap-2">
+            <PenLine className="w-5 h-5 text-secondary shrink-0" aria-hidden />
+            Add a note for today
+          </DialogTitle>
+          <p id="add-note-desc" className="text-sm text-muted-foreground sr-only">
+            Optional note for today—e.g. how you felt or what you ate. Saved to your schedule.
+          </p>
+          <div className="space-y-2 pt-2">
+            <Label htmlFor="daily-note-textarea">Note</Label>
+            <Textarea
+              id="daily-note-textarea"
+              value={noteDraft}
+              onChange={(e) => setNoteDraft(e.target.value)}
+              placeholder="e.g. Felt good today, light suhoor…"
+              rows={4}
+              className="resize-y min-h-[100px]"
+              aria-describedby="add-note-desc"
+            />
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button type="button" variant="outline" onClick={() => setNoteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="button" onClick={handleSaveNote}>
+              Save note
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 });

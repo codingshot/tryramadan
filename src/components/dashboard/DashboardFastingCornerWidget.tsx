@@ -6,6 +6,8 @@ import { EATING_TIME_TITLE } from "@/data/eating-times-tooltips";
 interface DashboardFastingCornerWidgetProps {
   progress: FastingProgress;
   isFasting: boolean;
+  /** Time window: true = fasting window. Used so countdown/label always reflect eating vs fasting time. */
+  inFastingWindow: boolean;
   countdownToIftar: { h: number; m: number; s: number };
   countdownToSuhoor: { h: number; m: number; s: number };
   prayerTimes: PrayerTimes | null;
@@ -22,6 +24,7 @@ interface DashboardFastingCornerWidgetProps {
 export function DashboardFastingCornerWidget({
   progress,
   isFasting,
+  inFastingWindow,
   countdownToIftar,
   countdownToSuhoor,
   prayerTimes,
@@ -39,10 +42,9 @@ export function DashboardFastingCornerWidget({
   const todayBroken = todayEntry?.status === "broken";
   const todayNoNeedToFast = todayBroken && todayEntry?.brokenReason === "menstruation";
 
-  const countdown = isFasting ? countdownToIftar : countdownToSuhoor;
-  const targetLabel = isFasting ? "Iftar" : "Suhoor";
-  /* When broke fast we still show countdown (until Iftar or next Suhoor); hide only when complete or skipped */
-  const showCountdown = !todayComplete && !todaySkipped;
+  /* Countdown always reflects time window (and is always shown, regardless of complete/skipped) */
+  const countdown = inFastingWindow ? countdownToIftar : countdownToSuhoor;
+  const targetLabel = inFastingWindow ? "Iftar" : "Suhoor";
 
   return (
     <div
@@ -67,22 +69,17 @@ export function DashboardFastingCornerWidget({
           <p className="text-xs font-medium text-muted-foreground truncate">
             {todayComplete ? "Completed" : todaySkipped ? "Skipped" : todayNoNeedToFast ? "No need to fast" : todayBroken ? "Broke fast" : isFasting ? "Fasting" : "Eating window"}
           </p>
-          {showCountdown ? (
-            <>
-              <p
-                className="text-lg font-bold tabular-nums truncate"
-                aria-live="polite"
-                aria-atomic="true"
-              >
-                {String(countdown.h).padStart(2, "0")}:
-                {String(countdown.m).padStart(2, "0")}:
-                {String(countdown.s).padStart(2, "0")}
-              </p>
-              <p className="text-[10px] text-muted-foreground" title={isFasting ? EATING_TIME_TITLE.iftarTime : EATING_TIME_TITLE.suhoor}>until {targetLabel}</p>
-            </>
-          ) : (
-            <p className="text-sm font-semibold text-muted-foreground">—</p>
-          )}
+          <p
+            className="text-lg font-bold tabular-nums truncate"
+            aria-live="polite"
+            aria-atomic="true"
+            aria-label={`${countdown.h} hours ${countdown.m} minutes until ${targetLabel}`}
+          >
+            {String(countdown.h).padStart(2, "0")}:
+            {String(countdown.m).padStart(2, "0")}:
+            {String(countdown.s).padStart(2, "0")}
+          </p>
+          <p className="text-[10px] text-muted-foreground" title={inFastingWindow ? EATING_TIME_TITLE.iftarTime : EATING_TIME_TITLE.suhoor}>until {targetLabel}</p>
         </div>
       </div>
 

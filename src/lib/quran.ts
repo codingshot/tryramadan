@@ -66,3 +66,39 @@ export async function fetchVersesByJuz(
 
 /** Total juz in the Quran. */
 export const TOTAL_JUZ = 30;
+
+/** Single verse response for by_chapter endpoint. */
+export interface SingleVerseResponse {
+  verse: {
+    id: number;
+    verse_key: string;
+    verse_number: number;
+    text_uthmani?: string;
+    translations?: { resource_id: number; text: string }[];
+  };
+}
+
+/** Fetch a single verse by chapter and verse number with English translation. */
+export async function fetchVerseByChapterAndVerse(
+  chapterNumber: number,
+  verseNumber: number,
+  translationId = DEFAULT_TRANSLATION_ID
+): Promise<{ arabic?: string; translation: string }> {
+  const params = new URLSearchParams({
+    translations: String(translationId),
+    language: "en",
+    per_page: "1",
+    page: String(verseNumber),
+    fields: "text_uthmani,translations",
+  });
+  const res = await fetch(
+    `${QURAN_API_BASE}/verses/by_chapter/${chapterNumber}?${params}`
+  );
+  if (!res.ok) throw new Error("Failed to fetch verse");
+  const data = await res.json();
+  const verse = data.verses?.[0];
+  if (!verse) return { translation: "" };
+  const arabic = verse.text_uthmani ?? undefined;
+  const translation = verse.translations?.[0]?.text ?? "";
+  return { arabic, translation };
+}
