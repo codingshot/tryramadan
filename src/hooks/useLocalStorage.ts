@@ -104,6 +104,8 @@ export interface UserPreferences {
   ramadanEndOverride: string | null;
   /** When true, hide the habits / Ramadan habits step or link from onboarding flows. */
   hideHabitsFromOnboarding: boolean;
+  /** Aladhan API calculation method ID (e.g. 2 = ISNA, 5 = Egypt). Used for prayer times. */
+  prayerCalculationMethod: number;
 }
 
 export const defaultPreferences: UserPreferences = {
@@ -145,6 +147,7 @@ export const defaultPreferences: UserPreferences = {
   ramadanStartOverride: null,
   ramadanEndOverride: null,
   hideHabitsFromOnboarding: false,
+  prayerCalculationMethod: 2, // ISNA (Islamic Society of North America) — common default
 };
 
 const PREFERENCES_KEY = 'tryramadan-preferences';
