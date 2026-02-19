@@ -132,6 +132,13 @@ export function getCountryById(countryId: string): Country | undefined {
   return getAllCountries().find((c) => c.id === countryId);
 }
 
+/** Other countries in the same region (for "Related countries" on culture pages). */
+export function getRelatedCountries(country: Country, limit = 8): Country[] {
+  return getAllCountries()
+    .filter((c) => c.regionId === country.regionId && c.id !== country.id)
+    .slice(0, limit);
+}
+
 /** All country IDs for validation and sitemap */
 export function getAllCountryIds(): string[] {
   return getAllCountries().map((c) => c.id);

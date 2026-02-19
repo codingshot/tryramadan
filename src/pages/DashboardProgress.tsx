@@ -340,12 +340,12 @@ const DashboardProgress = () => {
             )}
           </motion.div>
 
-          {/* Non-fasting wins: journal streak, mindful eating, prayer (Muslim) */}
+          {/* Non-fasting wins: journal streak, mindful eating, prayer streak */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.12 }}
-            className={`grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8 ${isMuslim ? "md:grid-cols-3" : ""}`}
+            className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8"
           >
             <div className="p-4 rounded-2xl bg-card border border-border text-center">
               <BookOpen className="w-6 h-6 text-secondary mx-auto mb-2" aria-hidden />
@@ -357,14 +357,12 @@ const DashboardProgress = () => {
               <span className="text-xl sm:text-2xl font-bold">{mindfulEatingStreak}</span>
               <span className="block text-sm text-muted-foreground">Both meals logged (days in a row)</span>
             </div>
-            {isMuslim && (
-              <div className="p-4 rounded-2xl bg-secondary/10 border border-secondary/20 text-center">
-                <Landmark className="w-6 h-6 text-secondary mx-auto mb-2" aria-hidden />
-                <span className="text-xl sm:text-2xl font-bold text-secondary">{prayerStreak}</span>
-                <span className="block text-sm text-muted-foreground">Prayer streak (all 5/day)</span>
-                <span className="mt-1 block text-xs text-muted-foreground">{totalPrayers} prayers total</span>
-              </div>
-            )}
+            <div className="p-4 rounded-2xl bg-secondary/10 border border-secondary/20 text-center">
+              <Landmark className="w-6 h-6 text-secondary mx-auto mb-2" aria-hidden />
+              <span className="text-xl sm:text-2xl font-bold text-secondary">{prayerStreak}</span>
+              <span className="block text-sm text-muted-foreground">Prayer streak (all 5/day)</span>
+              <span className="mt-1 block text-xs text-muted-foreground">{totalPrayers} prayers total</span>
+            </div>
           </motion.div>
           
           {/* Progress bar */}
@@ -390,6 +388,39 @@ const DashboardProgress = () => {
                 )}
               </motion.div>
             </div>
+          </motion.div>
+
+          {/* Prayer streak */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="p-6 rounded-2xl bg-card border border-border mb-8"
+          >
+            <h3 className="font-display font-bold mb-3 flex items-center gap-2">
+              <Landmark className="w-5 h-5 text-secondary" />
+              Prayer streak
+            </h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Consecutive days you completed all 5 daily prayers (Fajr, Dhuhr, Asr, Maghrib, Isha). Taraweeh is optional and doesn&apos;t affect the streak.
+            </p>
+            <div className="flex flex-wrap items-center gap-4 mb-4">
+              <div>
+                <span className="text-2xl font-bold text-secondary">{prayerStreak}</span>
+                <span className="text-sm text-muted-foreground ml-1">days streak</span>
+              </div>
+              <div>
+                <span className="text-2xl font-bold">{totalPrayers}</span>
+                <span className="text-sm text-muted-foreground ml-1">prayers logged total</span>
+              </div>
+            </div>
+            <Link
+              to="/dashboard"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-secondary hover:underline"
+            >
+              Log today&apos;s prayers on Dashboard
+              <ChevronRight className="w-4 h-4" aria-hidden />
+            </Link>
           </motion.div>
 
           {/* Energy over time */}

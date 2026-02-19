@@ -1,13 +1,14 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Coffee, Utensils, ChevronRight, Globe, MapPin, Users, Building2, ExternalLink } from "lucide-react";
+import { ArrowLeft, Coffee, Utensils, ChevronRight, Globe, MapPin, Users, Building2, ExternalLink, Map } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { PageSEO } from "@/components/PageSEO";
 import {
   getCountryById,
   getRecipes,
+  getRelatedCountries,
 } from "@/lib/cultureRecipes";
 import { useIftarLabel } from "@/hooks/useLocalStorage";
 
@@ -449,6 +450,37 @@ export default function CultureCountry() {
                 </>
               )}
             </section>
+
+            {/* Related countries (same region) */}
+            {(() => {
+              const related = getRelatedCountries(country);
+              if (related.length === 0) return null;
+              return (
+                <section className="mt-10 pt-8 border-t border-border" aria-labelledby="related-countries-heading">
+                  <h2 id="related-countries-heading" className="font-display font-bold text-lg mb-4 flex items-center gap-2">
+                    <Map className="w-5 h-5 text-secondary" aria-hidden />
+                    Related countries
+                  </h2>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    More Ramadan traditions in {country.regionName}
+                  </p>
+                  <ul className="flex flex-wrap gap-2" role="navigation" aria-label="Related country culture pages">
+                    {related.map((c) => (
+                      <li key={c.id}>
+                        <Link
+                          to={`/culture/${c.id}`}
+                          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium bg-card border border-border hover:border-secondary/50 hover:bg-muted/50 transition-colors min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        >
+                          <span aria-hidden>{c.flag}</span>
+                          {c.name}
+                          <ChevronRight className="w-4 h-4 text-muted-foreground" aria-hidden />
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              );
+            })()}
           </motion.article>
 
           <p className="text-sm text-muted-foreground">

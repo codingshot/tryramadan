@@ -326,6 +326,10 @@ const Dashboard = () => {
   const tomorrowDate = new Date(todayStr + "T12:00:00");
   tomorrowDate.setDate(tomorrowDate.getDate() + 1);
   const tomorrowStr = toLocalDateString(tomorrowDate);
+  // Yesterday (for "Mark complete" after next Suhoor: we mark the previous calendar day)
+  const yesterdayDate = new Date(todayStr + "T12:00:00");
+  yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+  const yesterdayStr = toLocalDateString(yesterdayDate);
   const { prayerTimes: tomorrowPrayerTimes } = usePrayerTimesForDate(
     locationCoords?.lat || null,
     locationCoords?.lng || null,
@@ -546,25 +550,26 @@ const Dashboard = () => {
     return () => clearInterval(t);
   }, [tickFastingAndCountdown]);
 
-  // Toggle today's fast as complete (uses fasting log + console)
-  const toggleTodayComplete = () => {
-    const isComplete = progress.completedDays.includes(todayStr);
-
+  // Toggle a given day's fast as complete (uses fasting log + console)
+  const toggleCompleteForDate = (dateStr: string) => {
+    const isComplete = progress.completedDays.includes(dateStr);
     if (isComplete) {
-      uncompleteFastingToday(progress, setProgress, todayStr);
+      uncompleteFastingToday(progress, setProgress, dateStr);
     } else {
-      completeFastingToday(progress, setProgress, todayStr);
+      completeFastingToday(progress, setProgress, dateStr);
     }
   };
 
-  // Gray out "Mark complete" until iftar; on click before iftar show message
-  const markCompleteDisabled = isFasting && inFastingWindow;
+  // "Mark complete" is only allowed after the next Suhoor (new day started). Until then: in eating window show toast; in fasting window before iftar show toast.
+  // When in fasting window (post–next Suhoor), the button marks *yesterday* complete.
+  const markCompleteDisabled = !inFastingWindow;
   const handleMarkComplete = () => {
-    if (markCompleteDisabled) {
-      toast.info("Fasting is not done yet. You can mark complete after iftar.");
+    if (!inFastingWindow) {
+      toast.info("You can mark the day complete after the next Suhoor (start of the new day).");
       return;
     }
-    toggleTodayComplete();
+    // In fasting window: mark yesterday (the day that ended at iftar) complete
+    toggleCompleteForDate(yesterdayStr);
   };
 
   const allRecipesForAddFood = useMemo(() => getRecipes(), []);

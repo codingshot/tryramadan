@@ -642,9 +642,9 @@ export default function DashboardJournal() {
                       <label className="flex items-center gap-2 text-sm">
                         <span className="text-muted-foreground">Rak&apos;ats:</span>
                         <Select
-                          value={(taraweehTracker[writeDate] ?? {}).rakats != null ? String((taraweehTracker[writeDate] ?? {}).rakats) : ""}
+                          value={(taraweehTracker[writeDate] ?? {}).rakats != null ? String((taraweehTracker[writeDate] ?? {}).rakats) : "none"}
                           onValueChange={(v) => {
-                            const n = v === "" ? undefined : parseInt(v, 10);
+                            const n = v === "none" ? undefined : parseInt(v, 10);
                             setTaraweehTracker((prev) => ({
                               ...prev,
                               [writeDate]: {
@@ -658,7 +658,7 @@ export default function DashboardJournal() {
                             <SelectValue placeholder="—" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">—</SelectItem>
+                            <SelectItem value="none">—</SelectItem>
                             <SelectItem value="8">8</SelectItem>
                             <SelectItem value="20">20</SelectItem>
                           </SelectContent>
