@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
-import { Clock, Target, Lightbulb, AlertCircle } from "lucide-react";
+import { Clock, Target, Lightbulb, AlertCircle, Check, Circle, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { type PrayerTimes } from "@/hooks/usePrayerTimes";
-import { useDailyMissions, useUserPreferences, type FastingProgress } from "@/hooks/useLocalStorage";
+import { useGoalsUntilRamadan, useUserPreferences, type FastingProgress } from "@/hooks/useLocalStorage";
 import { DashboardProgressSummary } from "./DashboardProgressSummary";
 import { DashboardQuickActions } from "./DashboardQuickActions";
 
@@ -30,8 +30,15 @@ export const DashboardSidebar = ({
 }: DashboardSidebarProps) => {
   const [preferences] = useUserPreferences();
 
-  // Get today's missions
-  const dailyMissions = useDailyMissions();
+  // Overall goals (goal track from /dashboard/goals)
+  const [goals, setGoals] = useGoalsUntilRamadan();
+  const completedGoalsCount = goals.filter((g) => g.completed).length;
+  const displayGoals = goals.slice(0, 4);
+  const toggleGoal = (id: string) => {
+    setGoals((prev) =>
+      prev.map((g) => (g.id === id ? { ...g, completed: !g.completed } : g))
+    );
+  };
 
   // Get next 3 upcoming prayers
   const getUpcomingPrayers = () => {
@@ -169,36 +176,67 @@ export const DashboardSidebar = ({
         </p>
       </motion.div>
 
-      {/* Today's Missions (Compact) */}
-      {dailyMissions.missions.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.3 }}
-          className="p-4 rounded-2xl bg-card border border-border"
-        >
-          <h3 className="font-semibold mb-3 flex items-center gap-2">
+      {/* Overall goals (goal track — same list as /dashboard/goals) */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.3 }}
+        className="p-4 rounded-2xl bg-card border border-border"
+      >
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-semibold flex items-center gap-2">
             <Target className="w-5 h-5 text-secondary" />
-            Today's Goals
+            Overall goals
           </h3>
-          <ul className="space-y-2">
-            {dailyMissions.missions.slice(0, 3).map((mission) => (
-              <li
-                key={mission.id}
-                className="text-sm flex items-start gap-2"
-              >
-                <span className="text-muted-foreground mt-0.5">•</span>
-                <span className="text-muted-foreground">{mission.label}</span>
-              </li>
-            ))}
-          </ul>
-          {dailyMissions.missions.length > 3 && (
+          <Link
+            to="/dashboard/goals"
+            className="text-xs text-secondary hover:underline flex items-center gap-0.5"
+          >
+            Manage <ChevronRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+        {goals.length === 0 ? (
+          <p className="text-xs text-muted-foreground">
+            Add intentions on the Goals page (e.g. read Quran, give charity).
+          </p>
+        ) : (
+          <>
+            <ul className="space-y-2">
+              {displayGoals.map((goal) => (
+                <li key={goal.id} className="text-sm flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => toggleGoal(goal.id)}
+                    className="flex-shrink-0 rounded-full p-0.5 hover:bg-muted transition-colors"
+                    aria-label={goal.completed ? "Mark incomplete" : "Mark complete"}
+                  >
+                    {goal.completed ? (
+                      <Check className="w-4 h-4 text-secondary" />
+                    ) : (
+                      <Circle className="w-4 h-4 text-muted-foreground" />
+                    )}
+                  </button>
+                  <span
+                    className={`flex-1 truncate ${
+                      goal.completed ? "line-through text-muted-foreground" : ""
+                    }`}
+                  >
+                    {goal.title}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            {goals.length > 4 && (
+              <p className="text-xs text-muted-foreground mt-2">
+                +{goals.length - 4} more
+              </p>
+            )}
             <p className="text-xs text-muted-foreground mt-2">
-              +{dailyMissions.missions.length - 3} more missions
+              {completedGoalsCount} / {goals.length} done
             </p>
-          )}
-        </motion.div>
-      )}
+          </>
+        )}
+      </motion.div>
 
       {/* Emergency Link (if fasting) */}
       <motion.div

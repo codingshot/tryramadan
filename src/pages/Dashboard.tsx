@@ -560,15 +560,21 @@ const Dashboard = () => {
     }
   };
 
-  // "Mark complete" is only allowed after the next Suhoor (new day started). Until then: in eating window show toast; in fasting window before iftar show toast.
-  // When in fasting window (post–next Suhoor), the button marks *yesterday* complete.
-  const markCompleteDisabled = !inFastingWindow;
+  // Mark-complete logic (audit): You can only confirm a day after that day's iftar and after the next Suhoor (new day).
+  // - Before iftar (in fasting window + user said "I'm fasting"): disabled — "Fasting is not done yet. You can mark complete after iftar."
+  // - After iftar, before next Suhoor (eating window): disabled — "You can mark the day complete after the next Suhoor."
+  // - After next Suhoor (in new day's fasting window): enabled — button marks *yesterday* complete.
+  const markCompleteDisabled = !inFastingWindow || isFasting;
   const handleMarkComplete = () => {
+    if (inFastingWindow && isFasting) {
+      toast.info("Fasting is not done yet. You can mark complete after iftar.");
+      return;
+    }
     if (!inFastingWindow) {
       toast.info("You can mark the day complete after the next Suhoor (start of the new day).");
       return;
     }
-    // In fasting window: mark yesterday (the day that ended at iftar) complete
+    // In fasting window and not currently fasting (new day): mark yesterday complete
     toggleCompleteForDate(yesterdayStr);
   };
 

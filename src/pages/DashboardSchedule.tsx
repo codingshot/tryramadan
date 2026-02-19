@@ -362,6 +362,30 @@ const DashboardSchedule = () => {
     [todayPrayerTimes, todayStr, prayerTimeOverrides]
   );
 
+  /** Same as Dashboard: cannot mark *today* complete until after iftar and after next Suhoor. */
+  const scheduleMarkTodayComplete = useMemo(() => {
+    if (!effectiveTodayPrayerTimes?.imsak || !effectiveTodayPrayerTimes?.maghrib) {
+      return { disabled: true, toastMessage: "You can mark the day complete after the next Suhoor (start of the new day)." as string };
+    }
+    const nowSec = displayTimezone
+      ? getNowSecondsSinceMidnightInTimezone(displayTimezone)
+      : (() => {
+          const d = new Date();
+          return d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds();
+        })();
+    const imsakSec = timeStringToSecondsSinceMidnight(effectiveTodayPrayerTimes.imsak);
+    const maghribSec = timeStringToSecondsSinceMidnight(effectiveTodayPrayerTimes.maghrib);
+    const inFastingWindow = nowSec >= imsakSec && nowSec < maghribSec;
+    const fastingToday = isFastingToday(progress, todayStr);
+    const disabled = !inFastingWindow || fastingToday;
+    const toastMessage =
+      inFastingWindow && fastingToday
+        ? "Fasting is not done yet. You can mark complete after iftar."
+        : "You can mark the day complete after the next Suhoor (start of the new day).";
+    return { disabled, toastMessage };
+  }, [displayTimezone, effectiveTodayPrayerTimes, progress, todayStr]);
+  const scheduleMarkTodayCompleteDisabled = scheduleMarkTodayComplete.disabled;
+
   const getDaysInMonth = (date: Date) =>
     new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
   const getFirstDayOfMonth = (date: Date) =>
@@ -2604,7 +2628,14 @@ const DashboardSchedule = () => {
                             <Button
                               variant={selectedCompleted ? "secondary" : "outline"}
                               size="sm"
-                              onClick={() => toggleCompleted(selectedDate)}
+                              disabled={selectedDate === todayStr && scheduleMarkTodayCompleteDisabled}
+                              onClick={() => {
+                                if (selectedDate === todayStr && scheduleMarkTodayCompleteDisabled) {
+                                  toast.info(scheduleMarkTodayComplete.toastMessage);
+                                  return;
+                                }
+                                toggleCompleted(selectedDate!);
+                              }}
                               className="gap-2"
                             >
                               <Check className="w-4 h-4" />

@@ -194,7 +194,7 @@ export const HeroDailySlider = () => {
                         {(hadith as { context: string }).context}
                       </p>
                     )}
-                    <p className="text-xs text-muted-foreground mt-2">Click to open full hadith and mark as read</p>
+                    <p className="text-xs text-muted-foreground mt-2">Click to open full hadith</p>
                   </TooltipContent>
                 </Tooltip>
                 <p className="text-xs text-muted-foreground">
@@ -228,7 +228,7 @@ export const HeroDailySlider = () => {
                   </TooltipTrigger>
                   <TooltipContent side="top" className="max-w-md p-3" aria-describedby={undefined}>
                     <p className="font-display text-sm leading-relaxed">"{verse.text}"</p>
-                    <p className="text-xs text-muted-foreground mt-2">Click to open full verse, translation, and mark as read</p>
+                    <p className="text-xs text-muted-foreground mt-2">Click to open full verse and translation</p>
                   </TooltipContent>
                 </Tooltip>
                 <p className="text-xs text-muted-foreground">
@@ -292,15 +292,6 @@ export const HeroDailySlider = () => {
               {" · "}
               {hadith.topic}
             </p>
-            <a
-              href={`${EXTERNAL_LINKS.sunnah}/search?q=${encodeURIComponent(hadith.source)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-sm text-secondary hover:underline"
-            >
-              View on Sunnah.com
-              <ExternalLink className="w-3.5 h-3.5" aria-hidden />
-            </a>
             <div className="flex flex-wrap gap-2 pt-2">
               {hadithRead ? (
                 <Button type="button" variant="outline" size="sm" onClick={() => { unmarkHadithDate(viewDateStr); closeDetail(); }}>
@@ -312,6 +303,22 @@ export const HeroDailySlider = () => {
                   Mark as read
                 </Button>
               )}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                asChild
+              >
+                <a
+                  href={`${EXTERNAL_LINKS.sunnah}/search?q=${encodeURIComponent(hadith.source)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5"
+                >
+                  Read on Sunnah
+                  <ExternalLink className="w-3.5 h-3.5" aria-hidden />
+                </a>
+              </Button>
             </div>
           </div>
         </DialogContent>
@@ -371,17 +378,7 @@ function VerseDetailContent({
         </p>
       ) : null}
       <p className="text-xs text-muted-foreground">
-        <a
-          href={`${EXTERNAL_LINKS.quran}/${verse.surahNumber}/${verse.verseNumber}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-secondary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary rounded inline-flex items-center gap-1"
-        >
-          Surah {verse.surah} {verse.reference} on Quran.com
-          <ExternalLink className="w-3.5 h-3.5" aria-hidden />
-        </a>
-        {" · "}
-        {verse.topic}
+        Surah {verse.surah} {verse.reference} · {verse.topic}
       </p>
       <div className="flex flex-wrap gap-2 pt-2">
         {isRead ? (
@@ -394,6 +391,17 @@ function VerseDetailContent({
             Mark as read
           </Button>
         )}
+        <Button type="button" variant="outline" size="sm" asChild>
+          <a
+            href={`${EXTERNAL_LINKS.quran}/${verse.surahNumber}/${verse.verseNumber}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5"
+          >
+            Read on Quran.com
+            <ExternalLink className="w-3.5 h-3.5" aria-hidden />
+          </a>
+        </Button>
       </div>
     </div>
   );
