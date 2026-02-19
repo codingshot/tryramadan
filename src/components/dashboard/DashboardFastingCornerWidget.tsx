@@ -48,7 +48,7 @@ export function DashboardFastingCornerWidget({
 
   return (
     <div
-      className="rounded-xl border border-border bg-card p-3 shadow-sm w-full max-w-[220px]"
+      className="rounded-xl border border-border bg-card p-3 shadow-sm w-full max-w-full sm:max-w-[220px]"
       aria-label="Today's fast and next prayer"
     >
       <div className="flex items-center gap-2 mb-2">
