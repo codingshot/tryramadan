@@ -12,7 +12,7 @@ interface DashboardFastingCornerWidgetProps {
   countdownToSuhoor: { h: number; m: number; s: number };
   prayerTimes: PrayerTimes | null;
   todayStr: string;
-  nextPrayer: { name: string; time: string; countdown: string } | null;
+  nextPrayer: { name: string; time: string; countdown: string; h?: number; m?: number; s?: number } | null;
   onMarkComplete: () => void;
   /** When true, Complete button is grayed out (before iftar). Click still fires and parent shows message. */
   markCompleteDisabled?: boolean;
@@ -84,9 +84,21 @@ export function DashboardFastingCornerWidget({
       </div>
 
       {nextPrayer && (
-        <p className="text-xs text-muted-foreground mb-2 truncate" title={`${nextPrayer.name} at ${nextPrayer.time}`}>
-          🕌 {nextPrayer.name} in {nextPrayer.countdown}
-        </p>
+        <div className="mb-2">
+          <p className="text-xs text-muted-foreground truncate" title={`${nextPrayer.name} at ${nextPrayer.time}`}>
+            🕌 Next: {nextPrayer.name}
+          </p>
+          <p
+            className="text-sm font-bold tabular-nums truncate"
+            aria-live="polite"
+            aria-atomic="true"
+            aria-label={`${nextPrayer.name} in ${nextPrayer.countdown}`}
+          >
+            {typeof nextPrayer.h === "number" && typeof nextPrayer.m === "number" && typeof nextPrayer.s === "number"
+              ? `${String(nextPrayer.h).padStart(2, "0")}:${String(nextPrayer.m).padStart(2, "0")}:${String(nextPrayer.s).padStart(2, "0")}`
+              : nextPrayer.countdown}
+          </p>
+        </div>
       )}
 
       {prayerTimes && (

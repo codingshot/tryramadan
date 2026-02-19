@@ -15,7 +15,7 @@ interface DashboardHeroProps {
   countdownToSuhoor: { h: number; m: number; s: number };
   prayerTimes: PrayerTimes | null;
   todayStr: string;
-  nextPrayer: { name: string; time: string; countdown: string } | null;
+  nextPrayer: { name: string; time: string; countdown: string; h?: number; m?: number; s?: number } | null;
   onMarkComplete: () => void;
   /** When true, Mark complete is grayed out (fasting not done yet; before iftar). Click still fires and parent shows message. */
   markCompleteDisabled?: boolean;
@@ -170,13 +170,24 @@ export const DashboardHero = ({
           </p>
         </div>
 
-        {/* Next Prayer Indicator */}
+        {/* Next Prayer + countdown */}
         {nextPrayer && (
           <div className="text-center mb-6 pb-6 border-b border-border">
             <p className="text-sm text-muted-foreground mb-1">Next Prayer</p>
-            <p className="text-lg font-semibold">
-              🕌 {nextPrayer.name} in {nextPrayer.countdown}
+            <p className="text-lg font-semibold mb-1">
+              🕌 {nextPrayer.name} at {nextPrayer.time}
             </p>
+            <p
+              className="text-2xl md:text-3xl font-bold tabular-nums text-secondary"
+              aria-live="polite"
+              aria-atomic="true"
+              aria-label={`${nextPrayer.name} in ${nextPrayer.countdown}`}
+            >
+              {typeof nextPrayer.h === "number" && typeof nextPrayer.m === "number" && typeof nextPrayer.s === "number"
+                ? `${String(nextPrayer.h).padStart(2, "0")}:${String(nextPrayer.m).padStart(2, "0")}:${String(nextPrayer.s).padStart(2, "0")}`
+                : nextPrayer.countdown}
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">until {nextPrayer.name}</p>
           </div>
         )}
 

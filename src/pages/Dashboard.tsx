@@ -767,10 +767,15 @@ const Dashboard = () => {
     if (!info) return null;
     const h = Math.floor(info.secondsUntil / 3600);
     const m = Math.floor((info.secondsUntil % 3600) / 60);
+    const s = info.secondsUntil % 60;
+    const countdownWithSec = h > 0 ? `${h}h ${m}m ${s}s` : m > 0 ? `${m}m ${s}s` : `${s}s`;
     return {
       name: info.name,
       time: info.time,
-      countdown: h > 0 ? `${h}h ${m}m` : `${m}m`,
+      countdown: countdownWithSec,
+      h,
+      m,
+      s,
     };
   }, [
     displayTimezone,
