@@ -132,13 +132,49 @@ function isValidDateString(s: string): boolean {
   return !isNaN(d.getTime()) && d.toISOString().startsWith(s);
 }
 
+/** Normalize stored value to array of valid entries so corrupted localStorage never throws. */
+function safeJournalEntries(raw: unknown): JournalEntry[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter(
+    (e): e is JournalEntry =>
+      e != null &&
+      typeof e === "object" &&
+      typeof (e as JournalEntry).date === "string" &&
+      typeof (e as JournalEntry).content === "string"
+  );
+}
+
+/** Normalize to record so corrupted localStorage never throws. */
+function safeRecord<K extends string, V>(raw: unknown, defaultVal: Record<K, V>): Record<K, V> {
+  if (raw !== null && typeof raw === "object" && !Array.isArray(raw)) return raw as Record<K, V>;
+  return defaultVal;
+}
+
 export default function DashboardJournal() {
   const [searchParams] = useSearchParams();
   const [preferences] = useUserPreferences();
-  const [entries, setEntries] = useLocalStorage<JournalEntry[]>("tryramadan-journal", []);
-  const [habitLog, setHabitLog] = useHabitLog();
-  const [prayerTracker, setPrayerTracker] = useLocalStorage<Record<string, Record<string, boolean>>>("tryramadan-prayer-tracker", {});
-  const [taraweehTracker, setTaraweehTracker] = useLocalStorage<Record<string, { done: boolean; rakats?: number }>>("tryramadan-taraweeh", {});
+  const [storedEntries, setStoredEntries] = useLocalStorage<JournalEntry[]>("tryramadan-journal", []);
+  const entries = useMemo(() => safeJournalEntries(storedEntries), [storedEntries]);
+  const setEntries = useCallback(
+    (value: JournalEntry[] | ((prev: JournalEntry[]) => JournalEntry[])) => {
+      setStoredEntries(
+        typeof value === "function"
+          ? (raw: JournalEntry[]) => {
+              const prev = safeJournalEntries(raw);
+              const next = value(prev);
+              return Array.isArray(next) ? next : [];
+            }
+          : Array.isArray(value) ? value : []
+      );
+    },
+    [setStoredEntries]
+  );
+  const [storedHabitLog, setHabitLog] = useHabitLog();
+  const habitLog = useMemo(() => safeRecord(storedHabitLog, {}), [storedHabitLog]);
+  const [storedPrayerTracker, setPrayerTracker] = useLocalStorage<Record<string, Record<string, boolean>>>("tryramadan-prayer-tracker", {});
+  const prayerTracker = useMemo(() => safeRecord(storedPrayerTracker, {}), [storedPrayerTracker]);
+  const [storedTaraweehTracker, setTaraweehTracker] = useLocalStorage<Record<string, { done: boolean; rakats?: number }>>("tryramadan-taraweeh", {});
+  const taraweehTracker = useMemo(() => safeRecord(storedTaraweehTracker, {}), [storedTaraweehTracker]);
   const today = new Date().toISOString().split("T")[0];
   const dateFromUrl = searchParams.get("date");
   const initialDate = dateFromUrl && isValidDateString(dateFromUrl) ? dateFromUrl : today;
