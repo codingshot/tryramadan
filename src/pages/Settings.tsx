@@ -65,6 +65,12 @@ import { getDefaultHydrationGoalMl, getHydrationUnit, ML_PER_US_CUP } from "@/li
 import { kgToLb, lbToKg, isImperialWeightCountry } from "@/lib/weight";
 import { getRamadanDayNumber, isRamadanDay, getRamadanDateRange } from "@/lib/ramadan";
 import { useRamadanRange } from "@/hooks/useRamadanRange";
+import {
+  PRAYER_CALCULATION_METHODS,
+  getDefaultPrayerMethodForCountry,
+  getPrayerMethodById,
+  DEFAULT_PRAYER_METHOD_ID,
+} from "@/lib/prayerCalculation";
 import { deleteAllUserData, clearJournalOnly, clearHealthDataOnly, clearLocationFromPreferences, saveBackupBeforeClear, TRYRAMADAN_LOCALSTORAGE_KEYS } from "@/lib/dataLifecycle";
 import type { UserPreferences } from "@/hooks/useLocalStorage";
 
@@ -873,6 +879,61 @@ const Settings = () => {
               )}
               Auto-detect my location
             </button>
+
+            <div className="mt-6 pt-6 border-t border-border">
+              <label id="prayer-method-label" className="text-xs font-semibold text-muted-foreground block mb-2">
+                Prayer calculation method
+              </label>
+              <p className="text-sm text-muted-foreground mb-3">
+                Different authorities use different calculation methods. Your location above is used for coordinates; this setting chooses the algorithm (e.g. ISNA for North America, Muslim World League for UK).
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <Select
+                  value={String(preferences.prayerCalculationMethod ?? DEFAULT_PRAYER_METHOD_ID)}
+                  onValueChange={(v) => setPreferences({ ...preferences, prayerCalculationMethod: parseInt(v, 10) })}
+                  aria-labelledby="prayer-method-label"
+                >
+                  <SelectTrigger id="settings-prayer-method" className="max-w-md" aria-label="Prayer calculation method">
+                    <SelectValue placeholder="Select method" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PRAYER_CALCULATION_METHODS.map((m) => (
+                      <SelectItem key={m.id} value={String(m.id)}>
+                        {m.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {preferences.country && (() => {
+                  const recommended = getDefaultPrayerMethodForCountry(preferences.country);
+                  const current = preferences.prayerCalculationMethod ?? DEFAULT_PRAYER_METHOD_ID;
+                  if (recommended === current) return null;
+                  const rec = getPrayerMethodById(recommended);
+                  return (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPreferences({ ...preferences, prayerCalculationMethod: recommended })}
+                      className="shrink-0"
+                    >
+                      Use recommended for your country
+                    </Button>
+                  );
+                })()}
+              </div>
+              {preferences.country && (() => {
+                const recommended = getDefaultPrayerMethodForCountry(preferences.country);
+                const current = preferences.prayerCalculationMethod ?? DEFAULT_PRAYER_METHOD_ID;
+                if (recommended !== current) return null;
+                const rec = getPrayerMethodById(recommended);
+                return (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Using method recommended for your country ({rec?.name ?? "recommended"}).
+                  </p>
+                );
+              })()}
+            </div>
           </motion.div>
 
           {/* Language & region */}

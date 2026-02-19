@@ -1209,12 +1209,13 @@ const DashboardSchedule = () => {
         const endDate = new Date(endStr + "T12:00:00");
         const startYear = startDate.getFullYear();
         const endYear = endDate.getFullYear();
+        const method = preferences.prayerCalculationMethod ?? 2;
         for (let y = startYear; y <= endYear; y++) {
           for (let m = 1; m <= 12; m++) {
             const monthStart = new Date(y, m - 1, 1);
             const monthEnd = new Date(y, m, 0);
             if (monthEnd < startDate || monthStart > endDate) continue;
-            const data = await fetchPrayerTimesForMonth(lat, lng, y, m);
+            const data = await fetchPrayerTimesForMonth(lat, lng, y, m, method);
             Object.assign(prayerTimesMap, data);
           }
         }

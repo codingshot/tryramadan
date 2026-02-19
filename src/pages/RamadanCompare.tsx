@@ -5,6 +5,8 @@ import { Footer } from "@/components/Footer";
 import { PageSEO } from "@/components/PageSEO";
 import { LocationSearch } from "@/components/LocationSearch";
 import { fetchPrayerTimesForDateAsync, type PrayerTimes } from "@/hooks/usePrayerTimes";
+import { useUserPreferences } from "@/hooks/useLocalStorage";
+import { DEFAULT_PRAYER_METHOD_ID } from "@/lib/prayerCalculation";
 import { timeStringToSecondsSinceMidnight } from "@/lib/utils";
 import { getRamadanStartForYear, getRamadanEndForYear, isRamadanDay } from "@/lib/ramadan";
 import type { LocationResult } from "@/hooks/useLocation";
@@ -68,6 +70,8 @@ function formatDateLabel(iso: string): string {
 }
 
 export default function RamadanCompare() {
+  const [preferences] = useUserPreferences();
+  const method = preferences.prayerCalculationMethod ?? DEFAULT_PRAYER_METHOD_ID;
   const [regions, setRegions] = useState<CompareRegion[]>(() =>
     PRESET_REGIONS.slice(0, 4).map((r, i) => ({
       id: `preset-${i}-${r.lat}`,
@@ -93,7 +97,7 @@ export default function RamadanCompare() {
     try {
       const results = await Promise.all(
         regions.map(async (r) => {
-          const pt: PrayerTimes | null = await fetchPrayerTimesForDateAsync(r.lat, r.lng, compareDate);
+          const pt: PrayerTimes | null = await fetchPrayerTimesForDateAsync(r.lat, r.lng, compareDate, method);
           if (!pt) {
             return { region: r, imsak: "—", maghrib: "—", hours: null, error: true };
           }
@@ -111,7 +115,7 @@ export default function RamadanCompare() {
     } finally {
       setLoading(false);
     }
-  }, [regions, compareDate]);
+  }, [regions, compareDate, method]);
 
   useEffect(() => {
     fetchAll();

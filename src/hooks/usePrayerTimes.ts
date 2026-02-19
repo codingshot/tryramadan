@@ -3,6 +3,7 @@ import { toLocalDateString } from '@/lib/utils';
 import { getRamadanDateRange, type RamadanOverrideInput } from '@/lib/ramadan';
 import { API_CONFIG } from '@/lib/config';
 import { useUserPreferences } from '@/hooks/useLocalStorage';
+import { DEFAULT_PRAYER_METHOD_ID } from '@/lib/prayerCalculation';
 
 export interface PrayerTimes {
   fajr: string;
@@ -77,17 +78,18 @@ interface PrayerTimesCacheEntry {
   dateStr: string;
   lat: number;
   lng: number;
+  method: number;
   prayerTimes: PrayerTimes;
   hijriDate: { day: string; month: string; monthAr: string; year: string };
   savedAt: string;
 }
 
-function readPrayerTimesCache(dateStr: string, lat: number, lng: number): PrayerTimesCacheEntry | null {
+function readPrayerTimesCache(dateStr: string, lat: number, lng: number, method: number): PrayerTimesCacheEntry | null {
   try {
     const raw = localStorage.getItem(PRAYER_TIMES_CACHE_KEY);
     if (!raw) return null;
     const entry = JSON.parse(raw) as PrayerTimesCacheEntry;
-    if (entry.dateStr !== dateStr || entry.lat !== lat || entry.lng !== lng) return null;
+    if (entry.dateStr !== dateStr || entry.lat !== lat || entry.lng !== lng || (entry.method ?? DEFAULT_PRAYER_METHOD_ID) !== method) return null;
     return entry;
   } catch {
     return null;
@@ -98,6 +100,7 @@ function writePrayerTimesCache(
   dateStr: string,
   lat: number,
   lng: number,
+  method: number,
   prayerTimes: PrayerTimes,
   hijriDate: { day: string; month: string; monthAr: string; year: string }
 ) {
@@ -106,6 +109,7 @@ function writePrayerTimesCache(
       dateStr,
       lat,
       lng,
+      method,
       prayerTimes,
       hijriDate,
       savedAt: new Date().toISOString(),
@@ -137,6 +141,8 @@ function getTodayStrInTimezone(timeZone: string): string {
 }
 
 export function usePrayerTimes(lat: number | null, lng: number | null, displayTimezone?: string | null) {
+  const [preferences] = useUserPreferences();
+  const method = preferences.prayerCalculationMethod ?? DEFAULT_PRAYER_METHOD_ID;
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
   const [hijriDate, setHijriDate] = useState<{ day: string; month: string; monthAr: string; year: string } | null>(null);
   const [loading, setLoading] = useState(false);
@@ -165,7 +171,7 @@ export function usePrayerTimes(lat: number | null, lng: number | null, displayTi
       const date = new Date(y, m - 1, d);
       const dateStr = toAladhanDateStr(date);
       const response = await fetch(
-        `${API_CONFIG.aladhan}/v1/timings/${dateStr}?latitude=${lat}&longitude=${lng}&method=2`
+        `${API_CONFIG.aladhan}/v1/timings/${dateStr}?latitude=${lat}&longitude=${lng}&method=${method}`
       );
       if (!response.ok) throw new Error('Failed to fetch prayer times');
       const data: AladhanResponse = await response.json();
@@ -189,11 +195,11 @@ export function usePrayerTimes(lat: number | null, lng: number | null, displayTi
         };
         setPrayerTimes(pt);
         setHijriDate(hd);
-        writePrayerTimesCache(todayStr, lat, lng, pt, hd);
+        writePrayerTimesCache(todayStr, lat, lng, method, pt, hd);
       }
     } catch (err) {
       console.error('Prayer times error:', err);
-      const cached = lat && lng ? readPrayerTimesCache(todayStr, lat, lng) : null;
+      const cached = lat && lng ? readPrayerTimesCache(todayStr, lat, lng, method) : null;
       if (cached) {
         setPrayerTimes(cached.prayerTimes);
         setHijriDate(cached.hijriDate);
@@ -205,12 +211,11 @@ export function usePrayerTimes(lat: number | null, lng: number | null, displayTi
     } finally {
       setLoading(false);
     }
-  }, [lat, lng, todayStr]);
+  }, [lat, lng, todayStr, method]);
 
   useEffect(() => {
     if (!lat || !lng) return;
-    // Use cache first (sync) so we don't block; defer API fetch until after first paint when no cache
-    const cached = readPrayerTimesCache(todayStr, lat, lng);
+    const cached = readPrayerTimesCache(todayStr, lat, lng, method);
     if (cached) {
       setPrayerTimes(cached.prayerTimes);
       setHijriDate(cached.hijriDate);
@@ -227,7 +232,7 @@ export function usePrayerTimes(lat: number | null, lng: number | null, displayTi
       if (typeof cancelIdleCallback !== 'undefined') cancelIdleCallback(id as number);
       else clearTimeout(id as number);
     };
-  }, [lat, lng, todayStr, fetchPrayerTimes]);
+  }, [lat, lng, todayStr, method, fetchPrayerTimes]);
 
   return { prayerTimes, hijriDate, loading, error, refetch: fetchPrayerTimes, isFromCache };
 }
@@ -247,12 +252,12 @@ interface ForDateCacheEntry {
   savedAt: string;
 }
 
-function readForDateCache(isoDate: string, lat: number, lng: number): ForDateCacheEntry | null {
+function readForDateCache(isoDate: string, lat: number, lng: number, method: number): ForDateCacheEntry | null {
   try {
     const raw = localStorage.getItem(PRAYER_TIMES_FOR_DATE_CACHE_KEY);
     if (!raw) return null;
     const map = JSON.parse(raw) as Record<string, ForDateCacheEntry>;
-    const key = `${isoDate}_${lat}_${lng}`;
+    const key = `${isoDate}_${lat}_${lng}_${method}`;
     return map[key] ?? null;
   } catch {
     return null;
@@ -263,13 +268,14 @@ function writeForDateCache(
   isoDate: string,
   lat: number,
   lng: number,
+  method: number,
   prayerTimes: PrayerTimes,
   hijriDate: { day: string; month: string; monthAr: string; year: string }
 ) {
   try {
     const raw = localStorage.getItem(PRAYER_TIMES_FOR_DATE_CACHE_KEY);
     const map: Record<string, ForDateCacheEntry> = raw ? JSON.parse(raw) : {};
-    const key = `${isoDate}_${lat}_${lng}`;
+    const key = `${isoDate}_${lat}_${lng}_${method}`;
     map[key] = { prayerTimes, hijriDate, savedAt: new Date().toISOString() };
     const keys = Object.keys(map);
     if (keys.length > MAX_FOR_DATE_CACHE_ENTRIES) {
@@ -286,15 +292,16 @@ function writeForDateCache(
 export async function fetchPrayerTimesForDateAsync(
   lat: number,
   lng: number,
-  isoDate: string
+  isoDate: string,
+  method: number = DEFAULT_PRAYER_METHOD_ID
 ): Promise<PrayerTimes | null> {
-  const cached = readForDateCache(isoDate, lat, lng);
+  const cached = readForDateCache(isoDate, lat, lng, method);
   if (cached) return cached.prayerTimes;
 
   const dateStr = toAladhanDate(isoDate);
   try {
     const response = await fetch(
-      `${API_CONFIG.aladhan}/v1/timings/${dateStr}?latitude=${lat}&longitude=${lng}&method=2`
+      `${API_CONFIG.aladhan}/v1/timings/${dateStr}?latitude=${lat}&longitude=${lng}&method=${method}`
     );
     if (!response.ok) return null;
     const data: AladhanResponse = await response.json();
@@ -316,7 +323,7 @@ export async function fetchPrayerTimesForDateAsync(
       monthAr: data.data.date.hijri.month.ar,
       year: data.data.date.hijri.year,
     };
-    writeForDateCache(isoDate, lat, lng, times, hijri);
+    writeForDateCache(isoDate, lat, lng, method, times, hijri);
     return times;
   } catch {
     return null;
@@ -329,6 +336,8 @@ export function usePrayerTimesForDate(
   lng: number | null,
   isoDate: string | null
 ) {
+  const [preferences] = useUserPreferences();
+  const method = preferences.prayerCalculationMethod ?? DEFAULT_PRAYER_METHOD_ID;
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
   const [hijriDate, setHijriDate] = useState<{ day: string; month: string; monthAr: string; year: string } | null>(null);
   const [loading, setLoading] = useState(false);
@@ -341,7 +350,7 @@ export function usePrayerTimesForDate(
       return;
     }
 
-    const cached = readForDateCache(isoDate, lat, lng);
+    const cached = readForDateCache(isoDate, lat, lng, method);
     if (cached) {
       setPrayerTimes(cached.prayerTimes);
       setHijriDate(cached.hijriDate);
@@ -357,7 +366,7 @@ export function usePrayerTimesForDate(
       setError(null);
       try {
         const response = await fetch(
-          `${API_CONFIG.aladhan}/v1/timings/${dateStr}?latitude=${lat}&longitude=${lng}&method=2`
+          `${API_CONFIG.aladhan}/v1/timings/${dateStr}?latitude=${lat}&longitude=${lng}&method=${method}`
         );
         if (!response.ok) throw new Error('Failed to fetch prayer times');
         const data: AladhanResponse = await response.json();
@@ -381,7 +390,7 @@ export function usePrayerTimesForDate(
           };
           setPrayerTimes(times);
           setHijriDate(hijri);
-          writeForDateCache(isoDate, lat, lng, times, hijri);
+          writeForDateCache(isoDate, lat, lng, method, times, hijri);
         }
       } catch (err) {
         console.error('Prayer times for date error:', err);
@@ -392,7 +401,7 @@ export function usePrayerTimesForDate(
     };
 
     fetchPrayerTimes();
-  }, [lat, lng, isoDate]);
+  }, [lat, lng, isoDate, method]);
 
   return { prayerTimes, hijriDate, loading, error };
 }
@@ -419,10 +428,11 @@ export async function fetchPrayerTimesForMonth(
   lat: number,
   lng: number,
   year: number,
-  month: number
+  month: number,
+  method: number = DEFAULT_PRAYER_METHOD_ID
 ): Promise<Record<string, PrayerTimes>> {
   const response = await fetch(
-    `${API_CONFIG.aladhan}/v1/calendar?latitude=${lat}&longitude=${lng}&method=2&month=${month}&year=${year}`
+    `${API_CONFIG.aladhan}/v1/calendar?latitude=${lat}&longitude=${lng}&method=${method}&month=${month}&year=${year}`
   );
   if (!response.ok) throw new Error('Failed to fetch prayer times calendar');
   const json = await response.json();
@@ -502,7 +512,8 @@ function setRamadanPrayersCache(cache: Record<string, RamadanPrayersCacheEntry>,
 export async function fetchRamadanPrayerTimes(
   lat: number,
   lng: number,
-  overrides?: RamadanOverrideInput | null
+  overrides?: RamadanOverrideInput | null,
+  method: number = DEFAULT_PRAYER_METHOD_ID
 ): Promise<Record<string, PrayerTimes>> {
   const { startStr, endStr, startDate, endDate, year } = getRamadanDateRange(overrides);
   const out: Record<string, PrayerTimes> = {};
@@ -513,17 +524,18 @@ export async function fetchRamadanPrayerTimes(
       const monthStart = new Date(y, m - 1, 1);
       const monthEnd = new Date(y, m, 0);
       if (monthEnd < startDate || monthStart > endDate) continue;
-      const data = await fetchPrayerTimesForMonth(lat, lng, y, m);
+      const data = await fetchPrayerTimesForMonth(lat, lng, y, m, method);
       Object.assign(out, data);
     }
   }
   return out;
 }
 
-/** Cache key for Ramadan prayer times (location + range so overrides get correct data). */
-export function getRamadanPrayersCacheKey(lat: number, lng: number, ramadanYear: number, startStr?: string, endStr?: string): string {
+/** Cache key for Ramadan prayer times (location + range + method so overrides/method change get correct data). */
+export function getRamadanPrayersCacheKey(lat: number, lng: number, ramadanYear: number, startStr?: string, endStr?: string, method?: number): string {
   const range = startStr && endStr ? `${startStr}_${endStr}` : String(ramadanYear);
-  return `${lat.toFixed(4)}_${lng.toFixed(4)}_${range}`;
+  const m = method ?? DEFAULT_PRAYER_METHOD_ID;
+  return `${lat.toFixed(4)}_${lng.toFixed(4)}_${range}_${m}`;
 }
 
 /** Hook: Ramadan prayer times for the full month. Caches in localStorage by location + Ramadan year. Uses effective range from preferences when set. */
@@ -535,14 +547,15 @@ export function useRamadanPrayerTimes(lat: number | null, lng: number | null) {
 
   const range = getRamadanDateRange(preferences);
   const { startStr, endStr, year } = range;
-  const cacheKey = lat != null && lng != null ? getRamadanPrayersCacheKey(lat, lng, year, startStr, endStr) : null;
+  const method = preferences.prayerCalculationMethod ?? DEFAULT_PRAYER_METHOD_ID;
+  const cacheKey = lat != null && lng != null ? getRamadanPrayersCacheKey(lat, lng, year, startStr, endStr, method) : null;
 
   const fetchAndCache = useCallback(async () => {
     if (lat == null || lng == null) return;
     setLoading(true);
     setError(null);
     try {
-      const map = await fetchRamadanPrayerTimes(lat, lng, preferences);
+      const map = await fetchRamadanPrayerTimes(lat, lng, preferences, method);
       setPrayerTimesMap(map);
       const cache = getRamadanPrayersCache();
       cache[cacheKey!] = { prayerTimesMap: map, fetchedAt: Date.now() };
@@ -552,7 +565,7 @@ export function useRamadanPrayerTimes(lat: number | null, lng: number | null) {
     } finally {
       setLoading(false);
     }
-  }, [lat, lng, cacheKey, preferences, year]);
+  }, [lat, lng, cacheKey, preferences, year, method]);
 
   useEffect(() => {
     if (lat == null || lng == null) {
@@ -599,13 +612,16 @@ export function getSunnahFastingInfo(): { isSunnahDay: boolean; reason: string; 
 }
 
 // Get Islamic lunar calendar info for Ayyam al-Beed (13th, 14th, 15th of lunar month)
-export async function checkAyyamAlBeed(lat: number, lng: number): Promise<{ isAyyamAlBeed: boolean; hijriDay: number } | null> {
+export async function checkAyyamAlBeed(
+  lat: number,
+  lng: number,
+  method: number = DEFAULT_PRAYER_METHOD_ID
+): Promise<{ isAyyamAlBeed: boolean; hijriDay: number } | null> {
   try {
     const today = new Date();
     const dateStr = `${today.getDate()}-${today.getMonth() + 1}-${today.getFullYear()}`;
-    
     const response = await fetch(
-      `${API_CONFIG.aladhan}/v1/timings/${dateStr}?latitude=${lat}&longitude=${lng}&method=2`
+      `${API_CONFIG.aladhan}/v1/timings/${dateStr}?latitude=${lat}&longitude=${lng}&method=${method}`
     );
 
     if (!response.ok) return null;
