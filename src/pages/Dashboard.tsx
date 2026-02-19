@@ -560,21 +560,40 @@ const Dashboard = () => {
     }
   };
 
-  // Mark-complete logic (audit): You can only confirm a day after that day's iftar and after the next Suhoor (new day).
+  // Mark-complete logic: Enable after Maghrib (same day) or in next day's fasting window (mark yesterday).
   // - Before iftar (in fasting window + user said "I'm fasting"): disabled — "Fasting is not done yet. You can mark complete after iftar."
-  // - After iftar, before next Suhoor (eating window): disabled — "You can mark the day complete after the next Suhoor."
-  // - After next Suhoor (in new day's fasting window): enabled — button marks *yesterday* complete.
-  const markCompleteDisabled = !inFastingWindow || isFasting;
+  // - After Maghrib (eating window): enabled — mark TODAY complete.
+  // - After next Suhoor (next day's fasting window, not fasting): enabled — mark YESTERDAY complete.
+  const markCompleteDisabled = inFastingWindow && isFasting;
   const handleMarkComplete = () => {
     if (inFastingWindow && isFasting) {
       toast.info("Fasting is not done yet. You can mark complete after iftar.");
       return;
     }
     if (!inFastingWindow) {
-      toast.info("You can mark the day complete after the next Suhoor (start of the new day).");
+      // Eating window: after Maghrib today → mark today; before Imsak today → mark yesterday
+      const nowSec = displayTimezone
+        ? getNowSecondsSinceMidnightInTimezone(displayTimezone)
+        : (() => {
+            const n = new Date();
+            return n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds();
+          })();
+      const maghribSec = prayerTimes
+        ? timeStringToSecondsSinceMidnight(prayerTimes.maghrib)
+        : 0;
+      const imsakSec = prayerTimes
+        ? timeStringToSecondsSinceMidnight(prayerTimes.imsak)
+        : 0;
+      if (nowSec >= maghribSec) {
+        toggleCompleteForDate(todayStr);
+      } else if (nowSec < imsakSec) {
+        toggleCompleteForDate(yesterdayStr);
+      } else {
+        toggleCompleteForDate(todayStr);
+      }
       return;
     }
-    // In fasting window and not currently fasting (new day): mark yesterday complete
+    // In fasting window and not currently fasting (next day): mark yesterday complete
     toggleCompleteForDate(yesterdayStr);
   };
 

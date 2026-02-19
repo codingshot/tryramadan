@@ -362,10 +362,10 @@ const DashboardSchedule = () => {
     [todayPrayerTimes, todayStr, prayerTimeOverrides]
   );
 
-  /** Same as Dashboard: cannot mark *today* complete until after iftar and after next Suhoor. */
+  /** Same as Dashboard: can mark *today* complete after Maghrib (iftar); disabled only while still in fasting window and fasting. */
   const scheduleMarkTodayComplete = useMemo(() => {
     if (!effectiveTodayPrayerTimes?.imsak || !effectiveTodayPrayerTimes?.maghrib) {
-      return { disabled: true, toastMessage: "You can mark the day complete after the next Suhoor (start of the new day)." as string };
+      return { disabled: false, toastMessage: "Fasting is not done yet. You can mark complete after iftar." as string };
     }
     const nowSec = displayTimezone
       ? getNowSecondsSinceMidnightInTimezone(displayTimezone)
@@ -377,11 +377,8 @@ const DashboardSchedule = () => {
     const maghribSec = timeStringToSecondsSinceMidnight(effectiveTodayPrayerTimes.maghrib);
     const inFastingWindow = nowSec >= imsakSec && nowSec < maghribSec;
     const fastingToday = isFastingToday(progress, todayStr);
-    const disabled = !inFastingWindow || fastingToday;
-    const toastMessage =
-      inFastingWindow && fastingToday
-        ? "Fasting is not done yet. You can mark complete after iftar."
-        : "You can mark the day complete after the next Suhoor (start of the new day).";
+    const disabled = inFastingWindow && fastingToday;
+    const toastMessage = "Fasting is not done yet. You can mark complete after iftar.";
     return { disabled, toastMessage };
   }, [displayTimezone, effectiveTodayPrayerTimes, progress, todayStr]);
   const scheduleMarkTodayCompleteDisabled = scheduleMarkTodayComplete.disabled;
