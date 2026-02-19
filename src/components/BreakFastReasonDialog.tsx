@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Landmark, Utensils, BookOpen } from "lucide-react";
+import { Landmark, Utensils, BookOpen, ExternalLink, Heart } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +14,12 @@ import { cn } from "@/lib/utils";
 
 /** Preset "broke X minutes ago" options. Value = minutes ago. */
 const BROKE_AGO_MINUTES = [15, 30, 45, 60, 90, 120] as const;
+
+/** LaunchGood campaigns for feeding people — rotate randomly when showing "Feed someone" CTA. */
+const LAUNCHGOOD_FEED_LINKS = [
+  "https://www.launchgood.com/v4/campaign/ramadan_for_sudan_provide_food_and_medical_relief_to_displaced_families",
+  "https://www.launchgood.com/v4/campaign/feed_sudan_emergency_meals_today",
+] as const;
 
 interface BreakFastReasonDialogProps {
   open: boolean;
@@ -43,6 +49,10 @@ export function BreakFastReasonDialog({
   notInFastingPeriod,
 }: BreakFastReasonDialogProps) {
   const [brokeWhen, setBrokeWhen] = useState<"now" | number>("now");
+  const feedSomeoneUrl = useMemo(
+    () => LAUNCHGOOD_FEED_LINKS[Math.floor(Math.random() * LAUNCHGOOD_FEED_LINKS.length)],
+    [open]
+  );
 
   useEffect(() => {
     if (open) setBrokeWhen("now");
@@ -105,12 +115,36 @@ export function BreakFastReasonDialog({
           </div>
         </div>
 
-        <p className="text-xs text-muted-foreground">
-          Need medical resources?{" "}
-          <Link to="/health-safety" className="text-secondary hover:underline">
-            Health & Safety →
-          </Link>
-        </p>
+        {/* Making up the fast + verse 2:184 + Feed someone CTA */}
+        <div className="mt-4 pt-4 border-t border-border space-y-4">
+          <div>
+            <p className="text-sm font-medium text-foreground mb-1">Making up the fast</p>
+            <p className="text-xs text-muted-foreground">
+              Make up missed days after Ramadan (any time before the next Ramadan). For those who find fasting extremely difficult—such as the very elderly or chronically ill who cannot make up the fasts—Allah has provided a ransom.
+            </p>
+          </div>
+          <blockquote className="text-xs text-foreground pl-3 border-l-2 border-secondary/50 italic bg-secondary/5 py-2 pr-2 rounded-r">
+            &ldquo;...and for those who can fast only with great difficulty, there is a ransom: feeding a poor person (for each day). But to fast is better for you, if you only knew.&rdquo;
+            <cite className="block not-italic text-muted-foreground mt-1">— Quran, Surah al-Baqarah 2:184</cite>
+          </blockquote>
+          <a
+            href={feedSomeoneUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 min-h-[40px] px-4 py-2 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:bg-primary/90 transition-colors"
+            aria-label="Feed someone (opens LaunchGood in new tab)"
+          >
+            <Heart className="w-4 h-4 shrink-0" aria-hidden />
+            Feed someone
+            <ExternalLink className="w-3.5 h-3.5 shrink-0 opacity-80" aria-hidden />
+          </a>
+          <p className="text-xs text-muted-foreground">
+            Need medical resources?{" "}
+            <Link to="/health-safety" className="text-secondary hover:underline">
+              Health & Safety →
+            </Link>
+          </p>
+        </div>
         {userType === "muslim" && (
           <div className="mt-3 p-3 rounded-xl bg-secondary/10 border border-secondary/20 space-y-2">
             <p className="text-xs font-medium text-foreground flex items-center gap-2">

@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ChevronRight, Flame, Check } from "lucide-react";
+import { ChevronRight, ChevronDown, ChevronUp, Flame, Check } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { type PrayerTimes } from "@/hooks/usePrayerTimes";
 import { type FastingProgress, useDisplayTimezone } from "@/hooks/useLocalStorage";
 import { timeStringToSecondsSinceMidnight, getNowSecondsSinceMidnightInTimezone } from "@/lib/utils";
+import { OPTIONAL_PRAYERS } from "@/data/optionalPrayers";
 
 /** Prayer tracker value: boolean for daily prayers; 'half' | 'full' for Taraweeh. */
 export type PrayerTrackerValue = boolean | 'half' | 'full';
@@ -29,6 +30,7 @@ export const DashboardPrayerTracking = ({
   onViewAllPrayers,
 }: DashboardPrayerTrackingProps) => {
   const displayTimezone = useDisplayTimezone();
+  const [optionalPrayersOpen, setOptionalPrayersOpen] = useState(false);
 
   if (!prayerTimes) {
     return null;
@@ -170,6 +172,65 @@ export const DashboardPrayerTracking = ({
               </div>
             );
           })}
+        </div>
+
+        {/* Optional prayers (Sunnah & Witr) — collapsible */}
+        <div className="mt-3 pt-3 border-t border-border">
+          <button
+            type="button"
+            onClick={() => setOptionalPrayersOpen((o) => !o)}
+            className="w-full flex items-center justify-between gap-2 p-2 rounded-lg hover:bg-muted/50 text-left"
+            aria-expanded={optionalPrayersOpen}
+            aria-controls="optional-prayers-list"
+          >
+            <span className="text-sm font-medium text-muted-foreground">
+              Optional prayers (Sunnah & Witr)
+            </span>
+            {optionalPrayersOpen ? (
+              <ChevronUp className="w-4 h-4 shrink-0 text-muted-foreground" aria-hidden />
+            ) : (
+              <ChevronDown className="w-4 h-4 shrink-0 text-muted-foreground" aria-hidden />
+            )}
+          </button>
+          {optionalPrayersOpen && (
+            <div id="optional-prayers-list" className="mt-2 space-y-1.5 pl-1">
+              {OPTIONAL_PRAYERS.map((prayer) => {
+                const raw = prayerTracker[todayStr]?.[prayer.id];
+                const isChecked = raw === true || raw === "half" || raw === "full";
+                return (
+                  <Tooltip key={prayer.id}>
+                    <TooltipTrigger asChild>
+                      <label className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/30 hover:bg-muted/50 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={(e) => onPrayerCheck(prayer.id, e.target.checked)}
+                          className="w-4 h-4 rounded border-2 border-primary text-primary focus:ring-2 focus:ring-primary/20 cursor-pointer shrink-0 accent-primary"
+                          aria-label={`Mark ${prayer.label} as ${isChecked ? "not " : ""}prayed`}
+                        />
+                        <span
+                          className={`text-sm font-medium truncate ${
+                            isChecked ? "line-through text-muted-foreground" : ""
+                          }`}
+                        >
+                          {prayer.label}
+                          {prayer.rakah && (
+                            <span className="text-muted-foreground font-normal ml-1">
+                              ({prayer.rakah})
+                            </span>
+                          )}
+                        </span>
+                      </label>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="max-w-xs p-3">
+                      <p className="font-medium text-sm">{prayer.label}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{prayer.description}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Taraweeh (optional night prayer) — half vs full */}

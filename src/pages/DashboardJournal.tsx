@@ -24,6 +24,7 @@ import { Footer } from "@/components/Footer";
 import { useLocalStorage, useUserPreferences, useHabitLog } from "@/hooks/useLocalStorage";
 import { Clock } from "lucide-react";
 import { getHabitsForUser, getShortLabelsForHabitIds } from "@/data/ramadan-habits";
+import { OPTIONAL_PRAYERS } from "@/data/optionalPrayers";
 import { isRamadanDay } from "@/lib/ramadan";
 import { Calendar } from "@/components/ui/calendar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -651,6 +652,37 @@ export default function DashboardJournal() {
                     );
                   })}
                 </div>
+                <Collapsible>
+                  <CollapsibleTrigger className="flex items-center gap-2 mt-3 text-xs font-medium text-muted-foreground hover:text-foreground">
+                    Optional prayers (Sunnah & Witr)
+                    <ChevronDown className="w-3.5 h-3.5" aria-hidden />
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {OPTIONAL_PRAYERS.map((prayer) => {
+                        const done = (prayerTracker[writeDate] ?? {})[prayer.id];
+                        const isChecked = done === true || done === "half" || done === "full";
+                        return (
+                          <label key={prayer.id} className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={!!isChecked}
+                              onChange={(e) => {
+                                setPrayerTracker((prev) => ({
+                                  ...prev,
+                                  [writeDate]: { ...(prev[writeDate] ?? {}), [prayer.id]: e.target.checked },
+                                }));
+                              }}
+                              className="rounded border-border"
+                              aria-label={`Mark ${prayer.label} as ${isChecked ? "not " : ""}completed`}
+                            />
+                            <span className="text-sm font-medium">{prayer.label}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
                 {isRamadanDay(new Date(writeDate + "T12:00:00")) && (
                   <div className="mt-4 pt-3 border-t border-border/60">
                     <p className="text-xs font-medium text-muted-foreground mb-2">
