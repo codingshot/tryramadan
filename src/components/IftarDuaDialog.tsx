@@ -53,22 +53,20 @@ export function IftarDuaDialog({
           </p>
           <p className="text-sm text-muted-foreground italic">
             {IFTAR_DUA_TRANSLATION}
+            {" — "}
+            <a
+              href={EXTERNAL_LINKS.iftarDuaHadith}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              Sunnah.com
+            </a>
           </p>
-          <a
-            href={EXTERNAL_LINKS.iftarDuaHadith}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex"
-          >
-            <Button variant="outline" size="sm" className="gap-2">
-              Read on Sunnah.com
-            </Button>
-          </a>
 
-          {/* CTAs: Mark complete or I broke fast earlier */}
+          {/* Main CTAs: Mark complete or I broke fast */}
           {isFastingToday && (onMarkComplete != null || onBreakFastEarlier != null) && (
             <div className="pt-4 border-t border-border space-y-3">
-              <p className="text-sm font-medium text-foreground">Log your fast</p>
               <div className="flex flex-col sm:flex-row gap-2">
                 {onMarkComplete != null && (
                   <Button
@@ -92,15 +90,10 @@ export function IftarDuaDialog({
                     className="flex-1 gap-2"
                   >
                     <AlertCircle className="w-4 h-4 shrink-0" aria-hidden />
-                    I broke fast earlier
+                    I broke my fast
                   </Button>
                 )}
               </div>
-              {onBreakFastEarlier != null && (
-                <p className="text-xs text-muted-foreground">
-                  Broke fast earlier during the fasting window? Tap &quot;I broke fast earlier&quot; — we&apos;ll ask when and log a reason (e.g. illness, travel). No judgment.
-                </p>
-              )}
             </div>
           )}
         </div>
