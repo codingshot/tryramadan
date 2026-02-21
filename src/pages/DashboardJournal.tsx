@@ -171,11 +171,11 @@ export default function DashboardJournal() {
     [setStoredEntries]
   );
   const [storedHabitLog, setHabitLog] = useHabitLog();
-  const habitLog = useMemo(() => safeRecord(storedHabitLog, {}), [storedHabitLog]);
-  const [storedPrayerTracker, setPrayerTracker] = useLocalStorage<Record<string, Record<string, boolean>>>("tryramadan-prayer-tracker", {});
-  const prayerTracker = useMemo(() => safeRecord(storedPrayerTracker, {}), [storedPrayerTracker]);
+  const habitLog = useMemo(() => safeRecord(storedHabitLog, {} as Record<string, Record<string, boolean>>), [storedHabitLog]);
+  const [storedPrayerTracker, setPrayerTracker] = useLocalStorage<Record<string, Record<string, boolean | string>>>("tryramadan-prayer-tracker", {});
+  const prayerTracker = useMemo(() => safeRecord(storedPrayerTracker, {} as Record<string, Record<string, boolean | string>>), [storedPrayerTracker]);
   const [storedTaraweehTracker, setTaraweehTracker] = useLocalStorage<Record<string, { done: boolean; rakats?: number }>>("tryramadan-taraweeh", {});
-  const taraweehTracker = useMemo(() => safeRecord(storedTaraweehTracker, {}), [storedTaraweehTracker]);
+  const taraweehTracker = useMemo(() => safeRecord(storedTaraweehTracker, {} as Record<string, { done: boolean; rakats?: number }>), [storedTaraweehTracker]);
   const today = new Date().toISOString().split("T")[0];
   const dateFromUrl = searchParams.get("date");
   const initialDate = dateFromUrl && isValidDateString(dateFromUrl) ? dateFromUrl : today;

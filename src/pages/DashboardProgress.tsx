@@ -8,7 +8,7 @@ import {
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useFastingProgress, getTodayFastingLog, getBrokenReasonLabel, isFastingToday, useLocalStorage, calculateStreak, getLongestStreak, getJournalStreak, getMindfulEatingStreak, getPrayerStreak, getTotalPrayerCount, useDayMealPlans, useDayFoodLog, useUserPreferences, useDisplayTimezone } from "@/hooks/useLocalStorage";
-import type { DayFoodLog, DayMealPlan, FoodLogEntry } from "@/hooks/useLocalStorage";
+import type { DayFoodLog, DayMealPlan, FoodLogEntry, PrayerTracker } from "@/hooks/useLocalStorage";
 import { useRamadanRange } from "@/hooks/useRamadanRange";
 import { getTodayStringInTimezone, toLocalDateString } from "@/lib/utils";
 import type { EnergyEntry } from "@/hooks/useLocalStorage";
@@ -60,7 +60,7 @@ const DashboardProgress = () => {
   const showStreakAndAchievements = preferences.showStreakAndAchievements !== false;
   const journalStreak = getJournalStreak(journalEntries);
   const mindfulEatingStreak = getMindfulEatingStreak(foodLogs, mealPlans);
-  const [prayerTracker] = useLocalStorage<Record<string, Record<string, boolean>>>("tryramadan-prayer-tracker", {});
+  const [prayerTracker] = useLocalStorage<PrayerTracker>("tryramadan-prayer-tracker", {});
   const prayerStreak = getPrayerStreak(prayerTracker, todayStr);
   const totalPrayers = getTotalPrayerCount(prayerTracker);
   const isMuslim = preferences.userType === "muslim";
@@ -105,7 +105,7 @@ const DashboardProgress = () => {
     if (exportSections.prayerLog && prayerTracker && Object.keys(prayerTracker).length > 0) {
       payload.prayerLog = Object.entries(prayerTracker)
         .sort(([a], [b]) => a.localeCompare(b))
-        .map(([date, day]) => ({ date, ...day }));
+        .map(([date, day]) => ({ date, ...(day && typeof day === "object" ? day : {}) }));
     }
     if (exportSections.meals) {
       const mealPlansList = Object.entries(mealPlans || {}).sort(([a], [b]) => a.localeCompare(b));
@@ -152,8 +152,8 @@ const DashboardProgress = () => {
     if (exportSections.prayerLog && prayerTracker && Object.keys(prayerTracker).length > 0) {
       rows.push(["Prayer log", ""], ["Date", "Fajr", "Dhuhr", "Asr", "Maghrib", "Isha", "Taraweeh"]);
       for (const [date, day] of Object.entries(prayerTracker).sort(([a], [b]) => a.localeCompare(b))) {
-        const d = day && typeof day === "object" ? day : {};
-        const truthy = (key: string) => !!(d[key as keyof typeof d] ?? d[(key.charAt(0).toUpperCase() + key.slice(1)) as keyof typeof d]);
+        const d = day && typeof day === "object" ? day as Record<string, unknown> : {} as Record<string, unknown>;
+        const truthy = (key: string) => !!(d[key] ?? d[key.charAt(0).toUpperCase() + key.slice(1)]);
         const taraweeh = d.taraweeh ?? d.Taraweeh;
         const taraweehStr = taraweeh === "half" ? "Half" : taraweeh === "full" ? "Full" : "";
         rows.push([
