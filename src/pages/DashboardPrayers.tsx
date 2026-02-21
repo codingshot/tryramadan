@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { 
-  ArrowLeft, ChevronRight, Sun, Moon, Sunrise, Sunset, SunDim, Check, Bell, Volume2, Play
+  ArrowLeft, ChevronRight, ChevronDown, Sun, Moon, Sunrise, Sunset, SunDim, Check, Bell, Volume2, Play, Lock, AlertCircle, BookOpen, Clock
 } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
@@ -21,7 +21,98 @@ import { ArabicHover } from "@/components/ArabicHover";
 import { LocationRequiredCTA } from "@/components/LocationRequiredCTA";
 import { ApiErrorRetry } from "@/components/ApiErrorRetry";
 import { PageSEO } from "@/components/PageSEO";
-import { getNowInTimezone, toLocalDateString } from "@/lib/utils";
+import { getNowInTimezone, toLocalDateString, timeStringToSecondsSinceMidnight, getNowSecondsSinceMidnightInTimezone } from "@/lib/utils";
+
+/** Detailed how-to-pray guide data */
+const PRAYER_FULL_GUIDES: Record<string, { rakah: number; sunnah: string; steps: string[]; makeup: string; tips: string[] }> = {
+  Fajr: {
+    rakah: 2,
+    sunnah: "2 sunnah rak'ahs before the fard (very strongly emphasized)",
+    steps: [
+      "Make wudu (ablution) — wash hands 3×, rinse mouth 3×, nose 3×, face 3×, arms to elbows 3×, wipe head once, wash feet 3×",
+      "Stand facing the Qibla, make intention (niyyah) in your heart for Fajr",
+      "Raise hands to ears and say 'Allahu Akbar' (Takbirat al-Ihram)",
+      "Place right hand over left on chest, recite opening du'a (optional), then Al-Fatiha",
+      "Recite a short surah (e.g. Al-Ikhlas, Al-Falaq, or Al-Kawthar)",
+      "Say 'Allahu Akbar' and bow (ruku) — back straight, hands on knees, say 'Subhana Rabbiyal Azeem' 3×",
+      "Stand upright: 'Sami Allahu liman hamidah, Rabbana wa lakal hamd'",
+      "Say 'Allahu Akbar' and prostrate (sujud) — forehead, nose, palms, knees, toes on ground, say 'Subhana Rabbiyal A'la' 3×",
+      "Sit briefly (between two sujud), then prostrate again",
+      "Stand for 2nd rak'ah — repeat Al-Fatiha + surah, ruku, sujud",
+      "After 2nd sujud, sit for Tashahhud: recite At-Tahiyyat, then Salawat on Prophet ﷺ",
+      "Turn head right saying 'Assalamu alaikum wa rahmatullah', then left — prayer complete",
+    ],
+    makeup: "Pray 2 rak'ahs as soon as you remember, even after sunrise. Make the intention for Qada Fajr. The Prophet ﷺ said: 'Whoever forgets a prayer should pray it when he remembers it.'",
+    tips: [
+      "Best prayed in the last third of darkness before sunrise",
+      "The 2 sunnah rak'ahs before Fajr are the most emphasized sunnah prayer",
+      "Keep recitations shorter than other prayers (surahs like Al-Kafirun, Al-Ikhlas)",
+    ],
+  },
+  Dhuhr: {
+    rakah: 4,
+    sunnah: "2–4 sunnah before the fard, 2 sunnah after",
+    steps: [
+      "Make wudu if needed, face Qibla, intention for Dhuhr",
+      "1st rak'ah: Takbir → Al-Fatiha + surah → ruku → stand → sujud × 2",
+      "2nd rak'ah: same as 1st, then sit for first Tashahhud (At-Tahiyyat only)",
+      "3rd rak'ah: stand, recite Al-Fatiha only (no additional surah), ruku, sujud × 2",
+      "4th rak'ah: same as 3rd, then sit for final Tashahhud + Salawat + Salam",
+    ],
+    makeup: "Pray 4 rak'ahs with intention for Qada Dhuhr. Best to make up before the next prayer.",
+    tips: [
+      "Performed after the sun passes its zenith (highest point)",
+      "On Fridays, Jumu'ah (2 rak'ahs with imam's khutbah) replaces Dhuhr for men",
+      "Recitation is silent (not aloud) in all 4 rak'ahs",
+    ],
+  },
+  Asr: {
+    rakah: 4,
+    sunnah: "No emphasized sunnah, but 2–4 nafl rak'ahs before are rewarded",
+    steps: [
+      "Same structure as Dhuhr — 4 rak'ahs with silent recitation",
+      "Al-Fatiha + surah in first two rak'ahs, Al-Fatiha only in last two",
+    ],
+    makeup: "Pray 4 rak'ahs with Qada Asr intention. The Prophet ﷺ emphasized not to miss Asr.",
+    tips: [
+      "Should not be delayed until the sun turns yellow/orange",
+      "The Prophet ﷺ said: 'Whoever misses Asr prayer, it is as if he lost his family and property'",
+    ],
+  },
+  Maghrib: {
+    rakah: 3,
+    sunnah: "2 sunnah rak'ahs after the fard",
+    steps: [
+      "Prayed immediately after sunset (break your fast first with dates/water)",
+      "1st & 2nd rak'ah: Al-Fatiha + surah (recited aloud), ruku, sujud",
+      "Sit for first Tashahhud after 2nd rak'ah",
+      "3rd rak'ah: Al-Fatiha only (silent), ruku, sujud, final Tashahhud + Salam",
+    ],
+    makeup: "Pray 3 rak'ahs with Qada Maghrib intention. Make up before sleeping.",
+    tips: [
+      "Should not be delayed — pray as soon as possible after sunset",
+      "During Ramadan, break fast first then pray (sunnah order)",
+      "Recitation is aloud in the first two rak'ahs",
+    ],
+  },
+  Isha: {
+    rakah: 4,
+    sunnah: "2 sunnah rak'ahs after the fard, then Witr (1–11 rak'ahs)",
+    steps: [
+      "Same structure as Dhuhr/Asr but recitation is aloud in first two rak'ahs",
+      "Follow with 2 sunnah rak'ahs",
+      "Then pray Witr (minimum 1 rak'ah, commonly 3) — includes Qunut du'a in last rak'ah",
+      "During Ramadan, Taraweeh is prayed after Isha sunnah (8 or 20 rak'ahs at mosque)",
+    ],
+    makeup: "Pray 4 rak'ahs with Qada Isha intention. Can be made up anytime.",
+    tips: [
+      "Best to pray Isha in the first third of the night",
+      "Witr is the last prayer of the night — delay it if you plan to pray Tahajjud",
+      "During Ramadan, many mosques lead Taraweeh after Isha",
+    ],
+  },
+};
+
 
 const DashboardPrayers = () => {
   const [preferences] = useUserPreferences();
@@ -31,10 +122,10 @@ const DashboardPrayers = () => {
   const [prayerTracker, setPrayerTracker] = useLocalStorage<Record<string, Record<string, boolean>>>("tryramadan-prayer-tracker", {});
   const [prayerNotifications, setPrayerNotifications] = usePrayerNotificationPrefs();
   const [adhanSoundEnabled, setAdhanSoundEnabled] = useAdhanSoundEnabled();
-  // Taraweeh tracker: which nights attended, and which juz they're on
   const [taraweehTracker, setTaraweehTracker] = useLocalStorage<Record<string, { attended: boolean; juz: number | null; mosque?: string }>>("tryramadan-taraweeh-tracker", {});
   const [taraweehMosque, setTaraweehMosque] = useLocalStorage<string>("tryramadan-taraweeh-mosque", "");
   const { permission, requestPermission, supported } = useNotifications();
+  const [expandedGuide, setExpandedGuide] = useState<string | null>(null);
   const todayStr = displayTimezone
     ? new Date().toLocaleDateString("en-CA", { timeZone: displayTimezone })
     : toLocalDateString(new Date());
@@ -239,6 +330,19 @@ const DashboardPrayers = () => {
                 {prayers.map((prayer, index) => {
               const Icon = prayer.icon;
               const isNext = prayer.name === nextPrayer;
+              const prayerSec = timeStringToSecondsSinceMidnight(prayer.time);
+              const nowSec = displayTimezone
+                ? getNowSecondsSinceMidnightInTimezone(displayTimezone)
+                : currentTime.getHours() * 3600 + currentTime.getMinutes() * 60 + currentTime.getSeconds();
+              const isPast = nowSec > prayerSec;
+              const isFuture = !isPast && !isNext;
+              const canCheck = isPast || isNext;
+              const isMissed = isPast && !todayPrayers[prayer.name] && ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"].includes(prayer.name);
+              const guide = PRAYER_FULL_GUIDES[prayer.name];
+              const secondsUntil = isPast ? 0 : prayerSec - nowSec;
+              const countdownStr = secondsUntil > 0
+                ? `${Math.floor(secondsUntil / 3600)}h ${Math.floor((secondsUntil % 3600) / 60)}m`
+                : "";
               
               return (
                 <motion.div
@@ -248,19 +352,19 @@ const DashboardPrayers = () => {
                   transition={{ delay: 0.1 * index }}
                   className={`
                     p-4 rounded-2xl border transition-all
-                    ${isNext ? 'bg-secondary/20 border-secondary shadow-gold' : 'bg-card border-border'}
+                    ${isNext ? 'bg-secondary/20 border-secondary shadow-gold' : isMissed ? 'bg-destructive/5 border-destructive/20' : isFuture ? 'bg-muted/20 border-border/50' : 'bg-card border-border'}
                     ${prayer.highlight ? 'ring-1 ring-secondary/30' : ''}
                   `}
                 >
                   <div className="flex items-center gap-4">
                     <div className={`
                       w-12 h-12 rounded-xl flex items-center justify-center
-                      ${isNext ? 'bg-secondary text-secondary-foreground' : 'bg-muted'}
+                      ${isNext ? 'bg-secondary text-secondary-foreground' : isFuture ? 'bg-muted/50' : 'bg-muted'}
                     `}>
-                      <Icon className="w-6 h-6" />
+                      <Icon className={`w-6 h-6 ${isFuture ? 'opacity-50' : ''}`} />
                     </div>
                     
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <ArabicHover
                           arabic={prayer.nameAr}
@@ -273,11 +377,21 @@ const DashboardPrayers = () => {
                             prayer.name === "Isha" ? EATING_TIME_TOOLTIPS.isha.body : prayer.description
                           }
                         >
-                          <span className="font-bold">{prayer.name}</span>
+                          <span className={`font-bold ${isFuture ? 'text-muted-foreground' : ''}`}>{prayer.name}</span>
                         </ArabicHover>
                         {isNext && (
                           <span className="px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground text-xs">
                             Next
+                          </span>
+                        )}
+                        {isMissed && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive font-medium">
+                            Missed
+                          </span>
+                        )}
+                        {isFuture && countdownStr && (
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Clock className="w-3 h-3" /> {countdownStr}
                           </span>
                         )}
                       </div>
@@ -288,7 +402,7 @@ const DashboardPrayers = () => {
                               {prayer.description}
                             </p>
                           </TooltipTrigger>
-                          <TooltipContent side="bottom" className="max-w-xs p-3">
+                          <TooltipContent side="bottom" className="max-w-xs p-3 z-50 bg-popover border border-border">
                             <p className="font-semibold text-sm">
                               {prayer.name === "Fajr" ? EATING_TIME_TOOLTIPS.fajr.title : EATING_TIME_TOOLTIPS.maghrib.title}
                             </p>
@@ -318,31 +432,62 @@ const DashboardPrayers = () => {
                           </Label>
                         </div>
                       )}
-                      <span className="text-2xl font-bold">{prayer.time}</span>
+                      <span className={`text-2xl font-bold ${isFuture ? 'text-muted-foreground' : ''}`}>{prayer.time}</span>
                       {preferences.userType === "muslim" && ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"].includes(prayer.name) && (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setTodayPrayer(prayer.name, !todayPrayers[prayer.name]);
-                              }}
-                              className={`p-2 rounded-lg border-2 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
-                                todayPrayers[prayer.name] ? "bg-secondary border-secondary text-secondary-foreground" : "border-border hover:border-secondary"
-                              }`}
-                              aria-label={todayPrayers[prayer.name] ? `Mark ${prayer.name} as not prayed` : `Mark ${prayer.name} as prayed`}
-                            >
-                              <Check className="w-5 h-5" />
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent side="left">
-                            {todayPrayers[prayer.name] ? "Mark as not prayed" : "Mark as prayed"}
-                          </TooltipContent>
-                        </Tooltip>
+                        canCheck ? (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setTodayPrayer(prayer.name, !todayPrayers[prayer.name]);
+                                }}
+                                className={`p-2 rounded-lg border-2 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center ${
+                                  todayPrayers[prayer.name] ? "bg-secondary border-secondary text-secondary-foreground" : "border-border hover:border-secondary"
+                                }`}
+                                aria-label={todayPrayers[prayer.name] ? `Mark ${prayer.name} as not prayed` : `Mark ${prayer.name} as prayed`}
+                              >
+                                <Check className="w-5 h-5" />
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent side="left" className="z-50 bg-popover border border-border">
+                              {todayPrayers[prayer.name] ? "Mark as not prayed" : isMissed ? "Mark as made up (Qada)" : "Mark as prayed"}
+                            </TooltipContent>
+                          </Tooltip>
+                        ) : (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="p-2 rounded-lg border-2 border-border/30 min-h-[44px] min-w-[44px] flex items-center justify-center opacity-40">
+                                <Lock className="w-5 h-5 text-muted-foreground" />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent side="left" className="z-50 bg-popover border border-border">
+                              <p className="text-xs">Prayer time hasn't arrived. Available after {prayer.time}.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        )
                       )}
                     </div>
                   </div>
+                  
+                  {/* Missed prayer makeup guidance */}
+                  {isMissed && guide && preferences.userType === "muslim" && (
+                    <div className="mt-3 p-3 rounded-xl bg-destructive/5 border border-destructive/10">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <AlertCircle className="w-3.5 h-3.5 text-destructive shrink-0" />
+                        <span className="text-xs font-semibold text-destructive">Make up {prayer.name} (Qada)</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{guide.makeup}</p>
+                      <button
+                        type="button"
+                        onClick={() => setTodayPrayer(prayer.name, true)}
+                        className="mt-2 text-xs font-medium text-primary hover:underline"
+                      >
+                        ✓ I've made up this prayer
+                      </button>
+                    </div>
+                  )}
                 </motion.div>
               );
             })}
@@ -574,26 +719,97 @@ const DashboardPrayers = () => {
           </motion.div>
           )}
 
-          {/* Prayer tutorial link — learning is for everyone */}
+          {/* How to Pray — Expanded Guide */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="mt-8 p-4 rounded-2xl bg-muted/50 border border-border"
+            className="mt-8 rounded-2xl bg-card border border-border overflow-hidden"
           >
-            <Link 
-              to="/dashboard/learn"
-              className="flex items-center justify-between"
-            >
+            <div className="p-5 border-b border-border">
               <div className="flex items-center gap-3">
-                <span className="text-2xl">🤲</span>
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <BookOpen className="w-5 h-5 text-primary" />
+                </div>
                 <div>
-                  <span className="font-medium">New to Islamic Prayer?</span>
-                  <p className="text-sm text-muted-foreground">Learn about the five daily prayers</p>
+                  <h3 className="font-display font-bold text-lg">How to Pray</h3>
+                  <p className="text-sm text-muted-foreground">Step-by-step guide for each of the five daily prayers</p>
                 </div>
               </div>
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            </Link>
+            </div>
+
+            <div className="divide-y divide-border">
+              {(["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"] as const).map((name) => {
+                const guide = PRAYER_FULL_GUIDES[name];
+                if (!guide) return null;
+                const isOpen = expandedGuide === name;
+                return (
+                  <div key={name}>
+                    <button
+                      type="button"
+                      onClick={() => setExpandedGuide(isOpen ? null : name)}
+                      className="w-full flex items-center justify-between p-4 hover:bg-muted/30 transition-colors text-left"
+                      aria-expanded={isOpen}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="font-semibold">{name}</span>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                          {guide.rakah} rak'ah{guide.rakah > 1 ? "s" : ""}
+                        </span>
+                      </div>
+                      {isOpen ? (
+                        <ChevronDown className="w-4 h-4 text-muted-foreground rotate-180 transition-transform" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform" />
+                      )}
+                    </button>
+                    {isOpen && (
+                      <div className="px-4 pb-4 space-y-3">
+                        <div className="p-3 rounded-lg bg-primary/5 border border-primary/10">
+                          <p className="text-xs font-medium text-primary mb-1">Sunnah prayers</p>
+                          <p className="text-xs text-muted-foreground">{guide.sunnah}</p>
+                        </div>
+
+                        <div>
+                          <p className="text-xs font-semibold mb-2">Steps:</p>
+                          <ol className="text-xs text-muted-foreground space-y-1.5 list-decimal list-inside">
+                            {guide.steps.map((step, i) => (
+                              <li key={i} className="leading-relaxed">{step}</li>
+                            ))}
+                          </ol>
+                        </div>
+
+                        {guide.tips.length > 0 && (
+                          <div className="p-3 rounded-lg bg-secondary/5 border border-secondary/10">
+                            <p className="text-xs font-medium text-secondary mb-1">Tips</p>
+                            <ul className="text-xs text-muted-foreground space-y-1 list-disc list-inside">
+                              {guide.tips.map((tip, i) => (
+                                <li key={i}>{tip}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        <div className="p-3 rounded-lg bg-muted/30 border border-border">
+                          <p className="text-xs font-medium text-foreground mb-1">Making up (Qada)</p>
+                          <p className="text-xs text-muted-foreground">{guide.makeup}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="p-4 border-t border-border bg-muted/20">
+              <Link
+                to="/dashboard/learn"
+                className="flex items-center justify-between text-sm text-primary hover:underline"
+              >
+                <span>Learn more about Islamic prayer and Ramadan</span>
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
           </motion.div>
         </div>
       </main>
