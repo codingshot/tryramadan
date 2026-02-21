@@ -5,7 +5,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { type PrayerTimes } from "@/hooks/usePrayerTimes";
 import { type FastingProgress, useDisplayTimezone } from "@/hooks/useLocalStorage";
 import { timeStringToSecondsSinceMidnight, getNowSecondsSinceMidnightInTimezone } from "@/lib/utils";
-import { OPTIONAL_PRAYERS } from "@/data/optionalPrayers";
+import { getOptionalPrayersByParent } from "@/data/optionalPrayers";
 
 /** Prayer tracker value: boolean for daily prayers; 'half' | 'full' for Taraweeh. */
 export type PrayerTrackerValue = boolean | 'half' | 'full';
@@ -30,13 +30,10 @@ export const DashboardPrayerTracking = ({
   onViewAllPrayers,
 }: DashboardPrayerTrackingProps) => {
   const displayTimezone = useDisplayTimezone();
-  const [optionalPrayersOpen, setOptionalPrayersOpen] = useState(false);
+  const [expandedPrayer, setExpandedPrayer] = useState<string | null>(null);
 
-  if (!prayerTimes) {
-    return null;
-  }
+  if (!prayerTimes) return null;
 
-  // Get current time in seconds since midnight
   const nowSec = displayTimezone
     ? getNowSecondsSinceMidnightInTimezone(displayTimezone)
     : (() => {
@@ -44,7 +41,6 @@ export const DashboardPrayerTracking = ({
         return n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds();
       })();
 
-  // Define all daily prayers with their times (Taraweeh is separate, no fixed time)
   const allPrayers = [
     { name: "Fajr", time: prayerTimes.fajr },
     { name: "Dhuhr", time: prayerTimes.dhuhr },
@@ -56,43 +52,123 @@ export const DashboardPrayerTracking = ({
   const taraweehValue = prayerTracker[todayStr]?.taraweeh;
   const taraweehDone = taraweehValue === 'half' || taraweehValue === 'full';
 
-  // Find next 3 prayers
   const prayersWithTime = allPrayers.map((prayer) => {
     const prayerSec = timeStringToSecondsSinceMidnight(prayer.time);
     const isPast = nowSec > prayerSec;
     const raw = prayerTracker[todayStr]?.[prayer.name.toLowerCase()];
     const isChecked = raw === true || raw === 'half' || raw === 'full';
     const secondsUntil = isPast ? 0 : prayerSec - nowSec;
-
-    return {
-      ...prayer,
-      seconds: prayerSec,
-      isPast,
-      isChecked,
-      secondsUntil,
-    };
+    const optionalPrayers = getOptionalPrayersByParent(prayer.name);
+    return { ...prayer, seconds: prayerSec, isPast, isChecked, secondsUntil, optionalPrayers };
   });
 
-  // Get next 3 upcoming prayers (or last 3 if all are past)
   const upcomingPrayers = prayersWithTime.filter((p) => !p.isPast);
-  const next3Prayers =
-    upcomingPrayers.length >= 3
-      ? upcomingPrayers.slice(0, 3)
-      : [
-          ...upcomingPrayers,
-          ...prayersWithTime.filter((p) => p.isPast).slice(-(3 - upcomingPrayers.length)),
-        ];
-
-  // Find the very next prayer
+  const pastPrayers = prayersWithTime.filter((p) => p.isPast);
   const nextPrayer = upcomingPrayers[0];
 
-  // Format countdown
   const formatCountdown = (seconds: number) => {
     if (seconds === 0) return "Passed";
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
     if (h > 0) return `In ${h}h ${m}m`;
     return `In ${m}m`;
+  };
+
+  const renderPrayerRow = (prayer: typeof prayersWithTime[number], isNext: boolean) => {
+    const hasOptional = prayer.optionalPrayers.length > 0;
+    const isExpanded = expandedPrayer === prayer.name;
+
+    return (
+      <div key={prayer.name}>
+        <div
+          className={`flex items-center justify-between p-3 rounded-xl transition-colors ${
+            isNext
+              ? "bg-primary/10 border-2 border-primary/30"
+              : "bg-muted/30"
+          } ${prayer.isPast && !prayer.isChecked ? "opacity-60" : ""}`}
+        >
+          <label className="flex items-center gap-3 flex-1 cursor-pointer min-w-0">
+            <input
+              type="checkbox"
+              checked={prayer.isChecked}
+              onChange={(e) => onPrayerCheck(prayer.name.toLowerCase(), e.target.checked)}
+              className="w-5 h-5 rounded border-2 border-primary text-primary focus:ring-2 focus:ring-primary/20 cursor-pointer shrink-0 accent-primary"
+            />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className={`font-medium ${prayer.isChecked ? "line-through text-muted-foreground" : ""}`}>
+                  {prayer.name}
+                </span>
+                {isNext && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-primary text-primary-foreground">Next</span>
+                )}
+              </div>
+              <span className="text-sm text-muted-foreground">{prayer.time}</span>
+            </div>
+          </label>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="text-sm text-muted-foreground">
+              {prayer.isChecked ? (
+                <span className="flex items-center gap-1 text-secondary">
+                  <Check className="w-4 h-4" /> Done
+                </span>
+              ) : (
+                <span>{formatCountdown(prayer.secondsUntil)}</span>
+              )}
+            </div>
+            {hasOptional && (
+              <button
+                type="button"
+                onClick={() => setExpandedPrayer(isExpanded ? null : prayer.name)}
+                className="p-1 rounded-md hover:bg-muted/50"
+                aria-label={`${isExpanded ? "Hide" : "Show"} optional prayers for ${prayer.name}`}
+                aria-expanded={isExpanded}
+              >
+                {isExpanded ? (
+                  <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                )}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Optional prayers nested under this fard prayer */}
+        {hasOptional && isExpanded && (
+          <div className="ml-6 mt-1 space-y-1 mb-1">
+            {prayer.optionalPrayers.map((opt) => {
+              const raw = prayerTracker[todayStr]?.[opt.id];
+              const optChecked = raw === true || raw === "half" || raw === "full";
+              return (
+                <Tooltip key={opt.id}>
+                  <TooltipTrigger asChild>
+                    <label className="flex items-center gap-2.5 p-2 rounded-lg bg-muted/20 hover:bg-muted/40 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={optChecked}
+                        onChange={(e) => onPrayerCheck(opt.id, e.target.checked)}
+                        className="w-4 h-4 rounded border-2 border-primary/60 text-primary focus:ring-2 focus:ring-primary/20 cursor-pointer shrink-0 accent-primary"
+                        aria-label={`Mark ${opt.label} as ${optChecked ? "not " : ""}prayed`}
+                      />
+                      <span className={`text-xs font-medium truncate ${optChecked ? "line-through text-muted-foreground" : ""}`}>
+                        {opt.label}
+                        {opt.rakah && <span className="text-muted-foreground font-normal ml-1">({opt.rakah})</span>}
+                      </span>
+                    </label>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="max-w-xs p-3 z-50 bg-popover border border-border">
+                    <p className="font-medium text-sm">{opt.label}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{opt.description}</p>
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -102,7 +178,6 @@ export const DashboardPrayerTracking = ({
       transition={{ duration: 0.3, delay: 0.1 }}
       className="space-y-4"
     >
-      {/* Prayer Tracking Card */}
       <div className="p-4 rounded-2xl bg-card border border-border">
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-semibold text-lg">Today's Prayers</h3>
@@ -115,135 +190,34 @@ export const DashboardPrayerTracking = ({
           </button>
         </div>
 
-        {/* Next 3 Prayers */}
-        <div className="space-y-2">
-          {next3Prayers.map((prayer, index) => {
-            const isNext = prayer.name === nextPrayer?.name;
+        {/* Upcoming prayers */}
+        {upcomingPrayers.length > 0 && (
+          <div className="space-y-2">
+            {upcomingPrayers.map((prayer) => renderPrayerRow(prayer, prayer.name === nextPrayer?.name))}
+          </div>
+        )}
 
-            return (
-              <div
-                key={prayer.name}
-                className={`flex items-center justify-between p-3 rounded-xl transition-colors ${
-                  isNext
-                    ? "bg-primary/10 border-2 border-primary/30"
-                    : "bg-muted/30"
-                } ${prayer.isPast && !prayer.isChecked ? "opacity-60" : ""}`}
-              >
-                {/* Checkbox + Prayer Name */}
-                <label className="flex items-center gap-3 flex-1 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={prayer.isChecked}
-                    onChange={(e) => {
-                      onPrayerCheck(prayer.name.toLowerCase(), e.target.checked);
-                    }}
-                    className="w-5 h-5 rounded border-2 border-primary text-primary focus:ring-2 focus:ring-primary/20 cursor-pointer shrink-0 accent-primary"
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`font-medium ${
-                          prayer.isChecked ? "line-through text-muted-foreground" : ""
-                        }`}
-                      >
-                        {prayer.name}
-                      </span>
-                      {isNext && (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-primary text-primary-foreground">
-                          Next
-                        </span>
-                      )}
-                    </div>
-                    <span className="text-sm text-muted-foreground">{prayer.time}</span>
-                  </div>
-                </label>
-
-                {/* Status */}
-                <div className="text-sm text-muted-foreground">
-                  {prayer.isChecked ? (
-                    <span className="flex items-center gap-1 text-secondary">
-                      <Check className="w-4 h-4" />
-                      Done
-                    </span>
-                  ) : (
-                    <span>{formatCountdown(prayer.secondsUntil)}</span>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Optional prayers (Sunnah & Witr) — collapsible */}
-        <div className="mt-3 pt-3 border-t border-border">
-          <button
-            type="button"
-            onClick={() => setOptionalPrayersOpen((o) => !o)}
-            className="w-full flex items-center justify-between gap-2 p-2 rounded-lg hover:bg-muted/50 text-left"
-            aria-expanded={optionalPrayersOpen}
-            aria-controls="optional-prayers-list"
-          >
-            <span className="text-sm font-medium text-muted-foreground">
-              Optional prayers (Sunnah & Witr)
-            </span>
-            {optionalPrayersOpen ? (
-              <ChevronUp className="w-4 h-4 shrink-0 text-muted-foreground" aria-hidden />
-            ) : (
-              <ChevronDown className="w-4 h-4 shrink-0 text-muted-foreground" aria-hidden />
-            )}
-          </button>
-          {optionalPrayersOpen && (
-            <div id="optional-prayers-list" className="mt-2 space-y-1.5 pl-1">
-              {OPTIONAL_PRAYERS.map((prayer) => {
-                const raw = prayerTracker[todayStr]?.[prayer.id];
-                const isChecked = raw === true || raw === "half" || raw === "full";
-                return (
-                  <Tooltip key={prayer.id}>
-                    <TooltipTrigger asChild>
-                      <label className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/30 hover:bg-muted/50 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={(e) => onPrayerCheck(prayer.id, e.target.checked)}
-                          className="w-4 h-4 rounded border-2 border-primary text-primary focus:ring-2 focus:ring-primary/20 cursor-pointer shrink-0 accent-primary"
-                          aria-label={`Mark ${prayer.label} as ${isChecked ? "not " : ""}prayed`}
-                        />
-                        <span
-                          className={`text-sm font-medium truncate ${
-                            isChecked ? "line-through text-muted-foreground" : ""
-                          }`}
-                        >
-                          {prayer.label}
-                          {prayer.rakah && (
-                            <span className="text-muted-foreground font-normal ml-1">
-                              ({prayer.rakah})
-                            </span>
-                          )}
-                        </span>
-                      </label>
-                    </TooltipTrigger>
-                    <TooltipContent side="right" className="max-w-xs p-3">
-                      <p className="font-medium text-sm">{prayer.label}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{prayer.description}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                );
-              })}
+        {/* Past prayers — show below upcoming for quick marking */}
+        {pastPrayers.length > 0 && (
+          <div className={upcomingPrayers.length > 0 ? "mt-3 pt-3 border-t border-border/60" : ""}>
+            <p className="text-xs text-muted-foreground mb-2 font-medium">Earlier today</p>
+            <div className="space-y-2">
+              {pastPrayers.map((prayer) => renderPrayerRow(prayer, false))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Taraweeh (optional night prayer) — half vs full */}
+        {/* Taraweeh — mobile-responsive stacked layout */}
         <div className="mt-3 pt-3 border-t border-border">
-          <div className="flex items-center justify-between p-3 rounded-xl bg-muted/30">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="p-3 rounded-xl bg-muted/30 space-y-2">
+            <div className="flex items-center justify-between gap-2">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span className="font-medium cursor-help border-b border-dotted border-muted-foreground/40">
                     Taraweeh
                   </span>
                 </TooltipTrigger>
-                <TooltipContent side="right" className="max-w-xs p-3">
+                <TooltipContent side="top" className="max-w-xs p-3 z-50 bg-popover border border-border">
                   <p className="font-medium text-sm">Taraweeh (optional)</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     Optional night prayer during Ramadan. Time depends on your mosque (usually after Isha).
@@ -251,64 +225,48 @@ export const DashboardPrayerTracking = ({
                   </p>
                 </TooltipContent>
               </Tooltip>
-              <span className="text-sm text-muted-foreground shrink-0">Optional · after Isha (varies by mosque)</span>
+              <span className="text-xs text-muted-foreground">After Isha</span>
             </div>
-            <div className="flex items-center gap-1 shrink-0">
+            <div className="flex items-center gap-1.5">
               <button
                 type="button"
                 onClick={() => onPrayerCheck('taraweeh', false)}
-                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                className={`flex-1 py-2 rounded-lg text-xs font-medium transition-colors ${
                   !taraweehDone ? "bg-primary text-primary-foreground" : "bg-muted/70 text-muted-foreground hover:bg-muted"
                 }`}
                 aria-pressed={!taraweehDone}
                 aria-label="Taraweeh: none"
               >
-                —
+                Not done
               </button>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    onClick={() => onPrayerCheck('taraweeh', taraweehValue === 'half' ? false : 'half')}
-                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                      taraweehValue === 'half' ? "bg-primary text-primary-foreground" : "bg-muted/70 text-muted-foreground hover:bg-muted"
-                    }`}
-                    aria-pressed={taraweehValue === 'half'}
-                    aria-label="Taraweeh: half (8 rak'ahs)"
-                  >
-                    Half
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="top" className="max-w-xs">
-                  <p className="font-medium text-sm">Half</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Typically 8 rak&apos;ahs (shorter set). Often prayed at home or when the mosque does a shorter Tarawih.</p>
-                </TooltipContent>
-              </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    onClick={() => onPrayerCheck('taraweeh', taraweehValue === 'full' ? false : 'full')}
-                    className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                      taraweehValue === 'full' ? "bg-primary text-primary-foreground" : "bg-muted/70 text-muted-foreground hover:bg-muted"
-                    }`}
-                    aria-pressed={taraweehValue === 'full'}
-                    aria-label="Taraweeh: full (20 rak'ahs)"
-                  >
-                    Full
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="top" className="max-w-xs">
-                  <p className="font-medium text-sm">Full</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Typically 20 rak&apos;ahs (complete set). Common in many mosques; one thirtieth of the Quran is recited each night so the full Quran is completed by Eid.</p>
-                </TooltipContent>
-              </Tooltip>
+              <button
+                type="button"
+                onClick={() => onPrayerCheck('taraweeh', taraweehValue === 'half' ? false : 'half')}
+                className={`flex-1 py-2 rounded-lg text-xs font-medium transition-colors ${
+                  taraweehValue === 'half' ? "bg-primary text-primary-foreground" : "bg-muted/70 text-muted-foreground hover:bg-muted"
+                }`}
+                aria-pressed={taraweehValue === 'half'}
+                aria-label="Taraweeh: half (8 rak'ahs)"
+              >
+                Half (8)
+              </button>
+              <button
+                type="button"
+                onClick={() => onPrayerCheck('taraweeh', taraweehValue === 'full' ? false : 'full')}
+                className={`flex-1 py-2 rounded-lg text-xs font-medium transition-colors ${
+                  taraweehValue === 'full' ? "bg-primary text-primary-foreground" : "bg-muted/70 text-muted-foreground hover:bg-muted"
+                }`}
+                aria-pressed={taraweehValue === 'full'}
+                aria-label="Taraweeh: full (20 rak'ahs)"
+              >
+                Full (20)
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Quick Stats Row — fasting progress, with labels and hover explanations */}
+      {/* Quick Stats Row */}
       <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 p-4 rounded-xl bg-muted/30">
         <Tooltip>
           <TooltipTrigger asChild>
@@ -321,7 +279,7 @@ export const DashboardPrayerTracking = ({
               <span className="text-xs text-muted-foreground sm:block">Streak</span>
             </div>
           </TooltipTrigger>
-          <TooltipContent side="top" className="max-w-[240px]">
+          <TooltipContent side="top" className="max-w-[240px] z-50 bg-popover border border-border">
             <p className="font-medium">Fasting streak</p>
             <p className="text-muted-foreground text-xs mt-0.5">
               Consecutive days you completed the full fast (dawn to sunset). Skipped or broken days reset the streak.
@@ -343,7 +301,7 @@ export const DashboardPrayerTracking = ({
               <span className="text-xs text-muted-foreground sm:block">Fasts done</span>
             </div>
           </TooltipTrigger>
-          <TooltipContent side="top" className="max-w-[240px]">
+          <TooltipContent side="top" className="max-w-[240px] z-50 bg-popover border border-border">
             <p className="font-medium">Fasts completed</p>
             <p className="text-muted-foreground text-xs mt-0.5">
               Days you marked as &quot;Mark complete&quot; (fasted full day) out of total Ramadan days so far.
@@ -363,7 +321,7 @@ export const DashboardPrayerTracking = ({
               <span className="text-xs text-muted-foreground sm:block">Completion</span>
             </div>
           </TooltipTrigger>
-          <TooltipContent side="top" className="max-w-[240px]">
+          <TooltipContent side="top" className="max-w-[240px] z-50 bg-popover border border-border">
             <p className="font-medium">Ramadan completion</p>
             <p className="text-muted-foreground text-xs mt-0.5">
               Percentage of Ramadan days you completed (full fast). Based on total days in this Ramadan so far.
