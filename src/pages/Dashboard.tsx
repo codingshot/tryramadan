@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import {
   Moon,
@@ -1155,11 +1155,21 @@ const Dashboard = () => {
                   className="text-xs text-muted-foreground hover:text-foreground hover:underline transition-colors text-left"
                   aria-label={displayCity ? `Prayer times for ${displayCity}. Click to change location.` : "Set location for prayer times"}
                 >
-                  {displayCity ? (
-                    <>Prayer times ({displayCity})</>
-                  ) : (
-                    <>Prayer times · Set location</>
-                  )}
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={displayCity || "no-location"}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      transition={{ duration: 0.25 }}
+                    >
+                      {displayCity ? (
+                        <>Prayer times ({displayCity})</>
+                      ) : (
+                        <>Prayer times · Set location</>
+                      )}
+                    </motion.span>
+                  </AnimatePresence>
                 </button>
                 {(locationLoading || timesLoading) && (
                   <span className="text-xs text-muted-foreground animate-pulse">

@@ -18,7 +18,7 @@ const LearnHadith = () => {
   const todayStr = displayTimezone ? getTodayStringInTimezone(displayTimezone) : getTodayDateString();
 
   const readHadithIds = useMemo(
-    () => new Set(activityEntries.filter((e) => e.type === "hadith_read" && e.hadithId != null).map((e) => e.hadithId)),
+    () => new Set(activityEntries.filter((e): e is import("@/hooks/useLocalStorage").HadithReadEntry => e.type === "hadith_read" && e.hadithId != null).map((e) => e.hadithId)),
     [activityEntries],
   );
 

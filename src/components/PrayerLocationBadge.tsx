@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { MapPin } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useUserPreferences } from "@/hooks/useLocalStorage";
 import { useAutoLocation } from "@/hooks/useLocation";
 
@@ -7,6 +8,13 @@ interface PrayerLocationBadgeProps {
   /** When provided, clicking opens this handler (e.g. location editor) instead of navigating to Settings */
   onClickToUpdate?: () => void;
 }
+
+const locationAnim = {
+  initial: { opacity: 0, y: 6 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -6 },
+  transition: { duration: 0.25 },
+};
 
 /** Shows which location prayer times are for, with link/button to update (Settings or custom handler). */
 export function PrayerLocationBadge({ onClickToUpdate }: PrayerLocationBadgeProps) {
@@ -21,6 +29,17 @@ export function PrayerLocationBadge({ onClickToUpdate }: PrayerLocationBadgeProp
   const title = displayLocation ? `Prayer times for ${displayLocation}. Click to update.` : "Set location for prayer times";
   const className = "inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-secondary transition-colors";
 
+  const locationContent = locationShort ? (
+    <AnimatePresence mode="wait">
+      <motion.span key={locationShort} {...locationAnim} className="inline-flex items-center gap-1.5">
+        <span>Prayer times for {locationShort}</span>
+        <span className="opacity-70">· Update</span>
+      </motion.span>
+    </AnimatePresence>
+  ) : (
+    <span>Set location for prayer times</span>
+  );
+
   if (onClickToUpdate) {
     return (
       <button
@@ -31,14 +50,7 @@ export function PrayerLocationBadge({ onClickToUpdate }: PrayerLocationBadgeProp
         aria-label={label}
       >
         <MapPin className="w-3.5 h-3.5" />
-        {locationShort ? (
-          <>
-            <span>Prayer times for {locationShort}</span>
-            <span className="opacity-70">· Update</span>
-          </>
-        ) : (
-          <span>Set location for prayer times</span>
-        )}
+        {locationContent}
       </button>
     );
   }
@@ -55,8 +67,7 @@ export function PrayerLocationBadge({ onClickToUpdate }: PrayerLocationBadgeProp
   return (
     <Link to="/settings" className={className} title={title}>
       <MapPin className="w-3.5 h-3.5" />
-      <span>Prayer times for {locationShort}</span>
-      <span className="opacity-70">· Update</span>
+      {locationContent}
     </Link>
   );
 }

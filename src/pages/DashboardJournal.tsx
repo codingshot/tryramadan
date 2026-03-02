@@ -54,6 +54,10 @@ export interface JournalEntry {
   createdAt?: string;
   /** Set on every save */
   updatedAt?: string;
+  /** Location the user was journaling/fasting from when the entry was saved */
+  locationLabel?: string;
+  /** Coordinates at the time of save */
+  locationCoords?: { lat: number; lng: number };
 }
 
 const SLOT_LABELS: Record<JournalSlot, string> = {
@@ -252,6 +256,8 @@ export default function DashboardJournal() {
       slot: activeSlot,
       createdAt: existing?.createdAt ?? now,
       updatedAt: now,
+      locationLabel: preferences.location || undefined,
+      locationCoords: preferences.locationCoords || undefined,
     };
     setEntries((prev) => {
       const rest = prev.filter((e) => e.date !== writeDate);
@@ -1110,17 +1116,26 @@ export default function DashboardJournal() {
                       className="p-4 rounded-xl bg-card border border-border min-w-0"
                     >
                       <div className="flex items-center justify-between gap-2 flex-wrap">
-                        <span className="text-xs text-muted-foreground">{entry.date}</span>
-                        {(entry.slot ?? "general") !== "general" && (
-                          <span className="text-xs px-1.5 py-0.5 rounded bg-secondary/10 text-secondary">
-                            {SLOT_LABELS[entry.slot ?? "general"]}
-                          </span>
-                        )}
-                        {entry.mood != null && (
-                          <span className="text-sm" title={MOOD_LABELS[entry.mood - 1]}>
-                            {MOOD_EMOJI[entry.mood - 1]}
-                          </span>
-                        )}
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-xs text-muted-foreground">{entry.date}</span>
+                          {entry.locationLabel && (
+                            <span className="text-[10px] text-muted-foreground/70 flex items-center gap-0.5" title={`Journaled from ${entry.locationLabel}`}>
+                              📍 {entry.locationLabel.split(",")[0]}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {(entry.slot ?? "general") !== "general" && (
+                            <span className="text-xs px-1.5 py-0.5 rounded bg-secondary/10 text-secondary">
+                              {SLOT_LABELS[entry.slot ?? "general"]}
+                            </span>
+                          )}
+                          {entry.mood != null && (
+                            <span className="text-sm" title={MOOD_LABELS[entry.mood - 1]}>
+                              {MOOD_EMOJI[entry.mood - 1]}
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <p className={`text-sm mt-1 ${isExpanded ? "" : "line-clamp-2"}`}>
                         {entry.content}
