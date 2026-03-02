@@ -22,6 +22,10 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T 
   React.useEffect(() => {
     try {
       window.localStorage.setItem(key, JSON.stringify(storedValue));
+      // Notify same-tab listeners (e.g. useAutoLocation) about preference changes
+      if (key === 'tryramadan-preferences') {
+        window.dispatchEvent(new Event('tryramadan-prefs-updated'));
+      }
     } catch (error) {
       console.error(`Error setting localStorage key "${key}":`, error);
     }
@@ -159,6 +163,8 @@ export function persistPreferencesSync(partial: Partial<UserPreferences>): void 
     const current = raw ? JSON.parse(raw) : {};
     const merged = { ...defaultPreferences, ...current, ...partial };
     window.localStorage.setItem(PREFERENCES_KEY, JSON.stringify(merged));
+    // Notify same-tab listeners (e.g. useAutoLocation)
+    window.dispatchEvent(new Event('tryramadan-prefs-updated'));
   } catch (e) {
     console.error('persistPreferencesSync:', e);
   }
