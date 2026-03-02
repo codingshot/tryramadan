@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, ChevronDown, Loader2, X, Check } from "lucide-react";
 import { LocationSearch } from "./LocationSearch";
 import { LocationResult, getLocationFromIP, getTimezoneFromCoords } from "@/hooks/useLocation";
-import { useUserPreferences } from "@/hooks/useLocalStorage";
+import { useUserPreferences, useActivityLog } from "@/hooks/useLocalStorage";
 
 interface LocationDisplayProps {
   compact?: boolean;
@@ -15,6 +15,7 @@ interface LocationDisplayProps {
 
 export const LocationDisplay = ({ compact = false, showTimezone = false, open: controlledOpen, onOpenChange }: LocationDisplayProps) => {
   const [preferences, setPreferences] = useUserPreferences();
+  const [, addActivityEntry] = useActivityLog();
   const [internalOpen, setInternalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -23,6 +24,7 @@ export const LocationDisplay = ({ compact = false, showTimezone = false, open: c
   const setIsEditing = isControlled ? onOpenChange! : setInternalOpen;
   
   const handleLocationSelect = async (location: LocationResult) => {
+    const previousLocation = preferences.location || undefined;
     let timezone: string | null = location.timezone ?? null;
     if (!timezone) {
       timezone = await getTimezoneFromCoords(location.lat, location.lng);
@@ -32,6 +34,14 @@ export const LocationDisplay = ({ compact = false, showTimezone = false, open: c
       location: location.displayName,
       locationCoords: { lat: location.lat, lng: location.lng },
       timezone,
+    });
+    // Log location change in activity log
+    addActivityEntry({
+      type: 'location_changed',
+      date: new Date().toISOString(),
+      from: previousLocation,
+      to: location.displayName,
+      coords: { lat: location.lat, lng: location.lng },
     });
     setIsEditing(false);
   };

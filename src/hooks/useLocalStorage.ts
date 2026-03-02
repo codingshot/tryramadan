@@ -1543,9 +1543,10 @@ const HADITH_VIEWED_MAX_DAYS = 60;
 export const ACTIVITY_LOG_KEY = 'tryramadan-activity-log';
 const ACTIVITY_LOG_MAX_ENTRIES = 500;
 
-export type ActivityLogEntry =
-  | { id: string; type: 'hadith_read'; date: string; hadithId?: string }
-  ;
+export type HadithReadEntry = { id: string; type: 'hadith_read'; date: string; hadithId?: string };
+export type LocationChangedEntry = { id: string; type: 'location_changed'; date: string; from?: string; to: string; coords?: { lat: number; lng: number } };
+export type ActivityLogEntry = HadithReadEntry | LocationChangedEntry;
+export type ActivityLogInput = Omit<HadithReadEntry, 'id'> | Omit<LocationChangedEntry, 'id'>;
 
 function generateActivityId(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
@@ -1555,7 +1556,7 @@ function generateActivityId(): string {
 /** Hook: activity log (hadith read, etc.) with add and remove. Entries sorted by date desc, newest first. */
 export function useActivityLog(): [
   ActivityLogEntry[],
-  (entry: Omit<ActivityLogEntry, 'id'>) => void,
+  (entry: ActivityLogInput) => void,
   (id: string) => void,
 ] {
   const [entries, setEntries] = useLocalStorage<ActivityLogEntry[]>(ACTIVITY_LOG_KEY, []);
@@ -1577,7 +1578,7 @@ export function useActivityLog(): [
     }
   }, [entries.length, setEntries]);
 
-  const addEntry = React.useCallback((entry: Omit<ActivityLogEntry, 'id'>) => {
+  const addEntry = React.useCallback((entry: ActivityLogInput) => {
     const id = generateActivityId();
     setEntries((prev) => [{ ...entry, id } as ActivityLogEntry, ...prev].slice(0, ACTIVITY_LOG_MAX_ENTRIES));
   }, [setEntries]);
