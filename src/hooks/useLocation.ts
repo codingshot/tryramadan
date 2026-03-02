@@ -131,35 +131,70 @@ export async function detectLocationWithGeolocation(): Promise<LocationResult | 
   return getLocationFromIP();
 }
 
-// Custom hook for location: auto-detect from IP only on load (no browser location request). Use detectLocation for explicit "use my location" (geolocation then IP).
+/**
+ * Custom hook for location: returns saved preferences location if available,
+ * otherwise auto-detects from IP on load. Updating location anywhere (Settings,
+ * LocationDisplay, Onboarding) writes to useUserPreferences which triggers
+ * re-renders in all consumers of useAutoLocation.
+ */
 export function useAutoLocation() {
-  const [state, setState] = useState<LocationState>({
-    location: null,
-    loading: true,
-    error: null,
-  });
+  // Read preferences via a lightweight localStorage snapshot + storage event listener
+  // to avoid circular hook dependencies with useLocalStorage
+  const getPrefsSnapshot = useCallback(() => {
+    try {
+      const raw = window.localStorage.getItem('tryramadan-preferences');
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  }, []);
+
+  const [prefs, setPrefs] = useState(getPrefsSnapshot);
+
+  // Listen for localStorage writes from other components (same tab: custom event, cross-tab: storage event)
+  useEffect(() => {
+    const handler = () => setPrefs(getPrefsSnapshot());
+    // For cross-tab sync
+    window.addEventListener('storage', handler);
+    // For same-tab sync: we'll dispatch a custom event when preferences change
+    window.addEventListener('tryramadan-prefs-updated', handler);
+    return () => {
+      window.removeEventListener('storage', handler);
+      window.removeEventListener('tryramadan-prefs-updated', handler);
+    };
+  }, [getPrefsSnapshot]);
+
+  const savedCoords = prefs?.locationCoords as { lat: number; lng: number } | null | undefined;
+  const savedName = prefs?.location as string | undefined;
+
+  const [ipLocation, setIpLocation] = useState<LocationResult | null>(null);
+  const [loading, setLoading] = useState(!savedCoords);
+  const [error, setError] = useState<string | null>(null);
 
   const detectLocation = useCallback(async () => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
+    setLoading(true);
+    setError(null);
     const location = await detectLocationWithGeolocation();
     if (location) {
-      setState({ location, loading: false, error: null });
+      setIpLocation(location);
+      setLoading(false);
       return location;
     }
-    setState({ location: null, loading: false, error: 'Could not detect location' });
+    setError('Could not detect location');
+    setLoading(false);
     return null;
   }, []);
 
-  // On load: IP only (no browser geolocation). User can request precise location when selecting location (e.g. "Use my location" button).
+  // On load: IP only if no saved location
   useEffect(() => {
+    if (savedCoords && savedName) return;
     const run = async () => {
-      setState(prev => ({ ...prev, loading: true, error: null }));
-      const ipLocation = await detectLocationFromIPOnly();
-      if (ipLocation) {
-        setState({ location: ipLocation, loading: false, error: null });
+      setLoading(true);
+      const loc = await detectLocationFromIPOnly();
+      if (loc) {
+        setIpLocation(loc);
       } else {
-        setState({ location: null, loading: false, error: 'Could not detect location' });
+        setError('Could not detect location');
       }
+      setLoading(false);
     };
     const id =
       typeof requestIdleCallback !== 'undefined'
@@ -169,7 +204,25 @@ export function useAutoLocation() {
       if (typeof cancelIdleCallback !== 'undefined') cancelIdleCallback(id as number);
       else clearTimeout(id as number);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return { ...state, detectLocation };
+  // Prefer saved preferences location over IP-detected
+  const location: LocationResult | null = (savedCoords && savedName)
+    ? {
+        name: savedName.split(',')[0] || savedName,
+        displayName: savedName,
+        lat: savedCoords.lat,
+        lng: savedCoords.lng,
+        country: '',
+        timezone: prefs?.timezone ?? undefined,
+      }
+    : ipLocation;
+
+  return {
+    location,
+    loading: !location && loading,
+    error: location ? null : error,
+    detectLocation,
+  };
 }
