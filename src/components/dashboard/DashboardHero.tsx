@@ -88,7 +88,13 @@ export const DashboardHero = ({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <h2 className="text-xl md:text-2xl font-bold cursor-help border-b border-dotted border-transparent hover:border-foreground/40">
-                    {todayExcusedMenstruation ? "No need to fast" : todayBroken ? "Broke fast" : isFasting ? "Currently Fasting" : "Eating Window"}
+                    {todayExcusedMenstruation
+                      ? "No need to fast"
+                      : todayBroken
+                        ? "Broke fast"
+                        : inFastingWindow
+                          ? "Currently Fasting"
+                          : "Eating Window"}
                   </h2>
                 </TooltipTrigger>
                 <TooltipContent className="max-w-xs p-3">
@@ -97,7 +103,7 @@ export const DashboardHero = ({
                       ? "No need to fast"
                       : todayBroken
                         ? "Broke fast"
-                        : isFasting
+                        : inFastingWindow
                           ? GENERAL_TOOLTIPS.fastingPeriod.title
                           : "Eating Window"}
                   </p>
@@ -106,14 +112,20 @@ export const DashboardHero = ({
                       ? "You're in your menstrual period. In Islam there is no obligation to fast during menstruation. These days don't break your streak."
                       : todayBroken
                         ? "You logged that you broke your fast today. Countdown below is until Iftar or next Suhoor."
-                        : isFasting
+                        : inFastingWindow
                           ? GENERAL_TOOLTIPS.fastingPeriod.body
                           : "You're between sunset (Maghrib) and dawn (Fajr). You can eat and drink."}
                   </p>
                 </TooltipContent>
               </Tooltip>
               <p className="text-sm text-muted-foreground">
-                {todayExcusedMenstruation ? "Excused (menstruation)" : todayBroken ? "Logged breaking fast today" : isFasting ? "No food or drink" : "You can eat now"}
+                {todayExcusedMenstruation
+                  ? "Excused (menstruation)"
+                  : todayBroken
+                    ? "Logged breaking fast today"
+                    : inFastingWindow
+                      ? "No food or drink"
+                      : "You can eat now"}
               </p>
             </div>
           </div>

@@ -130,13 +130,14 @@ export const FastingTimer = ({
         let label: "Suhoor end" | "Iftar";
         let eating: boolean;
         let displayTime: string;
+        const maghribValid = maghribSec > 12 * 3600 && maghribSec < 24 * 3600;
         if (nowSec < imsakSec) {
           diff = secondsUntilTimeInTimezone(nowSec, imsakSec);
           label = "Suhoor end";
           eating = true;
           displayTime = suhoorTime;
-        } else if (nowSec < maghribSec) {
-          diff = secondsUntilTimeInTimezone(nowSec, maghribSec);
+        } else if (!maghribValid || nowSec < maghribSec) {
+          diff = maghribValid ? secondsUntilTimeInTimezone(nowSec, maghribSec) : secondsUntilTimeInTimezone(nowSec, 18 * 3600);
           label = "Iftar";
           eating = false;
           displayTime = iftarTime;
@@ -161,6 +162,7 @@ export const FastingTimer = ({
         const [suhoorH, suhoorM] = suhoorTime.split(":").map(Number);
         const [suhoorTomorrowH, suhoorTomorrowM] = suhoorTomorrowTime.split(":").map(Number);
         const [iftarH, iftarM] = iftarTime.split(":").map(Number);
+        const maghribValid = Number.isFinite(iftarH) && iftarH >= 12 && iftarH < 24;
         const imsakToday = new Date();
         imsakToday.setHours(suhoorH, suhoorM, 0, 0);
         const maghribToday = new Date();
@@ -175,8 +177,14 @@ export const FastingTimer = ({
           target = imsakToday;
           label = "Suhoor end";
           eating = true;
-        } else if (now < maghribToday) {
-          target = maghribToday;
+        } else if (!maghribValid || now < maghribToday) {
+          if (!maghribValid) {
+            const fallback = new Date();
+            fallback.setHours(18, 0, 0, 0);
+            target = fallback.getTime() <= now.getTime() ? imsakTomorrow : fallback;
+          } else {
+            target = maghribToday;
+          }
           label = "Iftar";
           eating = false;
         } else {
