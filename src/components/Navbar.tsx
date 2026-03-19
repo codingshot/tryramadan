@@ -212,16 +212,15 @@ export function Navbar() {
 
             {/* Location, time, profile & CTA — only on lg so we don't duplicate profile icon with hamburger row */}
             <div className="hidden lg:flex items-center gap-3">
-              <Link
-                to="/settings"
+              <button
+                onClick={handleLocationClick}
                 className={`flex items-center gap-1.5 text-sm transition-colors min-w-0 max-w-[140px] cursor-pointer rounded-md px-2 py-1.5 ${
                   pathname === "/settings" ? "text-foreground bg-muted/60" : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
                 }`}
-                aria-current={pathname === "/settings" ? "page" : undefined}
               >
                 <MapPin className="w-4 h-4 flex-shrink-0" />
                 <span className="truncate">{locationShort}</span>
-              </Link>
+              </button>
               <span className="text-sm text-muted-foreground tabular-nums" aria-live="polite">
                 {localTime}
               </span>
