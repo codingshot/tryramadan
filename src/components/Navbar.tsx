@@ -17,9 +17,12 @@ import {
 
 export function Navbar() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [localTime, setLocalTime] = useState("");
-  const [preferences] = useUserPreferences();
+  const [showLocationDialog, setShowLocationDialog] = useState(false);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [preferences, setPreferences] = useUserPreferences();
   const [progress] = useFastingProgress();
   const { location: autoLocation } = useAutoLocation();
   const ramadanRange = useRamadanRange();
