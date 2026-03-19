@@ -323,6 +323,49 @@ export function Navbar() {
         </div>
       </motion.nav>
 
+      {/* Quick Location Set Dialog */}
+      <Dialog open={showLocationDialog} onOpenChange={setShowLocationDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-primary" />
+              Set Your Location
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Your location is used for accurate prayer and fasting times.
+          </p>
+          <div className="space-y-3">
+            <LocationSearch
+              value=""
+              onSelect={handleLocationSelect}
+              placeholder="Search for your city..."
+            />
+            <button
+              onClick={handleAutoDetect}
+              disabled={locationLoading}
+              className="w-full min-h-[44px] flex items-center justify-center gap-2 p-3 rounded-xl text-sm text-primary hover:bg-primary/10 transition-colors border border-border disabled:opacity-50"
+            >
+              {locationLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <MapPin className="w-4 h-4" />
+              )}
+              Auto-detect my location
+            </button>
+          </div>
+          <button
+            onClick={() => {
+              setShowLocationDialog(false);
+              navigate("/settings#settings-location");
+            }}
+            className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 mt-1"
+          >
+            <Settings className="w-3 h-3" />
+            More location settings
+          </button>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
