@@ -14,6 +14,7 @@ import {
   FileText,
   Trophy,
   Link2,
+  RotateCcw,
   type LucideIcon,
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -36,6 +37,7 @@ const QUICK_ACTION_ICONS: Record<DashboardQuickActionId, LucideIcon> = {
   health: Heart,
   journal: FileText,
   achievements: Trophy,
+  qada: RotateCcw,
 };
 
 const QUICK_ACTION_COLORS: Record<DashboardQuickActionId, { color: string; bgColor: string; borderColor: string }> = {
@@ -53,6 +55,7 @@ const QUICK_ACTION_COLORS: Record<DashboardQuickActionId, { color: string; bgCol
   health: { color: "text-rose-500", bgColor: "bg-rose-500/10", borderColor: "border-rose-500/20" },
   journal: { color: "text-amber-600", bgColor: "bg-amber-500/10", borderColor: "border-amber-500/20" },
   achievements: { color: "text-yellow-600", bgColor: "bg-yellow-500/10", borderColor: "border-yellow-500/20" },
+  qada: { color: "text-teal-600", bgColor: "bg-teal-500/10", borderColor: "border-teal-500/20" },
 };
 
 const SIDEBAR_QUICK_ACTIONS_SHOWN = 9;
