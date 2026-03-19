@@ -1096,6 +1096,7 @@ export const DASHBOARD_QUICK_ACTIONS: { id: DashboardQuickActionId; label: strin
   { id: 'health', label: 'Health', path: '/dashboard/health' },
   { id: 'journal', label: 'Journal', path: '/dashboard/journal' },
   { id: 'achievements', label: 'Achievements', path: '/dashboard/achievements' },
+  { id: 'qada', label: "Qaḍā'", path: '/dashboard/qada' },
 ];
 
 const defaultQuickActionOrder: DashboardQuickActionId[] = [...DASHBOARD_QUICK_ACTION_IDS];
