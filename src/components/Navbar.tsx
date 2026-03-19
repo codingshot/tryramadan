@@ -1,12 +1,19 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Link, useLocation } from "react-router-dom";
-import { Menu, X, MapPin, User } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Menu, X, MapPin, User, Loader2, Settings } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { useUserPreferences, useFastingProgress, isFastingToday, useDisplayTimezone } from "@/hooks/useLocalStorage";
-import { useAutoLocation } from "@/hooks/useLocation";
+import { useAutoLocation, LocationResult, getLocationFromIP, getTimezoneFromCoords } from "@/hooks/useLocation";
 import { useRamadanRange } from "@/hooks/useRamadanRange";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { LocationSearch } from "@/components/LocationSearch";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export function Navbar() {
   const { pathname } = useLocation();
