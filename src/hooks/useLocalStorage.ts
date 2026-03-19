@@ -22,7 +22,7 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T 
   React.useEffect(() => {
     try {
       window.localStorage.setItem(key, JSON.stringify(storedValue));
-      // Notify same-tab listeners (e.g. useAutoLocation) about preference changes
+      // Notify same-tab listeners about preference changes
       if (key === 'tryramadan-preferences') {
         window.dispatchEvent(new Event('tryramadan-prefs-updated'));
       }
@@ -30,6 +30,39 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T 
       console.error(`Error setting localStorage key "${key}":`, error);
     }
   }, [key, storedValue]);
+
+  // Re-sync from localStorage when another component (same tab) or another tab updates this key
+  React.useEffect(() => {
+    const resync = () => {
+      try {
+        const item = window.localStorage.getItem(key);
+        if (!item) return;
+        const parsed = JSON.parse(item) as T;
+        setStoredValue((prev) => {
+          // Avoid infinite loop: only update if actually different
+          if (JSON.stringify(prev) === JSON.stringify(parsed)) return prev;
+          return parsed;
+        });
+      } catch { /* ignore */ }
+    };
+
+    // Cross-tab sync
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === key) resync();
+    };
+    window.addEventListener('storage', onStorage);
+
+    // Same-tab sync for preferences (fired by other useLocalStorage instances or persistPreferencesSync)
+    const onPrefsUpdated = () => {
+      if (key === 'tryramadan-preferences') resync();
+    };
+    window.addEventListener('tryramadan-prefs-updated', onPrefsUpdated);
+
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('tryramadan-prefs-updated', onPrefsUpdated);
+    };
+  }, [key]);
 
   return [storedValue, setStoredValue];
 }
