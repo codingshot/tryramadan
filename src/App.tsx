@@ -254,6 +254,14 @@ const App = () => (
               </Suspense>
             }
           />
+          <Route
+            path="/dashboard/qada"
+            element={
+              <Suspense fallback={<PageFallback />}>
+                <DashboardQada />
+              </Suspense>
+            }
+          />
           <Route path="/dashboard/glossary" element={<Suspense fallback={<PageFallback />}><LearnGlossary /></Suspense>} />
           <Route path="/learn" element={<Navigate to="/dashboard/learn" replace />} />
           <Route path="/learn/" element={<Navigate to="/dashboard/learn" replace />} />
