@@ -82,6 +82,42 @@ export function Navbar() {
 
   const handleStartJourney = () => setIsOpen(false);
 
+  const hasLocation = !!preferences.location;
+
+  const handleLocationClick = () => {
+    if (hasLocation) {
+      // Already has location — go to Settings
+      navigate("/settings#settings-location");
+    } else {
+      // First time — show quick-set dialog
+      setShowLocationDialog(true);
+    }
+    setIsOpen(false);
+  };
+
+  const handleLocationSelect = async (loc: LocationResult) => {
+    let timezone: string | null = loc.timezone ?? null;
+    if (!timezone) {
+      timezone = await getTimezoneFromCoords(loc.lat, loc.lng);
+    }
+    setPreferences({
+      ...preferences,
+      location: loc.displayName,
+      locationCoords: { lat: loc.lat, lng: loc.lng },
+      timezone,
+    });
+    setShowLocationDialog(false);
+  };
+
+  const handleAutoDetect = async () => {
+    setLocationLoading(true);
+    const loc = await getLocationFromIP();
+    if (loc) {
+      await handleLocationSelect(loc);
+    }
+    setLocationLoading(false);
+  };
+
   return (
     <>
       <a
