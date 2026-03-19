@@ -224,7 +224,7 @@ export default function DashboardQada() {
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-secondary" />
-                Primary Intention (<ArabicTerm term="Niyyah" arabic="نية" />)
+                Primary Intention (<ArabicTerm term="Niyyah" arabic="نية" definition="Intention before fasting" />)
               </CardTitle>
             </CardHeader>
             <CardContent>
