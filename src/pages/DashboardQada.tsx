@@ -149,7 +149,7 @@ export default function DashboardQada() {
             </Link>
             <div>
               <h1 className="text-2xl font-bold flex items-center gap-2">
-                <ArabicTerm term="Qaḍā'" arabic="قضاء" /> Tracker
+                <ArabicTerm term="Qaḍā'" arabic="قضاء" definition="Making up missed obligatory fasts" /> Tracker
               </h1>
               <p className="text-sm text-muted-foreground">
                 Make up your missed Ramadan fasts
