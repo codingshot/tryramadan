@@ -25,6 +25,7 @@ const DashboardProgress = lazy(() => import("./pages/DashboardProgress").then((m
 const DashboardCulture = lazy(() => import("./pages/DashboardCulture").then((m) => ({ default: m.default })));
 const DashboardQuran = lazy(() => import("./pages/DashboardQuran").then((m) => ({ default: m.default })));
 const DashboardMacros = lazy(() => import("./pages/DashboardMacros").then((m) => ({ default: m.default })));
+const DashboardQada = lazy(() => import("./pages/DashboardQada").then((m) => ({ default: m.default })));
 
 const OnboardingLayout = lazy(() => import("./pages/onboarding/OnboardingLayout").then((m) => ({ default: m.default })));
 const OnboardingWelcome = lazy(() => import("./pages/onboarding/OnboardingWelcome").then((m) => ({ default: m.default })));
