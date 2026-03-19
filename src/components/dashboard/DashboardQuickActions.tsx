@@ -14,6 +14,7 @@ import {
   FileText,
   Trophy,
   Link2,
+  RotateCcw,
   type LucideIcon,
 } from "lucide-react";
 import { Link } from "react-router-dom";
