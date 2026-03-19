@@ -37,6 +37,7 @@ const QUICK_ACTION_ICONS: Record<DashboardQuickActionId, LucideIcon> = {
   health: Heart,
   journal: FileText,
   achievements: Trophy,
+  qada: RotateCcw,
 };
 
 const QUICK_ACTION_COLORS: Record<DashboardQuickActionId, { color: string; bgColor: string; borderColor: string }> = {
