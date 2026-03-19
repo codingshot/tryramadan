@@ -1,18 +1,28 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Link, useLocation } from "react-router-dom";
-import { Menu, X, MapPin, User } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Menu, X, MapPin, User, Loader2, Settings } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { useUserPreferences, useFastingProgress, isFastingToday, useDisplayTimezone } from "@/hooks/useLocalStorage";
-import { useAutoLocation } from "@/hooks/useLocation";
+import { useAutoLocation, LocationResult, getLocationFromIP, getTimezoneFromCoords } from "@/hooks/useLocation";
 import { useRamadanRange } from "@/hooks/useRamadanRange";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { LocationSearch } from "@/components/LocationSearch";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export function Navbar() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [localTime, setLocalTime] = useState("");
-  const [preferences] = useUserPreferences();
+  const [showLocationDialog, setShowLocationDialog] = useState(false);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [preferences, setPreferences] = useUserPreferences();
   const [progress] = useFastingProgress();
   const { location: autoLocation } = useAutoLocation();
   const ramadanRange = useRamadanRange();
@@ -71,6 +81,42 @@ export function Navbar() {
   };
 
   const handleStartJourney = () => setIsOpen(false);
+
+  const hasLocation = !!preferences.location;
+
+  const handleLocationClick = () => {
+    if (hasLocation) {
+      // Already has location — go to Settings
+      navigate("/settings#settings-location");
+    } else {
+      // First time — show quick-set dialog
+      setShowLocationDialog(true);
+    }
+    setIsOpen(false);
+  };
+
+  const handleLocationSelect = async (loc: LocationResult) => {
+    let timezone: string | null = loc.timezone ?? null;
+    if (!timezone) {
+      timezone = await getTimezoneFromCoords(loc.lat, loc.lng);
+    }
+    setPreferences({
+      ...preferences,
+      location: loc.displayName,
+      locationCoords: { lat: loc.lat, lng: loc.lng },
+      timezone,
+    });
+    setShowLocationDialog(false);
+  };
+
+  const handleAutoDetect = async () => {
+    setLocationLoading(true);
+    const loc = await getLocationFromIP();
+    if (loc) {
+      await handleLocationSelect(loc);
+    }
+    setLocationLoading(false);
+  };
 
   return (
     <>
@@ -166,16 +212,15 @@ export function Navbar() {
 
             {/* Location, time, profile & CTA — only on lg so we don't duplicate profile icon with hamburger row */}
             <div className="hidden lg:flex items-center gap-3">
-              <Link
-                to="/settings"
+              <button
+                onClick={handleLocationClick}
                 className={`flex items-center gap-1.5 text-sm transition-colors min-w-0 max-w-[140px] cursor-pointer rounded-md px-2 py-1.5 ${
                   pathname === "/settings" ? "text-foreground bg-muted/60" : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
                 }`}
-                aria-current={pathname === "/settings" ? "page" : undefined}
               >
                 <MapPin className="w-4 h-4 flex-shrink-0" />
                 <span className="truncate">{locationShort}</span>
-              </Link>
+              </button>
               <span className="text-sm text-muted-foreground tabular-nums" aria-live="polite">
                 {localTime}
               </span>
@@ -252,17 +297,15 @@ export function Navbar() {
                   );
                 })}
                 <div className="mt-4 pt-4 border-t border-border flex flex-col gap-2">
-                  <Link
-                    to="/settings"
-                    onClick={() => setIsOpen(false)}
-                    className={`flex items-center gap-2 text-sm min-h-[44px] items-center cursor-pointer rounded-lg px-4 py-3 ${
-                      pathname === "/settings" ? "bg-muted/60 text-foreground font-medium" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  <button
+                    onClick={handleLocationClick}
+                    className={`flex items-center gap-2 text-sm min-h-[44px] w-full cursor-pointer rounded-lg px-4 py-3 ${
+                      "text-muted-foreground hover:bg-muted hover:text-foreground"
                     }`}
-                    aria-current={pathname === "/settings" ? "page" : undefined}
                   >
                     <MapPin className="w-4 h-4" />
                     <span className="truncate">{locationShort}</span>
-                  </Link>
+                  </button>
                   <span className="text-sm text-muted-foreground tabular-nums py-2">{localTime}</span>
                 </div>
                 {!preferences.onboardingComplete && (
@@ -280,6 +323,49 @@ export function Navbar() {
         </div>
       </motion.nav>
 
+      {/* Quick Location Set Dialog */}
+      <Dialog open={showLocationDialog} onOpenChange={setShowLocationDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-primary" />
+              Set Your Location
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Your location is used for accurate prayer and fasting times.
+          </p>
+          <div className="space-y-3">
+            <LocationSearch
+              value=""
+              onSelect={handleLocationSelect}
+              placeholder="Search for your city..."
+            />
+            <button
+              onClick={handleAutoDetect}
+              disabled={locationLoading}
+              className="w-full min-h-[44px] flex items-center justify-center gap-2 p-3 rounded-xl text-sm text-primary hover:bg-primary/10 transition-colors border border-border disabled:opacity-50"
+            >
+              {locationLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <MapPin className="w-4 h-4" />
+              )}
+              Auto-detect my location
+            </button>
+          </div>
+          <button
+            onClick={() => {
+              setShowLocationDialog(false);
+              navigate("/settings#settings-location");
+            }}
+            className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 mt-1"
+          >
+            <Settings className="w-3 h-3" />
+            More location settings
+          </button>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
