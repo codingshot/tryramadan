@@ -297,17 +297,15 @@ export function Navbar() {
                   );
                 })}
                 <div className="mt-4 pt-4 border-t border-border flex flex-col gap-2">
-                  <Link
-                    to="/settings"
-                    onClick={() => setIsOpen(false)}
-                    className={`flex items-center gap-2 text-sm min-h-[44px] items-center cursor-pointer rounded-lg px-4 py-3 ${
-                      pathname === "/settings" ? "bg-muted/60 text-foreground font-medium" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  <button
+                    onClick={handleLocationClick}
+                    className={`flex items-center gap-2 text-sm min-h-[44px] w-full cursor-pointer rounded-lg px-4 py-3 ${
+                      "text-muted-foreground hover:bg-muted hover:text-foreground"
                     }`}
-                    aria-current={pathname === "/settings" ? "page" : undefined}
                   >
                     <MapPin className="w-4 h-4" />
                     <span className="truncate">{locationShort}</span>
-                  </Link>
+                  </button>
                   <span className="text-sm text-muted-foreground tabular-nums py-2">{localTime}</span>
                 </div>
                 {!preferences.onboardingComplete && (
