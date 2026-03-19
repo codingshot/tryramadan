@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, MapPin, Check, Loader2, Navigation } from "lucide-react";
@@ -67,8 +67,31 @@ export default function OnboardingLocation() {
     }
   }, [setLocation]);
 
+  // Pre-populate from saved preferences if user already set location (e.g. via navbar quick-set)
+  const prePopulated = useRef(false);
   useEffect(() => {
-    if (!state.location && !initialTried) {
+    if (state.location || prePopulated.current) return;
+    try {
+      const raw = window.localStorage.getItem('tryramadan-preferences');
+      if (!raw) return;
+      const prefs = JSON.parse(raw);
+      if (prefs?.location && prefs?.locationCoords) {
+        prePopulated.current = true;
+        setLocation({
+          displayName: prefs.location,
+          name: prefs.location.split(',')[0]?.trim() || prefs.location,
+          country: prefs.location.split(',').slice(-1)[0]?.trim() || '',
+          lat: prefs.locationCoords.lat,
+          lng: prefs.locationCoords.lng,
+          timezone: prefs.timezone ?? undefined,
+        });
+        return;
+      }
+    } catch { /* ignore */ }
+  }, [state.location, setLocation]);
+
+  useEffect(() => {
+    if (!state.location && !initialTried && !prePopulated.current) {
       setInitialTried(true);
       runAutoDetectIPOnly();
     }
