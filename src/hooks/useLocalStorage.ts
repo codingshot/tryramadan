@@ -1741,3 +1741,39 @@ export function useDailyMissions(): { missions: DailyMission[]; completedCount: 
   const totalCount = missions.length;
   return { missions, completedCount, totalCount };
 }
+
+// ─── Qaḍā' (makeup fasting) tracker ──────────────────────────────────────────
+
+const QADA_KEY = 'tryramadan-qada';
+
+export interface QadaScheduledDay {
+  date: string; // ISO YYYY-MM-DD
+  /** Sunnah label if scheduled on a Sunnah day */
+  sunnahLabel?: string;
+  completed: boolean;
+  completedAt?: string;
+}
+
+export interface QadaData {
+  /** Total Ramadan fasts the user needs to make up */
+  totalOwed: number;
+  /** Completed makeup fasts */
+  completedDays: QadaScheduledDay[];
+  /** Scheduled future makeup fasts */
+  scheduledDays: QadaScheduledDay[];
+  /** Primary intention: 'qada' means making up missed fast */
+  intention: 'qada' | 'sunnah' | 'both';
+}
+
+export const defaultQadaData: QadaData = {
+  totalOwed: 0,
+  completedDays: [],
+  scheduledDays: [],
+  intention: 'both',
+};
+
+export function useQadaTracker() {
+  const [data, setData] = useLocalStorage<QadaData>(QADA_KEY, defaultQadaData);
+  const qada: QadaData = { ...defaultQadaData, ...data };
+  return [qada, setData] as const;
+}
