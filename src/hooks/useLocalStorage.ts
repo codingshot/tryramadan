@@ -1076,7 +1076,7 @@ export function useRecentRecipes() {
 
 export const DASHBOARD_QUICK_ACTION_IDS = [
   'today', 'goals', 'schedule', 'prayers', 'meals', 'macros', 'learn', 'glossary', 'quran',
-  'progress', 'culture', 'health', 'journal', 'achievements',
+  'progress', 'culture', 'health', 'journal', 'achievements', 'qada',
 ] as const;
 
 export type DashboardQuickActionId = (typeof DASHBOARD_QUICK_ACTION_IDS)[number];
