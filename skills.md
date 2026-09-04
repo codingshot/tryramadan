@@ -1,5 +1,9 @@
 # TryRamadan – skills and conventions
 
+Monorepo note: application paths below are relative to `apps/web`; shared calendar implementation is now in `packages/core/src/ramadan.ts`. Expo lives in `apps/mobile`.
+
+New workflows: `.cursor/skills/expo-monorepo/SKILL.md` for cross-platform maintenance and `.cursor/skills/sunni-content-review/SKILL.md` for source-based Sunni editorial review.
+
 This file is a **short index** for developers and AI. Full skills live in **`.cursor/skills/`**; each skill has a `SKILL.md` with frontmatter and detailed guidance.
 
 ---

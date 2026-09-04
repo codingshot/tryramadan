@@ -10,6 +10,7 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+dist-native
 *.local
 
 # Editor directories and files
@@ -22,4 +23,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-package-lock.json
+.expo/
+**/android/
+**/ios/
+**/playwright-report/
+**/test-results/

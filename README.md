@@ -1,5 +1,34 @@
 # TryRamadan.app 🌙
 
+## Monorepo development
+
+Use Node 22.13+ and npm. Install from the repository root with `npm ci`.
+
+| Workspace | Purpose |
+|---|---|
+| `apps/web` | Existing React/Vite site, web-only landing page, and full web PWA |
+| `apps/mobile` | Expo iOS/Android companion and standalone React Native Web PWA |
+| `packages/core` | Shared platform-neutral calendar logic and sourced educational guidance |
+
+```sh
+npm run dev                # Existing web app, port 8080
+npm run dev:mobile         # Expo; choose Android or iOS
+npm run dev:universal      # Expo browser development
+npm run build:all          # Web and Expo PWA production builds
+npm run typecheck
+npm test
+npm run test:expo          # Build + browser tests for the Expo PWA
+npm run export:native -w @tryramadan/mobile
+```
+
+Deploy the existing site from `apps/web/dist` (root Vercel configuration is updated). Deploy the Expo PWA from `apps/mobile/dist` on a **separate origin**, with SPA fallback to `index.html`, HTTPS, and revalidation for `index.html`, `sw.js` and the manifest. Do not replace the full web site with the companion build. Native JS exports go to `apps/mobile/dist-native`, separately from the PWA.
+
+The Expo companion currently provides fasting check-ins, a persistent journal and sourced learning cards; it is **not yet feature-equivalent** to the full web app. Web data remains under existing keys on the existing origin; Expo data is local and separate, with no cross-device or web/native sync. No app-store binaries have been signed or submitted.
+
+See [migration and audit status](docs/MONOREPO-AUDIT.md) for verification, unresolved issues and Sunni editorial-review limitations. Root npm is the supported package manager; previous Bun lockfiles are preserved under `docs/legacy-lockfiles/` for reference only.
+
+The feature inventory below describes the **existing web app**, not native feature parity. Historical `src/`, `public/`, `e2e/` and configuration paths in older docs are now relative to `apps/web` unless otherwise noted.
+
 > **Fast like a Muslim for the holy month of Ramadan.** A culturally immersive wellness app for everyone: progressive fasting, prayer times, cultural education, and interfaith understanding.
 
 **Live URL**: [https://tryramadan.app](https://tryramadan.app)

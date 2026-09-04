@@ -1,0 +1,171 @@
+import { useEffect, useRef } from "react";
+import { useUserPreferences, useNotificationSettings, useDisplayTimezone, useIftarLabel, useIftarLabelShort } from "@/hooks/useLocalStorage";
+import { useNotifications } from "@/hooks/useNotifications";
+import { usePrayerTimes, getSunnahFastingInfo } from "@/hooks/usePrayerTimes";
+import { useRamadanRange } from "@/hooks/useRamadanRange";
+import { getTodayStringInTimezone, toLocalDateString, getNowInTimezone } from "@/lib/utils";
+
+const REMINDERS_SENT_KEY = "tryramadan-reminders-sent";
+
+type ReminderType = "suhoor" | "iftar" | "iftar-time" | "sunnah-day" | `hydration-${string}`;
+
+function getRemindersSent(): Record<string, ReminderType[]> {
+  try {
+    const raw = window.localStorage.getItem(REMINDERS_SENT_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as Record<string, string[]>;
+    return parsed as Record<string, ReminderType[]>;
+  } catch {
+    return {};
+  }
+}
+
+function markReminderSent(dateStr: string, type: ReminderType) {
+  try {
+    const prev = getRemindersSent();
+    const list = prev[dateStr] ?? [];
+    if (list.includes(type)) return;
+    const next = { ...prev, [dateStr]: [...list, type] };
+    window.localStorage.setItem(REMINDERS_SENT_KEY, JSON.stringify(next));
+  } catch {
+    // ignore
+  }
+}
+
+function timeToMinutes(timeStr: string): number {
+  const [h, m] = timeStr.split(":").map(Number);
+  return (h ?? 0) * 60 + (m ?? 0);
+}
+
+/**
+ * When the app is open, checks every 60 seconds if we're in the suhoor/iftar reminder window.
+ * Uses NotificationSettings (suhoorEnabled, iftarEnabled, suhoorMinutesBefore, iftarMinutesBefore)
+ * and today's prayer times (imsak = suhoor end, maghrib = iftar). Fires browser notifications
+ * and marks them sent per day so we don't double-fire.
+ */
+export function ReminderScheduler(): null {
+  const [preferences] = useUserPreferences();
+  const [notifSettings] = useNotificationSettings();
+  const displayTimezone = useDisplayTimezone();
+  const ramadanRange = useRamadanRange();
+  const iftarLabel = useIftarLabel();
+  const iftarLabelShort = useIftarLabelShort();
+  const { permission, requestPermission } = useNotifications();
+  const { prayerTimes } = usePrayerTimes(
+    preferences.locationCoords?.lat ?? null,
+    preferences.locationCoords?.lng ?? null,
+    displayTimezone
+  );
+  const sentRef = useRef<Record<string, ReminderType[]>>(getRemindersSent());
+  const permissionRequestedRef = useRef(false);
+
+  // When fasting alarms (suhoor/iftar) are on, request notification permission so push notifications fire when alarm time comes
+  useEffect(() => {
+    if (!preferences.notificationsEnabled || (!notifSettings.suhoorEnabled && !notifSettings.iftarEnabled)) return;
+    if (permission !== "default" || permissionRequestedRef.current) return;
+    permissionRequestedRef.current = true;
+    requestPermission();
+  }, [preferences.notificationsEnabled, notifSettings.suhoorEnabled, notifSettings.iftarEnabled, permission, requestPermission]);
+
+  useEffect(() => {
+    if (!preferences.notificationsEnabled) return;
+    if (!prayerTimes) return;
+    if (permission !== "granted") return;
+
+    const checkAndNotify = () => {
+      sentRef.current = getRemindersSent();
+      const now = new Date();
+      const todayStr = displayTimezone ? getTodayStringInTimezone(displayTimezone) : toLocalDateString(now);
+      const nowInTz = displayTimezone ? getNowInTimezone(displayTimezone) : { hours: now.getHours(), minutes: now.getMinutes(), seconds: now.getSeconds() };
+      const nowMinutes = nowInTz.hours * 60 + nowInTz.minutes;
+      let sent = (sentRef.current[todayStr] ?? []) as ReminderType[];
+
+      const addSent = (type: ReminderType) => {
+        sent = [...sent, type];
+        sentRef.current = { ...sentRef.current, [todayStr]: sent };
+        markReminderSent(todayStr, type);
+      };
+
+      // Sunnah day (Mon/Thu) notification: Muslim users only, once per day when today is a Sunnah fasting day and not Ramadan
+      if (preferences.userType === "muslim" && !sent.includes("sunnah-day")) {
+        const sunnahInfo = getSunnahFastingInfo();
+        const todayDate = new Date();
+        todayDate.setHours(0, 0, 0, 0);
+        if (sunnahInfo && !ramadanRange.isRamadanDay(todayDate)) {
+          addSent("sunnah-day");
+          new Notification("Sunnah fasting day • يوم صيام سنة", {
+            body: `Today is ${sunnahInfo.reason}. Voluntary fasting is recommended.`,
+            icon: "/favicon.png",
+            tag: `sunnah-day-${todayStr}`,
+          });
+        }
+      }
+
+      // Suhoor reminder: X minutes before Imsak (stop eating)
+      if (notifSettings.suhoorEnabled) {
+        const imsakMin = timeToMinutes(prayerTimes.fajr);
+        const reminderMin = imsakMin - notifSettings.suhoorMinutesBefore;
+        const diff = Math.abs(nowMinutes - reminderMin);
+        if (diff <= 2 && !sent.includes("suhoor")) {
+          addSent("suhoor");
+          new Notification("Suhoor Reminder • سحور", {
+            body: `${notifSettings.suhoorMinutesBefore} minutes until suhoor ends (Imsak). Finish eating soon!`,
+            icon: "/favicon.png",
+            tag: `suhoor-${todayStr}`,
+          });
+        }
+      }
+
+      // Iftar reminder: X minutes before Maghrib
+      if (notifSettings.iftarEnabled) {
+        const maghribMin = timeToMinutes(prayerTimes.maghrib);
+        const reminderMin = maghribMin - notifSettings.iftarMinutesBefore;
+        const diff = Math.abs(nowMinutes - reminderMin);
+        if (diff <= 2 && !sent.includes("iftar")) {
+          addSent("iftar");
+          new Notification(`${iftarLabel} Reminder • إفطار`, {
+            body: `${notifSettings.iftarMinutesBefore} minutes until ${iftarLabelShort}. Prepare to break your fast!`,
+            icon: "/favicon.png",
+            tag: `iftar-reminder-${todayStr}`,
+          });
+        }
+        // Iftar time (at Maghrib)
+        const atIftarDiff = Math.abs(nowMinutes - maghribMin);
+        if (atIftarDiff <= 2 && !sent.includes("iftar-time")) {
+          addSent("iftar-time");
+          new Notification(`${iftarLabel} Time! • وقت الإفطار`, {
+            body: "It's time to break your fast. Bismillah! 🌙",
+            icon: "/favicon.png",
+            tag: `iftar-time-${todayStr}`,
+          });
+        }
+      }
+
+      // Hydration reminders: at user-configured times (during non-fasting hours)
+      if (preferences.hydrationReminderEnabled && (preferences.hydrationReminderTimes?.length ?? 0) > 0) {
+        const times = preferences.hydrationReminderTimes ?? ["12:00", "15:00", "19:00"];
+        for (const timeStr of times) {
+          const slot = `hydration-${timeStr}` as ReminderType;
+          if (sent.includes(slot)) continue;
+          const [h, m] = timeStr.split(":").map(Number);
+          const targetMin = (h ?? 0) * 60 + (m ?? 0);
+          const diff = Math.abs(nowMinutes - targetMin);
+          if (diff <= 2) {
+            addSent(slot);
+            new Notification("Stay hydrated • ترطيب", {
+              body: "Log your water intake during non-fasting hours.",
+              icon: "/favicon.png",
+              tag: `hydration-${timeStr}-${todayStr}`,
+            });
+          }
+        }
+      }
+    };
+
+    checkAndNotify();
+    const interval = setInterval(checkAndNotify, 60 * 1000);
+    return () => clearInterval(interval);
+  }, [permission, preferences.notificationsEnabled, preferences.userType, displayTimezone, prayerTimes, notifSettings.suhoorEnabled, notifSettings.iftarEnabled, notifSettings.suhoorMinutesBefore, notifSettings.iftarMinutesBefore, preferences.hydrationReminderEnabled, preferences.hydrationReminderTimes, iftarLabel, iftarLabelShort]);
+
+  return null;
+}

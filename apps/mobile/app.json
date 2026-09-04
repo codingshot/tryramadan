@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "TryRamadan",
+    "slug": "tryramadan",
+    "version": "1.0.0",
+    "scheme": "tryramadan",
+    "orientation": "default",
+    "userInterfaceStyle": "light",
+    "web": { "bundler": "metro", "output": "single", "name": "TryRamadan" },
+    "ios": { "supportsTablet": true },
+    "android": { "edgeToEdgeEnabled": true }
+  }
+}

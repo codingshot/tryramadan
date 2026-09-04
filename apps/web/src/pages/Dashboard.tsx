@@ -1,0 +1,1767 @@
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import {
+  Moon,
+  Sun,
+  Sunrise,
+  Sunset,
+  SunDim,
+  Clock,
+  Calendar,
+  MapPin,
+  Settings,
+  TrendingUp,
+  Check,
+  Bell,
+  ChevronRight,
+  Flame,
+  ChevronLeft,
+  ChevronDown,
+  Utensils,
+  Coffee,
+  Droplets,
+  BookOpen,
+  Target,
+  PenLine,
+  Plus,
+  AlertTriangle,
+  Trophy,
+  HelpCircle,
+} from "lucide-react";
+import { Navbar } from "@/components/Navbar";
+import { ArabicHover } from "@/components/ArabicHover";
+import { ProgressRing } from "@/components/ProgressRing";
+import dailyFactsData from "@/data/daily-facts.json";
+import { SunnahFastingBadge } from "@/components/SunnahFastingBadge";
+import { DashboardHero } from "@/components/dashboard/DashboardHero";
+import { DashboardFastingCornerWidget } from "@/components/dashboard/DashboardFastingCornerWidget";
+import { DashboardPrayerTracking } from "@/components/dashboard/DashboardPrayerTracking";
+import { DashboardCatchUpQuranHadith } from "@/components/dashboard/DashboardCatchUpQuranHadith";
+import { DashboardHistory } from "@/components/dashboard/DashboardHistory";
+import { DashboardContent } from "@/components/dashboard/DashboardContent";
+import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
+import { PrayerTimesModal } from "@/components/dashboard/PrayerTimesModal";
+import { HeroDailySlider } from "@/components/HeroDailySlider";
+import { DailyMissionsCard } from "@/components/DailyMissionsCard";
+import { TodayScheduleTimeline } from "@/components/TodayScheduleTimeline";
+import { LocationDisplay } from "@/components/LocationDisplay";
+import { PWAInstallBanner } from "@/components/PWAInstallBanner";
+import { RamadanContextCard } from "@/components/RamadanContextCard";
+import { DashboardWalkthrough } from "@/components/DashboardWalkthrough";
+import {
+  useUserPreferences,
+  useFastingProgress,
+  startFastingToday,
+  breakFastingToday,
+  completeFastingToday,
+  uncompleteFastingToday,
+  getTodayFastingLog,
+  getBrokenReasonLabel,
+  isFastingToday,
+  setDayCompleted,
+  setBrokenDayToCompleted,
+  setDaySkipped,
+  useDayMealPlans,
+  useDayNutrition,
+  clampCalories,
+  CALORIE_MAX,
+  getRecommendedCaloriesFromPreferences,
+  useDashboardQuickActions,
+  DASHBOARD_QUICK_ACTIONS,
+  useLocalStorage,
+  useIftarLabel,
+  useIftarLabelShort,
+  useSuhoorLabelShort,
+  calculateStreak,
+  getStreakDays,
+  getBrokenFastDays,
+  getExcusedFastDays,
+  getSunnahDaysCompleted,
+  useNotificationSettings,
+  usePrayerNotificationPrefs,
+  useDayFoodLog,
+  normalizeDayFoodLog,
+  getDayTotalsFromFoodLog,
+  planToFoodLogEntries,
+  useDisplayTimezone,
+  useHabitLog,
+  useMenstruationTrackingEnabled,
+  isInMenstrualPeriod,
+  startMenstrualPeriod,
+  endMenstrualPeriod,
+  type LearningPriority,
+  type CultureRecipesPriority,
+  type QuranPriority,
+} from "@/hooks/useLocalStorage";
+import {
+  getHabitLogStreak,
+  getTotalHabitCheckmarks,
+} from "@/data/ramadan-habits";
+import {
+  toLocalDateString,
+  getTodayStringInTimezone,
+  getNowSecondsSinceMidnightInTimezone,
+  timeStringToSecondsSinceMidnight,
+  secondsUntilTimeInTimezone,
+  formatSecondsAsTimeLabel,
+} from "@/lib/utils";
+import { BreakFastReasonDialog } from "@/components/BreakFastReasonDialog";
+import {
+  usePrayerTimes,
+  usePrayerTimesForDate,
+  getSunnahFastingInfo,
+  checkAyyamAlBeed,
+  type PrayerTimes,
+} from "@/hooks/usePrayerTimes";
+import { getDaysUntilRamadan, getCurrentRamadanStart } from "@/lib/ramadan";
+import { useRamadanRange } from "@/hooks/useRamadanRange";
+import { useAutoLocation } from "@/hooks/useLocation";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { EATING_TIME_TOOLTIPS } from "@/data/eating-times-tooltips";
+import { GENERAL_TOOLTIPS } from "@/data/general-tooltips";
+import { Footer } from "@/components/Footer";
+import { PageSEO } from "@/components/PageSEO";
+import { toast } from "sonner";
+import { getPromptForDate } from "@/pages/DashboardJournal";
+import type { JournalEntry } from "@/pages/DashboardJournal";
+import {
+  getRecipes,
+  getRecipe,
+  parseNutrient,
+  getAllCountries,
+  type MealType,
+  type Recipe,
+} from "@/lib/cultureRecipes";
+
+/** Next prayer or Suhoor end (Imsak), with seconds until. Handles wrap after Isha (next = tomorrow's Imsak or Fajr). Skips empty time strings. */
+function getNextPrayerInfo(
+  prayerTimes: PrayerTimes | null,
+  nowSec: number,
+): { name: string; time: string; secondsUntil: number } | null {
+  if (!prayerTimes) return null;
+  const imsak = prayerTimes.fajr?.trim();
+  const list: { name: string; time: string }[] = [];
+  if (imsak) list.push({ name: "Suhoor end", time: imsak });
+  [
+    { name: "Fajr", time: prayerTimes.fajr },
+    { name: "Dhuhr", time: prayerTimes.dhuhr },
+    { name: "Asr", time: prayerTimes.asr },
+    { name: "Maghrib", time: prayerTimes.maghrib },
+    { name: "Isha", time: prayerTimes.isha },
+  ].forEach((p) => {
+    if (p.time?.trim()) list.push(p);
+  });
+  for (const p of list) {
+    const prayerSec = timeStringToSecondsSinceMidnight(p.time);
+    if (nowSec < prayerSec) {
+      return { name: p.name, time: p.time, secondsUntil: prayerSec - nowSec };
+    }
+  }
+  // After Isha: next is tomorrow's first (Suhoor end or Fajr)
+  const fajrTrimmed = prayerTimes.fajr?.trim();
+  if (!fajrTrimmed) return null;
+  const imsakSec = imsak ? timeStringToSecondsSinceMidnight(prayerTimes.fajr) : 24 * 3600;
+  const fajrSec = timeStringToSecondsSinceMidnight(prayerTimes.fajr);
+  const secUntilImsak = secondsUntilTimeInTimezone(nowSec, imsakSec);
+  const secUntilFajr = secondsUntilTimeInTimezone(nowSec, fajrSec);
+  if (imsak && secUntilImsak <= secUntilFajr) {
+    return {
+      name: "Suhoor end",
+      time: prayerTimes.fajr,
+      secondsUntil: secUntilImsak,
+    };
+  }
+  return {
+    name: "Fajr",
+    time: prayerTimes.fajr,
+    secondsUntil: secUntilFajr,
+  };
+}
+
+const Dashboard = () => {
+  const navigate = useNavigate();
+  const [preferences, setPreferences] = useUserPreferences();
+  const [progress, setProgress] = useFastingProgress();
+  const ramadanRange = useRamadanRange();
+
+  const [isFasting, setIsFasting] = useState(false);
+  const [inFastingWindow, setInFastingWindow] = useState(false);
+  const [countdownToIftar, setCountdownToIftar] = useState({
+    h: 0,
+    m: 0,
+    s: 0,
+  });
+  const [countdownToSuhoor, setCountdownToSuhoor] = useState({
+    h: 0,
+    m: 0,
+    s: 0,
+  });
+  /** Ticks every 2s so next prayer and countdowns stay in sync with current time and prayer time updates. */
+  const [countdownTick, setCountdownTick] = useState(0);
+  const [showAskFastingPopup, setShowAskFastingPopup] = useState(false);
+  const [ayyamAlBeed, setAyyamAlBeed] = useState<{
+    isAyyamAlBeed: boolean;
+    hijriDay: number;
+  } | null>(null);
+  const [locationEditorOpen, setLocationEditorOpen] = useState(false);
+  const [showBreakFastDialog, setShowBreakFastDialog] = useState(false);
+  const [showBreakFastConfirm, setShowBreakFastConfirm] = useState(false);
+  const [datePopoverOpen, setDatePopoverOpen] = useState(false);
+  const [prayerTimesPopoverOpen, setPrayerTimesPopoverOpen] = useState(false);
+  const [modeQuickSettingsOpen, setModeQuickSettingsOpen] = useState(false);
+  const [statsDialog, setStatsDialog] = useState<
+    "streak" | "total" | "sunnah" | "broken" | null
+  >(null);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
+  const [addFoodMeal, setAddFoodMeal] = useState<"suhoor" | "iftar" | null>(
+    null,
+  );
+  const [addFoodInputs, setAddFoodInputs] = useState({
+    name: "",
+    cal: "",
+    portions: "1",
+    protein: "",
+    carbs: "",
+    fat: "",
+  });
+  /** When set, form was pre-filled from this recipe; user can override before adding. */
+  const [pendingRecipe, setPendingRecipe] = useState<{
+    mealType: "suhoor" | "iftar";
+    mealTypeKey: string;
+    recipeId: number;
+  } | null>(null);
+  const [quickJournalOpen, setQuickJournalOpen] = useState(false);
+  const [quickJournalContent, setQuickJournalContent] = useState("");
+  const [quickJournalGratitude, setQuickJournalGratitude] = useState("");
+  const [notifSettings] = useNotificationSettings();
+  const [prayerPrefs] = usePrayerNotificationPrefs();
+  const [locationBannerDismissed, setLocationBannerDismissed] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.localStorage.getItem("tryramadan-dismissed-location-banner") ===
+        "1",
+  );
+  const [showPrayerTimesModal, setShowPrayerTimesModal] = useState(false);
+
+  const location = useLocation();
+  useEffect(() => {
+    if ((location.state as { openBreakFast?: boolean })?.openBreakFast) {
+      setShowBreakFastConfirm(true);
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, location.pathname, navigate]);
+
+  // Auto-detect location if not set
+  const { location: autoLocation, loading: locationLoading } =
+    useAutoLocation();
+
+  // Use saved location or auto-detected (memoized to avoid effect churn)
+  const locationCoords = useMemo(
+    () =>
+      preferences.locationCoords ||
+      (autoLocation ? { lat: autoLocation.lat, lng: autoLocation.lng } : null),
+    [preferences.locationCoords, autoLocation],
+  );
+
+  const displayTimezone = useDisplayTimezone();
+  const displayCity =
+    preferences.location?.split(",")[0]?.trim() ||
+    autoLocation?.displayName?.split(",")[0]?.trim() ||
+    null;
+  const todayStr = displayTimezone
+    ? getTodayStringInTimezone(displayTimezone)
+    : toLocalDateString(new Date());
+  const [selectedDate, setSelectedDate] = useState(todayStr);
+  // Get prayer times (today; when timezone is set, "today" is location's date so countdowns match)
+  const {
+    prayerTimes,
+    hijriDate,
+    loading: timesLoading,
+  } = usePrayerTimes(
+    locationCoords?.lat || null,
+    locationCoords?.lng || null,
+    displayTimezone,
+  );
+
+  // Don't redirect to onboarding if user already has location/prayer times or has used the app (e.g. logged fast/break/skip)
+  const hasTime = !!(locationCoords || prayerTimes);
+  const hasProgress =
+    (progress.fastingLog?.length ?? 0) > 0 ||
+    (progress.completedDays?.length ?? 0) > 0 ||
+    (progress.skippedDays?.length ?? 0) > 0;
+  useEffect(() => {
+    if (preferences.onboardingComplete || hasTime || hasProgress) return;
+    if (locationLoading) return; // Wait for auto-location to resolve
+    navigate("/onboarding/welcome", { replace: true });
+  }, [preferences.onboardingComplete, hasTime, hasProgress, locationLoading, navigate]);
+
+  // Prayer times for selected day (for day view)
+  const { prayerTimes: selectedDayPrayerTimes } = usePrayerTimesForDate(
+    locationCoords?.lat || null,
+    locationCoords?.lng || null,
+    selectedDate,
+  );
+
+  // Tomorrow's date for suhoor countdown when past iftar (imsak changes day by day)
+  const tomorrowDate = new Date(todayStr + "T12:00:00");
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  const tomorrowStr = toLocalDateString(tomorrowDate);
+  // Yesterday (for "Mark complete" after next Suhoor: we mark the previous calendar day)
+  const yesterdayDate = new Date(todayStr + "T12:00:00");
+  yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+  const yesterdayStr = toLocalDateString(yesterdayDate);
+  const { prayerTimes: tomorrowPrayerTimes } = usePrayerTimesForDate(
+    locationCoords?.lat || null,
+    locationCoords?.lng || null,
+    tomorrowStr,
+  );
+  const imsakTomorrow = tomorrowPrayerTimes?.fajr ?? prayerTimes?.fajr;
+
+  const [mealPlans, setMealPlans] = useDayMealPlans();
+  const [foodLogs, setFoodLogs] = useDayFoodLog();
+  const [dayNutrition, setDayNutrition] = useDayNutrition();
+  const [quickActionOrder] = useDashboardQuickActions();
+  const [journalEntries, setJournalEntries] = useLocalStorage<JournalEntry[]>(
+    "tryramadan-journal",
+    [],
+  );
+  const [prayerTracker, setPrayerTracker] = useLocalStorage<
+    Record<string, Record<string, boolean | 'half' | 'full'>>
+  >("tryramadan-prayer-tracker", {});
+  const [habitLog] = useHabitLog();
+  const habitStreak = useMemo(
+    () => getHabitLogStreak(habitLog, todayStr),
+    [habitLog, todayStr],
+  );
+  const habitTotalCheckmarks = useMemo(
+    () => getTotalHabitCheckmarks(habitLog),
+    [habitLog],
+  );
+  const iftarLabel = useIftarLabel();
+  const iftarLabelShort = useIftarLabelShort();
+  const suhoorLabelShort = useSuhoorLabelShort();
+
+  const sunnahInfo = getSunnahFastingInfo();
+
+  const selectedDayMeals = mealPlans[selectedDate];
+  const selectedDayNutr = dayNutrition[selectedDate];
+  const selectedDayLog = useMemo(
+    () => normalizeDayFoodLog(foodLogs[selectedDate]),
+    [foodLogs, selectedDate],
+  );
+  const selectedDayTotalsFromLog = useMemo(
+    () => getDayTotalsFromFoodLog(selectedDayLog),
+    [selectedDayLog],
+  );
+  const suhoorCal = useMemo(
+    () =>
+      selectedDayLog.suhoor.reduce(
+        (sum, e) => sum + (e.caloriesPerPortion || 0) * (e.portions || 1),
+        0,
+      ),
+    [selectedDayLog.suhoor],
+  );
+  const iftarCal = useMemo(
+    () =>
+      selectedDayLog.iftar.reduce(
+        (sum, e) => sum + (e.caloriesPerPortion || 0) * (e.portions || 1),
+        0,
+      ),
+    [selectedDayLog.iftar],
+  );
+  const selectedDayJournal = journalEntries.find(
+    (e) => e.date === selectedDate,
+  );
+  const selectedDayComplete = progress.completedDays.includes(selectedDate);
+  const selectedDayBroken = (progress.fastingLog ?? []).some(
+    (e) => e.date === selectedDate && e.status === "broken",
+  );
+  const selectedDateObj = new Date(selectedDate + "T12:00:00");
+  const isSelectedToday = selectedDate === todayStr;
+
+  const goPrevDay = () => {
+    const d = new Date(selectedDate + "T12:00:00");
+    d.setDate(d.getDate() - 1);
+    setSelectedDate(toLocalDateString(d));
+  };
+  const goNextDay = () => {
+    const d = new Date(selectedDate + "T12:00:00");
+    d.setDate(d.getDate() + 1);
+    setSelectedDate(toLocalDateString(d));
+  };
+  const goToToday = () => setSelectedDate(todayStr);
+
+  // Update location in preferences if auto-detected
+  useEffect(() => {
+    if (autoLocation && !preferences.location) {
+      setPreferences({
+        ...preferences,
+        location: autoLocation.displayName,
+        locationCoords: { lat: autoLocation.lat, lng: autoLocation.lng },
+      });
+    }
+  }, [autoLocation, preferences, setPreferences]);
+
+  // Check Ayyam al-Beed
+  useEffect(() => {
+    if (locationCoords) {
+      checkAyyamAlBeed(locationCoords.lat, locationCoords.lng).then(
+        setAyyamAlBeed,
+      );
+    }
+  }, [locationCoords]);
+
+  // Parse prayer time string (e.g. "05:15" or "05:15 (EAT)") to hours and minutes in local date (used when no display timezone)
+  const parseTimeToToday = useCallback((timeStr: string) => {
+    const clean =
+      (timeStr ?? "").trim().indexOf(" ") >= 0
+        ? (timeStr ?? "")
+            .trim()
+            .slice(0, (timeStr ?? "").trim().indexOf(" "))
+            .trim()
+        : (timeStr ?? "").trim();
+    const parts = clean.split(":").map((p) => parseInt(p, 10));
+    const h = Number.isFinite(parts[0]) ? parts[0] : 0;
+    const m = Number.isFinite(parts[1]) ? parts[1] : 0;
+    const d = new Date();
+    d.setHours(h, m, 0, 0);
+    return d;
+  }, []);
+
+  const tickFastingAndCountdown = useCallback(() => {
+    if (!prayerTimes?.fajr || !prayerTimes?.maghrib) {
+      return;
+    }
+    const fastingToday = isFastingToday(progress, todayStr);
+    const suhoorForTomorrow = imsakTomorrow ?? prayerTimes.fajr;
+    if (displayTimezone) {
+      const nowSeconds = getNowSecondsSinceMidnightInTimezone(displayTimezone);
+      const imsakSeconds = timeStringToSecondsSinceMidnight(prayerTimes.fajr);
+      const imsakTomorrowSeconds =
+        timeStringToSecondsSinceMidnight(suhoorForTomorrow);
+      const maghribSeconds = timeStringToSecondsSinceMidnight(
+        prayerTimes.maghrib,
+      );
+      const inWindow =
+        nowSeconds >= imsakSeconds && nowSeconds < maghribSeconds;
+
+      setInFastingWindow(inWindow);
+      setIsFasting(inWindow && fastingToday);
+      if (inWindow) {
+        const diff = secondsUntilTimeInTimezone(nowSeconds, maghribSeconds);
+        setCountdownToIftar({
+          h: Math.floor(diff / 3600),
+          m: Math.floor((diff % 3600) / 60),
+          s: diff % 60,
+        });
+      } else {
+        // Past iftar: count down to tomorrow's suhoor (imsak changes day by day)
+        const diff = secondsUntilTimeInTimezone(
+          nowSeconds,
+          imsakTomorrowSeconds,
+        );
+        setCountdownToSuhoor({
+          h: Math.floor(diff / 3600),
+          m: Math.floor((diff % 3600) / 60),
+          s: diff % 60,
+        });
+      }
+    } else {
+      const now = new Date();
+      const imsakTime = parseTimeToToday(prayerTimes.fajr);
+      const imsakTomorrowTime = parseTimeToToday(suhoorForTomorrow);
+      const maghribTime = parseTimeToToday(prayerTimes.maghrib);
+      const maghribSameDay = maghribTime.getTime() > imsakTime.getTime();
+      const maghribTarget = maghribSameDay
+        ? maghribTime
+        : (() => {
+            const next = new Date(maghribTime);
+            next.setDate(next.getDate() + 1);
+            return next;
+          })();
+      const inWindow = now >= imsakTime && now < maghribTarget;
+      setInFastingWindow(inWindow);
+      setIsFasting(inWindow && fastingToday);
+      if (inWindow) {
+        const diff = maghribTarget.getTime() - now.getTime();
+        if (diff > 0)
+          setCountdownToIftar({
+            h: Math.floor(diff / 36e5),
+            m: Math.floor((diff % 36e5) / 6e4),
+            s: Math.floor((diff % 6e4) / 1000),
+          });
+      } else {
+        // Past iftar: use tomorrow's imsak (suhoorForTomorrow is already tomorrow's time)
+        // If we're past today's maghrib, count down to tomorrow's imsak
+        const baseImsakTime = new Date(imsakTomorrowTime);
+
+        // If baseImsakTime is in the past (already passed today), move to tomorrow
+        const imsakTarget = baseImsakTime.getTime() < now.getTime()
+          ? new Date(baseImsakTime.setDate(baseImsakTime.getDate() + 1))
+          : baseImsakTime;
+
+        const diff = imsakTarget.getTime() - now.getTime();
+        if (diff > 0)
+          setCountdownToSuhoor({
+            h: Math.floor(diff / 36e5),
+            m: Math.floor((diff % 36e5) / 6e4),
+            s: Math.floor((diff % 6e4) / 1000),
+          });
+      }
+    }
+  }, [
+    prayerTimes,
+    imsakTomorrow,
+    displayTimezone,
+    parseTimeToToday,
+    progress,
+    todayStr,
+  ]);
+
+  useEffect(() => {
+    tickFastingAndCountdown();
+  }, [tickFastingAndCountdown]);
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      tickFastingAndCountdown();
+      setCountdownTick((prev) => prev + 1);
+    }, 2000); // Throttle for INP (was 1s) — also drives next-prayer refresh
+    return () => clearInterval(t);
+  }, [tickFastingAndCountdown]);
+
+  // Toggle a given day's fast as complete (uses fasting log + console)
+  const toggleCompleteForDate = (dateStr: string) => {
+    const isComplete = progress.completedDays.includes(dateStr);
+    if (isComplete) {
+      uncompleteFastingToday(progress, setProgress, dateStr);
+    } else {
+      completeFastingToday(progress, setProgress, dateStr);
+    }
+  };
+
+  // Mark-complete logic: Enable after Maghrib (same day) or in next day's fasting window (mark yesterday).
+  // - Before iftar (in fasting window + user said "I'm fasting"): disabled — "Fasting is not done yet. You can mark complete after iftar."
+  // - After Maghrib (eating window): enabled — mark TODAY complete.
+  // - After next Suhoor (next day's fasting window, not fasting): enabled — mark YESTERDAY complete.
+  const markCompleteDisabled = inFastingWindow && isFasting;
+  const handleMarkComplete = () => {
+    if (inFastingWindow && isFasting) {
+      toast.info("Fasting is not done yet. You can mark complete after iftar.");
+      return;
+    }
+    if (!inFastingWindow) {
+      // Eating window: after Maghrib today → mark today; before Imsak today → mark yesterday
+      const nowSec = displayTimezone
+        ? getNowSecondsSinceMidnightInTimezone(displayTimezone)
+        : (() => {
+            const n = new Date();
+            return n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds();
+          })();
+      const maghribSec = prayerTimes
+        ? timeStringToSecondsSinceMidnight(prayerTimes.maghrib)
+        : 0;
+      const imsakSec = prayerTimes
+        ? timeStringToSecondsSinceMidnight(prayerTimes.fajr)
+        : 0;
+      if (nowSec >= maghribSec) {
+        toggleCompleteForDate(todayStr);
+      } else if (nowSec < imsakSec) {
+        toggleCompleteForDate(yesterdayStr);
+      } else {
+        toggleCompleteForDate(todayStr);
+      }
+      return;
+    }
+    // In fasting window and not currently fasting (next day): mark yesterday complete
+    toggleCompleteForDate(yesterdayStr);
+  };
+
+  const allRecipesForAddFood = useMemo(() => getRecipes(), []);
+  const allCulturalFoods = useMemo(
+    () =>
+      [...new Set(getAllCountries().flatMap((c) => c.foods ?? []))].filter(
+        Boolean,
+      ),
+    [],
+  );
+  const addFoodSuggestions = useMemo((): {
+    recipes: { mealType: MealType; recipe: Recipe }[];
+    foods: string[];
+  } => {
+    if (!addFoodMeal) return { recipes: [], foods: [] };
+    const q = addFoodInputs.name.trim().toLowerCase();
+    if (!q || q.length < 1) return { recipes: [], foods: [] };
+    const recipes = allRecipesForAddFood
+      .filter(
+        (r) =>
+          r.mealType === addFoodMeal && r.recipe.name.toLowerCase().includes(q),
+      )
+      .slice(0, 6);
+    const foods = allCulturalFoods
+      .filter(
+        (f) =>
+          f.toLowerCase().includes(q) &&
+          !recipes.some((r) => r.recipe.name.toLowerCase() === f.toLowerCase()),
+      )
+      .slice(0, 4);
+    return { recipes, foods };
+  }, [addFoodMeal, addFoodInputs.name, allRecipesForAddFood, allCulturalFoods]);
+
+  /** Pre-fill form from recipe so user can override calories/portions/macros before adding. */
+  const prefillFromRecipe = (
+    mealType: "suhoor" | "iftar",
+    mealTypeKey: string,
+    recipeId: number,
+  ) => {
+    const recipe = getRecipe(mealType, recipeId);
+    if (!recipe) return;
+    const cal = recipe.nutrition?.calories ?? 0;
+    const protein = parseNutrient(recipe.nutrition?.protein);
+    const carbs = parseNutrient(recipe.nutrition?.carbs);
+    const fat = parseNutrient(recipe.nutrition?.fat);
+    setAddFoodInputs({
+      name: recipe.name,
+      cal: cal ? String(cal) : "",
+      portions: "1",
+      protein: protein ? String(protein) : "",
+      carbs: carbs ? String(carbs) : "",
+      fat: fat ? String(fat) : "",
+    });
+    setPendingRecipe({ mealType, mealTypeKey, recipeId });
+  };
+
+  const submitAddFood = (mealType: "suhoor" | "iftar") => {
+    const name = addFoodInputs.name.trim();
+    const cal = parseInt(addFoodInputs.cal, 10) || 0;
+    const portions = Math.max(0.1, parseFloat(addFoodInputs.portions) || 1);
+    const protein = parseFloat(addFoodInputs.protein) || 0;
+    const carbs = parseFloat(addFoodInputs.carbs) || 0;
+    const fat = parseFloat(addFoodInputs.fat) || 0;
+    if (!name && cal <= 0) {
+      toast.error(
+        "Add a name or at least one calorie so we can save this item.",
+      );
+      return;
+    }
+    const day = normalizeDayFoodLog(foodLogs[selectedDate]);
+
+    if (pendingRecipe && pendingRecipe.mealType === mealType) {
+      const entry = {
+        id: `recipe-${Date.now()}-${pendingRecipe.mealTypeKey}-${pendingRecipe.recipeId}`,
+        type: "recipe" as const,
+        mealType,
+        name: name || "Recipe",
+        portions,
+        caloriesPerPortion: clampCalories(cal),
+        proteinPerPortion: protein || undefined,
+        carbsPerPortion: carbs || undefined,
+        fatPerPortion: fat || undefined,
+        recipeId: `${pendingRecipe.mealTypeKey}-${pendingRecipe.recipeId}`,
+      };
+      setFoodLogs((prev) => {
+        const d = normalizeDayFoodLog(prev[selectedDate]);
+        const list =
+          mealType === "suhoor" ? [...d.suhoor, entry] : [...d.iftar, entry];
+        return { ...prev, [selectedDate]: { ...d, [mealType]: list } };
+      });
+      toast.success(`Added ${name}`);
+    } else {
+      const entry = {
+        id: `custom-${Date.now()}`,
+        type: "custom" as const,
+        mealType,
+        name: name || "Custom",
+        portions,
+        caloriesPerPortion: clampCalories(cal),
+        proteinPerPortion: protein || undefined,
+        carbsPerPortion: carbs || undefined,
+        fatPerPortion: fat || undefined,
+      };
+      setFoodLogs((prev) => {
+        const d = normalizeDayFoodLog(prev[selectedDate]);
+        const list =
+          mealType === "suhoor" ? [...d.suhoor, entry] : [...d.iftar, entry];
+        return { ...prev, [selectedDate]: { ...d, [mealType]: list } };
+      });
+    }
+    setAddFoodInputs({
+      name: "",
+      cal: "",
+      portions: "1",
+      protein: "",
+      carbs: "",
+      fat: "",
+    });
+    setPendingRecipe(null);
+    setAddFoodMeal(null);
+  };
+
+  const todayComplete = progress.completedDays.includes(todayStr);
+  const todaySkipped = (progress.skippedDays ?? []).includes(todayStr);
+  const todayBroken = progress.fastingLog?.some((e) => e.date === todayStr && e.status === "broken") ?? false;
+  const fastingToday = isFastingToday(progress, todayStr);
+  const todayLog = getTodayFastingLog(progress, todayStr);
+  const [showChangeStatusDialog, setShowChangeStatusDialog] = useState(false);
+  const recentLog = (progress.fastingLog || []).slice(-7).reverse();
+  const menstruationTrackingEnabled = useMenstruationTrackingEnabled();
+  const inMenstrualPeriod = isInMenstrualPeriod(progress);
+
+  const ASK_FASTING_DISMISSED_KEY = "tryramadan-ask-fasting-dismissed";
+  useEffect(() => {
+    if (!inFastingWindow || fastingToday || todayComplete || todaySkipped || todayBroken || inMenstrualPeriod) {
+      setShowAskFastingPopup(false);
+      return;
+    }
+    try {
+      if (window.localStorage.getItem(ASK_FASTING_DISMISSED_KEY) === todayStr)
+        return;
+    } catch {
+      return;
+    }
+    setShowAskFastingPopup(true);
+  }, [inFastingWindow, fastingToday, todayComplete, todaySkipped, todayBroken, inMenstrualPeriod, todayStr]);
+
+  const markAskFastingAnsweredForToday = useCallback(() => {
+    try {
+      window.localStorage.setItem(ASK_FASTING_DISMISSED_KEY, todayStr);
+    } catch {
+      // ignore
+    }
+    setShowAskFastingPopup(false);
+  }, [todayStr]);
+
+  const dismissAskFastingForToday = markAskFastingAnsweredForToday;
+
+  const handleAskFastingYes = useCallback(() => {
+    startFastingToday(progress, setProgress, todayStr);
+    markAskFastingAnsweredForToday();
+    toast.success("You're fasting today");
+  }, [progress, setProgress, todayStr, markAskFastingAnsweredForToday]);
+
+  const handleAskFastingNo = useCallback(() => {
+    setDaySkipped(progress, setProgress, todayStr);
+    markAskFastingAnsweredForToday();
+    toast.success("Marked as not fasting today");
+  }, [progress, setProgress, todayStr, markAskFastingAnsweredForToday]);
+
+  // Prayer tracking handler (boolean for daily prayers; 'half' | 'full' for Taraweeh)
+  const handlePrayerCheck = useCallback(
+    (prayer: string, value: boolean | 'half' | 'full') => {
+      setPrayerTracker((prev) => ({
+        ...prev,
+        [todayStr]: {
+          ...(prev[todayStr] || {}),
+          [prayer]: value,
+        },
+      }));
+    },
+    [todayStr, setPrayerTracker],
+  );
+
+  // Calculate completion rate
+  const completionRate = useMemo(() => {
+    if (!ramadanRange?.totalDays) return 0;
+    return Math.round(
+      (progress.completedDays.length / ramadanRange.totalDays) * 100,
+    );
+  }, [progress.completedDays.length, ramadanRange?.totalDays]);
+
+  // Next prayer (or Suhoor end); recomputes on tick so countdown stays live and when prayer times change
+  const nextPrayer = useMemo(() => {
+    const nowSec = displayTimezone
+      ? getNowSecondsSinceMidnightInTimezone(displayTimezone)
+      : (() => {
+          const n = new Date();
+          return n.getHours() * 3600 + n.getMinutes() * 60 + n.getSeconds();
+        })();
+    const info = getNextPrayerInfo(prayerTimes, nowSec);
+    if (!info) return null;
+    const h = Math.floor(info.secondsUntil / 3600);
+    const m = Math.floor((info.secondsUntil % 3600) / 60);
+    const s = info.secondsUntil % 60;
+    const countdownWithSec = h > 0 ? `${h}h ${m}m ${s}s` : m > 0 ? `${m}m ${s}s` : `${s}s`;
+    return {
+      name: info.name,
+      time: info.time,
+      countdown: countdownWithSec,
+      h,
+      m,
+      s,
+    };
+  }, [
+    displayTimezone,
+    countdownTick,
+    prayerTimes,
+    prayerTimes?.fajr,
+    prayerTimes?.fajr,
+    prayerTimes?.dhuhr,
+    prayerTimes?.asr,
+    prayerTimes?.maghrib,
+    prayerTimes?.isha,
+  ]);
+
+  const askFastingContext = useMemo(() => {
+    const today = new Date(todayStr + "T12:00:00");
+    if (ramadanRange.isRamadanDay(today)) {
+      const dayNum = ramadanRange.getRamadanDayNumber(today);
+      const total = ramadanRange.totalDays ?? 30;
+      return dayNum != null
+        ? `Today is Day ${dayNum} of ${total} of Ramadan.`
+        : "Today is a Ramadan day.";
+    }
+    const sunnah = getSunnahFastingInfo();
+    if (sunnah) return sunnah.reason + ".";
+    return null;
+  }, [todayStr, ramadanRange]);
+
+  const streak = calculateStreak(progress, todayStr);
+  const totalDays = ramadanRange.totalDays ?? 30;
+  const ramadanStart = ramadanRange.startStr ?? "";
+  const ramadanEnd = ramadanRange.endStr ?? "";
+  const completedInRange = (progress.completedDays ?? []).filter(
+    (d) => d >= ramadanStart && d <= ramadanEnd,
+  );
+  const ramadanCompletionPct =
+    totalDays > 0 ? Math.round((completedInRange.length / totalDays) * 100) : 0;
+  const factDay = Math.min(30, Math.max(1, new Date().getDate() % 30 || 30));
+  const dailyFact =
+    dailyFactsData.facts.find((f) => f.day === factDay) ||
+    dailyFactsData.facts[0];
+  const badgeList = [
+    {
+      id: "first-fast",
+      name: "First Fast",
+      icon: "🌙",
+      unlocked: completedInRange.length >= 1,
+    },
+    {
+      id: "week-one",
+      name: "Week One",
+      icon: "⭐",
+      unlocked: completedInRange.length >= 7,
+    },
+    {
+      id: "halfway",
+      name: "Halfway",
+      icon: "🏅",
+      unlocked: completedInRange.length >= 15,
+    },
+    { id: "streak-5", name: "5-day streak", icon: "🔥", unlocked: streak >= 5 },
+    {
+      id: "full-month",
+      name: "Ramadan Champion",
+      icon: "🏆",
+      unlocked: completedInRange.length >= totalDays && totalDays > 0,
+    },
+  ];
+  const recentAchievements = badgeList
+    .filter((b) => b.unlocked)
+    .slice(-3)
+    .reverse();
+
+  // Quick tips based on time of day
+  const getQuickTip = () => {
+    const hour = new Date().getHours();
+    if (hour < 6)
+      return {
+        icon: Coffee,
+        text: "Time for Suhoor! Eat protein-rich foods.",
+        textAr: "وقت السحور! تناول أطعمة غنية بالبروتين",
+      };
+    if (hour < 12)
+      return {
+        icon: Droplets,
+        text: "Remember to make morning duas.",
+        textAr: "لا تنسى أذكار الصباح",
+      };
+    if (hour < 15)
+      return {
+        icon: TrendingUp,
+        text: "Stay productive, you're halfway there!",
+        textAr: "ابق منتجاً، أنت في المنتصف!",
+      };
+    if (hour < 18)
+      return {
+        icon: Sun,
+        text: `Almost ${iftarLabel} time, prepare your meal.`,
+        textAr: "اقترب وقت الإفطار، حضّر وجبتك",
+      };
+    return {
+      icon: Utensils,
+      text: `Don't overeat at ${iftarLabel}. Start with dates.`,
+      textAr: "لا تفرط في الإفطار. ابدأ بالتمر",
+    };
+  };
+  const tip = getQuickTip();
+
+  if (!preferences.onboardingComplete && !hasTime && !hasProgress) {
+    return null;
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <PageSEO
+        title="Dashboard | TryRamadan.app"
+        description={`Your Ramadan fasting dashboard: timer, prayer times, daily goals, and progress. Track ${suhoorLabelShort} and ${iftarLabelShort}, log fasting days, and stay on track.`}
+        path="/dashboard"
+      />
+      <Navbar />
+
+      <main id="main-content" className="main-content">
+        <div className="container mx-auto px-4 min-w-0 max-w-5xl">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <div className="flex items-center justify-between gap-2 mb-4">
+              <h1 className="text-2xl md:text-3xl font-display font-bold truncate min-w-0">
+                {preferences.userType === "muslim" ? (
+                  ramadanRange.isRamadanDay(new Date()) ? (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="cursor-help border-b border-dotted border-transparent hover:border-muted-foreground/50">
+                          Ramadan Mubarak
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs p-3" side="bottom">
+                        <p className="font-semibold text-sm">
+                          {GENERAL_TOOLTIPS.ramadanMubarak.title}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {GENERAL_TOOLTIPS.ramadanMubarak.body}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">
+                          Arabic:{" "}
+                          <span className="font-arabic" dir="rtl">
+                            {
+                              (
+                                GENERAL_TOOLTIPS.ramadanMubarak as {
+                                  bodyAr?: string;
+                                }
+                              ).bodyAr
+                            }
+                          </span>
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  ) : (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="cursor-help border-b border-dotted border-transparent hover:border-muted-foreground/50">
+                          <span className="sm:hidden">Looking forward</span>
+                          <span className="hidden sm:inline">Looking forward to Ramadan</span>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs p-3" side="bottom">
+                        <p className="font-semibold text-sm">
+                          {
+                            (
+                              GENERAL_TOOLTIPS as {
+                                beforeRamadanGreeting: {
+                                  title: string;
+                                  body: string;
+                                  bodyAr: string;
+                                };
+                              }
+                            ).beforeRamadanGreeting.title
+                          }
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {
+                            (
+                              GENERAL_TOOLTIPS as {
+                                beforeRamadanGreeting: { body: string };
+                              }
+                            ).beforeRamadanGreeting.body
+                          }
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border/50">
+                          Arabic:{" "}
+                          <span className="font-arabic" dir="rtl">
+                            {
+                              (
+                                GENERAL_TOOLTIPS as {
+                                  beforeRamadanGreeting: { bodyAr: string };
+                                }
+                              ).beforeRamadanGreeting.bodyAr
+                            }
+                          </span>
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )
+                ) : (
+                  <>Your Fasting Journey</>
+                )}
+              </h1>
+              <div className="flex items-center gap-1 sm:gap-2 shrink-0 flex-wrap">
+                <Popover open={modeQuickSettingsOpen} onOpenChange={setModeQuickSettingsOpen}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border bg-muted/50 hover:bg-muted text-sm font-medium min-h-[36px] touch-manipulation"
+                          aria-label={`Mode: ${preferences.userType === "muslim" ? "Muslim" : "Non-Muslim"}. Click for quick settings.`}
+                        >
+                          <span aria-hidden>{preferences.userType === "muslim" ? "☪" : "🌱"}</span>
+                          <span>{preferences.userType === "muslim" ? "Muslim" : "Non-Muslim"}</span>
+                        </button>
+                      </PopoverTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      <p>Click for quick settings & learning</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  <PopoverContent align="start" className="w-[min(100vw-2rem,340px)] p-4" aria-label="Quick settings for your mode">
+                    <h3 className="font-semibold text-sm mb-3">
+                      {preferences.userType === "muslim" ? "Muslim" : "Non-Muslim"} · Quick settings
+                    </h3>
+                    <p className="text-xs text-muted-foreground mb-3">
+                      Settings and learning that match this mode. Change in full Settings anytime.
+                    </p>
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground mb-1.5">Learning</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {(["minimal", "moderate", "deep"] as LearningPriority[]).map((v) => (
+                            <button
+                              key={v}
+                              type="button"
+                              onClick={() => setPreferences({ ...preferences, learningPriority: v })}
+                              className={`px-2.5 py-1 rounded-md text-xs font-medium capitalize ${
+                                (preferences.learningPriority ?? "moderate") === v
+                                  ? "bg-secondary text-secondary-foreground"
+                                  : "bg-muted/70 hover:bg-muted border border-transparent"
+                              }`}
+                              aria-pressed={(preferences.learningPriority ?? "moderate") === v}
+                            >
+                              {v}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium text-muted-foreground mb-1.5">Culture & recipes</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {(["none", "some", "lots"] as CultureRecipesPriority[]).map((v) => (
+                            <button
+                              key={v}
+                              type="button"
+                              onClick={() => setPreferences({ ...preferences, cultureRecipesPriority: v })}
+                              className={`px-2.5 py-1 rounded-md text-xs font-medium capitalize ${
+                                (preferences.cultureRecipesPriority ?? "some") === v
+                                  ? "bg-secondary text-secondary-foreground"
+                                  : "bg-muted/70 hover:bg-muted border border-transparent"
+                              }`}
+                              aria-pressed={(preferences.cultureRecipesPriority ?? "some") === v}
+                            >
+                              {v}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      {preferences.userType === "muslim" && (
+                        <>
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground mb-1.5">Quran & glossary</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {(["none", "some", "daily"] as QuranPriority[]).map((v) => (
+                                <button
+                                  key={v}
+                                  type="button"
+                                  onClick={() => setPreferences({ ...preferences, quranPriority: v })}
+                                  className={`px-2.5 py-1 rounded-md text-xs font-medium capitalize ${
+                                    (preferences.quranPriority ?? "some") === v
+                                      ? "bg-secondary text-secondary-foreground"
+                                      : "bg-muted/70 hover:bg-muted border border-transparent"
+                                  }`}
+                                  aria-pressed={(preferences.quranPriority ?? "some") === v}
+                                >
+                                  {v}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground mb-1.5">Sunnah fasting</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {[
+                                { id: "monday-thursday", label: "Mon/Thu" },
+                                { id: "ayyam-al-beed", label: "Ayyam al-Beed" },
+                              ].map(({ id, label }) => {
+                                const selected = (preferences.voluntaryFasting ?? []).includes(id);
+                                return (
+                                  <button
+                                    key={id}
+                                    type="button"
+                                    onClick={() => {
+                                      const curr = preferences.voluntaryFasting ?? [];
+                                      const next = selected ? curr.filter((x) => x !== id) : [...curr, id];
+                                      setPreferences({ ...preferences, voluntaryFasting: next });
+                                    }}
+                                    className={`px-2.5 py-1 rounded-md text-xs font-medium ${
+                                      selected ? "bg-primary/20 text-primary border border-primary/40" : "bg-muted/70 hover:bg-muted border border-transparent"
+                                    }`}
+                                    aria-pressed={selected}
+                                  >
+                                    {label}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    <Link
+                      to="/settings"
+                      onClick={() => setModeQuickSettingsOpen(false)}
+                      className="mt-3 inline-block text-xs font-medium text-secondary hover:underline"
+                    >
+                      All settings →
+                    </Link>
+                  </PopoverContent>
+                </Popover>
+                <LocationDisplay
+                  compact
+                  open={locationEditorOpen}
+                  onOpenChange={setLocationEditorOpen}
+                />
+                <button
+                  type="button"
+                  onClick={() => setLocationEditorOpen(true)}
+                  className="text-xs text-muted-foreground hover:text-foreground hover:underline transition-colors text-left"
+                  aria-label={displayCity ? `Prayer times for ${displayCity}. Click to change location.` : "Set location for prayer times"}
+                >
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={displayCity || "no-location"}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      transition={{ duration: 0.25 }}
+                    >
+                      {displayCity ? (
+                        <>Prayer times ({displayCity})</>
+                      ) : (
+                        <>Prayer times · Set location</>
+                      )}
+                    </motion.span>
+                  </AnimatePresence>
+                </button>
+                {(locationLoading || timesLoading) && (
+                  <span className="text-xs text-muted-foreground animate-pulse">
+                    updating...
+                  </span>
+                )}
+                {(() => {
+                  const suhoorAlarm = notifSettings.suhoorEnabled ? 1 : 0;
+                  const iftarAlarm = notifSettings.iftarEnabled ? 1 : 0;
+                  const dailyAlarm = notifSettings.dailyReminderEnabled ? 1 : 0;
+                  const prayerAlarms =
+                    preferences.userType === "muslim"
+                      ? Object.values(prayerPrefs).filter(Boolean).length
+                      : 0;
+                  const alarmCount =
+                    suhoorAlarm + iftarAlarm + dailyAlarm + prayerAlarms;
+                  return (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Link
+                          to="/settings"
+                          aria-label={`Settings${alarmCount > 0 ? `, ${alarmCount} alarms` : ""}`}
+                          className="relative p-2 rounded-full hover:bg-muted transition-colors"
+                        >
+                          <Settings
+                            className="w-5 h-5 text-muted-foreground"
+                            aria-hidden
+                          />
+                          {alarmCount > 0 && (
+                            <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-bold">
+                              {alarmCount}
+                            </span>
+                          )}
+                        </Link>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {alarmCount > 0
+                          ? `${alarmCount} notification${alarmCount === 1 ? "" : "s"}/alarms`
+                          : "Settings"}
+                      </TooltipContent>
+                    </Tooltip>
+                  );
+                })()}
+              </div>
+            </div>
+
+            {/* PWA install prompt (when installable and not dismissed) */}
+            <PWAInstallBanner />
+
+            {/* Dismissible location reminder when user hasn't saved location (UX-FLOWS 4.6) */}
+            {preferences.onboardingComplete &&
+              !preferences.locationCoords &&
+              !locationBannerDismissed && (
+                <div className="mt-2 flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-muted/60 border border-border">
+                  <p className="text-sm text-muted-foreground">
+                    Set your location in Settings for accurate prayer and
+                    fasting times.
+                  </p>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Link
+                      to="/settings"
+                      className="text-sm font-medium text-primary hover:underline"
+                    >
+                      Settings
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        try {
+                          window.localStorage.setItem(
+                            "tryramadan-dismissed-location-banner",
+                            "1",
+                          );
+                        } catch {
+                          // ignore localStorage quota/access errors
+                        }
+                        setLocationBannerDismissed(true);
+                      }}
+                      className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground"
+                      aria-label="Dismiss"
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+              )}
+
+            {/* Menstrual period: outline rule (no obligation to fast), "No need to fast" tag, mark start/end */}
+            {menstruationTrackingEnabled && (
+              <div className="mt-4 p-4 rounded-xl border border-border bg-card" role="region" aria-label="Menstrual period tracking">
+                {inMenstrualPeriod ? (
+                  <>
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted border border-border text-sm font-medium">
+                        No need to fast
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        Period started {progress.menstrualPeriodStartDate}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      You&apos;re in your menstrual period. In Islam there is no obligation to fast during menstruation—you can resume fasting after you&apos;re no longer menstruating. These days don&apos;t break your streak.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        endMenstrualPeriod(progress, setProgress, todayStr);
+                        toast.success("Marked as no longer menstruating. Logged.");
+                      }}
+                      className="text-sm font-medium px-3 py-2 rounded-lg bg-primary/20 text-primary hover:bg-primary/30 border border-primary/30 focus-visible:ring-2 focus-visible:ring-offset-2"
+                      aria-label="Mark as no longer menstruating and log period end"
+                    >
+                      No longer menstruating?
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      In Islam there is no obligation to fast during menstruation. Mark when you&apos;re in your period so we show &quot;No need to fast&quot; and log it.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        startMenstrualPeriod(progress, setProgress, todayStr);
+                        toast.success("Marked as in menstrual period. No need to fast.");
+                      }}
+                      className="text-sm font-medium px-3 py-2 rounded-lg border border-border hover:bg-muted focus-visible:ring-2 focus-visible:ring-offset-2"
+                      aria-label="Mark as in menstrual period (no need to fast today)"
+                    >
+                      Mark as in menstrual period
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* Hint for women who have not enabled period tracking */}
+            {preferences.gender === "female" && !menstruationTrackingEnabled && (
+              <div className="mt-4 p-3 rounded-xl border border-border bg-muted/30">
+                <p className="text-sm text-muted-foreground">
+                  Turn on <Link to="/settings" className="text-primary hover:underline font-medium">period tracking in Settings</Link> to mark excused days and see &quot;No need to fast&quot; during your period—these days won&apos;t break your streak.
+                </p>
+              </div>
+            )}
+
+            {/* Compact Ramadan / Sunnah badge at top */}
+            {(() => {
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              const inRamadan = ramadanRange.isRamadanDay(today);
+              const ramadanDay = inRamadan
+                ? (ramadanRange.getRamadanDayNumber(today) ?? 1)
+                : null;
+              const daysUntil = inRamadan
+                ? 0
+                : today < ramadanRange.start
+                  ? Math.ceil(
+                      (ramadanRange.start.getTime() - today.getTime()) /
+                        86400000,
+                    )
+                  : getDaysUntilRamadan();
+              const sunnahInfo = getSunnahFastingInfo();
+              const isSunnahDay = sunnahInfo && !inRamadan;
+              if (isSunnahDay) {
+                const todayTimesNote = prayerTimes
+                  ? `Today (${displayCity ?? "your location"}): Suhoor end (Fajr) ${prayerTimes.fajr} · Iftar (Maghrib) ${prayerTimes.maghrib}`
+                  : "Set your location in settings for today's prayer times.";
+                return (
+                  <div className="mt-2 flex items-center gap-2">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-secondary/15 border border-secondary/30 text-xs font-medium text-secondary cursor-help">
+                          <Moon className="w-3.5 h-3.5" aria-hidden />
+                          Sunnah fasting day ·{" "}
+                          {sunnahInfo.reason.split(" - ")[0]}
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs p-3" side="bottom">
+                        <p className="font-medium text-sm">
+                          {sunnahInfo.reason}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {todayTimesNote}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                );
+              }
+              if (inRamadan && ramadanDay) {
+                const lastDay = ramadanRange.isLastDayOfRamadan(new Date());
+                return (
+                  <div className="mt-2 flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/15 border border-primary/30 text-xs font-medium">
+                      <Moon className="w-3.5 h-3.5" aria-hidden />
+                      {lastDay
+                        ? `Last day of Ramadan (Day ${ramadanDay} of ${totalDays})`
+                        : `Day ${ramadanDay} of ${totalDays} of Ramadan`}
+                    </span>
+                  </div>
+                );
+              }
+              if (daysUntil > 0) {
+                const ramadanStartStr = (
+                  today < ramadanRange.start
+                    ? ramadanRange.start
+                    : getCurrentRamadanStart()
+                ).toLocaleDateString("en", {
+                  weekday: "short",
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                });
+                return (
+                  <div className="mt-2 flex items-center gap-2">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted/80 border border-border text-xs font-medium text-muted-foreground cursor-help">
+                          <Moon className="w-3.5 h-3.5" aria-hidden />
+                          {daysUntil} day{daysUntil === 1 ? "" : "s"} until
+                          Ramadan
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs p-3" side="bottom">
+                        <p className="text-sm font-medium">
+                          Ramadan doesn&apos;t start until {ramadanStartStr}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Approximate date; actual start may vary by one day
+                          with moon sighting.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
+            {/* Ramadan context for non-Muslim users */}
+            {preferences.userType !== "muslim" && (
+              <RamadanContextCard compact className="mt-4" />
+            )}
+
+            {/* Day selector — arrows inline with date; click date for calendar add options */}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-4 p-3 sm:p-4 rounded-xl bg-muted/50 border border-border">
+              <button
+                type="button"
+                onClick={goPrevDay}
+                className="p-2.5 sm:p-2 rounded-lg hover:bg-muted transition-colors min-h-[44px] min-w-[44px] touch-manipulation shrink-0"
+                aria-label="Previous day"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex items-center gap-2 flex-1 min-w-0 justify-center sm:justify-start font-display font-semibold text-sm sm:text-base truncate rounded-lg hover:bg-muted/80 px-2 py-1"
+                    aria-label="Date options"
+                  >
+                    <span className="truncate">
+                      {selectedDateObj.toLocaleDateString("en", {
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </span>
+                    {isSelectedToday && (
+                      <span className="px-2 py-0.5 rounded-full bg-secondary/20 text-secondary text-xs font-medium shrink-0">
+                        Today
+                      </span>
+                    )}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-48 sm:w-56 p-2.5 sm:p-3">
+                  <p className="text-xs font-medium text-muted-foreground mb-1.5 px-0.5">
+                    Add to calendar
+                  </p>
+                  <div className="flex flex-col gap-0.5">
+                    <Link
+                      to="/dashboard/schedule"
+                      onClick={() => setDatePopoverOpen(false)}
+                      className="text-sm py-2 px-2 rounded-md hover:bg-muted min-h-[40px] flex items-center touch-manipulation"
+                    >
+                      Today → Schedule
+                    </Link>
+                    <Link
+                      to="/dashboard/schedule?export=ramadan"
+                      onClick={() => setDatePopoverOpen(false)}
+                      className="text-sm py-2 px-2 rounded-md hover:bg-muted min-h-[40px] flex items-center touch-manipulation"
+                    >
+                      Ramadan → .ics
+                    </Link>
+                  </div>
+                  {getDaysUntilRamadan() > 0 && (
+                    <p className="text-[11px] sm:text-xs text-muted-foreground mt-1.5 pt-1.5 border-t border-border px-0.5">
+                      {getDaysUntilRamadan()} day
+                      {getDaysUntilRamadan() === 1 ? "" : "s"} until Ramadan
+                    </p>
+                  )}
+                </PopoverContent>
+              </Popover>
+              {!isSelectedToday && (
+                <button
+                  type="button"
+                  onClick={goToToday}
+                  aria-label="Go to today's date"
+                  className="px-3 py-1.5 rounded-lg bg-primary/20 text-foreground text-sm font-medium hover:bg-primary/30 shrink-0"
+                >
+                  Go to today
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={goNextDay}
+                className="p-2.5 sm:p-2 rounded-lg hover:bg-muted transition-colors min-h-[44px] min-w-[44px] touch-manipulation shrink-0"
+                aria-label="Next day"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+            </div>
+          </motion.div>
+
+          {/* Desktop: two columns — left: main content (70%); right: sidebar (30%) */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 lg:gap-8 mb-6">
+            {/* Left column: Main dashboard content */}
+            <div className="min-w-0 space-y-4 w-full relative">
+              {/* When viewing another day: corner widget (current fast + upcoming prayers); main area = selected day info + CTAs */}
+              {!isSelectedToday ? (
+                <>
+                  <div className="flex flex-col sm:flex-row gap-4 sm:gap-0 sm:justify-between sm:items-start">
+                    {/* Selected day: date + this day's prayer times + actions */}
+                    <div className="flex-1 min-w-0 p-4 sm:p-5 rounded-2xl border-2 border-border bg-muted/30">
+                      <h2 className="text-lg font-semibold mb-1">
+                        {selectedDateObj.toLocaleDateString("en", {
+                          weekday: "short",
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </h2>
+                      {selectedDayPrayerTimes ? (
+                        <p className="text-sm text-muted-foreground mb-3">
+                          {suhoorLabelShort} end{" "}
+                          <span className="font-medium text-foreground">
+                            {selectedDayPrayerTimes.fajr}
+                          </span>
+                          {" · "}
+                          {iftarLabelShort}{" "}
+                          <span className="font-medium text-foreground">
+                            {selectedDayPrayerTimes.maghrib}
+                          </span>
+                        </p>
+                      ) : (
+                        <p className="text-sm text-muted-foreground mb-3">
+                          Set location for this day&apos;s times
+                        </p>
+                      )}
+                      <div className="flex flex-wrap gap-2">
+                        {!selectedDayComplete && !selectedDayBroken && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setDayCompleted(progress, setProgress, selectedDate, true);
+                              toast.success("Marked as completed");
+                            }}
+                            className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90"
+                          >
+                            Mark complete
+                          </button>
+                        )}
+                        {!selectedDayComplete && !(progress.skippedDays ?? []).includes(selectedDate) && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setDaySkipped(progress, setProgress, selectedDate);
+                              toast.success("Marked as skipped");
+                            }}
+                            className="px-3 py-1.5 rounded-lg border border-border text-sm font-medium hover:bg-muted"
+                          >
+                            Didn&apos;t fast
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={goToToday}
+                          className="px-3 py-1.5 rounded-lg bg-primary/20 text-primary text-sm font-medium hover:bg-primary/30"
+                        >
+                          Go to today
+                        </button>
+                        <Link
+                          to="/dashboard/schedule"
+                          className="px-3 py-1.5 rounded-lg border border-border text-sm font-medium hover:bg-muted inline-flex items-center"
+                        >
+                          Schedule
+                        </Link>
+                      </div>
+                    </div>
+                    {/* Corner widget: current fast + upcoming prayers */}
+                    <div className="sm:shrink-0 sm:absolute sm:top-0 sm:right-0 lg:right-0">
+                      <DashboardFastingCornerWidget
+                        progress={progress}
+                        isFasting={isFasting}
+                        inFastingWindow={inFastingWindow}
+                        countdownToIftar={countdownToIftar}
+                        countdownToSuhoor={countdownToSuhoor}
+                        prayerTimes={prayerTimes}
+                        todayStr={todayStr}
+                        nextPrayer={nextPrayer}
+                        onMarkComplete={handleMarkComplete}
+                        markCompleteDisabled={markCompleteDisabled}
+                        onBreakFast={() => setShowBreakFastConfirm(true)}
+                        onSkip={() => {
+                          setDaySkipped(progress, setProgress, todayStr);
+                          toast.success("Marked as not fasting today");
+                        }}
+                        onGoToToday={goToToday}
+                      />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Today: full hero - Fast Status + Timer + Next Prayer */}
+                  <DashboardHero
+                    progress={progress}
+                    isFasting={isFasting}
+                    inFastingWindow={inFastingWindow}
+                    countdownToIftar={countdownToIftar}
+                    countdownToSuhoor={countdownToSuhoor}
+                    prayerTimes={prayerTimes}
+                    todayStr={todayStr}
+                    nextPrayer={nextPrayer}
+                    onMarkComplete={handleMarkComplete}
+                    markCompleteDisabled={markCompleteDisabled}
+                    onBreakFast={() => setShowBreakFastConfirm(true)}
+                    onSkip={() => {
+                      setDaySkipped(progress, setProgress, todayStr);
+                      toast.success("Marked as not fasting today");
+                    }}
+                  />
+                </>
+              )}
+
+              {/* Daily Hadith & Quran Slider */}
+              <HeroDailySlider />
+
+              {/* Catch up on past Quran & Hadith (from Ramadan start or last 60 days) */}
+              <DashboardCatchUpQuranHadith todayStr={todayStr} />
+
+              {/* NEW: Prayer Tracking + Quick Stats */}
+              <DashboardPrayerTracking
+                prayerTimes={prayerTimes}
+                progress={progress}
+                completionRate={completionRate}
+                prayerTracker={prayerTracker}
+                todayStr={todayStr}
+                onPrayerCheck={handlePrayerCheck}
+                onViewAllPrayers={() => setShowPrayerTimesModal(true)}
+              />
+
+              {/* NEW: History - Collapsible Past Days */}
+              <DashboardHistory
+                selectedDate={selectedDate}
+                setSelectedDate={setSelectedDate}
+                progress={progress}
+                todayStr={todayStr}
+              />
+
+              {/* NEW: Content - Daily Fact + Explore Links */}
+              <DashboardContent userType={preferences.userType} />
+            </div>
+
+            {/* Right sidebar: Quick Actions, Progress, Prayers, Tips (hidden on mobile) */}
+            <DashboardSidebar
+              prayerTimes={prayerTimes}
+              todayStr={todayStr}
+              progress={progress}
+              ramadanRange={ramadanRange}
+              completionRate={completionRate}
+              onViewAllPrayers={() => setShowPrayerTimesModal(true)}
+            />
+          </div>
+        </div>
+      </main>
+
+      {/* Prayer Times Modal */}
+      <PrayerTimesModal
+        open={showPrayerTimesModal}
+        onOpenChange={setShowPrayerTimesModal}
+        prayerTimes={prayerTimes}
+        prayerTracker={prayerTracker}
+        todayStr={todayStr}
+        onPrayerCheck={handlePrayerCheck}
+      />
+
+      {/* Break Fast Confirmation Dialog */}
+      <Dialog
+        open={showBreakFastConfirm}
+        onOpenChange={setShowBreakFastConfirm}
+      >
+        <DialogContent className="max-w-xs">
+          <DialogTitle>Break fast?</DialogTitle>
+          {inFastingWindow ? (
+            <DialogDescription>
+              Log that you broke your fast early. Choose a reason.
+            </DialogDescription>
+          ) : (
+            <DialogDescription>
+              It&apos;s not fasting period right now (you&apos;re in the eating
+              window). Did you break your fast earlier, during the fasting
+              window (before Maghrib)? If so, choose a reason below.
+            </DialogDescription>
+          )}
+          <div className="flex gap-2 justify-end">
+            <button
+              type="button"
+              className="px-3 py-1.5 rounded-lg text-sm border border-border"
+              onClick={() => setShowBreakFastConfirm(false)}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="px-3 py-1.5 rounded-lg text-sm bg-destructive text-destructive-foreground"
+              onClick={() => {
+                setShowBreakFastConfirm(false);
+                setShowBreakFastDialog(true);
+              }}
+            >
+              Continue
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Break Fast Reason Dialog */}
+      <BreakFastReasonDialog
+        open={showBreakFastDialog}
+        onOpenChange={setShowBreakFastDialog}
+        onSelectReason={(reasonId, brokeAt) =>
+          breakFastingToday(progress, setProgress, reasonId, todayStr, brokeAt)
+        }
+        userType={preferences.userType}
+        notInFastingPeriod={!inFastingWindow}
+      />
+
+      {/* Ask Fasting Popup — once closed (any method), don't ask again this fasting period for today */}
+      <Dialog
+        open={showAskFastingPopup}
+        onOpenChange={(open) => {
+          if (!open) markAskFastingAnsweredForToday();
+        }}
+      >
+        <DialogContent className="max-w-sm">
+          <DialogTitle>Are you fasting today?</DialogTitle>
+          <DialogDescription className="mb-4">
+            You&apos;re in the fasting window. Mark whether you&apos;re fasting
+            to track your progress.
+          </DialogDescription>
+          <div className="flex flex-col gap-2">
+            <Button onClick={handleAskFastingYes} className="w-full">
+              Yes, I&apos;m fasting
+            </Button>
+            <Button
+              variant="outline"
+              onClick={handleAskFastingNo}
+              className="w-full"
+            >
+              I didn&apos;t fast today
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={dismissAskFastingForToday}
+              className="w-full text-muted-foreground"
+            >
+              Later
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Footer />
+
+      {/* Guided walkthrough for first-time non-Muslim users */}
+      <DashboardWalkthrough userType={preferences.userType} />
+    </div>
+  );
+};
+
+export default Dashboard;

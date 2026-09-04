@@ -1,0 +1,163 @@
+{
+  "glossary": [
+    {
+      "term": "Ramadan",
+      "arabic": "رمضان",
+      "transliteration": "Ramaḍān",
+      "definition": "The ninth month of the Islamic lunar calendar, during which Muslims observe fasting from dawn to sunset as one of the Five Pillars of Islam.",
+      "category": "core"
+    },
+    {
+      "term": "Suhoor",
+      "arabic": "سحور",
+      "transliteration": "Suḥūr",
+      "definition": "The pre-dawn meal eaten before beginning the daily fast. It's recommended to eat suhoor as close to dawn as possible for maximum energy during fasting hours.",
+      "category": "meals"
+    },
+    {
+      "term": "Iftar",
+      "arabic": "إفطار",
+      "transliteration": "Ifṭār",
+      "definition": "The evening meal that breaks the daily fast at sunset. Traditionally begins with dates and water, following the Prophet's practice.",
+      "category": "meals"
+    },
+    {
+      "term": "Fajr",
+      "arabic": "فجر",
+      "transliteration": "Fajr",
+      "definition": "The dawn prayer and also the time when fasting begins each day. The call to Fajr prayer signals the start of the fasting period.",
+      "category": "prayer"
+    },
+    {
+      "term": "Maghrib",
+      "arabic": "مغرب",
+      "transliteration": "Maghrib",
+      "definition": "The sunset prayer and the time when fasting ends each day. The call to Maghrib prayer signals it's time for iftar.",
+      "category": "prayer"
+    },
+    {
+      "term": "Taraweeh",
+      "arabic": "تراويح",
+      "transliteration": "Tarāwīḥ",
+      "definition": "Special evening prayers performed during Ramadan after the Isha (night) prayer. These prayers involve recitation of the Quran.",
+      "category": "prayer"
+    },
+    {
+      "term": "Zakat",
+      "arabic": "زكاة",
+      "transliteration": "Zakāt",
+      "definition": "Obligatory charitable giving, one of the Five Pillars of Islam. During Ramadan, many Muslims calculate and pay their annual zakat.",
+      "category": "charity"
+    },
+    {
+      "term": "Sadaqah",
+      "arabic": "صدقة",
+      "transliteration": "Ṣadaqah",
+      "definition": "Voluntary charitable giving beyond zakat. The rewards for sadaqah are believed to be multiplied during Ramadan.",
+      "category": "charity"
+    },
+    {
+      "term": "Sawm",
+      "arabic": "صوم",
+      "transliteration": "Ṣawm",
+      "definition": "The Arabic word for fasting. Sawm is one of the Five Pillars of Islam and involves abstaining from food, drink, and other physical needs from dawn to sunset.",
+      "category": "core"
+    },
+    {
+      "term": "Laylat al-Qadr",
+      "arabic": "ليلة القدر",
+      "transliteration": "Laylat al-Qadr",
+      "definition": "The Night of Power or Decree, believed to fall within the last ten nights of Ramadan. It commemorates the night the Quran was first revealed.",
+      "category": "spiritual"
+    },
+    {
+      "term": "Eid al-Fitr",
+      "arabic": "عيد الفطر",
+      "transliteration": "ʿĪd al-Fiṭr",
+      "definition": "The Festival of Breaking Fast, a three-day celebration marking the end of Ramadan. It begins with a special prayer and involves family gatherings, gift-giving, and festive meals.",
+      "category": "celebration"
+    },
+    {
+      "term": "Quran",
+      "arabic": "قرآن",
+      "transliteration": "Qurʾān",
+      "definition": "The holy book of Islam, believed to be the word of God revealed to Prophet Muhammad. Ramadan is the month when its revelation began.",
+      "category": "core"
+    },
+    {
+      "term": "Dua",
+      "arabic": "دعاء",
+      "transliteration": "Duʿāʾ",
+      "definition": "Personal supplication or prayer to God. The moment just before breaking fast is considered an especially blessed time for dua.",
+      "category": "prayer"
+    },
+    {
+      "term": "Niyyah",
+      "arabic": "نية",
+      "transliteration": "Niyyah",
+      "definition": "Intention. Making the intention to fast is an essential part of the fasting practice, typically made before Fajr.",
+      "category": "core"
+    },
+    {
+      "term": "Zakat al-Fitr",
+      "arabic": "زكاة الفطر",
+      "transliteration": "Zakāt al-Fiṭr",
+      "definition": "Charity due at the end of Ramadan, distinct from fitrah (innate disposition). Sahih al-Bukhari 1503 describes a sa‘ of staple food before Eid prayer, not simply one meal. Follow qualified local guidance on quantity and monetary payment.",
+      "category": "charity"
+    }
+  ],
+  "fastingRules": [
+    {
+      "title": "What Invalidates the Fast",
+      "rules": [
+        "Eating or drinking intentionally",
+        "Smoking",
+        "Sexual intercourse during the fasting hours",
+        "Intentional vomiting (ask a scholar about details)",
+        "Onset of menstruation or postnatal bleeding"
+      ]
+    },
+    {
+      "title": "What Does NOT Invalidate the Fast",
+      "rules": [
+        "Forgetful eating or drinking: the hadith directs the person to continue fasting (Bukhari 1933); ask your scholar about school-specific make-up rules",
+        "Tasting food without swallowing",
+        "Brushing teeth (being careful not to swallow)",
+        "Taking a shower, while avoiding swallowing water"
+      ],
+      "note": "This is not an exhaustive list. Medical procedures, injections, inhalers and accidental swallowing require specific guidance; scholars differ on some treatments. Never withhold necessary medicine based on this app."
+    },
+    {
+      "title": "Who is Exempt from Fasting",
+      "rules": [
+        "Children who haven't reached puberty",
+        "Elderly who cannot safely fast",
+        "Those whose illness makes fasting harmful or unduly difficult",
+        "Pregnant or breastfeeding women who cannot fast or reasonably fear harm",
+        "Travelers on long journeys",
+        "Women during menstruation or postnatal bleeding (they do not fast during this time)"
+      ],
+      "note": "Children are not required to make up pre-puberty fasts. Missed fasts due to temporary illness, travel, menstruation or postnatal bleeding are generally made up later. Permanent inability and pregnancy/nursing can involve different fidya and make-up rules across Sunni schools; consult a qualified scholar."
+    }
+  ],
+  "healthBenefits": [
+    {
+      "title": "Metabolic Health",
+      "description": "Some time-restricted eating studies report improved blood glucose control. These findings do not establish that Ramadan dry fasting is safe or beneficial for everyone, particularly people using diabetes medicines.",
+      "source": "NIDDK: intermittent fasting and type 2 diabetes",
+      "sourceUrl": "https://www.niddk.nih.gov/health-information/professionals/diabetes-discoveries-practice/patients-intermittent-fasting"
+    },
+    {
+      "title": "Weight Management",
+      "description": "Time-restricted eating may help some adults manage weight, but it is not a guarantee of weight loss or a reason to fast when unsafe. Ramadan fasting differs from research protocols that permit water.",
+      "source": "NIDDK: intermittent fasting and type 2 diabetes",
+      "sourceUrl": "https://www.niddk.nih.gov/health-information/professionals/diabetes-discoveries-practice/patients-intermittent-fasting"
+    },
+    {
+      "title": "Safety Comes First",
+      "description": "Fasting can pose risks including low blood glucose and dehydration. Discuss your circumstances and medicines with your healthcare team before fasting; do not adjust medicines based on this app.",
+      "source": "NIDDK: fasting safely with diabetes",
+      "sourceUrl": "https://www.niddk.nih.gov/health-information/professionals/diabetes-discoveries-practice/fasting-safely-with-diabetes"
+    }
+  ]
+}
